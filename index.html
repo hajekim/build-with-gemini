@@ -1255,6 +1255,40 @@ python3 -m http.server 8081 --directory artifacts/grade_results</code></pre>
                 </div>
               </div>
 
+              <!-- Lab 1 Completed Project Download Card -->
+              <div class="card-studio p-6 border-indigo-200 bg-gradient-to-r from-indigo-50/70 via-blue-50/40 to-white space-y-4 shadow-sm">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div class="space-y-1">
+                    <span class="text-[11px] font-bold text-indigo-700 bg-indigo-100 px-2.5 py-0.5 rounded-full uppercase tracking-wider">Lab 2 대비 체크포인트</span>
+                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                      <i class="fa-solid fa-box-archive text-indigo-600"></i>
+                      <span>실습 1 최종 완성본 프로젝트 다운로드 (ZIP)</span>
+                    </h3>
+                    <p class="text-xs text-slate-600 leading-relaxed font-medium">
+                      실습 1에서 코드를 완성하지 못했더라도 실습 2를 즉시 진행하실 수 있도록, 검증 완료된 전체 프로젝트 코드를 압축 패키지로 제공합니다.
+                    </p>
+                  </div>
+                  <a href="lab1/enterprise_ops_agent_completed.zip" download class="shrink-0 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md transition flex items-center gap-2">
+                    <i class="fa-solid fa-download"></i>
+                    <span>ZIP 다운로드</span>
+                  </a>
+                </div>
+
+                <div class="bg-[#090d16] border border-slate-800 rounded-xl overflow-hidden shadow-inner">
+                  <div class="bg-[#131b2e] px-4 py-2 border-b border-slate-800 flex items-center justify-between">
+                    <span class="text-[11px] text-indigo-300 font-mono">bash terminal (원클릭 설치)</span>
+                    <button class="px-2.5 py-1 rounded bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white font-semibold text-[11px] transition flex items-center gap-1" onclick="copyCode(this)">
+                      <i class="fa-regular fa-copy"></i> 명령어 복사
+                    </button>
+                  </div>
+                  <pre class="p-4 font-mono text-xs text-indigo-300 whitespace-pre-wrap leading-relaxed"><code># VM 터미널에서 한 줄로 완성본 다운로드 및 압축 해제
+cd /config/workspace && \
+curl -fsSL https://raw.githubusercontent.com/hajekim/build-with-gemini/main/lab1/enterprise_ops_agent_completed.zip -o enterprise_ops_agent_completed.zip && \
+unzip -o enterprise_ops_agent_completed.zip && \
+cd enterprise_ops_agent</code></pre>
+                </div>
+              </div>
+
               <!-- Conclusion Card -->
               <div class="bg-gradient-to-r from-emerald-50 via-teal-50 to-blue-50 border border-emerald-300 rounded-2xl p-6 space-y-2.5 shadow-sm">
                 <div class="font-black text-emerald-950 text-base flex items-center gap-2">

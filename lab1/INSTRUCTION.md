@@ -831,6 +831,33 @@ python3 -m http.server 8081 --directory artifacts/grade_results
 
 ---
 
+## 📦 실습 1 최종 완성본 프로젝트 다운로드 (Lab 2 대비 체크포인트)
+
+실습 1 진행 중 시간 제약이나 환경 오류로 인해 전체 코드를 완성하지 못한 참가자분들도 실습 2를 원활하게 진행하실 수 있도록, **실습 1의 최종 완성본 코드 프로젝트 압축 파일**을 제공합니다.
+
+### 1. 브라우저에서 직접 다운로드
+- [📥 enterprise_ops_agent_completed.zip 다운로드](./enterprise_ops_agent_completed.zip)
+
+### 2. VM 터미널에서 명령어로 즉시 내려받기
+원격 가상 머신(VM) 터미널에서 다음 명령어를 실행하면 최종 완성본 프로젝트를 즉시 내려받아 압축을 풀고 실습 2 준비를 마칠 수 있습니다:
+
+```bash
+# 1. 워크스페이스로 이동
+cd /config/workspace
+
+# 2. 완성본 압축 파일 다운로드 및 해제
+curl -fsSL https://raw.githubusercontent.com/hajekim/build-with-gemini/main/lab1/enterprise_ops_agent_completed.zip -o enterprise_ops_agent_completed.zip
+unzip -o enterprise_ops_agent_completed.zip
+
+# 3. 프로젝트 디렉터리 이동 및 구성 확인
+cd enterprise_ops_agent
+ls -la
+```
+
+압축 해제 후 `enterprise_ops_agent` 디렉터리에 `agent.py`, `tools/`, `a2a_server.py`, `tests/eval/`이 모두 정상적으로 구성되어 있는지 확인합니다.
+
+---
+
 ## 마무리 및 핵심 요약
 
 수고하셨습니다! **Google Antigravity 2.0**과 **Google ADK 2.0**을 활용해 소프트웨어 설계서(SDD) 기반의 프롬프트 주도 개발로 엔터프라이즈 AI 운영 에이전트를 성공적으로 구축했습니다.
