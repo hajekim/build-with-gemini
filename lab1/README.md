@@ -73,48 +73,95 @@
 
 ---
 
-### 실습 전용 환경 접속
+### 실습 전용 환경 접속 (Remote Browser Session)
 
 이 실습은 사전 구성된 개발자 가상 머신(VM)과 **Cloud Run 프록시** 서비스를 제공합니다. 로컬 컴퓨터에 별도의 프로그램을 깔지 않고도 웹 브라우저에서 Antigravity 개발 환경에 바로 접속할 수 있습니다.
 
-Google Antigravity 2.0은 다음 구성 요소를 포함합니다.
+Google Antigravity 2.0은 다음 구성 요소를 포함합니다:
 - **Antigravity Agent Platform**: 에이전트 실행 및 모니터링 플랫폼
 - **Antigravity CLI (`agy`)**: 터미널 기반 대화형 인터페이스
 - **Antigravity SDK & ADK 2.0**: 에이전트와 도구를 결합하는 개발 프레임워크
 
+#### 원격 브라우저 세션 열기
+
+1. Google Cloud 콘솔 상단 검색창에 **Cloud Run**을 입력하고, 결과에서 **Cloud Run**을 클릭합니다.
+![Cloud Run 검색](./images/01_cloud_run_search.png)
+
+2. 왼쪽 탐색 메뉴에서 **Services**를 클릭합니다.
+![Cloud Run Services](./images/02_cloud_run_services.png)
+
+3. 서비스 목록에서 **remote-browser-vm1**을 클릭하여 서비스 세부정보 페이지를 엽니다. 상단의 **URL 링크**를 클릭하여 새 브라우저 탭에서 원격 세션을 엽니다.
+![원격 브라우저 서비스 URL](./images/03_remote_browser_service_url.png)
+
+4. 브라우저에서 클립보드 권한 요청 팝업이 나타나면 **[허용(Allow)]**을 클릭합니다. 이를 통해 로컬 PC와 원격 세션 간 텍스트 복사/붙여넣기가 가능해집니다.
+![클립보드 권한 허용](./images/04_clipboard_allow.png)
+
+> [!NOTE]
+> 만약 로컬 PC에서 원격 세션으로 직접 텍스트 복사/붙여넣기가 동작하지 않는 경우, 원격 세션 우측 하단의 클립보드 매니저를 이용하세요:
+> 1. 원격 화면 우측 하단의 **Clipboard** 아이콘을 클릭합니다.
+> 2. 로컬 컴퓨터의 텍스트를 텍스트 상자에 붙여넣습니다.
+> 3. 패널을 닫고 터미널에 붙여넣기를 수행합니다.
+
 ---
 
-### Antigravity CLI (`agy`) 실행
+### Antigravity CLI (`agy`) 실행 및 초기 설정
 
-Antigravity CLI는 가벼운 터미널 환경에서 여러 파일의 맥락을 파악하고 도구를 실행할 수 있는 대화형 개발 도구입니다.
+Antigravity CLI는 가벼운 터미널 환경에서 여러 파일의 맥락을 파악하고 도구를 실행할 수 있는 대화형 개발 도구입니다. 다단계 추론, 다중 파일 편집, 도구 호출, 대화 히스토리 등 Antigravity의 핵심 에이전틱 역량을 터미널에서 직접 제공합니다.
 
-1. 원격 데스크톱 또는 터미널 창을 엽니다. (**Application Launcher > System > Konsole**)
-2. 터미널에 다음 명령어를 입력해 Antigravity CLI를 실행합니다.
+1. 원격 화면 좌측 하단 **Application Launcher > System > Konsole**을 클릭하여 터미널을 실행합니다.
+![Konsole 터미널 실행](./images/05_konsole_terminal_access.png)
+
+> [!NOTE]
+> Konsole 터미널을 열 때 `Warning: Could not find '', starting '/bin/bash' instead. Please check your profile settings.` 경고가 표시되더라도 정상 동작하므로 안전하게 무시하셔도 됩니다.
+
+2. 터미널에 다음 명령어를 입력해 Antigravity CLI를 실행합니다:
 
 ```bash
 agy
 ```
 
-3. 로그인 방식 선택 창이 나오면 **Use a Google Cloud project**를 선택합니다.
-4. 브라우저 인증 안내가 나오면 로그인 코드를 복사해 터미널에 붙여넣고, 본인의 **Google Cloud Project ID**를 선택합니다.
-5. 위치(Location)는 `global`을 선택합니다.
-6. 선호하는 색상 테마(Color Scheme)를 고르고 **Next**를 누릅니다.
-7. 서비스 이용 약관에 동의합니다.
-8. *"Do you trust the contents of this project?"* 알림이 뜨면 **Yes, I trust this folder**를 선택하고 Enter를 누릅니다.
+3. 로그인 방식 선택 창이 나타나면 **Use a Google Cloud project**를 선택합니다.
+![Google Cloud Project 로그인 선택](./images/06_agy_signin_option.png)
 
-#### 모델 및 환경 설정 확인
+4. Chrome 브라우저에서 인증 절차를 완료합니다 (또는 터미널에 표시된 인증 URL을 복사하여 새 Chrome 탭에서 엽니다):
+   - Welcome to Google Chrome 알림이 나타나면 **OK**를 클릭합니다.
+   - Chrome 초기 로그인 창이 나타나면 **Stay signed out** 또는 **Use Chrome without an account**를 클릭합니다.
+   - Google 로그인 화면에서 Qwiklabs 자격증명 패널의 **Username**과 **Password**를 입력합니다.
+   - 안내에 따라 접근 권한을 허용하고 생성된 인증 코드(Authorization Code)를 복사합니다.
+   - 터미널로 돌아와 인증 코드를 붙여넣고 **ENTER**를 누른 뒤, 본인의 **Google Cloud Project ID**를 선택합니다.
+![인증 코드 입력 및 프로젝트 선택](./images/07_agy_auth_code.png)
 
-`agy` 프롬프트 상태에서 현재 구성을 확인합니다.
+5. Google Cloud 위치(Location)는 **global**을 선택합니다.
+
+6. 선호하는 색상 테마(Color Scheme)를 선택하고 **Next**를 클릭합니다.
+![색상 테마 선택](./images/08_agy_color_scheme.png)
+
+7. 서비스 이용약관 및 데이터 사용(Terms of Service & Data Use)에 동의합니다.
+![서비스 약관 동의](./images/09_agy_terms_of_service.png)
+
+8. *"Do you trust the contents of this project?"* 알림이 뜨면 **Yes, I trust this folder**를 선택하고 **ENTER**를 누릅니다.
+![폴더 신뢰 권한 승인](./images/10_agy_folder_trust_permission.png)
+
+설정이 완료되면 터미널 화면이 다음과 같이 준비됩니다:
+![Antigravity CLI 환경 준비 완료](./images/11_agy_environment_setup.png)
+
+9. 환경 설정을 검증하려면 `agy` 프롬프트 상태에서 다음 명령어를 입력합니다:
 
 ```text
 /config
 ```
 
-사용할 모델을 확인하고 `gemini-3.8-flash`로 지정합니다.
+색상 테마(Color Scheme)를 확인하고 원하는 테마를 확정합니다.
+![색상 테마 확인](./images/12_agy_select_color_scheme.png)
+
+10. 사용할 모델을 확인하고 `gemini-3.8-flash`로 지정합니다:
 
 ```text
 /model
 ```
+
+> [!NOTE]
+> 실습 환경에는 Gemini 3.8 Flash 모델에 프로비저닝된 처리량이 적용되어 있어 빠른 응답 속도를 제공합니다.
 
 ![Antigravity CLI 초기 화면](./images/agy_terminal_session.png)
 
