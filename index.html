@@ -597,17 +597,21 @@
                     <span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded-full uppercase tracking-wider">단일 진실 공급원 (SSOT)</span>
                     <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
                       <i class="fa-solid fa-file-lines text-blue-600"></i>
-                      <span>소프트웨어 설계서 (SDD.md v2.1.0) 다운로드 및 구성 안내</span>
+                      <span>소프트웨어 설계서 (SDD.md v2.1.0) 다운로드 및 뷰어 안내</span>
                     </h3>
                   </div>
-                  <div class="flex items-center gap-2">
-                    <a href="docs/SDD.md" download class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5">
-                      <i class="fa-solid fa-download"></i>
-                      <span>SDD.md 다운로드</span>
-                    </a>
-                    <a href="docs/SDD.md" target="_blank" class="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-semibold text-xs shadow-2xs transition flex items-center gap-1.5">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <a href="?tab=sdd" target="_blank" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer" title="새 브라우저 탭에서 SDD 설계서 뷰어를 엽니다">
                       <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                      <span>새 탭 열기</span>
+                      <span>새 탭에서 뷰어 열기</span>
+                    </a>
+                    <button type="button" onclick="switchMainTab('sdd')" class="px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold text-xs shadow-2xs transition flex items-center gap-1.5 cursor-pointer" title="현재 창에서 SDD 뷰어 탭으로 즉시 이동합니다">
+                      <i class="fa-solid fa-book-open"></i>
+                      <span>뷰어로 바로보기</span>
+                    </button>
+                    <a href="docs/SDD.md" download class="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-semibold text-xs shadow-2xs transition flex items-center gap-1.5" title="SDD.md 마크다운 원본 파일을 로컬에 저장합니다">
+                      <i class="fa-solid fa-download"></i>
+                      <span>파일 다운로드</span>
                     </a>
                   </div>
                 </div>
@@ -1647,16 +1651,26 @@ cd enterprise_ops_agent</code></pre>
     <!-- =================================================================== -->
     <div id="view-sdd" class="main-view flex-1 max-w-[1500px] w-full mx-auto p-6 overflow-y-auto hidden">
       <div class="card-studio p-6 border-slate-200 space-y-4">
-        <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-200 pb-4">
           <div>
             <span class="text-xs font-bold text-blue-600 uppercase tracking-widest">Document Spec</span>
             <h2 class="text-xl font-bold text-slate-900">소프트웨어 설계서 (SDD.md v2.1.0)</h2>
             <p class="text-xs text-slate-500 mt-1">3.1절 Gemini Enterprise A2A 규격 및 M6 마일스톤 포함 완본</p>
           </div>
-          <a href="docs/SDD.md" target="_blank" class="text-xs bg-white hover:bg-slate-50 text-blue-600 border border-slate-200 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition font-bold shadow-xs">
-            <i class="fa-solid fa-arrow-up-right-from-square"></i>
-            <span>새 탭에서 원본 열기</span>
-          </a>
+          <div class="flex flex-wrap items-center gap-2">
+            <a href="https://github.com/hajekim/build-with-gemini/blob/main/docs/SDD.md" target="_blank" class="text-xs bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition font-semibold shadow-2xs" title="GitHub 웹사이트의 서식 렌더러로 SDD 문서를 봅니다">
+              <i class="fa-brands fa-github text-slate-800"></i>
+              <span>GitHub 렌더링 보기</span>
+            </a>
+            <a href="docs/SDD.md" target="_blank" class="text-xs bg-white hover:bg-slate-50 text-blue-600 border border-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition font-semibold shadow-2xs" title="브라우저 새 탭에서 텍스트 원본으로 열람합니다">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+              <span>새 탭에서 텍스트 원본 열기</span>
+            </a>
+            <a href="docs/SDD.md" download class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition font-bold shadow-xs" title="로컬 PC로 SDD.md 파일을 다운로드합니다">
+              <i class="fa-solid fa-download"></i>
+              <span>파일 다운로드</span>
+            </a>
+          </div>
         </div>
         <div class="bg-[#090d16] p-5 rounded-xl border border-slate-800 font-mono text-xs text-slate-200 overflow-x-auto whitespace-pre-wrap leading-relaxed shadow-inner" id="sdd-content">
           설계서 로딩 중...
@@ -1770,11 +1784,22 @@ cd enterprise_ops_agent</code></pre>
     // -------------------------------------------------------------
     // Gate / Passcode Logic
     // -------------------------------------------------------------
+    function applyUrlRouting() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const tabParam = params.get("tab") || params.get("view") || window.location.hash.replace("#", "");
+        if (tabParam && ["sdd", "policies", "saas", "codelab"].includes(tabParam)) {
+          switchMainTab(tabParam);
+        }
+      } catch (e) {}
+    }
+
     function checkAuth() {
       const auth = localStorage.getItem("bwg_authenticated");
       if (auth === "true") {
         document.getElementById("entrance-gate").classList.add("hidden");
         document.getElementById("app-container").classList.remove("hidden");
+        applyUrlRouting();
       }
     }
 
@@ -1786,6 +1811,7 @@ cd enterprise_ops_agent</code></pre>
         localStorage.setItem("bwg_authenticated", "true");
         document.getElementById("entrance-gate").classList.add("hidden");
         document.getElementById("app-container").classList.remove("hidden");
+        applyUrlRouting();
       } else {
         alert("입장 비밀번호가 올바르지 않습니다. (기본 비밀번호: gemini 또는 ENTER)");
       }
@@ -1832,12 +1858,20 @@ cd enterprise_ops_agent</code></pre>
       document.querySelectorAll(".main-view").forEach(el => el.classList.add("hidden"));
       document.querySelectorAll("[id^='tab-']").forEach(el => el.classList.remove("nav-tab-active"));
 
-      document.getElementById(`view-${tabId}`).classList.remove("hidden");
-      document.getElementById(`tab-${tabId}`).classList.add("nav-tab-active");
+      const targetView = document.getElementById(`view-${tabId}`);
+      const targetTab = document.getElementById(`tab-${tabId}`);
+      if (targetView) targetView.classList.remove("hidden");
+      if (targetTab) targetTab.classList.add("nav-tab-active");
 
       if (tabId === "sdd") {
         loadSddDoc();
       }
+
+      try {
+        const url = new URL(window.location);
+        url.searchParams.set("tab", tabId);
+        window.history.replaceState({}, "", url);
+      } catch (err) {}
     }
 
     async function loadSddDoc() {
