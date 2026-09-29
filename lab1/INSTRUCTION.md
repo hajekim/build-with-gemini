@@ -176,12 +176,23 @@ agy
 
 워크스페이스 내 `docs/SDD.md` 파일에 소프트웨어 설계 명세서가 사전에 준비되어 있습니다.
 
-| 구분 | 파일 및 리소스 경로 | 세부 설명 |
-|:---|:---|:---|
-| **소프트웨어 설계서** | `docs/SDD.md` | 시스템 구조, RAG 데이터 규격, FastMCP API 명세, 오케스트레이션 강령 |
-| **사내 복무 규정 PDF** | `gs://oreobox/policy/leave_policy_2026.pdf` | 문서번호 POL-HR-2026-004 (연차 및 병가 운영 지침) |
-| **IT 자산 지침 PDF** | `gs://oreobox/policy/it_hardware_guidelines.pdf` | 문서번호 POL-IT-2026-009 (PC 및 하드웨어 지원 규정) |
-| **한국형 Mock SaaS 웹 포털** | `https://korean-mock-saas-dri5akvbzq-du.a.run.app/` | 인사관리(WorkWeek) 및 IT서비스(ServiceImmediately) 통합 포털 |
+| 구분 | 파일 및 리소스 경로 | 세부 설명 | 링크/다운로드 |
+|:---|:---|:---|:---|
+| **소프트웨어 설계서** | `docs/SDD.md` | 시스템 구조, RAG 데이터 규격, FastMCP API 명세, 오케스트레이션 강령 | [📥 docs/SDD.md 다운로드](../docs/SDD.md) |
+| **사내 복무 규정 PDF** | `gs://oreobox/policy/leave_policy_2026.pdf` | 문서번호 POL-HR-2026-004 (연차 및 병가 운영 지침) | [📥 leave_policy_2026.pdf 다운로드](../docs/policies/leave_policy_2026.pdf) |
+| **IT 자산 지침 PDF** | `gs://oreobox/policy/it_hardware_guidelines.pdf` | 문서번호 POL-IT-2026-009 (PC 및 하드웨어 지원 규정) | [📥 it_hardware_guidelines.pdf 다운로드](../docs/policies/it_hardware_guidelines.pdf) |
+| **한국형 Mock SaaS 웹 포털** | `https://korean-mock-saas-dri5akvbzq-du.a.run.app/` | 인사관리(WorkWeek) 및 IT서비스(ServiceImmediately) 통합 포털 | [🔗 SaaS 포털 열기](https://korean-mock-saas-dri5akvbzq-du.a.run.app/) |
+
+### 소프트웨어 설계서(SDD)의 목적과 스펙 기반 개발(Spec-Driven Development)
+
+소프트웨어 설계서(SDD)는 AI 에이전트를 개발할 때 시스템 구조, 입출력 스키마, 호출 제약, 도구 명세를 사전에 정의하는 단일 진실 공급원(Single Source of Truth)입니다.
+
+프롬프트만으로 코딩을 지시하면 언어 모델이 임의로 API 경로를 추측하거나 함수 인자를 잘못 생성하는 할루시네이션이 발생합니다. 본 실습에서는 SDD를 Antigravity CLI(`agy`)에 컨텍스트로 먼저 주입한 뒤 코드를 생성하게 하여, 실제 운영 규격에 오차 없이 부합하는 에이전트를 완성합니다.
+
+**설계서(SDD)의 핵심 구성:**
+- **1절 시스템 개요**: 에이전트의 목표(휴가 신청 자동화, 하드웨어 교체 접수), 지원 모델(Gemini 3.8 Flash, Temperature 0.1), RAG 신뢰도 임계값(0.80), 사번 기본값(EMP-10294) 등 기본 환경 설정.
+- **2절 도구 및 인터페이스 규격**: Cloud Storage PDF 검색 RAG 도구(`tools/policy_rag.py`)와 인사/전산 SaaS 연동 FastMCP 도구(`tools/mcp_tools.py`)의 함수 시그니처 및 HTTP 엔드포인트 명세.
+- **3절 오케스트레이션 및 거버넌스 규칙**: 규정 검증 우선(Policy-First Grounding) 원칙, 위험 작업 사전 승인 강령, 복합 멀티턴 대화 상태 추적 지침.
 
 ---
 
@@ -269,38 +280,55 @@ cat /config/workspace/docs/context_summary.md
 
 ---
 
-### agents-cli 프로젝트 표준 아키텍처 및 디렉토리 구조
+### agents-cli 프로젝트 표준 아키텍처 및 핵심 파일별 역할
 
-Google Cloud 환경에서 엔터프라이즈 AI 에이전트를 개발하고 배포할 때 사용하는 공식 명령줄 도구가 `agents-cli`입니다. `agents-cli` 및 Google ADK의 모듈 로더는 파이썬 식별자 규칙을 엄격하게 준수하므로, 프로젝트 디렉토리 이름은 하이픈(-) 대신 언더스코어(_)를 사용한 `enterprise_ops_agent`로 구성합니다.
+Google Cloud 환경에서 엔터프라이즈 AI 에이전트를 개발, 평가(Evaluation), Cloud Run 컨테이너 배포, 사내 Gemini Enterprise 등록까지 일관되게 관리하는 공식 표준 규격 구조입니다.
 
-```
+`agents-cli`와 Google ADK의 모듈 로더는 파이썬의 동적 임포트 메커니즘(`importlib`)을 사용하므로, 프로젝트 디렉터리 이름은 하이픈(-)이 아닌 유효한 파이썬 식별자(언더스코어 `_`)인 `enterprise_ops_agent`로 명명해야 합니다.
+
+```text
 enterprise_ops_agent/
-├── config.yaml              # 에이전트 모델 설정(gemini-3.8-flash), 시스템 지침, 거버넌스 규칙
+├── agents-cli-manifest.yaml # CLI 프로젝트 식별 매니페스트 (진입점, 배포 타겟, A2A 플래그 선언)
+├── config.yaml              # 모델 파라미터(gemini-3.8-flash), 시스템 지침, 거버넌스 규칙
 ├── agent.py                 # Google ADK Runner 기반 에이전트 핵심 오케스트레이션 로직
-├── tools/                   # 외부 시스템 연동 도구 (RAG 규정 검색, SaaS API 연동)
-│   ├── rag_policy_search.py # Cloud Storage PDF 사내 규정 검색 도구
-│   ├── saas_leave_client.py # WorkWeek HR 시스템 연동 클라이언트
-│   └── saas_hardware_client.py # ServiceImmediately IT 티켓 연동 클라이언트
-├── a2a_server.py            # Gemini Enterprise 연동을 위한 A2A JSON-RPC 2.0 FastAPI 서버
-├── tests/eval/              # 에이전트 신뢰성 및 품질 검증 디렉토리
-│   ├── eval_config.yaml     # 평가 지표(task_success, tool_use_quality, hallucination) 및 가중치
+├── tools/                   # 외부 시스템 연동 도구 디렉터리
+│   ├── policy_rag.py        # Cloud Storage PDF 사내 규정 검색 도구 (RAG 시맨틱 검색)
+│   └── mcp_tools.py         # WorkWeek & ServiceImmediately FastMCP 연동 클라이언트
+├── a2a_server.py            # Gemini Enterprise A2A JSON-RPC 2.0 서버 및 로컬 웹 콘솔
+├── tests/eval/              # 에이전트 신뢰성 및 품질 검증 디렉터리
+│   ├── eval_config.yaml     # 평가 지표(task_success, tool_quality, hallucination) 및 가중치
 │   ├── evaluation_report.md # 평가 방법론, 벤치마크 설계 및 진단 보고서
-│   └── datasets/            # 평가용 검증 데이터셋
-│       ├── eval-single-turn.json # 단발성 규정 및 기능 검증 데이터셋
-│       └── eval-multi-turn.json  # 복합 대화 시나리오 데이터셋
-└── artifacts/               # 평가 실행 시 생성되는 로그 및 결과물
-    ├── traces/              # 에이전트 실행 궤적(생각, 도구 호출) 기록
-    └── grade_results/       # LLM 채점관 평가 결과 보고서(HTML, JSON)
+│   └── datasets/            # 평가용 검증 데이터셋 (단일턴 및 멀티턴 JSON)
+├── requirements.txt         # 파이썬 의존성 패키지 목록
+└── Dockerfile               # Cloud Run 컨테이너 빌드 명세
 ```
 
-각 파일과 디렉토리의 역할은 다음과 같습니다:
+#### 각 파일 및 디렉터리의 상세 역할:
 
-1. **config.yaml**: 에이전트의 명세서입니다. 사용할 언어 모델(Gemini 3.8 Flash), 시스템 프롬프트 지침, 신뢰도 임계값(0.80), 조직 정보를 선언적으로 관리합니다.
-2. **agent.py**: 에이전트의 핵심 제어부입니다. Google ADK의 Agent 및 Runner 인스턴스를 초기화하고, 사용자 질문을 받아 RAG 검색이나 SaaS 도구를 호출할지 자율 판단하는 오케스트레이션 로직을 담당합니다.
-3. **tools/**: 에이전트의 손발이 되는 도구 모음입니다. 사내 규정 PDF를 임베딩 검색하는 RAG 모듈과 WorkWeek, ServiceImmediately SaaS와 통신하는 API 클라이언트가 위치합니다.
-4. **a2a_server.py**: 사내 Gemini Enterprise와 원격으로 통신하기 위한 FastAPI 서빙 레이어입니다. A2A 프로토콜 v0.3 JSON-RPC 2.0 규약과 에이전트 카드를 제공합니다.
-5. **tests/eval/**: 에이전트의 품질을 지속적으로 측정하고 개선하기 위한 평가 전용 공간입니다. 설정 파일(`eval_config.yaml`), 단일 턴 및 멀티 턴 데이터셋(`datasets/`), 그리고 평가 결과와 개선 내역을 정리하는 보고서(`evaluation_report.md`)로 구성됩니다.
-6. **artifacts/**: 평가 실행 시 생성되는 로그 파일입니다. 에이전트의 사고 과정과 도구 호출 이력을 담은 `traces/`와, 이를 채점하여 생성된 브라우저용 `grade_results/*.html` 보고서가 저장됩니다.
+1. **agents-cli-manifest.yaml**:
+   - `agents-cli` 명령줄 도구가 프로젝트를 식별하는 루트 메니페스트입니다.
+   - 메인 에이전트 진입점(`agent.py:build_agent`), 배포 타겟(Cloud Run), A2A 인터페이스 활성화 여부, 프로젝트 메타데이터를 선언합니다.
+2. **config.yaml**:
+   - 에이전트의 동작 환경을 선언적으로 정의하는 설정 명세서입니다.
+   - 사용 언어 모델(`gemini-3.8-flash`), 추론 온도(Temperature 0.1), 시스템 지침, RAG 신뢰도 임계값(0.80), 기본 조직 및 사번 정보(EMP-10294)가 포함됩니다.
+3. **agent.py**:
+   - 에이전트의 두뇌 역할을 하는 메인 오케스트레이터입니다.
+   - Google ADK의 `Agent`와 `Runner` 클래스를 초기화하고, 사용자 질의를 받아 규정 확인(RAG)이 필요한지, SaaS 시스템 연동이 필요한지 판단하여 도구를 동적으로 호출합니다.
+4. **tools/ (외부 연동 도구)**:
+   - `policy_rag.py`: Cloud Storage에 업로드된 사내 규정 PDF를 기반으로 조항 번호와 근거를 정확히 찾아주는 시맨틱 검색 도구입니다.
+   - `mcp_tools.py`: 인사 포털(WorkWeek)과 IT 전산 포털(ServiceImmediately)의 FastMCP REST API를 호출하여 연차 조회/신청 및 랩톱 교체 티켓을 발행하는 실행 도구입니다.
+5. **a2a_server.py**:
+   - 사내 Gemini Enterprise(GE)와 통신하기 위한 FastAPI 기반 Agent-to-Agent 서빙 계층입니다.
+   - A2A v0.3 규약의 JSON-RPC 2.0 엔드포인트(`/a2a`), 에이전트 카드(`/.well-known/agent-card.json`), 그리고 브라우저에서 직접 테스트할 수 있는 대화형 웹 인터페이스를 제공합니다.
+6. **tests/eval/ (평가 및 품질 관리)**:
+   - 에이전트의 응답 정확도와 도구 호출 안정성을 측정하는 품질 검증 모듈입니다.
+   - `eval_config.yaml`(평가 지표 및 가중치), `datasets/`(단일턴/복합턴 테스트 질문셋), `evaluation_report.md`(벤치마크 설계 및 진단 보고서)로 구성됩니다.
+7. **requirements.txt & Dockerfile**:
+   - `google-adk`, `fastapi`, `uvicorn`, `httpx` 등 실행 라이브러리 목록을 정의하고, Cloud Run 서버리스 컨테이너로 패키징하기 위한 공식 빌드 명세입니다.
+
+> [!TIP]
+> **왜 `enterprise-ops-agent` 대신 `enterprise_ops_agent`인가요?**  
+> 파이썬에서는 하이픈(-)이 뺄셈 연산자로 해석되므로 모듈 이름으로 임포트할 수 없습니다. `agents-cli`와 Google ADK는 내부적으로 파이썬의 동적 모듈 로더를 사용하므로 언더스코어(_)를 사용해야 모듈 로딩 오류를 방지할 수 있습니다.
 
 ---
 
@@ -350,6 +378,29 @@ python3 /config/workspace/enterprise_ops_agent/agent.py
 ## Task 3. agy 프롬프트 기반 사내 규정 RAG 도구 구현
 
 이 단계에서는 `docs/SDD.md`의 2.1절 명세에 따라 사내 복무 규정(POL-HR-2026-004)과 IT 하드웨어 지침(POL-IT-2026-009)을 검색하는 RAG 도구(`tools/policy_rag.py`)를 `agy`에게 구현하도록 지시합니다.
+
+### 사내 규정 원본 문서 및 핵심 조항 요약
+
+에이전트가 그라운딩할 두 가지 사내 규정 원본 문서를 다운로드하여 직접 확인해볼 수 있습니다:
+
+- [📥 사내 복무 규정 (POL-HR-2026-004) PDF 다운로드](../docs/policies/leave_policy_2026.pdf)
+- [📥 사내 IT 자산 운용 지침 (POL-IT-2026-009) PDF 다운로드](../docs/policies/it_hardware_guidelines.pdf)
+
+#### 1. 사내 복무 규정 (POL-HR-2026-004) 핵심 조항:
+- **연차 발생 기준**: 1개월 개근 시 1.25일 발생 (연간 기본 15일 부여).
+- **연속 연차 신청 기한**: 3일을 초과하는 연속 연차는 업무 인수인계를 위해 **최소 사용 7영업일 전까지 상신**하여 팀장의 사전 승인을 득해야 함.
+- **병가 규정**: 연간 14일 유급 병가 지원, 연속 3일 초과 시 의사 진단서 제출 필수.
+
+#### 2. 사내 IT 자산 운용 지침 (POL-IT-2026-009) 핵심 조항:
+- **직군별 표준 기종**: 데이터 및 엔지니어링 직군은 **MacBook Pro 16 M3 Max (64GB RAM)**, 일반 사무직군은 M3 Pro 모델 지급.
+- **정기 교체 주기**: 지급일로부터 **36개월 경과** 시 신규 기종 교체 신청 가능.
+- **긴급 결함 조치**: 배터리 부풀림(스웰링) 등 안전 결함 발생 시 내구연한과 무관하게 **4시간 내 접수 점검 및 당일 대여 장비 즉시 선지급**.
+
+> [!NOTE]
+> **RAG 도구의 동작 원리와 신뢰도 임계값(0.80):**  
+> 에이전트가 규정을 임의로 지어내는 환각(Hallucination)을 원천 차단하기 위해, 검색 유사도/신뢰도가 0.80 이상인 경우에만 답변의 근거로 채택하고 조항 번호를 명시하도록 설계합니다.
+
+---
 
 ### 1단계: RAG 도구 구현 지시
 
@@ -412,6 +463,24 @@ print(json.dumps(r2, indent=2, ensure_ascii=False))
 ## Task 4. agy 프롬프트 기반 FastMCP SaaS 연동 도구 구현
 
 이번 단계에서는 웹 기반 Mock SaaS 플랫폼(`https://korean-mock-saas-dri5akvbzq-du.a.run.app/`)과 통신하는 FastMCP 클라이언트 도구(`tools/mcp_tools.py`)를 `agy`에게 구현하도록 요청합니다.
+
+### FastMCP 프로토콜 규격 및 한국형 Mock SaaS 명세
+
+**FastMCP 프로토콜이란:**  
+Anthropic과 오픈소스 커뮤니티가 주도하는 Model Context Protocol(MCP)을 경량 Streamable HTTP 기반으로 구현한 규격입니다. 에이전트가 브라우저 자동화나 복잡한 프로세스 통신 없이도 표준 REST 엔드포인트를 통해 사내 SaaS 시스템의 도구를 원격 실행할 수 있습니다.
+
+#### 사내 SaaS 연동 엔드포인트 규격
+
+| 시스템 | 기능 | HTTP 메서드 및 엔드포인트 | 상세 설명 |
+|:---|:---|:---|:---|
+| **WorkWeek HRMS** | 잔여 연차 조회 | `GET /work-week/api/employees/{id}/timeoff` | 사번 EMP-10294(이민우 수석)의 잔여 연차/병가 일수 반환 |
+| **WorkWeek HRMS** | 휴가 신청 | `POST /work-week/api/employees/{id}/timeoff` | 시작일, 종료일, 사유를 전달하여 휴가 등록 |
+| **ServiceImmediately ITMS** | 장비 및 티켓 조회 | `GET /service-immediately/api/tickets?requested_by={id}` | 지급 장비(38개월 경과 M1 Max) 이력 및 접수 내역 반환 |
+| **ServiceImmediately ITMS** | 인시던트 티켓 발행 | `POST /service-immediately/api/tickets` | 하드웨어 결함 및 장비 교체 인시던트 접수 |
+
+> [!IMPORTANT]
+> **150명 멀티 테넌트 데이터 격리 원리 (`X-Student-Token` / `X-MCP-Token`):**  
+> 150명의 실습생이 동일한 Cloud Run 백엔드 SaaS 서버를 사용하더라도, 각자가 발급받은 개인 토큰을 HTTP 요청 헤더(`X-Student-Token` 또는 `X-MCP-Token`)에 포함하여 전송함으로써 다른 실습생의 연차나 티켓 데이터와 섞이지 않는 완전한 독립 샌드박스를 보장받습니다.
 
 ![WorkWeek 메인 화면](./images/mock_saas_workweek.png)
 

@@ -590,6 +590,49 @@
             </div>
 
             <div class="space-y-4 text-sm">
+              <!-- SDD Purpose & Download Card -->
+              <div class="card-studio p-5 space-y-3.5 bg-gradient-to-r from-blue-50/70 via-indigo-50/40 to-white border-blue-200">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-blue-100 pb-3">
+                  <div class="space-y-0.5">
+                    <span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded-full uppercase tracking-wider">단일 진실 공급원 (SSOT)</span>
+                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                      <i class="fa-solid fa-file-lines text-blue-600"></i>
+                      <span>소프트웨어 설계서 (SDD.md v2.1.0) 다운로드 및 구성 안내</span>
+                    </h3>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <a href="docs/SDD.md" download class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5">
+                      <i class="fa-solid fa-download"></i>
+                      <span>SDD.md 다운로드</span>
+                    </a>
+                    <a href="docs/SDD.md" target="_blank" class="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-semibold text-xs shadow-2xs transition flex items-center gap-1.5">
+                      <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                      <span>새 탭 열기</span>
+                    </a>
+                  </div>
+                </div>
+
+                <div class="space-y-2 text-xs text-slate-700 leading-relaxed font-medium">
+                  <p>
+                    <strong>소프트웨어 설계서(SDD)의 목적:</strong> 프롬프트에 방대한 코드를 일일이 나열하지 않고, 시스템 명세서, 데이터 모델, 도구 인터페이스 규격을 단일 문서로 정의하여 에이전트에게 맥락으로 주입하는 설계서 기반 프롬프트 엔지니어링(Spec-Driven Development)의 핵심 기준 문서입니다.
+                  </p>
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5 pt-1 text-[11px]">
+                    <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs space-y-1">
+                      <span class="font-bold text-blue-800 block">제 1 절: 시스템 개요</span>
+                      <p class="text-slate-600">사용 모델(Gemini 3.8 Flash), RAG 신뢰도 임계값(0.80), 기본 사번(EMP-10294) 등 런타임 기준을 정의합니다.</p>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs space-y-1">
+                      <span class="font-bold text-indigo-800 block">제 2 절: 도구 명세</span>
+                      <p class="text-slate-600">사내 복무/IT 규정 RAG 도구와 WorkWeek 연차 API, ServiceImmediately IT 티켓 API의 파라미터 및 반환값을 선언합니다.</p>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs space-y-1">
+                      <span class="font-bold text-purple-800 block">제 3 절: 에이전트 행동 수칙</span>
+                      <p class="text-slate-600">규정 우선 확인 원칙(Policy-First), 근거 조항 인용 의무, 사전 승인 조건 등 필수 오케스트레이션 지침을 담고 있습니다.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div class="card-studio p-5 space-y-3">
                 <h3 class="font-bold text-slate-900 text-xs uppercase tracking-wider">1. 패키지 설치 및 저장소 클론 (터미널)</h3>
                 <div class="bg-[#090d16] border border-slate-800 rounded-xl overflow-hidden shadow-md">
@@ -638,38 +681,110 @@ cd /config/workspace/enterprise_ops_agent</code></pre>
             </div>
 
             <div class="space-y-4 text-sm">
-              <!-- agents-cli Directory Architecture Card -->
-              <div class="card-studio p-5 space-y-3 bg-slate-50/80 border-slate-200">
-                <h3 class="font-bold text-slate-900 text-xs uppercase tracking-wider flex items-center gap-2">
-                  <i class="fa-solid fa-folder-tree text-indigo-600"></i>
-                  <span>agents-cli 표준 프로젝트 아키텍처 및 디렉토리 구조</span>
-                </h3>
-                <p class="text-xs text-slate-600 leading-relaxed font-medium">
-                  Google Cloud 환경에서 AI 에이전트를 개발, 평가, 배포할 때 사용하는 공식 표준 규격 구조입니다. 각 파일과 디렉토리는 명확한 단일 책임을 갖습니다:
-                </p>
-                <div class="bg-[#090d16] border border-slate-800 rounded-xl p-4 font-mono text-[11px] text-slate-300 leading-relaxed overflow-x-auto shadow-inner">
-<span class="text-indigo-400 font-bold">enterprise_ops_agent/</span>
-├── <span class="text-amber-300">config.yaml</span>              <span class="text-slate-500"># 모델 설정(gemini-3.8-flash), 시스템 지침, 거버넌스 규칙</span>
-├── <span class="text-emerald-300">agent.py</span>                 <span class="text-slate-500"># Google ADK Runner 기반 에이전트 핵심 오케스트레이션 로직</span>
-├── <span class="text-cyan-300">tools/</span>                   <span class="text-slate-500"># 외부 시스템 연동 도구 (RAG 규정 검색, SaaS API 연동)</span>
-│   ├── <span class="text-cyan-200">rag_policy_search.py</span> <span class="text-slate-500"># Cloud Storage PDF 사내 규정 검색 도구</span>
-│   ├── <span class="text-cyan-200">saas_leave_client.py</span> <span class="text-slate-500"># WorkWeek HR 시스템 연동 클라이언트</span>
-│   └── <span class="text-cyan-200">saas_hardware_client.py</span> <span class="text-slate-500"># ServiceImmediately IT 티켓 연동 클라이언트</span>
-├── <span class="text-purple-300">a2a_server.py</span>            <span class="text-slate-500"># Gemini Enterprise 연동을 위한 A2A JSON-RPC 2.0 FastAPI 서버</span>
-├── <span class="text-blue-300">tests/eval/</span>              <span class="text-slate-500"># 에이전트 신뢰성 및 품질 검증 디렉토리</span>
-│   ├── <span class="text-blue-200">eval_config.yaml</span>     <span class="text-slate-500"># 평가 지표(task_success, tool_use_quality, hallucination) 및 가중치</span>
-│   ├── <span class="text-blue-200">evaluation_report.md</span> <span class="text-slate-500"># 평가 방법론, 벤치마크 설계 및 진단 보고서</span>
-│   └── <span class="text-blue-200">datasets/</span>            <span class="text-slate-500"># 평가용 검증 데이터셋 (단발성 및 멀티턴 JSON)</span>
-└── <span class="text-rose-300">artifacts/</span>               <span class="text-slate-500"># 평가 실행 시 생성되는 로그(traces/) 및 채점 리포트(HTML/JSON)</span>
+              <!-- agents-cli Directory Architecture Card (Comprehensive Guide) -->
+              <div class="card-studio p-6 space-y-4 bg-slate-50/90 border-slate-200">
+                <div class="border-b border-slate-200 pb-3">
+                  <span class="text-[10px] font-bold text-indigo-700 bg-indigo-100 px-2.5 py-0.5 rounded-full uppercase tracking-wider">Enterprise Architecture</span>
+                  <h3 class="text-base font-bold text-slate-900 flex items-center gap-2 mt-1">
+                    <i class="fa-solid fa-folder-tree text-indigo-600"></i>
+                    <span>agents-cli 표준 프로젝트 아키텍처 및 핵심 파일별 역할</span>
+                  </h3>
+                  <p class="text-xs text-slate-600 mt-1 leading-relaxed font-medium">
+                    Google Cloud 환경에서 엔터프라이즈 AI 에이전트를 개발, 평가(Evaluation), Cloud Run 배포, Gemini Enterprise 등록까지 일관되게 관리하는 공식 표준 규격 구조입니다.
+                  </p>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs text-slate-700 pt-1">
-                  <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-xs">
-                    <span class="font-bold text-slate-900 block mb-0.5">config.yaml & agent.py</span>
-                    <span class="text-[11px] text-slate-600">모델 설정과 시스템 프롬프트를 분리하고 ADK Runner를 통해 도구 호출을 자율 제어합니다.</span>
+
+                <!-- Formatted Tree Pre Block -->
+                <div class="bg-[#090d16] border border-slate-800 rounded-xl p-4 shadow-inner">
+                  <pre class="font-mono text-xs text-slate-200 leading-relaxed overflow-x-auto whitespace-pre"><code><span class="text-indigo-400 font-bold">enterprise_ops_agent/</span>
+├── <span class="text-cyan-300">agents-cli-manifest.yaml</span> <span class="text-slate-500"># CLI 프로젝트 식별 매니페스트 (배포 타겟, A2A 플래그 선언)</span>
+├── <span class="text-amber-300">config.yaml</span>              <span class="text-slate-500"># 모델 파라미터(gemini-3.8-flash), 시스템 지침, 거버넌스 규칙</span>
+├── <span class="text-emerald-300">agent.py</span>                 <span class="text-slate-500"># Google ADK Runner 기반 에이전트 핵심 오케스트레이션 로직</span>
+├── <span class="text-blue-300">tools/</span>                   <span class="text-slate-500"># 외부 시스템 연동 도구 디렉토리</span>
+│   ├── <span class="text-blue-200">policy_rag.py</span>        <span class="text-slate-500"># Cloud Storage PDF 사내 규정 검색 도구 (RAG)</span>
+│   └── <span class="text-blue-200">mcp_tools.py</span>         <span class="text-slate-500"># WorkWeek & ServiceImmediately FastMCP 연동 클라이언트</span>
+├── <span class="text-purple-300">a2a_server.py</span>            <span class="text-slate-500"># Gemini Enterprise A2A JSON-RPC 2.0 및 로컬 웹 콘솔</span>
+├── <span class="text-teal-300">tests/eval/</span>              <span class="text-slate-500"># 에이전트 신뢰성 및 품질 검증 디렉토리</span>
+│   ├── <span class="text-teal-200">eval_config.yaml</span>     <span class="text-slate-500"># 평가 지표(task_success, tool_quality, hallucination) 및 가중치</span>
+│   ├── <span class="text-teal-200">evaluation_report.md</span> <span class="text-slate-500"># 평가 방법론, 벤치마크 설계 및 진단 보고서</span>
+│   └── <span class="text-teal-200">datasets/</span>            <span class="text-slate-500"># 평가용 검증 데이터셋 (단일턴 및 멀티턴 JSON)</span>
+├── <span class="text-slate-400">requirements.txt</span>         <span class="text-slate-500"># 파이썬 의존성 패키지 목록</span>
+└── <span class="text-slate-400">Dockerfile</span>               <span class="text-slate-500"># Cloud Run 컨테이너 빌드 명세</span></code></pre>
+                </div>
+
+                <!-- Deep Explanation Cards for 150 Attendees -->
+                <div class="space-y-2.5 text-xs text-slate-700 leading-relaxed font-medium">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs space-y-1">
+                      <span class="font-bold text-slate-900 block flex items-center gap-1.5">
+                        <i class="fa-solid fa-file-code text-cyan-600"></i>
+                        <span>agents-cli-manifest.yaml</span>
+                      </span>
+                      <p class="text-[11px] text-slate-600">
+                        agents-cli가 이 디렉터리를 에이전트 프로젝트로 인식하도록 선언하는 메타데이터 파일입니다. 배포 대상(Cloud Run), 세션 저장 방식(in_memory), 리전, A2A 활성화 여부를 정의합니다.
+                      </p>
+                    </div>
+
+                    <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs space-y-1">
+                      <span class="font-bold text-slate-900 block flex items-center gap-1.5">
+                        <i class="fa-solid fa-sliders text-amber-600"></i>
+                        <span>config.yaml</span>
+                      </span>
+                      <p class="text-[11px] text-slate-600">
+                        에이전트의 런타임 설정 명세서입니다. 코드를 직접 수정하지 않고도 언어 모델(Gemini 3.8 Flash), temperature(0.1), RAG 신뢰도 임계값(0.80), 기본 사번(EMP-10294)을 변경할 수 있도록 환경과 코드를 분리합니다.
+                      </p>
+                    </div>
+
+                    <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs space-y-1">
+                      <span class="font-bold text-slate-900 block flex items-center gap-1.5">
+                        <i class="fa-solid fa-brain text-emerald-600"></i>
+                        <span>agent.py</span>
+                      </span>
+                      <p class="text-[11px] text-slate-600">
+                        에이전트의 핵심 두뇌입니다. Google ADK의 Agent 및 Runner 인스턴스를 초기화하고, 시스템 지침을 주입하며, 사용자 질문에 따라 RAG 도구와 SaaS API 도구를 자율적으로 호출하는 오케스트레이션 로직을 담당합니다.
+                      </p>
+                    </div>
+
+                    <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs space-y-1">
+                      <span class="font-bold text-slate-900 block flex items-center gap-1.5">
+                        <i class="fa-solid fa-wrench text-blue-600"></i>
+                        <span>tools/ (도구 모음)</span>
+                      </span>
+                      <p class="text-[11px] text-slate-600">
+                        에이전트의 손발 역할을 하는 파이썬 함수 모음입니다. 사내 규정 PDF를 임베딩 검색하는 RAG 모듈과 WorkWeek, ServiceImmediately SaaS와 통신하는 API 클라이언트가 위치합니다.
+                      </p>
+                    </div>
+
+                    <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs space-y-1">
+                      <span class="font-bold text-slate-900 block flex items-center gap-1.5">
+                        <i class="fa-solid fa-server text-purple-600"></i>
+                        <span>a2a_server.py</span>
+                      </span>
+                      <p class="text-[11px] text-slate-600">
+                        사내 Gemini Enterprise와 통신하기 위한 A2A(Agent-to-Agent) 표준 게이트웨이입니다. JSON-RPC 2.0 프로토콜을 처리하여 사내 챗봇에 연결하고, 브라우저(포트 8080)에서 바로 대화할 수 있는 로컬 웹 콘솔을 일체형으로 제공합니다.
+                      </p>
+                    </div>
+
+                    <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs space-y-1">
+                      <span class="font-bold text-slate-900 block flex items-center gap-1.5">
+                        <i class="fa-solid fa-vial-circle-check text-teal-600"></i>
+                        <span>tests/eval/ (평가 스위트)</span>
+                      </span>
+                      <p class="text-[11px] text-slate-600">
+                        에이전트가 사람 개입 없이도 안전하고 정확하게 동작하는지 검증하는 정량적 평가 공간입니다. 평가 지표 설정(eval_config.yaml), 검증 데이터셋(datasets/), 진단 보고서(evaluation_report.md)로 구성됩니다.
+                      </p>
+                    </div>
                   </div>
-                  <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-xs">
-                    <span class="font-bold text-slate-900 block mb-0.5">tests/eval & artifacts</span>
-                    <span class="text-[11px] text-slate-600">외부 평가 서버 없이 로컬에서 Vertex AI를 채점관으로 활용하여 정량 지표를 측정합니다.</span>
+
+                  <!-- Python Identifier Rule Callout -->
+                  <div class="bg-amber-50 border border-amber-200 rounded-xl p-3.5 text-xs text-amber-900 space-y-1">
+                    <span class="font-bold text-amber-950 flex items-center gap-1.5">
+                      <i class="fa-solid fa-triangle-exclamation text-amber-600"></i>
+                      <span>중요: 디렉토리 명칭 규칙 (Python Identifier Rule)</span>
+                    </span>
+                    <p class="text-[11px] text-amber-800 leading-relaxed font-medium">
+                      Google ADK 내부 모듈 로더는 파이썬 식별자 규칙을 엄격히 적용합니다. 폴더명에 하이픈(-)이 들어가면 파이썬 모듈 임포트 에러가 발생하므로, 반드시 언더스코어(_)를 사용한 <code class="font-mono text-amber-900 bg-amber-100 px-1 py-0.5 rounded font-bold">enterprise_ops_agent</code>로 디렉터리를 생성해야 합니다.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -732,6 +847,61 @@ cd /config/workspace/enterprise_ops_agent</code></pre>
             </div>
 
             <div class="space-y-4 text-sm">
+              <!-- Policy PDFs & RAG Architecture Card -->
+              <div class="card-studio p-5 space-y-3.5 bg-gradient-to-r from-rose-50/60 via-amber-50/40 to-white border-rose-200">
+                <div class="border-b border-rose-100 pb-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div class="space-y-0.5">
+                    <span class="text-[10px] font-bold text-rose-700 bg-rose-100 px-2.5 py-0.5 rounded-full uppercase tracking-wider">사내 규정 그라운딩 (Policy Grounding)</span>
+                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                      <i class="fa-solid fa-file-pdf text-rose-600"></i>
+                      <span>사내 공식 규정 PDF 원본 다운로드 및 핵심 조항</span>
+                    </h3>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <!-- Leave Policy Card -->
+                  <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs space-y-2">
+                    <div class="flex items-center justify-between">
+                      <span class="font-bold text-xs text-rose-900 flex items-center gap-1.5">
+                        <i class="fa-regular fa-file-pdf text-rose-600"></i>
+                        <span>사내 복무 규정 (POL-HR-2026-004)</span>
+                      </span>
+                      <a href="docs/policies/leave_policy_2026.pdf" download class="text-[11px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 px-2 py-0.5 rounded flex items-center gap-1">
+                        <i class="fa-solid fa-download"></i> 다운로드
+                      </a>
+                    </div>
+                    <ul class="text-[11px] text-slate-600 space-y-1 list-disc pl-4 leading-relaxed font-medium">
+                      <li><strong>연차 발생:</strong> 입사 1년 미만 월 1.25일 개근 발생, 1년 차 기본 15일 부여, 3년 이상 2년마다 1일 가산(최대 25일).</li>
+                      <li><strong>사전 신청 기한:</strong> 1일 이하 24시간 전 상신, 3일 이하 3일 전 상신, 3일 초과 7영업일 전 상신 및 팀장 사전 승인 필수.</li>
+                      <li><strong>병가 규정:</strong> 연간 14일 유급 병가 지원, 연속 3일 초과 시 진단서 제출 필수.</li>
+                    </ul>
+                  </div>
+
+                  <!-- IT Hardware Policy Card -->
+                  <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs space-y-2">
+                    <div class="flex items-center justify-between">
+                      <span class="font-bold text-xs text-amber-900 flex items-center gap-1.5">
+                        <i class="fa-regular fa-file-pdf text-amber-600"></i>
+                        <span>사내 IT 자산 운용 지침 (POL-IT-2026-009)</span>
+                      </span>
+                      <a href="docs/policies/it_hardware_guidelines.pdf" download class="text-[11px] font-bold text-amber-600 hover:text-amber-800 bg-amber-50 px-2 py-0.5 rounded flex items-center gap-1">
+                        <i class="fa-solid fa-download"></i> 다운로드
+                      </a>
+                    </div>
+                    <ul class="text-[11px] text-slate-600 space-y-1 list-disc pl-4 leading-relaxed font-medium">
+                      <li><strong>표준 기종 기준:</strong> 데이터/엔지니어링 직군은 MacBook Pro 16 M3 Max (64GB RAM), 일반 사무직군은 M3 Pro 모델 지급.</li>
+                      <li><strong>정기 교체 주기:</strong> 지급일로부터 36개월 경과 시 신규 기종 교체 신청 가능.</li>
+                      <li><strong>긴급 결함 조치:</strong> 배터리 부풀림(스웰링) 등 안전 결함 발생 시 내구연한과 무관하게 4시간 내 점검 및 당일 대여 장비 선지급.</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div class="text-[11px] text-slate-600 leading-relaxed font-medium bg-white/80 p-2.5 rounded-lg border border-slate-200">
+                  <p><strong>RAG 도구의 동작 원리:</strong> 에이전트가 규정을 추측(Hallucination)하지 않도록, Cloud Storage에 업로드된 위 PDF 문서들을 바탕으로 관련 조항을 발췌하여 신뢰도 0.80 이상일 때만 답변의 근거로 채택합니다.</p>
+                </div>
+              </div>
+
               <div class="card-studio p-5 space-y-3">
                 <h3 class="font-bold text-blue-700 text-xs uppercase tracking-wider flex items-center gap-1.5">
                   <i class="fa-solid fa-terminal"></i>
@@ -791,6 +961,66 @@ print(json.dumps(search_company_policy('4일 연속 연차 신청 기한', categ
             </div>
 
             <div class="space-y-4 text-sm">
+              <!-- FastMCP & Mock SaaS Spec Card -->
+              <div class="card-studio p-5 space-y-3.5 bg-gradient-to-r from-emerald-50/60 via-teal-50/40 to-white border-emerald-200">
+                <div class="border-b border-emerald-100 pb-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div class="space-y-0.5">
+                    <span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full uppercase tracking-wider">FastMCP Protocol &amp; SaaS Spec</span>
+                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                      <i class="fa-solid fa-network-wired text-emerald-600"></i>
+                      <span>Korean Mock SaaS 포털 및 FastMCP 프로토콜 규격</span>
+                    </h3>
+                  </div>
+                  <a href="https://korean-mock-saas-dri5akvbzq-du.a.run.app/" target="_blank" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 shrink-0">
+                    <span>Mock SaaS 포털 열기</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                  </a>
+                </div>
+
+                <div class="space-y-2.5 text-xs text-slate-700 leading-relaxed font-medium">
+                  <p>
+                    <strong>FastMCP 프로토콜이란:</strong> Anthropic과 오픈소스 커뮤니티가 주도하는 Model Context Protocol(MCP)을 가벼운 Streamable HTTP 기반으로 구현한 규격입니다. 에이전트가 브라우저나 복잡한 프로세스 통신 없이도 표준 REST 엔드포인트를 통해 사내 SaaS 시스템의 도구를 원격 실행할 수 있습니다.
+                  </p>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                    <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs space-y-2">
+                      <span class="font-bold text-blue-900 block flex items-center gap-1.5">
+                        <i class="fa-solid fa-calendar-check text-blue-600"></i>
+                        <span>WorkWeek HRMS (인사관리 SaaS)</span>
+                      </span>
+                      <p class="text-[11px] text-slate-600">사번 EMP-10294(이민우 수석 아키텍트)의 잔여 연차 조회 및 신규 휴가 신청을 처리합니다.</p>
+                      <div class="font-mono text-[10px] text-slate-700 bg-slate-50 p-2 rounded border border-slate-200 space-y-1">
+                        <div><strong>조회:</strong> <span class="text-blue-700">GET</span> /work-week/api/employees/{id}/timeoff</div>
+                        <div><strong>신청:</strong> <span class="text-emerald-700">POST</span> /work-week/api/employees/{id}/timeoff</div>
+                      </div>
+                    </div>
+
+                    <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs space-y-2">
+                      <span class="font-bold text-emerald-900 block flex items-center gap-1.5">
+                        <i class="fa-solid fa-ticket text-emerald-600"></i>
+                        <span>ServiceImmediately ITMS (전산장비 SaaS)</span>
+                      </span>
+                      <p class="text-[11px] text-slate-600">지급 장비(38개월 경과된 M1 Max 랩톱) 이력 조회 및 하드웨어 결함 인시던트 티켓을 발행합니다.</p>
+                      <div class="font-mono text-[10px] text-slate-700 bg-slate-50 p-2 rounded border border-slate-200 space-y-1">
+                        <div><strong>조회:</strong> <span class="text-blue-700">GET</span> /service-immediately/api/tickets</div>
+                        <div><strong>발행:</strong> <span class="text-emerald-700">POST</span> /service-immediately/api/tickets</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 150 Student Multi-tenant Isolation Callout -->
+                  <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-950 space-y-1">
+                    <span class="font-bold flex items-center gap-1.5">
+                      <i class="fa-solid fa-shield-halved text-blue-600"></i>
+                      <span>150명 멀티 테넌트 데이터 격리 원리 (X-Student-Token)</span>
+                    </span>
+                    <p class="text-[11px] text-blue-900 leading-relaxed font-medium">
+                      150명의 실습생이 동시에 공유 SaaS 서버를 사용하더라도, 각자가 발급받은 개인 MCP 토큰을 HTTP 헤더(<code class="font-mono bg-blue-100 px-1 py-0.5 rounded font-bold">X-Student-Token</code>)에 실어 보냄으로써 다른 실습생의 연차나 티켓 데이터와 섞이지 않는 완전한 독립 샌드박스를 보장받습니다.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <div class="card-studio p-5 space-y-3">
                 <h3 class="font-bold text-slate-900 text-xs uppercase tracking-wider">1. 개인 MCP 토큰 발급 및 환경변수 등록 (터미널)</h3>
                 <p class="text-xs text-slate-600 font-medium">
