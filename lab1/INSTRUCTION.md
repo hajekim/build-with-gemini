@@ -662,7 +662,7 @@ python3 a2a_server.py
 2. **로컬 테스트 콘솔 브라우징**:
 원격 브라우저 또는 로컬 브라우저에서 `http://localhost:8080`에 접속합니다.
 
-![로컬 에이전트 웹 콘솔](lab1/images/local_agent_web_chat.png)
+![로컬 에이전트 웹 콘솔](./images/local_agent_web_chat.png)
 
 화면 상단에는 에이전트 상태(Active)와 연결된 모델(Gemini 3.8 Flash)이 표시되며, 하단에는 추천 질문 칩들이 제공됩니다. 칩을 클릭하거나 직접 질문을 입력하면, 에이전트가 사내 RAG 문서와 Mock SaaS API를 호출하여 실시간으로 정밀한 답변을 생성합니다.
 
@@ -749,14 +749,14 @@ agents-cli publish gemini-enterprise \
 3. **등록 완료 및 콘솔 확인**:
 등록이 완료되면 `✅ Successfully created agent registration!` 메시지와 함께 콘솔 링크가 제공되며, 사내 Gemini Enterprise Agent Gallery에서 상태가 **`ENABLED`**로 즉시 활성화됩니다.
 
-![Gemini Enterprise 에이전트 상세 콘솔](lab1/images/ge_01_agent_console.png)
+![Gemini Enterprise 에이전트 상세 콘솔](./images/ge_01_agent_console.png)
 
 콘솔에서 에이전트 이름, 설명, 배포된 Cloud Run 엔드포인트 URL, 프로토콜 버전(0.3.0), 등록된 스킬(HR Leave Management, IT Hardware Support) 목록을 확인할 수 있습니다.
 
 4. **사내 Gemini Enterprise 웹 채팅 진입**:
 사내 Gemini Enterprise 포털의 에이전트 갤러리에서 `@Cymbal Enterprise Ops Agent`를 선택하면 전용 대화창이 열립니다.
 
-![Gemini Enterprise 대화창 진입 화면](lab1/images/ge_02_chat_entry.png)
+![Gemini Enterprise 대화창 진입 화면](./images/ge_02_chat_entry.png)
 
 5. **추천 실무 샘플 프롬프트**:
 사내 구성원들은 다음과 같은 자연어 질문으로 복무 규정 확인, 연차 조회/신청, IT 하드웨어 결함 조치를 원스톱으로 처리할 수 있습니다:
@@ -774,22 +774,22 @@ agents-cli publish gemini-enterprise \
 - **사내 복무 규정 RAG 조회**:
   "회사 휴가 규정 및 발생 기준이 어떻게 돼?" 질의 시, Cloud Storage에 저장된 사내 복무 규정(POL-HR-2026-004) 제3조와 제4조를 정확히 인용하여 사전 신청 기한(1일 이하: 24시간 전, 3일 이하: 3일 전, 3일 초과: 7영업일 전)을 체계적으로 안내합니다.
 
-  ![사내 복무 규정 RAG 조회 결과](lab1/images/ge_05_policy_rag_grounding.png)
+  ![사내 복무 규정 RAG 조회 결과](./images/ge_05_policy_rag_grounding.png)
 
 - **WorkWeek 연차 및 병가 실시간 조회**:
   "내 잔여 연차와 병가 일수 알려줘" 질의 시, WorkWeek HRMS 시스템을 호출하여 사번 EMP-10294의 실시간 잔여 연차(2.0일)와 병가(14.0일) 현황을 즉시 확인해 줍니다.
 
-  ![잔여 연차 및 병가 조회 결과](lab1/images/ge_06_leave_balance_check.png)
+  ![잔여 연차 및 병가 조회 결과](./images/ge_06_leave_balance_check.png)
 
 - **ServiceImmediately IT 티켓 목록 실시간 조회**:
   "현재 내 오픈된 IT 지원 티켓 목록 확인해줘" 질의 시, ServiceImmediately ITMS 시스템에서 활성 티켓 3건(업무용 M3 Max 랩톱 교체 신청, 원격 근무용 VPN 권한 갱신, 모니터 점검)의 상태와 담당자를 집계하여 답변합니다.
 
-  ![IT 지원 티켓 목록 확인 결과](lab1/images/ge_04_it_ticket_list.png)
+  ![IT 지원 티켓 목록 확인 결과](./images/ge_04_it_ticket_list.png)
 
 > **트러블슈팅 참고 (정적 Mock 반복 결함 방지)**:  
 > 초기 프로토타입에서 if/else 키워드 분기문 기반의 단순 Mock을 사용할 경우, 질문의 표현이 조금만 달라져도 아래와 같이 고정된 인사말만 무한 반복하는 결함이 발생합니다.
 >
-> ![고정 응답 반복 결함 사례](lab1/images/ge_03_defect_repeat_troubleshoot.png)
+> ![고정 응답 반복 결함 사례](./images/ge_03_defect_repeat_troubleshoot.png)
 >
 > 본 실습에서는 Google ADK Runner와 Vertex AI Gemini 3.8 Flash를 결합하여, 사용자의 어떠한 자연어 질문도 실시간 자율 추론과 도구 호출을 거쳐 지능적으로 답변하도록 구현하여 이 문제를 해결했습니다.
 
