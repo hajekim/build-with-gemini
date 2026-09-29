@@ -218,8 +218,8 @@ agents-cli --version
 작업 디렉터리를 만들고 제공된 설계서(`docs/SDD.md`)를 확인합니다.
 
 ```bash
-mkdir -p /config/workspace/enterprise-ops-agent/tools
-cd /config/workspace/enterprise-ops-agent
+mkdir -p /config/workspace/enterprise_ops_agent/tools
+cd /config/workspace/enterprise_ops_agent
 cat /config/workspace/docs/SDD.md | head -n 45
 ```
 
@@ -252,7 +252,7 @@ gsutil ls -l gs://oreobox/policy/
 ```text
 당신은 Cymbal Group Korea의 엔터프라이즈 AI 에이전트 개발자입니다.
 /config/workspace/docs/SDD.md 파일의 내용을 꼼꼼히 읽고, 전체 아키텍처 개요와 도구 구성 요소를 파악하세요.
-그리고 현재 프로젝트 디렉터리(/config/workspace/enterprise-ops-agent)의 컨텍스트를 요약한 context_summary.md 파일을 docs/ 디렉터리에 생성하세요.
+그리고 현재 프로젝트 디렉터리(/config/workspace/enterprise_ops_agent)의 컨텍스트를 요약한 context_summary.md 파일을 docs/ 디렉터리에 생성하세요.
 ```
 
 프롬프트 실행이 완료되면, 터미널에서 생성된 요약 파일을 확인합니다.
@@ -271,10 +271,10 @@ cat /config/workspace/docs/context_summary.md
 
 ### agents-cli 프로젝트 표준 아키텍처 및 디렉토리 구조
 
-Google Cloud 환경에서 엔터프라이즈 AI 에이전트를 개발하고 배포할 때 사용하는 공식 명령줄 도구가 `agents-cli`입니다. `agents-cli` 표준 프로젝트는 다음과 같은 일관된 디렉토리 구조를 따릅니다.
+Google Cloud 환경에서 엔터프라이즈 AI 에이전트를 개발하고 배포할 때 사용하는 공식 명령줄 도구가 `agents-cli`입니다. `agents-cli` 및 Google ADK의 모듈 로더는 파이썬 식별자 규칙을 엄격하게 준수하므로, 프로젝트 디렉토리 이름은 하이픈(-) 대신 언더스코어(_)를 사용한 `enterprise_ops_agent`로 구성합니다.
 
 ```
-enterprise-ops-agent/
+enterprise_ops_agent/
 ├── config.yaml              # 에이전트 모델 설정(gemini-3.8-flash), 시스템 지침, 거버넌스 규칙
 ├── agent.py                 # Google ADK Runner 기반 에이전트 핵심 오케스트레이션 로직
 ├── tools/                   # 외부 시스템 연동 도구 (RAG 규정 검색, SaaS API 연동)
@@ -333,7 +333,7 @@ enterprise-ops-agent/
 새 터미널 탭에서 `agy`가 올바르게 파일을 생성했는지 실행하여 확인합니다.
 
 ```bash
-python3 /config/workspace/enterprise-ops-agent/agent.py
+python3 /config/workspace/enterprise_ops_agent/agent.py
 ```
 
 ```
@@ -653,7 +653,7 @@ Gemini Enterprise에 배포하기 전에, 개발자 로컬 환경에서 웹 애�
 새 터미널 창에서 `a2a_server.py`를 실행합니다.
 
 ```bash
-cd /config/workspace/enterprise-ops-agent
+cd /config/workspace/enterprise_ops_agent
 python3 a2a_server.py
 ```
 
@@ -708,6 +708,20 @@ curl -s -X POST http://localhost:8080/ \
 ```
 
 에이전트가 고정된 답변이 아니라, 실제 ServiceImmediately 시스템에서 활성 티켓 8건을 실시간 조회하여 집계 결과를 지능적으로 생성하는 것을 확인했습니다.
+
+4. **심화 옵션: Google ADK 2.3.0 개발자 대시보드 (agents-cli playground)**:  
+   ADK의 공식 이벤트 타임라인, 세션 상태(State), 아티팩트 트리 및 트레이스를 GUI에서 심층 디버깅하려면 Vertex AI 환경 변수를 설정하고 `agents-cli playground`를 실행합니다:
+
+   ```bash
+   # Vertex AI 환경 변수 설정 후 공식 플레이그라운드 기동
+   export GOOGLE_GENAI_USE_VERTEXAI=true
+   export GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project)
+   export GOOGLE_CLOUD_LOCATION=global
+   cd /config/workspace/enterprise_ops_agent
+   agents-cli playground --port 8085
+   ```
+
+   브라우저에서 `http://localhost:8085/dev-ui/?app=enterprise_ops_agent`에 접속하면 공식 ADK 개발자 대시보드를 이용할 수 있습니다.
 
 ---
 
@@ -796,7 +810,7 @@ agents-cli publish gemini-enterprise \
 새 터미널 탭에서 다음 명령어를 입력하여 로컬 자체 평가를 실행합니다:
 
 ```bash
-cd /config/workspace/enterprise-ops-agent
+cd /config/workspace/enterprise_ops_agent
 agents-cli eval run
 ```
 

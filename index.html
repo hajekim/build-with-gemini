@@ -602,7 +602,7 @@
                   <pre class="p-4 font-mono text-xs text-cyan-300 leading-relaxed"><code>pip install --upgrade pip
 pip install google-agents-cli google-adk mcp httpx pydantic pyyaml
 git clone https://github.com/hajekim/build-with-gemini.git /config/workspace
-cd /config/workspace/enterprise-ops-agent</code></pre>
+cd /config/workspace/enterprise_ops_agent</code></pre>
                 </div>
               </div>
 
@@ -620,7 +620,7 @@ cd /config/workspace/enterprise-ops-agent</code></pre>
                   </div>
                   <pre class="p-4 font-mono text-xs text-slate-200 whitespace-pre-wrap leading-relaxed"><code>당신은 Cymbal Group Korea의 엔터프라이즈 AI 에이전트 개발자입니다.
 /config/workspace/docs/SDD.md 파일의 내용을 꼼꼼히 읽고, 전체 아키텍처 개요와 도구 구성 요소를 파악하세요.
-그리고 현재 프로젝트 디렉터리(/config/workspace/enterprise-ops-agent)의 컨텍스트를 요약한 context_summary.md 파일을 docs/ 디렉터리에 생성하세요.</code></pre>
+그리고 현재 프로젝트 디렉터리(/config/workspace/enterprise_ops_agent)의 컨텍스트를 요약한 context_summary.md 파일을 docs/ 디렉터리에 생성하세요.</code></pre>
                 </div>
                 <p class="text-xs text-slate-600 font-medium">agy가 제안하는 파일 생성 변경사항을 확인하고 <strong>Allow</strong>를 선택합니다.</p>
               </div>
@@ -648,7 +648,7 @@ cd /config/workspace/enterprise-ops-agent</code></pre>
                   Google Cloud 환경에서 AI 에이전트를 개발, 평가, 배포할 때 사용하는 공식 표준 규격 구조입니다. 각 파일과 디렉토리는 명확한 단일 책임을 갖습니다:
                 </p>
                 <div class="bg-[#090d16] border border-slate-800 rounded-xl p-4 font-mono text-[11px] text-slate-300 leading-relaxed overflow-x-auto shadow-inner">
-<span class="text-indigo-400 font-bold">enterprise-ops-agent/</span>
+<span class="text-indigo-400 font-bold">enterprise_ops_agent/</span>
 ├── <span class="text-amber-300">config.yaml</span>              <span class="text-slate-500"># 모델 설정(gemini-3.8-flash), 시스템 지침, 거버넌스 규칙</span>
 ├── <span class="text-emerald-300">agent.py</span>                 <span class="text-slate-500"># Google ADK Runner 기반 에이전트 핵심 오케스트레이션 로직</span>
 ├── <span class="text-cyan-300">tools/</span>                   <span class="text-slate-500"># 외부 시스템 연동 도구 (RAG 규정 검색, SaaS API 연동)</span>
@@ -711,7 +711,7 @@ cd /config/workspace/enterprise-ops-agent</code></pre>
                       <i class="fa-regular fa-copy"></i> 복사
                     </button>
                   </div>
-                  <pre class="p-4 font-mono text-xs text-cyan-300"><code>python3 /config/workspace/enterprise-ops-agent/agent.py</code></pre>
+                  <pre class="p-4 font-mono text-xs text-cyan-300"><code>python3 /config/workspace/enterprise_ops_agent/agent.py</code></pre>
                 </div>
                 <div class="bg-emerald-50 border border-emerald-300 rounded-xl p-3 text-xs text-emerald-950 font-bold flex items-center gap-2">
                   <i class="fa-solid fa-circle-check text-emerald-600"></i>
@@ -1040,7 +1040,7 @@ print(json.dumps(search_company_policy('4일 연속 연차 신청 기한', categ
                     </button>
                   </div>
                   <pre class="p-4 font-mono text-xs text-emerald-300 leading-relaxed"><code># 1. 로컬 A2A / 웹 서빙 서버 실행
-cd /config/workspace/enterprise-ops-agent
+cd /config/workspace/enterprise_ops_agent
 python3 a2a_server.py</code></pre>
                 </div>
                 <p class="text-xs text-slate-600 font-medium">서버가 실행되면 브라우저에서 <code class="font-mono text-blue-700 bg-blue-50 px-1 py-0.5 rounded font-bold">http://localhost:8080</code>에 접속하여 로컬 테스트 콘솔을 엽니다:</p>
@@ -1067,6 +1067,24 @@ python3 a2a_server.py</code></pre>
       }
     }
   }' | jq .</code></pre>
+                </div>
+
+                <!-- ADK Playground Tip Box -->
+                <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 space-y-2 shadow-xs">
+                  <span class="font-bold text-indigo-950 text-xs flex items-center gap-1.5">
+                    <i class="fa-solid fa-laptop-code text-indigo-600"></i>
+                    <span>심화 옵션: Google ADK 2.3.0 개발자 대시보드 (agents-cli playground)</span>
+                  </span>
+                  <p class="text-[11px] text-indigo-900 leading-relaxed font-medium">
+                    ADK의 공식 이벤트 타임라인, 세션 상태(State), 아티팩트 트리 및 트레이스를 GUI에서 심층 디버깅하려면 폴더명을 <code class="font-mono text-indigo-800 bg-indigo-100 px-1 py-0.5 rounded font-bold">enterprise_ops_agent</code>로 맞추고 Vertex AI 환경 변수를 설정하여 실행합니다:
+                  </p>
+                  <pre class="p-3 bg-[#090d16] rounded-lg font-mono text-[11px] text-indigo-300 overflow-x-auto leading-relaxed"><code># Vertex AI 환경 변수 설정 후 공식 플레이그라운드 기동
+export GOOGLE_GENAI_USE_VERTEXAI=true
+export GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project)
+export GOOGLE_CLOUD_LOCATION=global
+cd /config/workspace/enterprise_ops_agent
+agents-cli playground --port 8085</code></pre>
+                  <p class="text-[10px] text-indigo-700 font-medium">브라우저에서 <code class="font-mono">http://localhost:8085/dev-ui/?app=enterprise_ops_agent</code>에 접속하면 공식 ADK 개발자 대시보드를 이용할 수 있습니다.</p>
                 </div>
               </div>
 
@@ -1225,7 +1243,7 @@ agents-cli publish gemini-enterprise \
                     </button>
                   </div>
                   <pre class="p-4 font-mono text-xs text-blue-300 whitespace-pre-wrap leading-relaxed"><code># 1. 로컬 종합 평가 실행 (단일 명령어로 추론 및 LLM 채점관 평가 수행)
-cd /config/workspace/enterprise-ops-agent
+cd /config/workspace/enterprise_ops_agent
 agents-cli eval run
 
 # 2. 로컬 웹서버로 평가 결과 HTML 대시보드 열람 (포트 8081)
@@ -1602,7 +1620,7 @@ python3 -m http.server 8081 --directory artifacts/grade_results</code></pre>
         tag: "Task 1",
         desc: "환경 패키지 설치 및 SDD 요약",
         btnText: "패키지 설치 명령어 복사",
-        action: () => copyText("pip install --upgrade pip\npip install google-agents-cli google-adk mcp httpx pydantic pyyaml\ngit clone https://github.com/hajekim/build-with-gemini.git /config/workspace\ncd /config/workspace/enterprise-ops-agent"),
+        action: () => copyText("pip install --upgrade pip\npip install google-agents-cli google-adk mcp httpx pydantic pyyaml\ngit clone https://github.com/hajekim/build-with-gemini.git /config/workspace\ncd /config/workspace/enterprise_ops_agent"),
         preview: "pip install google-agents-cli google-adk mcp ...\n/config/workspace/docs/SDD.md 요약 프롬프트 실행"
       },
       {
@@ -1732,8 +1750,47 @@ python3 -m http.server 8081 --directory artifacts/grade_results</code></pre>
       });
     }
 
-    // Keyboard navigation
+    // -------------------------------------------------------------
+    // Image Lightbox Modal Controller (Works on Cloud Run & GitHub Pages)
+    // -------------------------------------------------------------
+    function openImageModal(imgSrc, altText) {
+      const modal = document.getElementById("image-modal");
+      const modalImg = document.getElementById("modal-img");
+      const modalCap = document.getElementById("modal-caption");
+      modalImg.src = imgSrc;
+      modalCap.textContent = altText || "이미지 확대 미리보기";
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+      setTimeout(() => {
+        modal.classList.remove("opacity-0");
+      }, 10);
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeImageModal() {
+      const modal = document.getElementById("image-modal");
+      if (!modal) return;
+      modal.classList.add("opacity-0");
+      setTimeout(() => {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+        document.body.style.overflow = "";
+      }, 200);
+    }
+
+    function initImageZoom() {
+      document.querySelectorAll("main img").forEach(img => {
+        img.style.cursor = "zoom-in";
+        img.setAttribute("title", "클릭하여 크게 보기");
+        img.addEventListener("click", () => {
+          openImageModal(img.src, img.alt);
+        });
+      });
+    }
+
+    // Keyboard navigation and modal escape
     document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeImageModal();
       if (document.getElementById("entrance-gate").classList.contains("hidden")) {
         if (e.key === "ArrowRight") navigateCodelab(1);
         if (e.key === "ArrowLeft") navigateCodelab(-1);
@@ -1743,6 +1800,21 @@ python3 -m http.server 8081 --directory artifacts/grade_results</code></pre>
     // Check auth on load
     checkAuth();
     updateCompanionDock(0);
+    initImageZoom();
   </script>
+
+  <!-- Image Lightbox Modal -->
+  <div id="image-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-4 transition-all duration-300 opacity-0" onclick="closeImageModal()">
+    <div class="relative max-w-5xl max-h-[92vh] flex flex-col items-center" onclick="event.stopPropagation()">
+      <!-- Close Button -->
+      <button onclick="closeImageModal()" class="absolute -top-12 right-0 md:-right-12 w-10 h-10 rounded-full bg-white/20 hover:bg-white/40 text-white flex items-center justify-center text-lg transition shadow-lg backdrop-blur-sm cursor-pointer" title="닫기 (ESC 또는 바깥 클릭)">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <!-- Image -->
+      <img id="modal-img" src="" alt="확대 이미지" class="max-w-full max-h-[82vh] rounded-xl shadow-2xl border border-white/20 object-contain">
+      <!-- Caption -->
+      <p id="modal-caption" class="text-white/90 text-xs md:text-sm font-medium mt-3 text-center px-4 py-1.5 bg-black/60 rounded-full backdrop-blur-sm shadow-md"></p>
+    </div>
+  </div>
 </body>
 </html>
