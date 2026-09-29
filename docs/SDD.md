@@ -175,6 +175,50 @@ def search_company_policy(query: str, category: str = "ALL") -> dict:
 4. **자연스러운 한국어 소통**:
    - 전문적이고 정중한 한국어 톤을 유지합니다.
 
+### 3.1 Gemini Enterprise (GE) 배포용 A2A 규격 (Agent-to-Agent Specification)
+
+실습 환경(임시 Qwiklabs 샌드박스)을 벗어나 참여자가 소속 회사의 라이브 **Gemini Enterprise (GE)** 테넌트 또는 **Agent Engine**에 에이전트를 등록하기 위해, 표준 A2A 인터페이스 및 Agent Manifest를 산출물로 제공합니다.
+
+- **산출물**: `agent_manifest.json` (A2A Manifest 규격)
+- **엔드포인트**: `POST /api/a2a/chat`
+- **A2A 메타데이터 스키마**:
+  ```json
+  {
+    "schema_version": "1.0.0",
+    "name": "enterprise-ops-agent",
+    "display_name": "Cymbal Enterprise IT/HR 운영 에이전트",
+    "version": "1.0.0",
+    "description": "사내 복무 지침(POL-HR) 및 IT 자산 지침(POL-IT)을 준수하여 휴가 신청 및 하드웨어 인시던트를 처리하는 GE 호환 에이전트",
+    "protocol": "A2A-1.0",
+    "endpoints": {
+      "chat": "/api/a2a/chat",
+      "health": "/healthz"
+    },
+    "capabilities": [
+      "policy_rag_grounding",
+      "fastmcp_saas_integration",
+      "policy_first_orchestration"
+    ],
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "user_id": {"type": "string"},
+        "message": {"type": "string"}
+      },
+      "required": ["message"]
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "reply": {"type": "string"},
+        "citations": {"type": "array", "items": {"type": "string"}},
+        "actions_taken": {"type": "array", "items": {"type": "string"}}
+      },
+      "required": ["reply"]
+    }
+  }
+  ```
+
 ---
 
 ## 4. 비기능적 요구사항 (Non-Functional Requirements)
@@ -209,6 +253,7 @@ def search_company_policy(query: str, category: str = "ALL") -> dict:
 | **M3: 규정 RAG 도구** | `tools/policy_rag.py` | POL-HR/POL-IT 조항 검색 및 단위 테스트 통과 (신뢰도 >= 0.90) | Task 3 |
 | **M4: FastMCP SaaS 도구**| `tools/mcp_tools.py` | 실제 Cloud Run Mock SaaS와 연동 및 HTTP 200 OK 응답 확인 | Task 4 |
 | **M5: 오케스트레이션 검증**| 통합 `agent.py` | 4일 연차 신청 및 긴급 노트북 교체 시나리오 100% 통과 | Task 5 |
+| **M6: GE A2A 패키징** | `agent_manifest.json`, `a2a_server.py` | GE 표준 A2A 매니페스트 생성 및 curl 로컬 시뮬레이션 성공 | Task 6 |
 
 ---
 
