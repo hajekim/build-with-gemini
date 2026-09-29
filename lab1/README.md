@@ -267,6 +267,43 @@ cat /config/workspace/docs/context_summary.md
 
 이 단계에서는 코드를 직접 작성하지 않고, `agy`에게 지시하여 SDD 규격에 맞는 설정 파일(`config.yaml`)과 기본 `agent.py` 뼈대를 생성하도록 합니다.
 
+---
+
+### agents-cli 프로젝트 표준 아키텍처 및 디렉토리 구조
+
+Google Cloud 환경에서 엔터프라이즈 AI 에이전트를 개발하고 배포할 때 사용하는 공식 명령줄 도구가 `agents-cli`입니다. `agents-cli` 표준 프로젝트는 다음과 같은 일관된 디렉토리 구조를 따릅니다.
+
+```
+enterprise-ops-agent/
+├── config.yaml              # 에이전트 모델 설정(gemini-3.8-flash), 시스템 지침, 거버넌스 규칙
+├── agent.py                 # Google ADK Runner 기반 에이전트 핵심 오케스트레이션 로직
+├── tools/                   # 외부 시스템 연동 도구 (RAG 규정 검색, SaaS API 연동)
+│   ├── rag_policy_search.py # Cloud Storage PDF 사내 규정 검색 도구
+│   ├── saas_leave_client.py # WorkWeek HR 시스템 연동 클라이언트
+│   └── saas_hardware_client.py # ServiceImmediately IT 티켓 연동 클라이언트
+├── a2a_server.py            # Gemini Enterprise 연동을 위한 A2A JSON-RPC 2.0 FastAPI 서버
+├── tests/eval/              # 에이전트 신뢰성 및 품질 검증 디렉토리
+│   ├── eval_config.yaml     # 평가 지표(task_success, tool_use_quality, hallucination) 및 가중치
+│   ├── evaluation_report.md # 평가 방법론, 벤치마크 설계 및 진단 보고서
+│   └── datasets/            # 평가용 검증 데이터셋
+│       ├── eval-single-turn.json # 단발성 규정 및 기능 검증 데이터셋
+│       └── eval-multi-turn.json  # 복합 대화 시나리오 데이터셋
+└── artifacts/               # 평가 실행 시 생성되는 로그 및 결과물
+    ├── traces/              # 에이전트 실행 궤적(생각, 도구 호출) 기록
+    └── grade_results/       # LLM 채점관 평가 결과 보고서(HTML, JSON)
+```
+
+각 파일과 디렉토리의 역할은 다음과 같습니다:
+
+1. **config.yaml**: 에이전트의 명세서입니다. 사용할 언어 모델(Gemini 3.8 Flash), 시스템 프롬프트 지침, 신뢰도 임계값(0.80), 조직 정보를 선언적으로 관리합니다.
+2. **agent.py**: 에이전트의 핵심 제어부입니다. Google ADK의 Agent 및 Runner 인스턴스를 초기화하고, 사용자 질문을 받아 RAG 검색이나 SaaS 도구를 호출할지 자율 판단하는 오케스트레이션 로직을 담당합니다.
+3. **tools/**: 에이전트의 손발이 되는 도구 모음입니다. 사내 규정 PDF를 임베딩 검색하는 RAG 모듈과 WorkWeek, ServiceImmediately SaaS와 통신하는 API 클라이언트가 위치합니다.
+4. **a2a_server.py**: 사내 Gemini Enterprise와 원격으로 통신하기 위한 FastAPI 서빙 레이어입니다. A2A 프로토콜 v0.3 JSON-RPC 2.0 규약과 에이전트 카드를 제공합니다.
+5. **tests/eval/**: 에이전트의 품질을 지속적으로 측정하고 개선하기 위한 평가 전용 공간입니다. 설정 파일(`eval_config.yaml`), 단일 턴 및 멀티 턴 데이터셋(`datasets/`), 그리고 평가 결과와 개선 내역을 정리하는 보고서(`evaluation_report.md`)로 구성됩니다.
+6. **artifacts/**: 평가 실행 시 생성되는 로그 파일입니다. 에이전트의 사고 과정과 도구 호출 이력을 담은 `traces/`와, 이를 채점하여 생성된 브라우저용 `grade_results/*.html` 보고서가 저장됩니다.
+
+---
+
 ### 1단계: 설정 파일 및 에이전트 뼈대 생성 지시
 
 실행 중인 **Antigravity CLI (`agy`)** 터미널에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
@@ -686,6 +723,42 @@ agents-cli publish gemini-enterprise \
 
 3. **등록 완료 및 콘솔 확인**:
 등록이 완료되면 `✅ Successfully created agent registration!` 메시지와 함께 콘솔 링크가 제공되며, 사내 Gemini Enterprise Agent Gallery에서 상태가 **`ENABLED`**로 즉시 활성화됩니다. 사내 구성원들은 Gemini 웹 채팅창에서 `@Cymbal Enterprise Ops Agent`를 호출하여 실시간으로 자유롭게 업무를 자동화할 수 있습니다.
+
+---
+
+### 5단계: agents-cli 기반 로컬 자체 평가 (tests/eval) 및 품질 검증
+
+에이전트를 배포하기 전이나 기능 변경 후 품질을 지속 검증하기 위해, 외부 평가 서버나 별도 사이트 없이도 개발자의 로컬 환경에서 100% 독립적으로 에이전트 품질을 측정할 수 있습니다.
+
+#### 1. tests/eval 디렉토리의 구성 요소
+프로젝트의 `tests/eval/` 디렉토리는 Project Elevate 및 Google 엔터프라이즈 에이전트 평가 표준을 그대로 따릅니다:
+- **`eval_config.yaml`**: 평가에 적용할 핵심 지표와 가중치를 선언합니다. 작업 완료율(`multi_turn_task_success`: 40%), 도구 호출 정확도(`multi_turn_tool_use_quality`: 35%), 규정 그라운딩 및 환각 방지(`hallucination`: 25%)를 측정합니다.
+- **`datasets/eval-single-turn.json`**: 단발성 규정 문의(미사용 연차 이월 규정, 활성 IT 티켓 수량 조회)를 평가하는 데이터셋입니다.
+- **`datasets/eval-multi-turn.json`**: 규정 확인 후 신청까지 이어지는 복합 대화 흐름(연차 사전 승인 기준 확인 후 신청, 랩톱 배터리 부풀림 규정 확인 후 교체 접수)을 평가하는 데이터셋입니다.
+- **`evaluation_report.md`**: 평가 설계 원칙, 벤치마크 점수, 테스트 케이스별 상세 진단 결과를 기록하는 엔터프라이즈 평가 보고서입니다.
+
+#### 2. 로컬 종합 평가 실행
+새 터미널 탭에서 다음 명령어를 입력하여 로컬 자체 평가를 실행합니다:
+
+```bash
+cd /config/workspace/enterprise-ops-agent
+agents-cli eval run
+```
+
+이 명령어는 내부적으로 다음 3단계를 로컬에서 순차 수행합니다:
+1. **추론 실행 (eval generate)**: 로컬의 `agent.py`가 `datasets/`의 질문들을 순차 실행하며 생각과 도구 호출 내역을 `artifacts/traces/` 폴더에 JSON 형태로 기록합니다.
+2. **LLM 채점관 채점 (eval grade)**: Vertex AI의 Gemini 모델이 채점관(LLM-as-a-judge) 역할을 수행하여, 기록된 실행 궤적을 `eval_config.yaml`에 정의된 기준과 대조하여 객관적인 점수를 매깁니다.
+3. **로컬 HTML 리포트 생성**: 채점이 끝나면 `artifacts/grade_results/results_<timestamp>.html` 파일과 `.json` 파일이 로컬 디스크에 즉시 생성됩니다.
+
+#### 3. 평가 결과 대시보드 확인
+생성된 HTML 리포트를 확인하려면 파이썬 내장 웹서버를 실행하여 브라우저에서 직접 열람합니다:
+
+```bash
+# 로컬 웹 서버로 채점 리포트 브라우징 (포트 8081)
+python3 -m http.server 8081 --directory artifacts/grade_results
+```
+
+원격 브라우저 창에서 새 탭을 열고 `http://localhost:8081`에 접속하면 각 테스트 케이스의 성공/실패 여부, 도구 호출 궤적, 상세 판정 사유가 일목요연하게 정리된 시각적 대시보드를 바로 확인할 수 있습니다.
 
 ---
 

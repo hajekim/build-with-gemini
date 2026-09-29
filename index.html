@@ -638,6 +638,42 @@ cd /config/workspace/enterprise-ops-agent</code></pre>
             </div>
 
             <div class="space-y-4 text-sm">
+              <!-- agents-cli Directory Architecture Card -->
+              <div class="card-studio p-5 space-y-3 bg-slate-50/80 border-slate-200">
+                <h3 class="font-bold text-slate-900 text-xs uppercase tracking-wider flex items-center gap-2">
+                  <i class="fa-solid fa-folder-tree text-indigo-600"></i>
+                  <span>agents-cli 표준 프로젝트 아키텍처 및 디렉토리 구조</span>
+                </h3>
+                <p class="text-xs text-slate-600 leading-relaxed font-medium">
+                  Google Cloud 환경에서 AI 에이전트를 개발, 평가, 배포할 때 사용하는 공식 표준 규격 구조입니다. 각 파일과 디렉토리는 명확한 단일 책임을 갖습니다:
+                </p>
+                <div class="bg-[#090d16] border border-slate-800 rounded-xl p-4 font-mono text-[11px] text-slate-300 leading-relaxed overflow-x-auto shadow-inner">
+<span class="text-indigo-400 font-bold">enterprise-ops-agent/</span>
+├── <span class="text-amber-300">config.yaml</span>              <span class="text-slate-500"># 모델 설정(gemini-3.8-flash), 시스템 지침, 거버넌스 규칙</span>
+├── <span class="text-emerald-300">agent.py</span>                 <span class="text-slate-500"># Google ADK Runner 기반 에이전트 핵심 오케스트레이션 로직</span>
+├── <span class="text-cyan-300">tools/</span>                   <span class="text-slate-500"># 외부 시스템 연동 도구 (RAG 규정 검색, SaaS API 연동)</span>
+│   ├── <span class="text-cyan-200">rag_policy_search.py</span> <span class="text-slate-500"># Cloud Storage PDF 사내 규정 검색 도구</span>
+│   ├── <span class="text-cyan-200">saas_leave_client.py</span> <span class="text-slate-500"># WorkWeek HR 시스템 연동 클라이언트</span>
+│   └── <span class="text-cyan-200">saas_hardware_client.py</span> <span class="text-slate-500"># ServiceImmediately IT 티켓 연동 클라이언트</span>
+├── <span class="text-purple-300">a2a_server.py</span>            <span class="text-slate-500"># Gemini Enterprise 연동을 위한 A2A JSON-RPC 2.0 FastAPI 서버</span>
+├── <span class="text-blue-300">tests/eval/</span>              <span class="text-slate-500"># 에이전트 신뢰성 및 품질 검증 디렉토리</span>
+│   ├── <span class="text-blue-200">eval_config.yaml</span>     <span class="text-slate-500"># 평가 지표(task_success, tool_use_quality, hallucination) 및 가중치</span>
+│   ├── <span class="text-blue-200">evaluation_report.md</span> <span class="text-slate-500"># 평가 방법론, 벤치마크 설계 및 진단 보고서</span>
+│   └── <span class="text-blue-200">datasets/</span>            <span class="text-slate-500"># 평가용 검증 데이터셋 (단발성 및 멀티턴 JSON)</span>
+└── <span class="text-rose-300">artifacts/</span>               <span class="text-slate-500"># 평가 실행 시 생성되는 로그(traces/) 및 채점 리포트(HTML/JSON)</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs text-slate-700 pt-1">
+                  <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-xs">
+                    <span class="font-bold text-slate-900 block mb-0.5">config.yaml & agent.py</span>
+                    <span class="text-[11px] text-slate-600">모델 설정과 시스템 프롬프트를 분리하고 ADK Runner를 통해 도구 호출을 자율 제어합니다.</span>
+                  </div>
+                  <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-xs">
+                    <span class="font-bold text-slate-900 block mb-0.5">tests/eval & artifacts</span>
+                    <span class="text-[11px] text-slate-600">외부 평가 서버 없이 로컬에서 Vertex AI를 채점관으로 활용하여 정량 지표를 측정합니다.</span>
+                  </div>
+                </div>
+              </div>
+
               <div class="card-studio p-5 space-y-3">
                 <h3 class="font-bold text-blue-700 text-xs uppercase tracking-wider flex items-center gap-1.5">
                   <i class="fa-solid fa-terminal"></i>
@@ -1078,6 +1114,47 @@ agents-cli publish gemini-enterprise \
                 <div class="text-xs text-slate-700 space-y-1.5 leading-relaxed font-medium mt-2">
                   <p>등록이 완료되면 <code class="font-mono text-emerald-800 bg-emerald-100 px-1 py-0.5 rounded font-bold">Successfully created agent registration!</code> 메시지와 함께 콘솔 링크가 제공되며, 사내 Gemini Enterprise Agent Gallery에서 상태가 <strong class="text-emerald-700">ENABLED</strong>로 즉시 활성화됩니다.</p>
                   <p>사내 임직원들은 사내 Gemini 웹 채팅창에서 <code class="font-mono text-purple-800 bg-purple-100 px-1 py-0.5 rounded font-bold">@Cymbal Enterprise Ops Agent</code>를 멘션하여 사내 규정 조회, 연차 신청, IT 장비 장애 처리를 실시간 자연어로 편리하게 이용할 수 있습니다.</p>
+                </div>
+              </div>
+
+              <!-- Substep 5 -->
+              <div class="card-studio p-5 border-blue-200 bg-blue-50/40 space-y-3 shadow-xs">
+                <h3 class="font-bold text-blue-900 text-xs uppercase tracking-wider flex items-center gap-2">
+                  <i class="fa-solid fa-vial-circle-check text-blue-600"></i>
+                  <span>5단계: agents-cli 기반 로컬 자체 평가 (tests/eval) 및 품질 검증</span>
+                </h3>
+                <p class="text-xs text-slate-700 leading-relaxed font-medium">
+                  외부 평가 사이트나 별도 서버 없이도 개발자의 로컬 터미널에서 100% 독립적으로 에이전트의 정량적 품질을 평가합니다. Project Elevate AI Advanced의 엔터프라이즈 평가 표준 규격을 충실히 준수합니다.
+                </p>
+
+                <!-- tests/eval Components -->
+                <div class="bg-white border border-blue-200 rounded-xl p-3.5 space-y-2 text-xs">
+                  <span class="font-bold text-slate-900 block text-[11px] uppercase tracking-wider">tests/eval 구성 요소</span>
+                  <ul class="space-y-1.5 text-slate-700 text-[11px] leading-relaxed">
+                    <li><code class="font-mono text-blue-700 bg-blue-50 px-1 py-0.5 rounded font-bold">eval_config.yaml</code>: 작업 성공률(40%), 도구 호출 품질(35%), 환각 방지(25%) 가중치 및 목표 점수 정의</li>
+                    <li><code class="font-mono text-blue-700 bg-blue-50 px-1 py-0.5 rounded font-bold">datasets/eval-single-turn.json</code>: 단발성 규정 문의 및 단순 잔여 연차 조회 평가 데이터셋</li>
+                    <li><code class="font-mono text-blue-700 bg-blue-50 px-1 py-0.5 rounded font-bold">datasets/eval-multi-turn.json</code>: 복무 규정 검토 후 연차 신청, 장비 장애 규정 확인 후 교체 접수 복합 시나리오</li>
+                    <li><code class="font-mono text-blue-700 bg-blue-50 px-1 py-0.5 rounded font-bold">evaluation_report.md</code>: 시스템 아키텍처, 벤치마크 설계 및 테스트 진단 결과를 종합하는 엔터프라이즈 리포트</li>
+                  </ul>
+                </div>
+
+                <div class="bg-[#090d16] border border-slate-800 rounded-xl overflow-hidden shadow-md">
+                  <div class="bg-[#131b2e] px-4 py-2 border-b border-slate-800 flex items-center justify-between">
+                    <span class="text-[11px] text-blue-300 font-mono">bash eval</span>
+                    <button class="px-2.5 py-1 rounded bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white font-semibold text-[11px] transition flex items-center gap-1" onclick="copyCode(this)">
+                      <i class="fa-regular fa-copy"></i> 명령어 복사
+                    </button>
+                  </div>
+                  <pre class="p-4 font-mono text-xs text-blue-300 whitespace-pre-wrap leading-relaxed"><code># 1. 로컬 종합 평가 실행 (단일 명령어로 추론 및 LLM 채점관 평가 수행)
+cd /config/workspace/enterprise-ops-agent
+agents-cli eval run
+
+# 2. 로컬 웹서버로 평가 결과 HTML 대시보드 열람 (포트 8081)
+python3 -m http.server 8081 --directory artifacts/grade_results</code></pre>
+                </div>
+                <div class="text-xs text-slate-700 space-y-1.5 leading-relaxed font-medium">
+                  <p>명령어를 실행하면 로컬 <code class="font-mono text-slate-900 bg-slate-100 px-1 py-0.5 rounded">agent.py</code>가 질문들을 순차 실행하고, Vertex AI Gemini 모델이 채점관(LLM-as-a-judge) 역할을 맡아 객관적인 품질 점수를 산출합니다.</p>
+                  <p>원격 브라우저에서 <code class="font-mono text-blue-800 bg-blue-100 px-1 py-0.5 rounded font-bold">http://localhost:8081</code>을 열면 각 케이스별 판정 사유와 지연 시간, 성공률이 포함된 시각적 리포트(<code class="font-mono text-slate-800">results_*.html</code>)를 즉시 열람할 수 있습니다.</p>
                 </div>
               </div>
 
