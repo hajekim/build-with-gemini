@@ -568,29 +568,40 @@ print(json.dumps(list_hardware_assets_and_tickets('EMP-10294'), indent=2, ensure
 
 ---
 
-### 2단계: A2A 프로토콜 서비스 래퍼 (a2a_server.py) 생성
+### 2단계: Google ADK Runner 기반 A2A 프로토콜 서비스 래퍼 (a2a_server.py) 생성
 
-Gemini Enterprise가 A2A 프로토콜로 에이전트를 원격 호출할 때 표준 JSON 입출력을 처리할 수 있도록, `agent.py`를 서빙하는 가벼운 FastAPI 래퍼 `a2a_server.py`를 생성합니다.
+Gemini Enterprise가 A2A 프로토콜로 에이전트를 원격 호출할 때 표준 JSON-RPC 2.0 규격으로 실시간 자율 추론과 도구 호출을 수행하도록, `agent.py`의 ADK Runner를 서빙하는 FastAPI 래퍼 `a2a_server.py`를 생성합니다.
 
 **Antigravity CLI (`agy`)** 터미널에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
 
 ```text
-우리가 완성한 agent.py의 get_enterprise_agent()를 호출하여 Gemini Enterprise A2A 규격 엔드포인트(POST /api/a2a/chat)와 상태 검사 엔드포인트(GET /healthz)를 제공하는 가벼운 FastAPI 서버 'a2a_server.py'를 작성해 주세요.
+우리가 완성한 agent.py의 root_agent와 Google ADK Runner를 결합하여, Gemini Enterprise A2A v0.3 JSON-RPC 표준 규격을 완벽하게 지원하는 FastAPI 서버 'a2a_server.py'를 작성해 주세요.
 
 요구사항:
-1. POST /api/a2a/chat:
-   - 요청 본문: {"user_id": "EMP-10294", "message": "연차 잔여 일수 조회해줘"}
-   - 에이전트 실행 후 규격 응답 반환:
+1. 에이전트 카드 엔드포인트:
+   - GET /.well-known/agent-card.json 및 GET /a2a/app/.well-known/agent-card.json
+   - protocolVersion: "0.3.0", preferredTransport: "JSONRPC", name: "Cymbal Enterprise Ops Agent", skills(HR 연차 관리, IT 하드웨어 지원) 정의
+
+2. Gemini Enterprise A2A JSON-RPC 대화 엔드포인트 (POST / 및 POST /a2a/app):
+   - GE가 전송하는 'message/send' 메서드 및 params의 user 메시지 텍스트를 추출
+   - ADK Runner(runner.run_async)를 실행하여 Gemini 3.8 Flash 모델이 실시간 자율 추론과 도구 호출(RAG 검색, Mock SaaS 티켓/연차 조회)을 동적으로 수행하도록 연결
+   - GE의 SendMessageSuccessResponse 규격에 100% 부합하도록 다음 A2A Message 스키마로 반환:
      {
-       "agent": "enterprise-ops-agent",
-       "protocol": "A2A-1.0",
-       "status": "SUCCESS",
-       "reply": "이민우 수석 아키텍트님의 현재 잔여 연차는 12.0일입니다.",
-       "citations": ["POL-HR-2026-004"],
-       "actions_taken": ["get_employee_leave_balance"]
+       "jsonrpc": "2.0",
+       "id": req_id,
+       "result": {
+         "kind": "message",
+         "messageId": f"msg-{uuid4().hex[:10]}",
+         "contextId": params에서 추출한 contextId,
+         "role": "agent",
+         "parts": [{"kind": "text", "text": reply_text}]
+       }
      }
-2. GET /healthz: {"status": "ok", "agent": "enterprise-ops-agent", "version": "1.0.0"}
-3. uvicorn을 통해 포트 8080에서 실행 가능하도록 main 블록 구성.
+
+3. 상태 검사 엔드포인트:
+   - GET /healthz: {"status": "ok", "agent": "enterprise-ops-agent"}
+
+4. uvicorn을 통해 포트 8080에서 실행 가능하도록 main 블록 구성.
 ```
 
 `agy`가 `a2a_server.py` 생성을 제안하면 **Allow**를 선택합니다.
@@ -608,51 +619,73 @@ python3 a2a_server.py &
 sleep 2
 ```
 
-이제 Gemini Enterprise 시뮬레이션 질의를 전송합니다.
+이제 Gemini Enterprise A2A 규격 질의를 전송합니다.
 
 ```bash
-curl -s -X POST http://localhost:8080/api/a2a/chat \
+curl -s -X POST http://localhost:8080/ \
   -H "Content-Type: application/json" \
   -d '{
-    "user_id": "EMP-10294",
-    "message": "안녕하세요, 제 잔여 연차 현황을 확인하고 싶습니다."
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "message/send",
+    "params": {
+      "message": {
+        "role": "user",
+        "messageId": "msg-001",
+        "contextId": "ctx-session-001",
+        "parts": [{"text": "IT 티켓이 총 몇개인가요?"}]
+      }
+    }
   }' | jq .
 ```
 
 #### 기대 출력:
 ```json
 {
-  "agent": "enterprise-ops-agent",
-  "protocol": "A2A-1.0",
-  "status": "SUCCESS",
-  "reply": "이민우 수석 아키텍트님(EMP-10294)의 현재 2026년도 잔여 연차는 총 12.0일(발생 15일 중 3일 사용)입니다.",
-  "citations": [
-    "POL-HR-2026-004 제 2 조"
-  ],
-  "actions_taken": [
-    "search_company_policy",
-    "get_employee_leave_balance"
-  ]
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "kind": "message",
+    "messageId": "msg-104f7d29db",
+    "contextId": "ctx-session-001",
+    "role": "agent",
+    "parts": [
+      {
+        "kind": "text",
+        "text": "현재 임직원님(사번: EMP-10294) 명의로 등록된 활성(Active) IT 인시던트 티켓은 총 8건입니다.\n\n최근 접수된 티켓 내역(최근 3건)은 다음과 같습니다:\n1. INC-88210: 업무용 M3 Max 랩톱 교체 신청 (처리중)\n2. INC-88211: 원격 근무용 보안 VPN 접속 권한 갱신 (접수)\n..."
+      }
+    ]
+  }
 }
 ```
 
-`A2A-1.0` 프로토콜 규격에 부합하는 응답과 근거 조항(`citations`), 수행된 도구 목록(`actions_taken`)이 구조화된 JSON으로 반환되는 것을 확인했습니다.
+에이전트가 고정된 답변이 아니라, 실제 ServiceImmediately 시스템에서 활성 티켓 8건을 실시간 조회하여 집계 결과를 지능적으로 생성하는 것을 확인했습니다.
 
 ---
 
-### 4단계: 사내 Gemini Enterprise 등록 안내 (Take Home 가이드)
+### 4단계: agents-cli를 통한 Gemini Enterprise (GE) 원클릭 등록
 
-실습을 마치고 회사로 복귀한 후, 본인이 만든 에이전트를 사내 Gemini Enterprise에 등록하는 방법은 다음과 같습니다.
+완성된 에이전트를 사내 Google Cloud 프로젝트의 Cloud Run에 배포하고, 구글 공식 `agents-cli` 명령어로 사내 Gemini Enterprise에 등록합니다.
 
-1. **Cloud Run / Agent Engine 배포**:
-   - 본 워크스페이스의 코드(`agent.py`, `tools/`, `a2a_server.py`, `agent_manifest.json`)를 사내 GCP 프로젝트의 Cloud Run 또는 Vertex AI Agent Engine에 배포합니다.
-2. **사내 Gemini Enterprise 콘솔 접속**:
-   - 사내 Google Workspace / Gemini Enterprise 관리자 포털 접속
-   - **Agent Gallery > Add Custom Agent (A2A)** 선택
-3. **Manifest 등록**:
-   - 배포된 Cloud Run URL과 본 실습에서 생성한 `agent_manifest.json`을 업로드합니다.
-4. **엔터프라이즈 전사 공유**:
-   - 사내 구성원들은 Gemini 웹 채팅창에서 `@enterprise-ops-agent`를 멘션하여 사내 규정 조회, 연차 신청, IT 장비 장애 처리를 자연어로 원스톱 처리할 수 있게 됩니다.
+1. **Cloud Run 배포**:
+```bash
+gcloud run deploy enterprise-ops-agent \
+  --source . \
+  --region asia-northeast3 \
+  --allow-unauthenticated
+```
+
+2. **agents-cli로 Gemini Enterprise에 A2A 에이전트 등록**:
+```bash
+agents-cli publish gemini-enterprise \
+  --agent-card-url https://[YOUR_CLOUD_RUN_URL]/.well-known/agent-card.json \
+  --gemini-enterprise-app-id projects/[PROJECT_NUMBER]/locations/global/collections/default_collection/engines/[ENGINE_ID] \
+  --display-name "Cymbal Enterprise Ops Agent" \
+  --description "사내 복무 규정 RAG 및 Mock SaaS 시스템 연동 엔터프라이즈 운영 에이전트"
+```
+
+3. **등록 완료 및 콘솔 확인**:
+등록이 완료되면 `✅ Successfully created agent registration!` 메시지와 함께 콘솔 링크가 제공되며, 사내 Gemini Enterprise Agent Gallery에서 상태가 **`ENABLED`**로 즉시 활성화됩니다. 사내 구성원들은 Gemini 웹 채팅창에서 `@Cymbal Enterprise Ops Agent`를 호출하여 실시간으로 자유롭게 업무를 자동화할 수 있습니다.
 
 ---
 
