@@ -645,18 +645,29 @@ Gemini Enterprise가 A2A 프로토콜로 에이전트를 원격 호출할 때 �
 
 ---
 
-### 3단계: 로컬 A2A 시뮬레이션 및 규격 검증
+### 3단계: GE 배포 없이 로컬에서 에이전트 웹 앱 구동 및 검증
 
-원격 가상 머신의 새 터미널 창 또는 백그라운드에서 A2A 서버를 기동하고, Gemini Enterprise가 호출하는 것과 동일한 A2A 규격 요청을 `curl`로 전송하여 검증합니다.
+Gemini Enterprise에 배포하기 전에, 개발자 로컬 환경에서 웹 애플리케이션을 직접 띄워 에이전트와 실시간 대화를 나누고 동작을 검증할 수 있습니다.
 
-터미널에서 다음 명령어를 실행합니다.
+1. **로컬 서버 기동**:
+새 터미널 창에서 `a2a_server.py`를 실행합니다.
 
 ```bash
-python3 a2a_server.py &
-sleep 2
+cd /config/workspace/enterprise-ops-agent
+python3 a2a_server.py
 ```
 
-이제 Gemini Enterprise A2A 규격 질의를 전송합니다.
+`Uvicorn running on http://0.0.0.0:8080` 로그가 출력되면 서버가 정상 실행된 것입니다.
+
+2. **로컬 테스트 콘솔 브라우징**:
+원격 브라우저 또는 로컬 브라우저에서 `http://localhost:8080`에 접속합니다.
+
+![로컬 에이전트 웹 콘솔](lab1/images/local_agent_web_chat.png)
+
+화면 상단에는 에이전트 상태(Active)와 연결된 모델(Gemini 3.8 Flash)이 표시되며, 하단에는 추천 질문 칩들이 제공됩니다. 칩을 클릭하거나 직접 질문을 입력하면, 에이전트가 사내 RAG 문서와 Mock SaaS API를 호출하여 실시간으로 정밀한 답변을 생성합니다.
+
+3. **Gemini Enterprise A2A 규격 curl 검증**:
+다른 터미널 창에서 실제 GE가 호출하는 JSON-RPC 2.0 포맷으로도 질의할 수 있습니다.
 
 ```bash
 curl -s -X POST http://localhost:8080/ \
@@ -700,7 +711,7 @@ curl -s -X POST http://localhost:8080/ \
 
 ---
 
-### 4단계: agents-cli를 통한 Gemini Enterprise (GE) 원클릭 등록
+### 4단계: agents-cli를 통한 Gemini Enterprise (GE) 원클릭 등록 및 실시간 검증
 
 완성된 에이전트를 사내 Google Cloud 프로젝트의 Cloud Run에 배포하고, 구글 공식 `agents-cli` 명령어로 사내 Gemini Enterprise에 등록합니다.
 
@@ -722,7 +733,51 @@ agents-cli publish gemini-enterprise \
 ```
 
 3. **등록 완료 및 콘솔 확인**:
-등록이 완료되면 `✅ Successfully created agent registration!` 메시지와 함께 콘솔 링크가 제공되며, 사내 Gemini Enterprise Agent Gallery에서 상태가 **`ENABLED`**로 즉시 활성화됩니다. 사내 구성원들은 Gemini 웹 채팅창에서 `@Cymbal Enterprise Ops Agent`를 호출하여 실시간으로 자유롭게 업무를 자동화할 수 있습니다.
+등록이 완료되면 `✅ Successfully created agent registration!` 메시지와 함께 콘솔 링크가 제공되며, 사내 Gemini Enterprise Agent Gallery에서 상태가 **`ENABLED`**로 즉시 활성화됩니다.
+
+![Gemini Enterprise 에이전트 상세 콘솔](lab1/images/ge_01_agent_console.png)
+
+콘솔에서 에이전트 이름, 설명, 배포된 Cloud Run 엔드포인트 URL, 프로토콜 버전(0.3.0), 등록된 스킬(HR Leave Management, IT Hardware Support) 목록을 확인할 수 있습니다.
+
+4. **사내 Gemini Enterprise 웹 채팅 진입**:
+사내 Gemini Enterprise 포털의 에이전트 갤러리에서 `@Cymbal Enterprise Ops Agent`를 선택하면 전용 대화창이 열립니다.
+
+![Gemini Enterprise 대화창 진입 화면](lab1/images/ge_02_chat_entry.png)
+
+5. **추천 실무 샘플 프롬프트**:
+사내 구성원들은 다음과 같은 자연어 질문으로 복무 규정 확인, 연차 조회/신청, IT 하드웨어 결함 조치를 원스톱으로 처리할 수 있습니다:
+
+- `내 잔여 연차와 병가 일수 알려줘`
+- `회사 휴가 규정 및 발생 기준이 어떻게 돼?`
+- `업무용 노트북 및 IT 장비 교체 규정 알려줘`
+- `2026-11-20에 연차 1일 신청해줘`
+- `현재 내 오픈된 IT 지원 티켓 목록 확인해줘`
+- `모니터 화면이 깜빡거려. 하드웨어 점검 티켓 등록해줘`
+- `내 남은 연차랑 현재 접수된 랩톱 교체 티켓 상태 둘 다 확인해줘`
+
+6. **실제 Gemini Enterprise 대화 실행 화면 및 동작 원리**:
+
+- **사내 복무 규정 RAG 조회**:
+  "회사 휴가 규정 및 발생 기준이 어떻게 돼?" 질의 시, Cloud Storage에 저장된 사내 복무 규정(POL-HR-2026-004) 제3조와 제4조를 정확히 인용하여 사전 신청 기한(1일 이하: 24시간 전, 3일 이하: 3일 전, 3일 초과: 7영업일 전)을 체계적으로 안내합니다.
+
+  ![사내 복무 규정 RAG 조회 결과](lab1/images/ge_05_policy_rag_grounding.png)
+
+- **WorkWeek 연차 및 병가 실시간 조회**:
+  "내 잔여 연차와 병가 일수 알려줘" 질의 시, WorkWeek HRMS 시스템을 호출하여 사번 EMP-10294의 실시간 잔여 연차(2.0일)와 병가(14.0일) 현황을 즉시 확인해 줍니다.
+
+  ![잔여 연차 및 병가 조회 결과](lab1/images/ge_06_leave_balance_check.png)
+
+- **ServiceImmediately IT 티켓 목록 실시간 조회**:
+  "현재 내 오픈된 IT 지원 티켓 목록 확인해줘" 질의 시, ServiceImmediately ITMS 시스템에서 활성 티켓 3건(업무용 M3 Max 랩톱 교체 신청, 원격 근무용 VPN 권한 갱신, 모니터 점검)의 상태와 담당자를 집계하여 답변합니다.
+
+  ![IT 지원 티켓 목록 확인 결과](lab1/images/ge_04_it_ticket_list.png)
+
+> **트러블슈팅 참고 (정적 Mock 반복 결함 방지)**:  
+> 초기 프로토타입에서 if/else 키워드 분기문 기반의 단순 Mock을 사용할 경우, 질문의 표현이 조금만 달라져도 아래와 같이 고정된 인사말만 무한 반복하는 결함이 발생합니다.
+>
+> ![고정 응답 반복 결함 사례](lab1/images/ge_03_defect_repeat_troubleshoot.png)
+>
+> 본 실습에서는 Google ADK Runner와 Vertex AI Gemini 3.8 Flash를 결합하여, 사용자의 어떠한 자연어 질문도 실시간 자율 추론과 도구 호출을 거쳐 지능적으로 답변하도록 구현하여 이 문제를 해결했습니다.
 
 ---
 
