@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Build with Gemini: AI Advanced 핸즈온 실습 가이드</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            gemini: {
+              blue: '#1a73e8',
+              cyan: '#38bdf8',
+              purple: '#9333ea',
+              dark: '#0f172a',
+              card: '#1e293b',
+              border: '#334155'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    pre { position: relative; }
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 6px;
+      background: #334155;
+      color: #94a3b8;
+      transition: all 0.2s;
+    }
+    .copy-btn:hover {
+      background: #475569;
+      color: #ffffff;
+    }
+    .copy-btn.copied {
+      background: #059669;
+      color: #ffffff;
+    }
+    .tab-active {
+      border-color: #38bdf8 !important;
+      color: #38bdf8 !important;
+      background: rgba(56, 189, 248, 0.08) !important;
+    }
+  </style>
+</head>
+<body class="bg-[#0b1120] text-slate-200 font-sans antialiased min-h-screen flex flex-col">
+
+  <!-- Top Sticky Navigation -->
+  <header class="sticky top-0 z-50 bg-[#0f172a]/95 backdrop-blur-md border-b border-slate-800 px-6 py-3.5 flex items-center justify-between shadow-lg">
+    <div class="flex items-center space-x-4">
+      <div class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 via-indigo-500 to-purple-500 flex items-center justify-center shadow-md shadow-blue-500/20">
+          <i class="fa-solid fa-wand-magic-sparkles text-white text-sm"></i>
+        </div>
+        <div>
+          <span class="text-white font-extrabold text-base tracking-tight">Build with Gemini</span>
+          <span class="text-xs bg-blue-500/20 text-blue-400 font-bold px-2 py-0.5 rounded-full ml-2 border border-blue-500/30">AI Advanced</span>
+        </div>
+      </div>
+      <span class="text-slate-600 hidden md:inline">|</span>
+      <span class="text-xs text-slate-400 font-medium hidden md:inline">과정 코드: <span class="font-mono text-slate-300">BWG-AI-MOD1</span></span>
+    </div>
+
+    <!-- Quick External Links -->
+    <div class="flex items-center space-x-3 text-xs">
+      <a href="https://korean-mock-saas-dri5akvbzq-du.a.run.app/" target="_blank" class="bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition">
+        <i class="fa-solid fa-server"></i>
+        <span>Mock SaaS 포털</span>
+        <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-70"></i>
+      </a>
+      <a href="./docs/policies/leave_policy_2026.pdf" target="_blank" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition">
+        <i class="fa-solid fa-file-pdf text-rose-400"></i>
+        <span>복무 규정 PDF</span>
+      </a>
+      <a href="./docs/policies/it_hardware_guidelines.pdf" target="_blank" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition">
+        <i class="fa-solid fa-file-pdf text-amber-400"></i>
+        <span>IT 지침 PDF</span>
+      </a>
+      <a href="https://github.com/hajekim/build-with-gemini" target="_blank" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition">
+        <i class="fa-brands fa-github text-sm"></i>
+        <span>GitHub</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Progress Bar -->
+  <div class="w-full bg-slate-800 h-1">
+    <div id="progress-bar" class="bg-gradient-to-r from-blue-500 to-cyan-400 h-1 transition-all duration-300" style="width: 16.66%;"></div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="flex-1 max-w-7xl w-full mx-auto flex overflow-hidden">
+
+    <!-- Left Sidebar: Steps -->
+    <aside class="w-72 bg-[#0f172a]/60 border-r border-slate-800 p-5 hidden lg:block overflow-y-auto shrink-0">
+      <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-3">실습 단계 (Steps)</div>
+      <nav class="space-y-1.5 text-sm" id="sidebar-nav">
+        <button onclick="goToStep(0)" class="step-btn w-full text-left px-3.5 py-2.5 rounded-lg font-medium flex items-center space-x-3 transition tab-active" data-step="0">
+          <span class="w-6 h-6 rounded-md bg-blue-500/20 text-cyan-400 flex items-center justify-center text-xs font-bold shrink-0">0</span>
+          <span class="truncate">개요 및 구성도</span>
+        </button>
+        <button onclick="goToStep(1)" class="step-btn w-full text-left px-3.5 py-2.5 rounded-lg font-medium flex items-center space-x-3 transition text-slate-400 hover:text-slate-200 hover:bg-slate-800/50" data-step="1">
+          <span class="w-6 h-6 rounded-md bg-slate-800 text-slate-400 flex items-center justify-center text-xs font-bold shrink-0">1</span>
+          <span class="truncate">Task 1: 환경 설정 & SDD</span>
+        </button>
+        <button onclick="goToStep(2)" class="step-btn w-full text-left px-3.5 py-2.5 rounded-lg font-medium flex items-center space-x-3 transition text-slate-400 hover:text-slate-200 hover:bg-slate-800/50" data-step="2">
+          <span class="w-6 h-6 rounded-md bg-slate-800 text-slate-400 flex items-center justify-center text-xs font-bold shrink-0">2</span>
+          <span class="truncate">Task 2: ADK 뼈대 생성</span>
+        </button>
+        <button onclick="goToStep(3)" class="step-btn w-full text-left px-3.5 py-2.5 rounded-lg font-medium flex items-center space-x-3 transition text-slate-400 hover:text-slate-200 hover:bg-slate-800/50" data-step="3">
+          <span class="w-6 h-6 rounded-md bg-slate-800 text-slate-400 flex items-center justify-center text-xs font-bold shrink-0">3</span>
+          <span class="truncate">Task 3: 사내 규정 RAG</span>
+        </button>
+        <button onclick="goToStep(4)" class="step-btn w-full text-left px-3.5 py-2.5 rounded-lg font-medium flex items-center space-x-3 transition text-slate-400 hover:text-slate-200 hover:bg-slate-800/50" data-step="4">
+          <span class="w-6 h-6 rounded-md bg-slate-800 text-slate-400 flex items-center justify-center text-xs font-bold shrink-0">4</span>
+          <span class="truncate">Task 4: FastMCP 연동</span>
+        </button>
+        <button onclick="goToStep(5)" class="step-btn w-full text-left px-3.5 py-2.5 rounded-lg font-medium flex items-center space-x-3 transition text-slate-400 hover:text-slate-200 hover:bg-slate-800/50" data-step="5">
+          <span class="w-6 h-6 rounded-md bg-slate-800 text-slate-400 flex items-center justify-center text-xs font-bold shrink-0">5</span>
+          <span class="truncate">Task 5: 시나리오 검증</span>
+        </button>
+      </nav>
+
+      <div class="mt-8 pt-6 border-t border-slate-800 text-xs text-slate-400 space-y-2.5">
+        <div class="font-bold text-slate-300">핵심 에셋 바로보기</div>
+        <a href="./docs/SDD.md" target="_blank" class="block text-cyan-400 hover:underline flex items-center space-x-1.5">
+          <i class="fa-solid fa-code-branch"></i>
+          <span>소프트웨어 설계서 (SDD.md)</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Content Area -->
+    <main class="flex-1 p-6 md:p-10 overflow-y-auto">
+
+      <!-- =================================================================== -->
+      <!-- Step 0: Overview -->
+      <!-- =================================================================== -->
+      <section id="step-0" class="step-content space-y-6">
+        <div>
+          <span class="text-xs font-bold text-cyan-400 uppercase tracking-widest">Step 0</span>
+          <h1 class="text-2xl md:text-3xl font-extrabold text-white mt-1">개요 및 엔터프라이즈 에이전트 아키텍처</h1>
+          <p class="text-slate-400 mt-2 text-sm leading-relaxed">
+            임직원의 일상 업무에서 발생하는 인사 복무(휴가/병가) 신청 및 IT 장비 고장/교체 문의를 사내 규정(PDF)과 실시간 연계하여 자동화하는 AI 에이전트를 구축합니다.
+          </p>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-xl">
+          <img src="./lab1/images/agent_architecture.png" alt="엔터프라이즈 에이전트 아키텍처" class="w-full rounded-lg shadow-md">
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+          <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-4">
+            <div class="font-bold text-cyan-400 flex items-center space-x-2 text-sm mb-2">
+              <i class="fa-solid fa-bullseye"></i>
+              <span>실습 1 핵심 목표</span>
+            </div>
+            <ul class="space-y-1.5 text-slate-300 list-disc list-inside">
+              <li>Google Antigravity 2.0 (agy) 대화형 프롬프트 주도 개발</li>
+              <li>Google ADK 2.0 (google-adk) 기반 멀티 툴 에이전트 구축</li>
+              <li>Cloud Storage 규정 PDF 기반 시맨틱 RAG 검색 도구 구현</li>
+              <li>FastMCP 프로토콜을 통한 Korean Mock SaaS 연동 및 테넌트 격리</li>
+            </ul>
+          </div>
+
+          <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-4">
+            <div class="font-bold text-purple-400 flex items-center space-x-2 text-sm mb-2">
+              <i class="fa-solid fa-shield-halved"></i>
+              <span>실습 2 연계 (Next Step)</span>
+            </div>
+            <p class="text-slate-300 leading-relaxed">
+              실습 1에서 개발한 에이전트를 바탕으로, 실습 2에서는 Model Garden 보안 가드레일, Agent Gateway 연동, Zero-Trust 보안 및 Gemini Enterprise 배포용 A2A(Agent-to-Agent) 구성을 완성합니다.
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-blue-950/30 border border-blue-500/20 rounded-xl p-4 text-xs text-blue-200 flex items-start space-x-3">
+          <i class="fa-solid fa-circle-info text-blue-400 text-sm mt-0.5"></i>
+          <div>
+            <strong>터미널 환경 세팅 안내:</strong> 실습 터미널에서 다음 명령어로 실습 에셋을 즉시 복제하여 시작하세요:
+            <div class="mt-2 bg-slate-950 p-2.5 rounded font-mono text-cyan-300 flex justify-between items-center">
+              <span>git clone https://github.com/hajekim/build-with-gemini.git</span>
+              <button onclick="copyText('git clone https://github.com/hajekim/build-with-gemini.git', this)" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded">복사</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- Step 1: Task 1 -->
+      <!-- =================================================================== -->
+      <section id="step-1" class="step-content space-y-6 hidden">
+        <div>
+          <span class="text-xs font-bold text-cyan-400 uppercase tracking-widest">Task 1</span>
+          <h1 class="text-2xl md:text-3xl font-extrabold text-white mt-1">환경 설정 및 설계서(SDD) 기반 컨텍스트 그라운딩</h1>
+          <p class="text-slate-400 mt-2 text-sm leading-relaxed">
+            파이썬 패키지를 설치하고 Antigravity CLI(agy)를 실행하여 docs/SDD.md 설계 문서를 주입합니다.
+          </p>
+        </div>
+
+        <div class="space-y-4 text-sm">
+          <h2 class="text-base font-bold text-white flex items-center space-x-2">
+            <span class="w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs">1</span>
+            <span>라이브러리 설치 (터미널)</span>
+          </h2>
+          <pre class="bg-slate-950 border border-slate-800 rounded-lg p-4 font-mono text-xs text-cyan-300"><button class="copy-btn" onclick="copyCode(this)">복사</button><code>pip install --upgrade pip
+pip install google-agents-cli google-adk mcp httpx pydantic pyyaml</code></pre>
+
+          <h2 class="text-base font-bold text-white flex items-center space-x-2 pt-2">
+            <span class="w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs">2</span>
+            <span>Antigravity CLI (agy) 실행 및 모델 설정</span>
+          </h2>
+          <pre class="bg-slate-950 border border-slate-800 rounded-lg p-4 font-mono text-xs text-cyan-300"><button class="copy-btn" onclick="copyCode(this)">복사</button><code>agy</code></pre>
+          <p class="text-xs text-slate-400">agy 프롬프트 창에서 모델을 확인하고 <code>/model</code> 명령어로 <strong>gemini-3.8-flash</strong>를 선택합니다.</p>
+
+          <img src="./lab1/images/agy_terminal_session.png" alt="agy 터미널 화면" class="w-full max-w-2xl rounded-lg border border-slate-800 shadow-md">
+
+          <h2 class="text-base font-bold text-white flex items-center space-x-2 pt-2">
+            <span class="w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs">3</span>
+            <span>agy에게 SDD 기반 컨텍스트 요약 지시 (agy 프롬프트 입력)</span>
+          </h2>
+          <div class="bg-slate-900 border border-blue-500/30 rounded-xl p-4 relative">
+            <span class="text-[11px] font-bold text-cyan-400 uppercase tracking-wider block mb-2"><i class="fa-solid fa-terminal mr-1"></i> agy 입력용 프롬프트</span>
+            <pre class="font-mono text-xs text-slate-200 whitespace-pre-wrap"><button class="copy-btn" onclick="copyCode(this)">프롬프트 복사</button><code>당신은 Cymbal Group Korea의 엔터프라이즈 AI 에이전트 개발자입니다.
+/config/workspace/docs/SDD.md 파일의 내용을 꼼꼼히 읽고, 전체 아키텍처 개요와 도구 구성 요소를 파악하세요.
+그리고 현재 프로젝트 디렉터리(/config/workspace/enterprise-ops-agent)의 컨텍스트를 요약한 context_summary.md 파일을 docs/ 디렉터리에 생성하세요.</code></pre>
+          </div>
+          <p class="text-xs text-slate-400">agy가 제안하는 파일 생성 제안을 검토하고 <strong>Allow</strong>를 선택합니다.</p>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- Step 2: Task 2 -->
+      <!-- =================================================================== -->
+      <section id="step-2" class="step-content space-y-6 hidden">
+        <div>
+          <span class="text-xs font-bold text-cyan-400 uppercase tracking-widest">Task 2</span>
+          <h1 class="text-2xl md:text-3xl font-extrabold text-white mt-1">agy 프롬프트 기반 ADK 2.0 에이전트 뼈대 생성</h1>
+          <p class="text-slate-400 mt-2 text-sm leading-relaxed">
+            코드를 직접 작성하지 않고, agy에게 SDD 규격에 맞춰 config.yaml과 agent.py 기본 뼈대를 작성하도록 지시합니다.
+          </p>
+        </div>
+
+        <div class="space-y-4 text-sm">
+          <div class="bg-slate-900 border border-blue-500/30 rounded-xl p-4 relative">
+            <span class="text-[11px] font-bold text-cyan-400 uppercase tracking-wider block mb-2"><i class="fa-solid fa-terminal mr-1"></i> agy 입력용 프롬프트</span>
+            <pre class="font-mono text-xs text-slate-200 whitespace-pre-wrap"><button class="copy-btn" onclick="copyCode(this)">프롬프트 복사</button><code>/config/workspace/docs/SDD.md의 1절 시스템 개요와 설정 규격을 참고하여, 다음 두 개의 파일을 생성해주세요:
+
+1. config.yaml:
+   - agent 이름: enterprise_ops_agent
+   - 모델: gemini-3.8-flash (temperature: 0.1, max_output_tokens: 2048)
+   - organization: Cymbal Group Korea, Cloud AI Platform Operations, 기본 사번 EMP-10294
+   - governance: enforce_policy_grounding=true, rag_confidence_threshold=0.80
+
+2. agent.py:
+   - google.adk.agents.Agent 클래스를 사용한 기본 에이전트 뼈대
+   - config.yaml을 로드하여 기본 속성 설정
+   - SDD 3절의 기본 시스템 지침(규정 우선 확인, 사내 시스템 연동)을 SYSTEM_INSTRUCTION으로 정의
+   - 아직 도구(tools)는 빈 리스트([])로 초기화하고, build_agent() 함수 및 메인 실행문 작성</code></pre>
+          </div>
+
+          <h2 class="text-base font-bold text-white flex items-center space-x-2 pt-2">
+            <span>생성 결과 검증 (터미널)</span>
+          </h2>
+          <pre class="bg-slate-950 border border-slate-800 rounded-lg p-4 font-mono text-xs text-cyan-300"><button class="copy-btn" onclick="copyCode(this)">복사</button><code>python3 /config/workspace/enterprise-ops-agent/agent.py</code></pre>
+          <p class="text-xs text-emerald-400">출력: <code>에이전트 준비 완료: enterprise_ops_agent (사용 모델: gemini-3.8-flash)</code></p>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- Step 3: Task 3 -->
+      <!-- =================================================================== -->
+      <section id="step-3" class="step-content space-y-6 hidden">
+        <div>
+          <span class="text-xs font-bold text-cyan-400 uppercase tracking-widest">Task 3</span>
+          <h1 class="text-2xl md:text-3xl font-extrabold text-white mt-1">agy 프롬프트 기반 사내 규정 RAG 도구 구현</h1>
+          <p class="text-slate-400 mt-2 text-sm leading-relaxed">
+            복무 규정(POL-HR-2026-004) 및 IT 지원 지침(POL-IT-2026-009)을 검색하는 tools/policy_rag.py를 agy에게 구현하도록 지시합니다.
+          </p>
+        </div>
+
+        <div class="space-y-4 text-sm">
+          <div class="bg-slate-900 border border-blue-500/30 rounded-xl p-4 relative">
+            <span class="text-[11px] font-bold text-cyan-400 uppercase tracking-wider block mb-2"><i class="fa-solid fa-terminal mr-1"></i> agy 입력용 프롬프트</span>
+            <pre class="font-mono text-xs text-slate-200 whitespace-pre-wrap"><button class="copy-btn" onclick="copyCode(this)">프롬프트 복사</button><code>/config/workspace/docs/SDD.md의 2.1절 '사내 규정 RAG 도구 명세'를 엄격히 준수하여 tools/policy_rag.py 파일을 구현해주세요.
+
+요구사항:
+1. 함수 시그니처: search_company_policy(query: str, category: str = "ALL") -> dict
+2. SDD에 명시된 두 가지 규정 데이터를 충실하게 인덱싱할 것:
+   - POL-HR-2026-004 (사내 복무 규정: 연차 발생 1.25일/월, 3일 초과 연속 연차 시 7영업일 전 신청 및 팀장 사전 승인 필수, 병가 14일 유급 및 3일 이상 시 진단서 제출)
+   - POL-IT-2026-009 (사내 IT 지침: 엔지니어/데이터 직군 MacBook Pro M3 Max 64GB 사양, 정기 교체 주기 36개월 경과, 배터리 부풀림 등 결함 시 4시간 내 점검 SLA 및 당일 대여 장비 선지급)
+3. 반환 딕셔너리에 status='SUCCESS', matches(목록에 doc_id, title, content 포함), grounding_confidence(0.9 이상)가 포함되도록 작성할 것.
+4. 작성이 완료되면 단독 실행 테스트 코드(test_policy_rag)를 함께 실행하여 검증 결과를 보여주세요.</code></pre>
+          </div>
+
+          <h2 class="text-base font-bold text-white flex items-center space-x-2 pt-2">
+            <span>RAG 도구 단독 검증 (터미널)</span>
+          </h2>
+          <pre class="bg-slate-950 border border-slate-800 rounded-lg p-4 font-mono text-xs text-cyan-300"><button class="copy-btn" onclick="copyCode(this)">복사</button><code>python3 -c "
+from tools.policy_rag import search_company_policy
+import json
+print(json.dumps(search_company_policy('4일 연속 연차 신청 기한', category='HR'), indent=2, ensure_ascii=False))
+"</code></pre>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- Step 4: Task 4 -->
+      <!-- =================================================================== -->
+      <section id="step-4" class="step-content space-y-6 hidden">
+        <div>
+          <span class="text-xs font-bold text-cyan-400 uppercase tracking-widest">Task 4</span>
+          <h1 class="text-2xl md:text-3xl font-extrabold text-white mt-1">agy 프롬프트 기반 FastMCP SaaS 연동 도구 구현</h1>
+          <p class="text-slate-400 mt-2 text-sm leading-relaxed">
+            Korean Mock SaaS와 통신하는 tools/mcp_tools.py 도구를 개발하고 개인별 토큰으로 실습 샌드박스를 격리합니다.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <img src="./lab1/images/mock_saas_workweek.png" alt="WorkWeek 포털" class="rounded-lg border border-slate-800 shadow">
+          <img src="./lab1/images/mock_saas_mcp_modal.png" alt="MCP 토큰 발급" class="rounded-lg border border-slate-800 shadow">
+        </div>
+
+        <div class="space-y-4 text-sm">
+          <div class="bg-blue-950/20 border border-blue-500/30 rounded-lg p-3 text-xs text-blue-300">
+            <strong>1단계:</strong> 웹 포털(<a href="https://korean-mock-saas-dri5akvbzq-du.a.run.app/" target="_blank" class="underline">https://korean-mock-saas-dri5akvbzq-du.a.run.app/</a>)에서 <strong>MCP 토큰 발급</strong>을 눌러 복사한 뒤 터미널에 등록합니다:
+            <pre class="bg-slate-950 p-2 rounded text-cyan-300 mt-1 font-mono">export MCP_TOKEN="mcp_여러분의토큰"</pre>
+          </div>
+
+          <div class="bg-slate-900 border border-blue-500/30 rounded-xl p-4 relative">
+            <span class="text-[11px] font-bold text-cyan-400 uppercase tracking-wider block mb-2"><i class="fa-solid fa-terminal mr-1"></i> agy 입력용 프롬프트</span>
+            <pre class="font-mono text-xs text-slate-200 whitespace-pre-wrap"><button class="copy-btn" onclick="copyCode(this)">프롬프트 복사</button><code>/config/workspace/docs/SDD.md의 2.2절 'FastMCP SaaS 연동 도구 명세'를 바탕으로 tools/mcp_tools.py 파일을 구현해주세요.
+
+요구사항:
+1. 서버 기본 URL: https://korean-mock-saas-dri5akvbzq-du.a.run.app
+2. 환경변수 MCP_TOKEN이 설정되어 있으면 헤더에 'X-MCP-Token'을 실어 보내고, 없으면 기본 헤더만 전송할 것.
+3. WorkWeek HRMS 도구 2종 구현:
+   - get_employee_leave_balance(employee_id="EMP-10294"): GET /work-week/api/employees/{employee_id}/timeoff 호출하여 연차/병가 잔여일수 반환
+   - submit_leave_request(employee_id, start_date, end_date, leave_type="연차", days=4.0, reason=""): POST /work-week/api/employees/{employee_id}/timeoff 호출하여 휴가 신청
+4. ServiceImmediately ITMS 도구 2종 구현:
+   - list_hardware_assets_and_tickets(employee_id="EMP-10294"): GET /service-immediately/api/tickets?requested_by={employee_id} 호출하여 장비 이력(AST-MBP-2022-819, 38개월 경과) 및 티켓 목록 반환
+   - create_hardware_incident_ticket(employee_id, title, description, category="하드웨어", priority="2 - 높음 (High)"): POST /service-immediately/api/tickets 호출하여 인시던트 티켓 발행
+5. 네트워크 예외 발생 시 안전한 Fallback Mock 데이터를 반환하도록 예외 처리를 구성할 것.</code></pre>
+          </div>
+
+          <pre class="bg-slate-950 border border-slate-800 rounded-lg p-4 font-mono text-xs text-cyan-300"><button class="copy-btn" onclick="copyCode(this)">복사</button><code>python3 -c "
+from tools.mcp_tools import get_employee_leave_balance
+print(get_employee_leave_balance('EMP-10294'))
+"</code></pre>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- Step 5: Task 5 -->
+      <!-- =================================================================== -->
+      <section id="step-5" class="step-content space-y-6 hidden">
+        <div>
+          <span class="text-xs font-bold text-cyan-400 uppercase tracking-widest">Task 5</span>
+          <h1 class="text-2xl md:text-3xl font-extrabold text-white mt-1">오케스트레이션 완성 및 실전 시나리오 검증</h1>
+          <p class="text-slate-400 mt-2 text-sm leading-relaxed">
+            모든 도구를 바인딩하고 agy 대화창에서 실제 임직원 질의(연차 신청, 노트북 결함)를 직접 검증합니다.
+          </p>
+        </div>
+
+        <div class="space-y-4 text-sm">
+          <div class="bg-slate-900 border border-blue-500/30 rounded-xl p-4 relative">
+            <span class="text-[11px] font-bold text-cyan-400 uppercase tracking-wider block mb-2"><i class="fa-solid fa-terminal mr-1"></i> agy 입력용 에이전트 완성 프롬프트</span>
+            <pre class="font-mono text-xs text-slate-200 whitespace-pre-wrap"><button class="copy-btn" onclick="copyCode(this)">프롬프트 복사</button><code>/config/workspace/docs/SDD.md의 3절 '오케스트레이션 및 거버넌스 강령'을 반영하여 agent.py를 최종 완성해주세요.
+
+요구사항:
+1. tools/policy_rag.py의 search_company_policy 도구 등록
+2. tools/mcp_tools.py의 get_employee_leave_balance, submit_leave_request, list_hardware_assets_and_tickets, create_hardware_incident_ticket 4개 도구 등록 (총 5개 도구)
+3. SYSTEM_INSTRUCTION에 다음 4대 핵심 행동 수칙을 강력하게 반영:
+   - [규정 우선 원칙]: 시스템에 휴가 신청이나 티켓을 발행하기 전에 반드시 'search_company_policy'를 먼저 호출할 것.
+   - [근거 명시]: POL-HR-2026-004 또는 POL-IT-2026-009의 조항 번호와 사전 신청 기한, 승인 요건을 답변에 반드시 포함할 것.
+   - [단계별 검증]: 휴가 신청 시 잔여 일수 확인 후 상신, 장비 교체 시 36개월 경과 및 긴급 결함 여부 확인 후 티켓 발행.
+   - [친절하고 명확한 한국어 톤].
+4. get_enterprise_agent() 함수로 완성된 에이전트 객체를 반환하도록 구성할 것.</code></pre>
+          </div>
+
+          <h2 class="text-base font-bold text-cyan-400 pt-4 flex items-center space-x-2">
+            <i class="fa-solid fa-play"></i>
+            <span>실전 시나리오 1: 4일 연속 연차 신청 (agy에 입력)</span>
+          </h2>
+          <div class="bg-slate-900 border border-slate-800 rounded-lg p-4 relative">
+            <pre class="font-mono text-xs text-slate-200 whitespace-pre-wrap"><button class="copy-btn" onclick="copyCode(this)">질의 복사</button><code>안녕하세요, 이민우입니다 (EMP-10294). 다음 주 월요일부터 목요일까지 4일 동안 연속으로 연차를 사용하고 싶습니다. 사내 규정상 신청 기한에 문제가 없는지 확인해 주시고, 제 잔여 연차를 조회한 뒤 WorkWeek 시스템에 휴가 신청을 상신해 주세요.</code></pre>
+          </div>
+          <img src="./lab1/images/scenario_leave_result.png" alt="시나리오 1 결과" class="rounded-lg border border-slate-800 shadow">
+
+          <h2 class="text-base font-bold text-cyan-400 pt-4 flex items-center space-x-2">
+            <i class="fa-solid fa-play"></i>
+            <span>실전 시나리오 2: 배터리 스웰링 결함 교체 (agy에 입력)</span>
+          </h2>
+          <div class="bg-slate-900 border border-slate-800 rounded-lg p-4 relative">
+            <pre class="font-mono text-xs text-slate-200 whitespace-pre-wrap"><button class="copy-btn" onclick="copyCode(this)">질의 복사</button><code>현재 제가 사용 중인 업무용 랩톱 배터리가 심하게 부풀어 올라서(스웰링) 정상적인 업무가 불가능합니다. 제가 데이터/엔지니어링 직군인데, M3 Max 64GB 랩톱으로 교체 지원이 가능한지 사내 IT 지원 규정을 확인해 주세요. 제 현재 장비 지급 이력을 확인하고 ServiceImmediately 시스템에 긴급 교체 인시던트 티켓을 발행해 주세요.</code></pre>
+          </div>
+          <img src="./lab1/images/scenario_hardware_result.png" alt="시나리오 2 결과" class="rounded-lg border border-slate-800 shadow">
+
+          <h2 class="text-base font-bold text-white pt-4">포털 실시간 반영 확인</h2>
+          <img src="./lab1/images/mock_saas_serviceimmediately.png" alt="ServiceImmediately 실시간 확인" class="rounded-lg border border-slate-800 shadow">
+        </div>
+      </section>
+
+      <!-- Bottom Step Navigation Buttons -->
+      <div class="mt-12 pt-6 border-t border-slate-800 flex justify-between items-center text-sm">
+        <button id="btn-prev" onclick="navigateStep(-1)" class="px-4 py-2 rounded-lg border border-slate-700 hover:bg-slate-800 text-slate-300 font-medium transition disabled:opacity-30 disabled:cursor-not-allowed">
+          <i class="fa-solid fa-arrow-left mr-1.5"></i> 이전 단계
+        </button>
+        <div id="step-indicator" class="text-xs text-slate-400 font-medium">Step 1 of 6</div>
+        <button id="btn-next" onclick="navigateStep(1)" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium shadow-md shadow-blue-600/20 transition">
+          다음 단계 <i class="fa-solid fa-arrow-right ml-1.5"></i>
+        </button>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    let currentStep = 0;
+    const totalSteps = 6;
+
+    function goToStep(step) {
+      if (step < 0 || step >= totalSteps) return;
+      currentStep = step;
+
+      // Update contents
+      document.querySelectorAll('.step-content').forEach((el, idx) => {
+        if (idx === currentStep) {
+          el.classList.remove('hidden');
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      // Update sidebar nav
+      document.querySelectorAll('.step-btn').forEach((btn, idx) => {
+        if (idx === currentStep) {
+          btn.classList.add('tab-active');
+          btn.classList.remove('text-slate-400');
+        } else {
+          btn.classList.remove('tab-active');
+          btn.classList.add('text-slate-400');
+        }
+      });
+
+      // Update progress bar
+      const progressPercent = ((currentStep + 1) / totalSteps) * 100;
+      document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+
+      // Update footer buttons
+      document.getElementById('btn-prev').disabled = currentStep === 0;
+      document.getElementById('btn-next').disabled = currentStep === totalSteps - 1;
+      document.getElementById('step-indicator').textContent = `Step ${currentStep + 1} of ${totalSteps}`;
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function navigateStep(delta) {
+      goToStep(currentStep + delta);
+    }
+
+    function copyCode(btn) {
+      const code = btn.nextElementSibling ? btn.nextElementSibling.innerText : btn.parentElement.innerText;
+      copyText(code, btn);
+    }
+
+    function copyText(text, btn) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerText;
+        btn.innerText = '복사 완료!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.innerText = originalText;
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    }
+
+    // Initialize
+    goToStep(0);
+  </script>
+</body>
+</html>
