@@ -145,9 +145,28 @@ Google ADK `McpToolset`을 통해 4종의 도구가 자동 바인딩됩니다:
 - `create_hardware_incident_ticket(employee_id: str, title: str, description: str, category: str = "하드웨어", priority: str = "2 - 높음 (High)") -> dict`: ServiceImmediately의 `create_ticket`을 호출하여 인시던트 티켓 발행
 - `add_ticket_comment(ticket_id: str, comment: str, author: str = "이민우") -> dict`: ServiceImmediately의 `add_ticket_comment` 호출
 
+#### 4. FastMCP Streamable HTTP JSON-RPC 클라이언트 구현 가이드
+FastMCP 서버와 통신할 때는 반드시 다음 HTTP 헤더 및 세션 핸드셰이크 규격을 준수해야 합니다:
+- **필수 헤더**:
+  - `Content-Type: application/json`
+  - `Accept: application/json, text/event-stream` (누락 시 406 Not Acceptable 반환)
+  - `X-MCP-Token: {token}` (누락 시 401 Unauthorized 반환)
+  - `MCP-Protocol-Version: 2025-06-18`
+- **토큰 자동 발급 API (`POST /api/mcp-tokens`)**:
+  - 환경 변수 `MCP_TOKEN`이 없을 경우, JSON 본문 `{"token_name": "workshop-agent"}`과 헤더 `{"Content-Type": "application/json", "X-Session-ID": "sess_..."}`를 실어 호출한 뒤 응답 JSON의 `data["raw_token"]`을 추출하여 사용.
+- **초기화 및 세션 어피니티 핸드셰이크 (`method: initialize`)**:
+  - 엔드포인트당 최초 1회 `method: "initialize"`를 호출하여 응답 헤더의 `mcp-session-id`를 추출하고, 이후 모든 `tools/call` 요청 헤더에 `Mcp-Session-Id: {session_id}`를 포함하여 전송.
+  - Cloud Run의 분산 부하 분산을 방지하기 위해 단일 영속 `httpx.Client`를 사용하여 세션 쿠키(`GAESA`)를 지속 유지.
+- **tools/call 응답 파싱**:
+  - `tools/call` 응답이 SSE(`text/event-stream`) 형식으로 반환되므로, `data:` 접두어로 시작하는 라인을 찾아 JSON으로 파싱하고 `result` 객체를 반환.
+
 ---
 
 ## 3. 오케스트레이션 및 거버넌스 강령 (Orchestration Policy)
+
+#### Google ADK Agent 클래스 작성 주의사항
+- **단수형 키워드 인자 준수**: `google.adk.agents.Agent`는 지시문 인자로 반드시 **`instruction` (단수형)** 만 허용하며, `instructions`(복수형) 사용 시 Pydantic ValidationError가 발생합니다.
+- **모듈 레벨 루트 에이전트 인스턴스**: `agent.py` 파일의 최상위 모듈 스코프에 반드시 `root_agent = build_agent()` 변수를 선언하여 `agents-cli` 및 자동 테스트 러너가 즉시 에이전트를 임포트할 수 있도록 구성해야 합니다.
 
 에이전트의 시스템 프롬프트(`HUB_INSTRUCTION`)는 다음 4가지 핵심 강령을 엄격히 준수해야 합니다.
 

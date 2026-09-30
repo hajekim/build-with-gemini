@@ -366,6 +366,7 @@ enterprise_ops_agent/
    - 중앙 허브 root_agent(enterprise_ops_agent): sub_agents=[hr_policy_agent, workweek_agent, itsm_agent]로 구성
    - SDD 3절의 규정 우선 확인(Policy-First) 및 위임 강령을 HUB_INSTRUCTION으로 정의
    - build_agent() 및 get_enterprise_agent() 함수 작성
+   - 주의사항: Agent 생성자 지시문은 반드시 단수형 'instruction' 키워드를 사용하고(instructions 복수형 사용 금지), 모듈 최상위에 'root_agent = build_agent()' 변수를 선언할 것
 ```
 
 `agy`가 파일 생성을 제안하면 내용을 확인한 뒤 **Allow**를 선택합니다.
@@ -526,19 +527,25 @@ export MCP_TOKEN="mcp_여러분의토큰값"
 실행 중인 **Antigravity CLI (`agy`)** 터미널에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
 
 ```text
-/config/workspace/docs/SDD.md의 2.3절 'Google ADK FastMCP SaaS 연동 도구 명세'를 바탕으로 tools/mcp_tools.py 파일을 구현해주세요.
+/config/workspace/docs/SDD.md의 2.3절 'FastMCP SaaS 연동 도구 명세'를 바탕으로 tools/mcp_tools.py 파일을 구현해주세요.
 
 요구사항:
-1. 서버 기본 URL: https://korean-mock-saas-dri5akvbzq-du.a.run.app (URL 끝 슬래시 자동 제거 .rstrip('/') 처리 필수)
-2. Google ADK 공식 클래스 사용:
-   - from google.adk.tools.mcp_tool import McpToolset
-   - from google.adk.tools.mcp_tool.mcp_session_manager import StreamableHTTPConnectionParams
-   - get_workweek_mcp_toolset() 함수: /work-week/mcp 엔드포인트 연결 (헤더에 X-MCP-Token 포함)
-   - get_itsm_mcp_toolset() 함수: /service-immediately/mcp 엔드포인트 연결 (헤더에 X-MCP-Token 포함)
-3. 실습 2(거버넌스 및 평가)와의 완벽한 연계를 위해 FastMCP tools/call 표준 JSON-RPC 도구 래퍼 제공:
-   - WorkWeek: get_employee_leave_balance, submit_leave_request, cancel_leave_request, get_personal_info, update_personal_info
-   - ServiceImmediately: list_hardware_assets_and_tickets, create_hardware_incident_ticket, add_ticket_comment
-4. 네트워크 예외 또는 세션 만료 시 안전한 Fallback 데이터를 반환하도록 방어적 예외 처리를 구성할 것.
+1. Google ADK의 McpToolset과 StreamableHTTPConnectionParams를 사용하여 WorkWeek(/work-week/mcp) 및 ServiceImmediately(/service-immediately/mcp) 연결 도구 세트 생성 함수 구현:
+   - get_workweek_mcp_toolset()
+   - get_itsm_mcp_toolset()
+2. 다음 6개 파이썬 래퍼 함수를 구현하고, FastMCP Streamable HTTP JSON-RPC 2.0 (tools/call) 규격으로 호출하도록 구성할 것:
+   - get_employee_leave_balance(employee_id: str)
+   - submit_leave_request(employee_id: str, start_date: str, end_date: str, leave_type: str, days: float, reason: str)
+   - cancel_leave_request(employee_id: str, request_id: int)
+   - list_hardware_assets_and_tickets(employee_id: str)
+   - create_hardware_incident_ticket(employee_id: str, title: str, description: str, category: str, priority: str)
+   - add_ticket_comment(ticket_id: str, author: str, comment: str)
+3. HTTP 통신 필수 규칙:
+   - 헤더: {'Content-Type': 'application/json', 'Accept': 'application/json, text/event-stream', 'MCP-Protocol-Version': '2025-06-18', 'X-MCP-Token': token}
+   - 엔드포인트별로 최초 1회 initialize 핸드셰이크를 호출하여 'mcp-session-id'를 획득하고, 이후 모든 tools/call 요청 헤더에 'Mcp-Session-Id'로 전달할 것 (엔드포인트별 딕셔너리로 세션 분리 관리)
+   - tools/call SSE 응답(data: 접두어) 파싱하여 result 객체 반환
+   - Cloud Run 세션 어피니티(GAESA 쿠키)를 유지하기 위해 영속 httpx.Client 캐시를 사용할 것
+   - MCP_TOKEN이 없을 경우 POST /api/mcp-tokens (json={'token_name': 'workshop-agent'}, headers={'Content-Type': 'application/json', 'X-Session-ID': 'sess_auto'})를 호출하여 응답의 raw_token을 자동 사용할 것
 ```
 
 `agy`가 파일 작성을 제안하면 **Allow**를 선택합니다.
