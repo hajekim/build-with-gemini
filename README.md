@@ -62,6 +62,6 @@ build-with-gemini/
 
 ## 🔗 실습용 외부 서비스
 
-- **한국형 Mock SaaS 웹 포털**: https://korean-mock-saas-dri5akvbzq-du.a.run.app/
-- **WorkWeek HRMS FastMCP 엔드포인트**: `https://korean-mock-saas-dri5akvbzq-du.a.run.app/work-week/mcp`
-- **ServiceImmediately ITMS FastMCP 엔드포인트**: `https://korean-mock-saas-dri5akvbzq-du.a.run.app/service-immediately/mcp`
+- **한국형 Mock SaaS 웹 포털**: https://korean-mock-saas-330751298968.asia-northeast3.run.app/
+- **WorkWeek HRMS FastMCP 엔드포인트**: `https://korean-mock-saas-330751298968.asia-northeast3.run.app/work-week/mcp`
+- **ServiceImmediately ITMS FastMCP 엔드포인트**: `https://korean-mock-saas-330751298968.asia-northeast3.run.app/service-immediately/mcp`

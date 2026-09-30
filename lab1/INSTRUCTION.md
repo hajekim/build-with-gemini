@@ -40,7 +40,7 @@
 2. **소프트웨어 설계서(SDD) 기반 컨텍스트 그라운딩**: `docs/SDD.md` 문서를 `agy`에 주입하여 전체 아키텍처와 도구 명세를 인식시킵니다.
 3. **agy 프롬프트 기반 ADK 2.0 뼈대 생성**: `agy`에게 지시하여 `config.yaml`과 ADK 2.0 기본 에이전트 코드를 생성하도록 합니다.
 4. **agy 프롬프트 기반 사내 규정 RAG 도구 구현**: SDD 2.1절과 Cloud Storage(`gs://oreobox/policy/`) 규정 문서를 바탕으로 조항 번호와 근거를 정확히 찾아주는 시맨틱 검색 도구(`tools/policy_rag.py`)를 개발합니다.
-5. **agy 프롬프트 기반 FastMCP SaaS 연동 도구 구현**: 한국형 Mock SaaS 플랫폼(`https://korean-mock-saas-dri5akvbzq-du.a.run.app/`)에 개인별 토큰으로 연결되는 FastMCP 도구(`tools/mcp_tools.py`)를 개발합니다.
+5. **agy 프롬프트 기반 FastMCP SaaS 연동 도구 구현**: 한국형 Mock SaaS 플랫폼(`https://korean-mock-saas-330751298968.asia-northeast3.run.app/`)에 개인별 토큰으로 연결되는 FastMCP 도구(`tools/mcp_tools.py`)를 개발합니다.
 6. **오케스트레이션 프롬프트 완성 및 복수 턴 시나리오 검증**: 규정 검증 우선(Policy-First) 규칙을 적용한 최종 에이전트를 완성하고, `agy` 대화창에서 실제 연차 신청 및 고성능 노트북 교체 요청을 테스트한 뒤 웹 화면에서 실시간 반영 결과를 확인합니다.
 7. **Gemini Enterprise (GE) 배포용 A2A 인터페이스 규격 패키징**: 사내 본인 테넌트의 Gemini Enterprise에 에이전트를 원클릭 등록할 수 있도록 Agent-to-Agent(A2A) 매니페스트(`agent_manifest.json`)를 생성하고, 로컬 A2A 시뮬레이터를 통해 프로토콜 규격 준수 여부를 검증합니다.
 
@@ -196,7 +196,7 @@ agy
 | **소프트웨어 설계서** | `docs/SDD.md` | 시스템 구조, RAG 데이터 규격, FastMCP API 명세, 오케스트레이션 강령 | [📥 docs/SDD.md 다운로드](../docs/SDD.md) |
 | **사내 복무 규정 PDF** | `gs://oreobox/policy/leave_policy_2026.pdf` | 문서번호 POL-HR-2026-004 (연차 및 병가 운영 지침) | [📥 leave_policy_2026.pdf 다운로드](../docs/policies/leave_policy_2026.pdf) |
 | **IT 자산 지침 PDF** | `gs://oreobox/policy/it_hardware_guidelines.pdf` | 문서번호 POL-IT-2026-009 (PC 및 하드웨어 지원 규정) | [📥 it_hardware_guidelines.pdf 다운로드](../docs/policies/it_hardware_guidelines.pdf) |
-| **한국형 Mock SaaS 웹 포털** | `https://korean-mock-saas-dri5akvbzq-du.a.run.app/` | 인사관리(WorkWeek) 및 IT서비스(ServiceImmediately) 통합 포털 | [🔗 SaaS 포털 열기](https://korean-mock-saas-dri5akvbzq-du.a.run.app/) |
+| **한국형 Mock SaaS 웹 포털** | `https://korean-mock-saas-330751298968.asia-northeast3.run.app/` | 인사관리(WorkWeek) 및 IT서비스(ServiceImmediately) 통합 포털 | [🔗 SaaS 포털 열기](https://korean-mock-saas-330751298968.asia-northeast3.run.app/) |
 
 ### 소프트웨어 설계서(SDD)의 목적과 스펙 기반 개발(Spec-Driven Development)
 
@@ -217,14 +217,22 @@ agy
 
 ### 1단계: 필수 라이브러리 및 런타임 툴 설치
 
-터미널 새 탭(**Ctrl+Shift+T**)을 열고 실습에 필요한 패키지와 Google Agent Development Kit(ADK) CLI를 설치합니다.
+터미널 새 탭(**Ctrl+Shift+T**)을 열고 실습 환경 구성을 위한 시스템 도구 및 Google Agent Development Kit(ADK) CLI를 설치합니다. Debian/Ubuntu 환경의 외부 관리 패키지 제약(PEP 668)을 안전하게 통과하기 위해 `--break-system-packages` 플래그를 사용하고, 설치된 CLI 바이너리가 인식되도록 `PATH` 환경변수를 등록합니다:
 
 ```bash
-pip install --upgrade pip
-pip install google-agents-cli "google-adk>=2.3.0" mcp httpx pydantic pyyaml uv
+# 1. 압축 해제 유틸리티 설치
+sudo apt-get update -qq && sudo apt-get install -y -qq unzip
+
+# 2. Google Agent Development Kit(ADK) CLI 및 필수 라이브러리 설치
+pip install --break-system-packages --upgrade pip
+pip install --break-system-packages google-agents-cli "google-adk>=2.3.0" mcp httpx pydantic pyyaml uv
+
+# 3. 사용자 바이너리 경로 환경변수 등록
+export PATH="$HOME/.local/bin:$PATH"
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
 ```
 
-설치된 버전을 확인합니다.
+설치된 버전을 확인합니다:
 
 ```bash
 agents-cli --version
@@ -232,8 +240,8 @@ agents-cli --version
 
 ```
 +-----------------------------------------------------------------------------------+
-| 출력 예시:                                                                          |
-| google-agents-cli version 1.7.0 (Google Agent Development Kit CLI)                |
+| 출력 예시 (실측):                                                                   |
+| agents-cli, version 1.7.0                                                         |
 +-----------------------------------------------------------------------------------+
 ```
 
@@ -241,7 +249,7 @@ agents-cli --version
 
 ### 2단계: agents-cli를 활용한 공식 에이전트 프로젝트 뼈대 생성
 
-`agents-cli`는 Google Agent Platform 환경에서 에이전트 프로젝트 생성(`create`), 실행(`run`), 평가(`eval`), 배포(`deploy`)를 일관된 명령어로 관리하는 공식 CLI 도구입니다.
+`agents-cli`는 Google Agent Platform에서 에이전트 프로젝트 생성(`create`), 로컬 실행(`run`), 평가(`eval`), 프로덕션 배포(`deploy`)를 일관되게 관리하는 공식 라이프사이클 도구입니다.
 
 터미널에서 다음 명령어를 실행하여 Cloud Run 배포와 인메모리 세션을 기본 지원하는 표준 에이전트 프로젝트를 생성합니다:
 
@@ -260,22 +268,46 @@ agents-cli create enterprise-ops-agent \
 cd enterprise-ops-agent
 ```
 
-> [!NOTE]
-> **agents-cli create가 자동 생성한 표준 프로젝트 구조:**  
-> 명령어를 실행하면 `enterprise-ops-agent/` 디렉터리에 다음 표준 파일들이 즉시 준비됩니다:
-> - `agents-cli-manifest.yaml`: Google Agent Platform 공식 프로젝트 식별 매니페스트 (`agent_directory: app`, `root_agent_name: enterprise_ops_agent`)
-> - `app/agent.py`: 기본 단일 에이전트 뼈대 (임시 더미 날씨 조회 함수 `get_weather` 포함)
-> - `app/fast_api_app.py`: 로컬 SSE 스트리밍 서버 및 평가 엔드포인트
-> - `tests/eval/`: 실습 2를 위한 정량 평가 설정(`eval_config.yaml`) 및 기본 데이터셋(`basic-dataset.json`)
-> - `Dockerfile`, `pyproject.toml`, `uv.lock`: 컨테이너 빌드 및 의존성 고정 명세
->
-> `agents-cli create`는 표준 디렉터리와 환경 설정을 완벽하게 잡아주지만, 생성된 `app/agent.py`는 단순한 날씨 봇 템플릿에 불과합니다. 우리는 Task 2에서 `agy`에게 지시하여 이 코드를 SDD 규격에 맞는 **Hub-and-Spoke 멀티 에이전트 시스템**으로 전면 리팩토링합니다.
+#### 명령어 플래그 상세 해설:
+- `--deployment-target cloud_run`: 프로덕션 배포 타겟을 Cloud Run으로 지정하여 공식 `Dockerfile`과 FastAPI 서빙 레이어를 자동 구성합니다.
+- `--session-type in_memory`: 개발 및 로컬 테스트 단계에 적합한 인메모리 세션 저장소를 사용합니다.
+- `--cicd-runner skip`: 로컬 이너루프(Inner-loop) 실습에 집중하기 위해 GitHub Actions 등의 CI/CD 파이프라인 파일 생성을 건너뜁니다.
+- `--prototype` (`-p`): 인프라 리소스 생성 전 빠른 프로토타이핑 모드로 프로젝트를 초기화합니다.
+- `--yes` (`-y`): CLI 생성 시 나타나는 모든 대화형 확인 질문을 자동으로 승인합니다.
+- `--skip-checks` (`-s`): GCP 사전 네트워크 및 API 검증 단계를 건너뛰고 프로젝트 생성을 즉시 완료합니다.
+
+```
++-----------------------------------------------------------------------------------+
+| 출력 예시 (실측):                                                                   |
+| Agents CLI v1.7.0                                                                 |
+| Info: --agent not specified. Defaulting to 'adk' in auto-approve mode.            |
+|                                                                                   |
+| ✅ Success! Your agent project is ready.                                          |
+|                                                                                   |
+| 📖 Documentation                                                                  |
+|    README:    cat enterprise-ops-agent/README.md                                  |
+|                                                                                   |
+| 💡 Tip                                                                            |
+|    Once ready for production, run: agents-cli scaffold enhance                    |
+|                                                                                   |
+| 🚀 Get Started                                                                    |
+|    cd enterprise-ops-agent && agents-cli install && agents-cli playground         |
++-----------------------------------------------------------------------------------+
+```
+
+> [!TIP]
+> **심화: Antigravity CLI(agy) 대화창에서 자연어 프롬프트로 생성 위임하기**  
+> CLI 명령어를 직접 실행하는 대신, 실행 중인 `agy` 대화창에 다음 한국어 프롬프트를 입력하여 생성을 지시할 수도 있습니다:
+> ```text
+> 현재 홈 디렉터리(~)에서 agents-cli를 사용해 'enterprise-ops-agent' 프로젝트를 생성해 주세요. 배포 대상은 Cloud Run, 세션 저장은 in_memory, CI/CD 러너는 건너뛰기(skip)로 지정하고, 비대화형 옵션(-p -y -s)을 적용해 실행하세요. 생성이 끝나면 enterprise-ops-agent 디렉터리로 이동해 기본 폴더 구조를 보여주세요.
+> ```
+> *(주의: 이미 위에서 터미널 명령어로 `enterprise-ops-agent` 디렉터리를 생성했다면 폴더 중복 충돌을 방지하기 위해 이 프롬프트를 중복 실행하지 마세요.)*
 
 ---
 
 ### 3단계: 소프트웨어 설계서(SDD) 및 사내 규정 원본 다운로드
 
-프로젝트 디렉터리(`enterprise-ops-agent/`) 내부의 `docs/` 폴더에 사내 소프트웨어 설계서와 규정 PDF 원본 문서를 다운로드합니다.
+프로젝트 디렉터리(`~/enterprise-ops-agent/`) 내부의 `docs/` 폴더에 사내 소프트웨어 설계서와 규정 PDF 원본 문서를 다운로드합니다.
 
 #### 옵션 A: Google Cloud Storage(GCS) 직접 다운로드 (기본 권장)
 실습 콘솔 계정 인증이 적용된 터미널에서 `gsutil` 명령어로 단 한 번에 다운로드합니다:
@@ -305,7 +337,7 @@ ls -lh docs/policies/
 
 ```
 +-----------------------------------------------------------------------------------+
-| 출력 예시:                                                                          |
+| 출력 예시 (실측):                                                                   |
 | docs/SDD.md (소프트웨어 설계서 완본 v2.2.0)                                          |
 | docs/policies/it_hardware_guidelines.pdf (POL-IT-2026-009 사내 IT 지침)            |
 | docs/policies/leave_policy_2026.pdf (POL-HR-2026-004 사내 복무 규정)                 |
@@ -314,7 +346,29 @@ ls -lh docs/policies/
 
 ---
 
-### 4단계: agy를 통한 프로젝트 컨텍스트 그라운딩
+### 4단계: 프로젝트 가상 환경 동기화 (agents-cli install)
+
+프로젝트 루트 디렉터리에서 `agents-cli install`을 실행하여 `pyproject.toml`에 명시된 의존성 패키지를 프로젝트 전용 가상 환경(`.venv`)에 동기화합니다:
+
+```bash
+cd ~/enterprise-ops-agent
+agents-cli install
+```
+
+```
++-----------------------------------------------------------------------------------+
+| 출력 예시 (실측):                                                                   |
+|   ▸ uv sync                                                                       |
+| Using CPython 3.11.2 interpreter at: /usr/bin/python3                             |
+| Creating virtual environment at: .venv                                            |
+| Resolved 173 packages in 235ms                                                    |
+| Installed 154 packages in 182ms                                                   |
++-----------------------------------------------------------------------------------+
+```
+
+---
+
+### 5단계: agy를 통한 프로젝트 컨텍스트 그라운딩
 
 실행 중인 **Antigravity CLI (`agy`)** 터미널 창으로 전환합니다 (반드시 생성된 `~/enterprise-ops-agent` 디렉터리에서 `agy`가 실행되어 있어야 합니다).
 
@@ -528,7 +582,7 @@ print(json.dumps(r2, indent=2, ensure_ascii=False))
 
 ## Task 4. agy 프롬프트 기반 FastMCP SaaS 연동 도구 구현
 
-이번 단계에서는 웹 기반 Mock SaaS 플랫폼(`https://korean-mock-saas-dri5akvbzq-du.a.run.app/`)과 통신하는 FastMCP 클라이언트 도구(`app/tools/mcp_tools.py`)를 `agy`에게 구현하도록 요청합니다.
+이번 단계에서는 웹 기반 Mock SaaS 플랫폼(`https://korean-mock-saas-330751298968.asia-northeast3.run.app/`)과 통신하는 FastMCP 클라이언트 도구(`app/tools/mcp_tools.py`)를 `agy`에게 구현하도록 요청합니다.
 
 ### FastMCP 프로토콜 규격 및 한국형 Mock SaaS 명세
 
@@ -555,7 +609,7 @@ Anthropic과 오픈소스 커뮤니티가 주도하는 Model Context Protocol(MC
 ### 1단계: Mock SaaS 웹 화면 접속 및 개인 토큰 발급
 
 1. 웹 브라우저에서 아래 Mock SaaS 주소로 접속합니다.  
-   `https://korean-mock-saas-dri5akvbzq-du.a.run.app/`
+   `https://korean-mock-saas-330751298968.asia-northeast3.run.app/`
 2. 화면 오른쪽 상단의 **MCP 토큰 발급** 버튼을 클릭합니다.
 3. 팝업 창에 나타난 고유 토큰(예: `mcp_eyJp...`)을 복사합니다.
 
@@ -588,6 +642,7 @@ docs/SDD.md의 2.3절 'FastMCP SaaS 연동 도구 명세'를 바탕으로 app/to
    - create_hardware_incident_ticket(employee_id: str, title: str, description: str, category: str, priority: str)
    - add_ticket_comment(ticket_id: str, author: str, comment: str)
 3. HTTP 통신 필수 규칙:
+   - BASE_URL은 os.environ.get("KOREAN_MOCK_SAAS_URL", "https://korean-mock-saas-330751298968.asia-northeast3.run.app")을 사용할 것
    - 헤더: {'Content-Type': 'application/json', 'Accept': 'application/json, text/event-stream', 'MCP-Protocol-Version': '2025-06-18', 'X-MCP-Token': token}
    - 엔드포인트별로 최초 1회 initialize 핸드셰이크를 호출하여 'mcp-session-id'를 획득하고, 이후 모든 tools/call 요청 헤더에 'Mcp-Session-Id'로 전달할 것 (엔드포인트별 딕셔너리로 세션 분리 관리)
    - tools/call SSE 응답(data: 접두어) 파싱하여 result 객체 반환
@@ -618,7 +673,7 @@ print(json.dumps(list_hardware_assets_and_tickets('EMP-10294'), indent=2, ensure
 
 ```
 +-----------------------------------------------------------------------------------+
-| 출력 예시 (실제 Cloud Run 서버 연동 응답):                                           |
+| 출력 예시 (실측):                                                                   |
 | === WorkWeek 잔여 연차 조회 ===                                                     |
 | {                                                                                 |
 |   "status": "SUCCESS",                                                            |
@@ -634,7 +689,7 @@ print(json.dumps(list_hardware_assets_and_tickets('EMP-10294'), indent=2, ensure
 
 ## Task 5. 오케스트레이션 프롬프트 완성 및 복수 턴 시나리오 검증
 
-이제 `agy`에게 SDD 3절의 오케스트레이션 행동 강령을 주입하여 `app/agent.py`를 최종 완성하게 하고, `agy` 터미널 대화창에서 실제 임직원 요청 시나리오를 직접 검증합니다.
+이제 `agy`에게 SDD 3절의 오케스트레이션 행동 강령을 주입하여 `app/agent.py`를 최종 완성하게 하고, `agy` 터미널 대화창 및 `agents-cli run`에서 실제 임직원 요청 시나리오를 직접 검증합니다.
 
 ### 1단계: 최종 에이전트 완성 지시
 
@@ -654,20 +709,101 @@ docs/SDD.md의 3절 '오케스트레이션 및 거버넌스 강령'을 반영하
    - [근거 명시]: POL-HR-2026-004 또는 POL-IT-2026-009의 조항 번호와 사전 신청 기한, 승인 요건을 최종 답변에 반드시 포함할 것.
    - [단계별 검증]: 규정에 부합할 때만 workweek_agent 또는 itsm_agent를 호출하여 SaaS 작업을 진행할 것.
    - [친절하고 명확한 한국어 톤].
-4. get_enterprise_agent() 및 build_agent() 함수로 완성된 Hub-and-Spoke 루트 에이전트 객체를 반환하고, 최상위에 app = App(root_agent=root_agent, name="app")을 유지할 것.
+4. get_enterprise_agent() 및 build_agent() 함수로 완성된 Hub-and-Spoke 루트 에이전트 객체를 반환하고, 최상위에 root_agent = build_agent()와 app = App(root_agent=root_agent, name="app")을 선언할 것.
 ```
 
 `agy`가 `app/agent.py` 업데이트를 제안하면 **Allow**를 선택합니다.
 
-터미널에서 자동 통합 검증 스크립트를 실행하여 5대 시나리오가 모두 통과하는지 즉시 확인할 수 있습니다:
+---
+
+### 2단계: 자동 통합 검증 스크립트 실행 (5대 시나리오)
+
+새 터미널 탭에서 자동 통합 검증 스크립트를 실행하여 5대 시나리오가 모두 정상 통과하는지 확인합니다:
 
 ```bash
+cd ~/enterprise-ops-agent
 python3 tests/test_scenarios.py
+```
+
+```
++-----------------------------------------------------------------------------------+
+| 출력 예시 (실측):                                                                   |
+| =====================================================================             |
+|    Cymbal Group Enterprise Ops Agent - Integration Test Suite                     |
+| =====================================================================             |
+| [1/5] Hub-and-Spoke 멀티 에이전트 토폴로지 검증...                                     |
+|       - 등록된 전문 서브 에이전트: ['hr_policy_agent', 'workweek_agent', 'itsm_agent']     |
+|       -> [PASS] 토폴로지 검증 완료 (Hub: 1, Spokes: 3)                             |
+|                                                                                   |
+| [2/5] Policy RAG: 4일 연속 연차 규정(POL-HR-2026-004) 검색 검증...                    |
+|       - 매칭 문서: POL-HR-2026-004 (제 3 조 (연차 발생 및 부여))                     |
+|       -> [PASS] 사내 복무 규정 제 4 조(7영업일 전 신청) 근거 인용 확인              |
+|                                                                                   |
+| [3/5] Policy RAG: 노트북 배터리 고장 및 교체 규정(POL-IT-2026-009) 검색 검증...          |
+|       - 매칭 문서: POL-IT-2026-009 (제 2 조 (전산 장비 지급 기준))                  |
+|       -> [PASS] IT 지원 지침 제 2 조(M3 Max 64GB) 및 제 4 조(긴급 교체) 확인        |
+|                                                                                   |
+| [4/5] FastMCP: WorkWeek 인사 시스템 실시간 연동 검증...                             |
+|       - WorkWeek 실시간 수신: Employee EMP-10294 (이민우) Leave Balances:          |
+| - Vacation (연차): 12.0...                                                         |
+|       -> [PASS] WorkWeek 잔여 연차 데이터 수신 확인                               |
+|                                                                                   |
+| [5/5] FastMCP: ServiceImmediately ITSM 시스템 실시간 연동 검증...                   |
+|       - ServiceImmediately 실시간 수신: [                                         |
+|   {                                                                               |
+|     "ticket_id": "INC-88210",                                                     |
+|     "requested_by": "EMP-10294", ...                                              |
+|       -> [PASS] ServiceImmediately 장비 및 인시던트 데이터 수신 확인               |
+| =====================================================================             |
+|    [SUCCESS] ALL 5 TEST SCENARIOS PASSED 100% IN 0.06s!                           |
+| =====================================================================             |
++-----------------------------------------------------------------------------------+
 ```
 
 ---
 
-### 2단계: 실전 시나리오 1 - 4일 연속 연차 신청 및 사전 기한 점검
+### 3단계: agents-cli run을 통한 고속 터미널 스모크 테스트
+
+`agents-cli run`은 별도의 서버 기동 없이도 백그라운드 ADK 런타임을 임시 기동하여 단일 프롬프트를 터미널에서 즉시 추론하고 스트리밍 결과를 출력합니다:
+
+```bash
+export GOOGLE_GENAI_USE_VERTEXAI=true
+export GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project)
+export GOOGLE_CLOUD_LOCATION=global
+cd ~/enterprise-ops-agent
+
+agents-cli run "안녕하세요, 이민우입니다 (EMP-10294). 다음 주 4일 동안 연속으로 연차를 사용하고 싶습니다. 사내 규정상 신청 기한에 문제가 없는지 확인해 주세요."
+```
+
+```
++-----------------------------------------------------------------------------------+
+| 출력 예시 (실측):                                                                   |
+| Starting a temporary local server on port 18080 (stops automatically when done).  |
+| [user]: 안녕하세요, 이민우입니다 (EMP-10294). 다음 주 4일 동안 연속으로 연차를 사용...   |
+| [enterprise_ops_agent]:                                                           |
+| [tool_call: transfer_to_agent({"agent_name": "hr_policy_agent"})]                 |
+| [tool_response: transfer_to_agent -> {"result": null}]                            |
+| [hr_policy_agent]:                                                                |
+| [tool_call: search_company_policy({"query": "연차 신청 기한", "category": "HR"})]  |
+| [tool_response: search_company_policy -> {"status": "SUCCESS", "match_count": 2...|
+|                                                                                   |
+| 이민우님 (EMP-10294), 사내 복무 규정(POL-HR-2026-004)에 따른 연차 신청 기한입니다.  |
+| 사내 규정 제 4 조 (신청 및 결재 절차)에 따르면:                                      |
+| - 1일 이하: 사용 개시일 24시간 전 상신                                             |
+| - 3일 이하: 사용 개시일 3일 전 상신 및 부서장 접수                                  |
+| - 3일 초과 연속 연차 (4일 이상): 최소 사용 7영업일 전 상신 및 부서장 사전 승인 필수 |
+|                                                                                   |
+| 민우님께서 신청하시려는 연차는 4일 연속 연차이므로, 규정상 사용 개시일 최소 7영업일     |
+| 전에 상신을 완료하시고 승인을 받으셔야 합니다.                                      |
+|                                                                                   |
+| Session: 235c7eef-cd88-409d-a2ab-c492c6cadfef                                    |
+| Local server stopped.                                                             |
++-----------------------------------------------------------------------------------+
+```
+
+---
+
+### 4단계: 실전 시나리오 1 - 4일 연속 연차 신청 및 사전 기한 점검 (agy 대화창)
 
 임직원 **이민우 (EMP-10294)**가 다음 주에 4일간 연속 연차를 쓰겠다고 요청하는 상황입니다.
 
@@ -714,7 +850,7 @@ python3 tests/test_scenarios.py
 ### 4단계: Mock SaaS 웹 화면에서 실시간 반영 확인
 
 1. 웹 브라우저에서 열어둔 **Korean Enterprise Mock SaaS 플랫폼** 탭으로 이동합니다.  
-   `https://korean-mock-saas-dri5akvbzq-du.a.run.app/`
+   `https://korean-mock-saas-330751298968.asia-northeast3.run.app/`
 2. **WorkWeek** 탭을 클릭합니다.
    - 에이전트가 신청한 연차 내역이 **휴가 신청 내역 (Leave Requests)** 목록에 `승인 대기` 상태로 등록되어 있는지 확인합니다.
 3. **ServiceImmediately** 탭을 클릭합니다.
@@ -878,7 +1014,13 @@ curl -s -X POST http://localhost:8080/ \
    agents-cli playground --port 8085
    ```
 
-   브라우저에서 `http://localhost:8085/dev-ui/?app=app`에 접속하면 공식 ADK 개발자 대시보드를 이용할 수 있습니다.
+   > [!NOTE]
+   > **원격 가상 머신(VM)에서 접속 시 포트 포워딩 안내:**  
+   > 원격 GCE VM에서 실행 중인 플레이그라운드를 개인 PC 브라우저에서 열려면, 로컬 PC 터미널에서 다음 SSH 포트 포워딩 터널을 연결해야 합니다:
+   > ```bash
+   > gcloud compute ssh <인스턴스이름> --zone=<존> -- -L 8085:localhost:8085
+   > ```
+   > 터널 연결 후 브라우저에서 `http://localhost:8085/dev-ui/?app=app`에 접속하면 공식 ADK 개발자 대시보드를 열람할 수 있습니다.
 
 ---
 
@@ -935,7 +1077,7 @@ flowchart LR
 
 | 평가 지표 (Metric) | 가중치 | 합격 목표 | 판정 질문 및 루브릭 (Rubric) | 실패 시 개선 방안 |
 |:---|:---:|:---:|:---|:---|
-| **과업 완료율**<br>`multi_turn_task_success` | **40%** | **>= 0.80** | **"에이전트가 사용자의 궁극적인 비즈니스 목적을 달성했는가?"**<br>- 1.0: 규정 확인 후 연차 상신 또는 IT 티켓 발행까지 완료<br>- 0.5: 규정이나 잔여 일수만 조회하고 상신을 누락함<br>- 0.0: 시스템 에러 또는 엉뚱한 답변으로 대화 중단 | `agent.py`의 `HUB_INSTRUCTION`에 최종 단계 상신 의무 및 태스크 완수 행동 수칙 강화 |
+| **과업 완료율**<br>`multi_turn_task_success` | **40%** | **>= 0.80** | **"에이전트가 사용자의 궁극적인 비즈니스 목적을 달성했는가?"**<br>- 1.0: 규정 확인 후 연차 상신 또는 IT 티켓 발행까지 완료<br>- 0.5: 규정이나 잔여 일수만 조회하고 상신을 누락함<br>- 0.0: 시스템 에러 또는 엉뚱한 답변으로 대화 중단 | `app/agent.py`의 `HUB_INSTRUCTION`에 최종 단계 상신 의무 및 태스크 완수 행동 수칙 강화 |
 | **도구 호출 품질**<br>`multi_turn_tool_use_quality` | **35%** | **>= 0.85** | **"올바른 순서와 유효한 파라미터로 필수 도구를 호출했는가?"**<br>- 1.0: 규정 RAG 선검증 -> FastMCP 잔여일수/장비 조회 -> SaaS 트랜잭션의 올바른 시퀀스 준수<br>- 0.0: 규정 검증 없이 바로 신청하거나 불필요한 도구를 반복 호출 | 서브 에이전트 지시문 및 도구 함수의 파라미터 docstring/스키마 보강 |
 | **규정 그라운딩 (환각 차단)**<br>`hallucination` | **25%** | **>= 0.90** | **"사내 공식 지침(POL-HR, POL-IT)에 기반한 사실만을 답변했는가?"**<br>- 1.0: 문서번호(POL-HR-2026-004 등) 및 조항별 기한/조건을 정확히 인용<br>- 0.0: 사내 지침에 없는 규정을 임의로 지어내거나 기한을 잘못 안내 | RAG 검색 신뢰도 임계값(0.80) 적용 확인 및 추측 답변 금지 강령 주입 |
 
@@ -953,42 +1095,11 @@ tests/eval/
     └── eval-multi-turn.json     # 규정 확인 후 신청까지 이어지는 복합 대화 시나리오
 ```
 
-##### 골든 데이터셋 (`eval-single-turn.json`) 스키마 예시:
-```json
-{
-  "eval_cases": [
-    {
-      "eval_case_id": "hr-leave-lead-time",
-      "prompt": {
-        "role": "user",
-        "parts": [{"text": "4일 연속으로 휴가를 쓰려면 며칠 전에 신청해야 하나요?"}]
-      },
-      "expected_outputs": {
-        "keywords": ["7영업일", "POL-HR-2026-004", "부서장 사전 승인"]
-      }
-    }
-  ]
-}
-```
-
 ---
 
-#### 4. `agents-cli eval` 핵심 명령어 레퍼런스
+#### 4. 로컬 평가 실행 및 실측 결과 분석
 
-| 명령어 | 역할 및 용도 | 주요 옵션 및 사용 예시 |
-|:---|:---|:---|
-| **`eval run`** | 추론 실행(`generate`)과 LLM 채점(`grade`)을 한 번에 원클릭 실행 | `agents-cli eval run --dataset tests/eval/datasets/eval-single-turn.json --config tests/eval/eval_config.yaml` |
-| **`eval generate`** | 에이전트를 구동하여 대화 및 도구 호출 궤적(Trace)만 `artifacts/traces/`에 저장 | `agents-cli eval generate --dataset tests/eval/datasets/eval-multi-turn.json` |
-| **`eval grade`** | 기 수집된 트레이스를 읽고 LLM 채점관을 통해 점수 및 HTML 리포트 생성 | `agents-cli eval grade --traces artifacts/traces/` |
-| **`eval compare`** | 프롬프트 수정 전후 두 결과 파일(.json)의 점수를 비교하여 회귀(퇴보) 여부 검증 | `agents-cli eval compare artifacts/grade_results/results_v1.json artifacts/grade_results/results_v2.json` |
-| **`eval analyze`** | 10개 이상의 실패 케이스 발생 시 실패 유형을 자동 클러스터링하여 원인 제시 | `agents-cli eval analyze --eval-result artifacts/grade_results/results_latest.json` |
-
----
-
-#### 5. 로컬 평가 실행 및 시각적 HTML 대시보드 열람
-
-1. **로컬 종합 평가 실행**:
-   터미널에서 Vertex AI 환경 변수를 설정한 뒤 `agents-cli eval run`을 실행합니다.
+터미널에서 Vertex AI 환경 변수를 설정한 뒤 `agents-cli eval run`을 실행합니다.
 
 ```bash
 # Vertex AI 환경 변수 설정 후 로컬 종합 평가 실행
@@ -1002,30 +1113,73 @@ agents-cli eval run \
   --config tests/eval/eval_config.yaml
 ```
 
-2. **로컬 웹 서버로 결과 열람 (포트 8081)**:
-   채점이 완료되면 `artifacts/grade_results/results_<timestamp>.html` 파일이 생성됩니다. 파이썬 내장 웹서버를 기동하여 시각적 보고서를 확인합니다:
+```
++-----------------------------------------------------------------------------------+
+| 출력 예시 (실측):                                                                   |
+| ─────────────────────────── Step 1/2: eval generate ──────────────────────────── |
+| Booting local ADK server (app_name=app)                                           |
+| Running inference on dataset: tests/eval/datasets/eval-single-turn.json            |
+| Starting a temporary local server on port 18081 (stops automatically when done).  |
+| Server ready at http://127.0.0.1:18081                                            |
+| Discovered root_agent_name=enterprise_ops_agent                                   |
+| [generate] case[2] done                                                           |
+| [generate] case[1] done                                                           |
+| [generate] case[0] done                                                           |
+| Traces saved to artifacts/traces/traces_20260930_053740.json                       |
+| Local server stopped.                                                             |
+| ───────────────────────────── Step 2/2: eval grade ───────────────────────────── |
+| Loading trace file(s) from artifacts/traces/traces_20260930_053740.json...        |
+| Loaded 3 total eval cases from 1 file(s).                                         |
+| Running evaluation for metrics: multi_turn_task_success,                          |
+| multi_turn_tool_use_quality, hallucination at 15/s (--qps to change)...           |
+|                                                                                   |
+| Evaluation Summary                                                                |
+|                                                                                   |
+| multi_turn_task_success_v1:                                                       |
+|   num_cases_total: 3                                                              |
+|   num_cases_valid: 3                                                              |
+|   num_cases_error: 0                                                              |
+|   mean_score: 0.6667                                                              |
+|   stdev_score: 0.0000                                                             |
+|   pass_rate: 0.0000                                                               |
+|                                                                                   |
+| multi_turn_tool_use_quality_v1:                                                   |
+|   num_cases_total: 3                                                              |
+|   num_cases_valid: 3                                                              |
+|   num_cases_error: 0                                                              |
+|   mean_score: 0.6667                                                              |
+|   stdev_score: 0.5774                                                             |
+|   pass_rate: 0.6667                                                               |
+|                                                                                   |
+| hallucination_v1:                                                                 |
+|   num_cases_total: 3                                                              |
+|   num_cases_valid: 3                                                              |
+|   num_cases_error: 0                                                              |
+|   mean_score: 1.0000                                                              |
+|   stdev_score: 0.0000                                                             |
+|   pass_rate: 1.0000                                                               |
+|                                                                                   |
+| Saved full results to artifacts/grade_results/results_20260930_053957.json        |
+| Saved HTML results to artifacts/grade_results/results_20260930_053957.html        |
++-----------------------------------------------------------------------------------+
+```
+
+로컬 웹 서버로 결과 열람 (포트 8081):
 
 ```bash
-# 로컬 웹 서버로 채점 리포트 브라우징 (포트 8081)
 python3 -m http.server 8081 --directory artifacts/grade_results
 ```
 
-3. **브라우저 접속 및 결과 분석**:
-   원격 브라우저(또는 로컬 PC)에서 `http://localhost:8081`에 접속하여 생성된 HTML 파일을 열어 다음 핵심 사항을 검토합니다:
-   - 각 테스트 케이스별 통과 여부(PASS/FAIL)
-   - 3대 핵심 지표별 점수 그래프 및 가중치 반영 종합 점수
-   - LLM 채점관의 상세한 정성적 판정 근거(Judge Verdicts)
-   - 에이전트의 내부 도구 호출 타임라인 및 파라미터 내역
-
 > [!IMPORTANT]
 > **실습 2(Part 2: Evaluation & Governance)로의 연결 로드맵:**  
-> 실습 1에서 준비된 `tests/eval` 프레임워크와 평가 기준은 **실습 2의 핵심 기반**이 됩니다. 실습 2에서는 이 평가 엔진을 CI/CD 파이프라인에 통합하여 점수가 미달하는 에이전트의 배포를 자동 차단하고, Agent Gateway와 Model Armor를 결합하여 규정과 보안을 완벽히 통제하는 엔터프라이즈 거버넌스를 완성하게 됩니다.
+> 실측 결과에서 `hallucination_v1`은 1.0000(100% 무환각)을 기록했으나, `multi_turn_task_success_v1`과 `multi_turn_tool_use_quality_v1`은 0.6667로 측정되었습니다.  
+> 실습 2에서는 이 베이스라인 점수를 바탕으로 감점 원인을 진단하고, 프롬프트 지침을 한 단계씩 체계적으로 교정(Hillclimbing)하여 합격선(0.85 이상)으로 점수를 향상시킨 뒤, Cloud Run에 안전하게 프로덕션 배포(`agents-cli deploy`)하는 과정을 마스터하게 됩니다.
 
 ---
 
 ## 📦 실습 1 최종 완성본 프로젝트 다운로드 (Lab 2 대비 체크포인트)
 
-실습 1 진행 중 시간 제약이나 환경 오류로 인해 전체 코드를 완성하지 못한 참가자분들도 실습 2를 원활하게 진행하실 수 있도록, **실습 1의 최종 완성본 코드 프로젝트 압축 파일**을 제공합니다.
+실습 1 진행 중 시간 제약이나 환경 오류로 인해 전체 코드를 완성하지 못한 참가자분들도 실습 2를 원활하게 진행하실 수 있도록, 검증 완료된 전체 프로젝트 코드를 압축 패키지로 제공합니다.
 
 ### 1. 브라우저에서 직접 다운로드
 - [📥 enterprise_ops_agent_completed.zip 다운로드](./enterprise_ops_agent_completed.zip)
@@ -1041,12 +1195,13 @@ cd ~
 curl -fsSL https://raw.githubusercontent.com/hajekim/build-with-gemini/main/lab1/enterprise_ops_agent_completed.zip -o enterprise_ops_agent_completed.zip
 unzip -o enterprise_ops_agent_completed.zip
 
-# 3. 프로젝트 디렉터리 이동 및 구성 확인
+# 3. 프로젝트 디렉터리 이동 및 가상 환경 동기화
 cd enterprise-ops-agent
-ls -la
+agents-cli install
+python3 tests/test_scenarios.py
 ```
 
-압축 해제 후 `enterprise_ops_agent` 디렉터리에 `agent.py`, `tools/`, `a2a_server.py`, `tests/eval/`이 모두 정상적으로 구성되어 있는지 확인합니다.
+압축 해제 후 `enterprise-ops-agent` 디렉터리에 `app/`, `docs/`, `tests/eval/`, `agents-cli-manifest.yaml`이 모두 정상적으로 구성되어 있는지 확인합니다.
 
 ---
 

@@ -174,7 +174,7 @@
           <span class="font-bold text-[11px]">실습 시스템 정상 가동 중</span>
         </div>
 
-        <a href="https://korean-mock-saas-dri5akvbzq-du.a.run.app/" target="_blank"
+        <a href="https://korean-mock-saas-330751298968.asia-northeast3.run.app/" target="_blank"
           class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold px-3 py-1.5 rounded-lg flex items-center space-x-1.5 shadow-xs transition">
           <i class="fa-solid fa-server text-xs"></i>
           <span>Mock SaaS 포털</span>
@@ -831,11 +831,15 @@
                       <i class="fa-regular fa-copy"></i> 복사
                     </button>
                   </div>
-                  <pre class="p-4 font-mono text-xs text-cyan-300 leading-relaxed"><code># 1. 필수 라이브러리 및 런타임 툴 설치 (Google ADK 2.3.0, uv, FastMCP)
-pip install --upgrade pip
-pip install google-agents-cli "google-adk>=2.3.0" mcp httpx pydantic pyyaml uv
+                  <pre class="p-4 font-mono text-xs text-cyan-300 leading-relaxed"><code># 1. 시스템 도구 및 ADK 필수 라이브러리 설치
+sudo apt-get update -qq && sudo apt-get install -y -qq unzip
+pip install --break-system-packages --upgrade pip
+pip install --break-system-packages google-agents-cli "google-adk>=2.3.0" mcp httpx pydantic pyyaml uv
 
-# 2. agents-cli 공식 템플릿으로 프로젝트 뼈대 생성
+# 2. 바이너리 PATH 환경변수 등록
+export PATH="$HOME/.local/bin:$PATH"
+
+# 3. agents-cli 공식 템플릿으로 프로젝트 뼈대 생성
 cd ~
 agents-cli create enterprise-ops-agent \
   --deployment-target cloud_run \
@@ -1248,7 +1252,7 @@ print(json.dumps(search_company_policy('4일 연속 연차 신청 기한', categ
                       <span>Korean Mock SaaS 포털 및 FastMCP 프로토콜 규격</span>
                     </h3>
                   </div>
-                  <a href="https://korean-mock-saas-dri5akvbzq-du.a.run.app/" target="_blank" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 shrink-0">
+                  <a href="https://korean-mock-saas-330751298968.asia-northeast3.run.app/" target="_blank" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 shrink-0">
                     <span>Mock SaaS 포털 열기</span>
                     <i class="fa-solid fa-arrow-up-right-from-square"></i>
                   </a>
@@ -1301,7 +1305,7 @@ print(json.dumps(search_company_policy('4일 연속 연차 신청 기한', categ
               <div class="card-studio p-5 space-y-3">
                 <h3 class="font-bold text-slate-900 text-xs uppercase tracking-wider">1. 개인 MCP 토큰 발급 및 환경변수 등록 (터미널)</h3>
                 <p class="text-xs text-slate-600 font-medium">
-                  <a href="https://korean-mock-saas-dri5akvbzq-du.a.run.app/" target="_blank" class="text-blue-600 underline font-bold">Mock SaaS 포털</a>에서 [MCP 토큰 발급]을 눌러 복사한 뒤 등록합니다:
+                  <a href="https://korean-mock-saas-330751298968.asia-northeast3.run.app/" target="_blank" class="text-blue-600 underline font-bold">Mock SaaS 포털</a>에서 [MCP 토큰 발급]을 눌러 복사한 뒤 등록합니다:
                 </p>
                 <div class="bg-[#090d16] border border-slate-800 rounded-xl overflow-hidden shadow-md">
                   <div class="bg-[#131b2e] px-4 py-2 border-b border-slate-800 flex items-center justify-between">
@@ -1815,6 +1819,31 @@ agents-cli eval run \
 python3 -m http.server 8081 --directory artifacts/grade_results</code></pre>
                 </div>
 
+                <!-- Real Output Callout -->
+                <div class="bg-[#090d16] border border-slate-800 rounded-xl p-4 shadow-inner space-y-2">
+                  <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                    <span class="text-[11px] text-emerald-400 font-mono font-bold">agents-cli eval run 실측 결과 출력</span>
+                    <span class="text-[10px] text-slate-400 font-mono">Evaluation Summary</span>
+                  </div>
+                  <pre class="font-mono text-[11px] text-slate-300 leading-relaxed overflow-x-auto whitespace-pre"><code>multi_turn_task_success_v1:
+  num_cases_total: 3
+  mean_score: 0.6667
+  pass_rate: 0.0000
+
+multi_turn_tool_use_quality_v1:
+  num_cases_total: 3
+  mean_score: 0.6667
+  pass_rate: 0.6667
+
+hallucination_v1:
+  num_cases_total: 3
+  mean_score: 1.0000
+  pass_rate: 1.0000
+
+Saved full results to artifacts/grade_results/results_*.json
+Saved HTML results to artifacts/grade_results/results_*.html</code></pre>
+                </div>
+
                 <div class="text-xs text-slate-700 space-y-1.5 leading-relaxed font-medium">
                   <p>명령어를 실행하면 로컬 <code class="font-mono text-slate-900 bg-slate-100 px-1 py-0.5 rounded">agent.py</code>가 질문들을 순차 실행하고, Vertex AI Gemini 모델이 채점관(LLM-as-a-judge) 역할을 맡아 객관적인 품질 점수를 산출합니다.</p>
                   <p>원격 브라우저에서 <code class="font-mono text-blue-800 bg-blue-100 px-1 py-0.5 rounded font-bold">http://localhost:8081</code>을 열면 각 케이스별 판정 사유와 지연 시간, 성공률이 포함된 시각적 리포트(<code class="font-mono text-slate-800">results_*.html</code>)를 즉시 열람할 수 있습니다.</p>
@@ -1827,7 +1856,7 @@ python3 -m http.server 8081 --directory artifacts/grade_results</code></pre>
                     <span>실습 2(Part 2: Evaluation &amp; Governance)로의 연결 로드맵</span>
                   </span>
                   <p class="text-[11px] text-indigo-900 leading-relaxed font-normal">
-                    실습 1에서 준비된 <code class="font-mono font-bold">tests/eval</code> 프레임워크와 평가 기준은 실습 2의 핵심 기반이 됩니다. 실습 2에서는 이 평가 엔진을 CI/CD 파이프라인에 통합하여 점수 미달 에이전트의 배포를 자동 차단하고, Agent Gateway와 Model Armor를 결합하여 규정과 보안을 완벽히 통제하는 엔터프라이즈 거버넌스를 완성하게 됩니다.
+                    실측 결과에서 <code class="font-mono font-bold">hallucination_v1</code>은 1.0000(100% 무환각)을 기록했으나, <code class="font-mono font-bold">multi_turn_task_success_v1</code>과 <code class="font-mono font-bold">multi_turn_tool_use_quality_v1</code>은 0.6667로 측정되었습니다. 실습 2에서는 이 베이스라인 점수를 바탕으로 감점 원인을 진단하고, 프롬프트 지침을 체계적으로 교정(Hillclimbing)하여 합격선(0.85 이상)으로 도약시킨 뒤, Cloud Run에 안전하게 프로덕션 배포(<code class="font-mono font-bold">agents-cli deploy</code>)하는 과정을 마스터하게 됩니다.
                   </p>
                 </div>
               </div>
@@ -1862,7 +1891,9 @@ python3 -m http.server 8081 --directory artifacts/grade_results</code></pre>
 cd ~ && \
 curl -fsSL https://raw.githubusercontent.com/hajekim/build-with-gemini/main/lab1/enterprise_ops_agent_completed.zip -o enterprise_ops_agent_completed.zip && \
 unzip -o enterprise_ops_agent_completed.zip && \
-cd enterprise-ops-agent</code></pre>
+cd enterprise-ops-agent && \
+agents-cli install && \
+python3 tests/test_scenarios.py</code></pre>
                 </div>
               </div>
 
@@ -1946,7 +1977,7 @@ cd enterprise-ops-agent</code></pre>
               </div>
               <div class="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-slate-200">
                 <span class="text-slate-500 font-medium">Mock SaaS 포털:</span>
-                <a href="https://korean-mock-saas-dri5akvbzq-du.a.run.app/" target="_blank" class="text-indigo-600 font-bold underline text-[11px] flex items-center gap-1">
+                <a href="https://korean-mock-saas-330751298968.asia-northeast3.run.app/" target="_blank" class="text-indigo-600 font-bold underline text-[11px] flex items-center gap-1">
                   <span>Cloud Run 포털 열기</span>
                   <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
                 </a>
@@ -2261,8 +2292,8 @@ cd enterprise-ops-agent</code></pre>
         tag: "Task 1",
         desc: "agents-cli 프로젝트 생성 & SDD 다운로드",
         btnText: "생성 및 다운로드 명령어 복사",
-        action: () => copyText("cd ~\nagents-cli create enterprise-ops-agent -d cloud_run --session-type in_memory --cicd-runner skip -p -y -s\ncd enterprise-ops-agent\nmkdir -p docs/policies\ngsutil cp gs://oreobox/sdd/SDD.md docs/\ngsutil cp gs://oreobox/policy/*.pdf docs/policies/"),
-        preview: "agents-cli create enterprise-ops-agent & gsutil cp SDD.md"
+        action: () => copyText("cd ~\nagents-cli create enterprise-ops-agent -d cloud_run --session-type in_memory --cicd-runner skip -p -y -s\ncd enterprise-ops-agent\nmkdir -p docs/policies\ngsutil cp gs://oreobox/sdd/SDD.md docs/\ngsutil cp gs://oreobox/policy/*.pdf docs/policies/\nagents-cli install"),
+        preview: "agents-cli create & gsutil cp SDD.md & agents-cli install"
       },
       {
         tag: "Task 2",

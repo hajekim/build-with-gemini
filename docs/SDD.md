@@ -113,7 +113,7 @@ def search_company_policy(query: str, category: str = "ALL") -> dict:
 ### 2.3 Google ADK FastMCP SaaS 연동 도구 명세 (`tools/mcp_tools.py`)
 
 #### 서버 통신 및 FastMCP 표준 프로토콜 규격
-- FastMCP 서버 베이스 URL: `https://korean-mock-saas-dri5akvbzq-du.a.run.app`
+- FastMCP 서버 베이스 URL: `https://korean-mock-saas-330751298968.asia-northeast3.run.app`
 - 프로토콜: **Streamable HTTP 기반 JSON-RPC 2.0** (`initialize`, `tools/list`, `tools/call`)
 - 세션 어피니티 보장: Cloud Run 인스턴스 간 세션 ID 유지를 위해 `_get_persistent_client`로 `GAESA` 쿠키 및 `Mcp-Session-Id`를 영속화
 - 인증 및 무중단 토큰 발급: 환경 변수에 `MCP_TOKEN`이 없을 경우 `/api/mcp-tokens` API로부터 참가자 세션 토큰을 자동 발급 (`_auto_obtain_mcp_token`)
