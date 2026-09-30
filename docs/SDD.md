@@ -1,9 +1,9 @@
 # 소프트웨어 설계서 (SDD): Cymbal Group 엔터프라이즈 AI 운영 에이전트
 
-**문서 버전**: 2.1.0  
-**작성일**: 2026-09-29  
+**문서 버전**: 2.2.0  
+**작성일**: 2026-09-30  
 **프로젝트**: Build with Gemini (Lab 1)  
-**대상 프레임워크**: Google Antigravity 2.0 (`agy`), Google Agent Development Kit 2.0 (`google-adk`)  
+**대상 프레임워크**: Google Antigravity 2.0 (`agy`), Google Agent Development Kit 2.3.0 (`google-adk`)  
 **주력 모델**: `gemini-3.8-flash`  
 
 ---
@@ -23,7 +23,7 @@ Cymbal Group Korea 임직원은 일상 업무에서 분산된 사내 포털과 �
    - 정기 교체 주기(36개월) 및 직군별 표준 기종(엔지니어링: M3 Max 64GB)을 인지하지 못한 채 무분별한 교체 요청이 발행되어 IT 서비스데스크 업무 과부하 유발.
 
 ### 1.2 시스템 목표 및 핵심 성과 지표 (Target & KPIs)
-본 프로젝트는 **Google Antigravity 2.0**과 **Google ADK 2.0**을 활용하여, 사내 규정을 실시간으로 선검증한 후 SaaS 시스템과 동기화하는 **엔터프라이즈 AI 운영 에이전트**를 구축합니다.
+본 프로젝트는 **Google Antigravity 2.0**과 **Google ADK 2.3.0**을 활용하여, 사내 규정을 실시간으로 선검증한 후 SaaS 시스템과 동기화하는 **엔터프라이즈 Hub-and-Spoke 멀티 에이전트 시스템**을 구축합니다.
 
 | 목표 지표 (KPI) | 목표 수준 | 측정 및 검증 방식 |
 |:---|:---|:---|
@@ -86,6 +86,12 @@ def search_company_policy(query: str, category: str = "ALL") -> dict:
     """
 ```
 
+#### 하이브리드 Policy RAG 아키텍처
+1. **1차 검색 (Vertex AI Search)**:
+   - Google Cloud Discovery Engine (`discoveryengine_v1.SearchServiceClient`)를 통해 사내 정책 데이터스토어에서 의미론적 시맨틱 검색 수행.
+2. **2차 탄력적 폴백 (Resilient Fallback)**:
+   - 클라우드 인증 지연이나 네트워크 예외 발생 시, Cloud Storage PDF 원본 및 내장 정적 그라운드 트루스 조항을 통해 `grounding_confidence: 0.96`의 검증 데이터를 무중단 반환.
+
 #### 사내 규정 Ground Truth 인덱싱 데이터
 1. **사내 복무 규정 (POL-HR-2026-004)**:
    - **제 3 조 (연차 발생 및 부여)**: 1년 미만 사원은 1개월 개근 시 1.25일 발생(1년 차 총 15일). 3년 이상 근속 시 매 2년마다 1일 가산(최대 25일 한도). 반일(0.5일) 및 전일(1.0일) 단위 분할 사용 가능.
@@ -107,27 +113,37 @@ def search_company_policy(query: str, category: str = "ALL") -> dict:
 ### 2.3 Google ADK FastMCP SaaS 연동 도구 명세 (`tools/mcp_tools.py`)
 
 #### 서버 통신 및 FastMCP 표준 프로토콜 규격
-- FastMCP 서버 베이스 URL: `https://korean-mock-saas-dri5akvbzq-du.a.run.app` (Cloud Run Session Affinity 활성화)
+- FastMCP 서버 베이스 URL: `https://korean-mock-saas-dri5akvbzq-du.a.run.app`
 - 프로토콜: **Streamable HTTP 기반 JSON-RPC 2.0** (`initialize`, `tools/list`, `tools/call`)
-- 인증 및 테넌트 격리 헤더: `X-MCP-Token: {MCP_TOKEN}` (참가자별 발급된 개인 토큰 주입)
+- 세션 어피니티 보장: Cloud Run 인스턴스 간 세션 ID 유지를 위해 `_get_persistent_client`로 `GAESA` 쿠키 및 `Mcp-Session-Id`를 영속화
+- 인증 및 무중단 토큰 발급: 환경 변수에 `MCP_TOKEN`이 없을 경우 `/api/mcp-tokens` API로부터 참가자 세션 토큰을 자동 발급 (`_auto_obtain_mcp_token`)
 - Google ADK 클라이언트: `google.adk.tools.mcp_tool.McpToolset` + `StreamableHTTPConnectionParams`
 
-#### 1. WorkWeek HRMS FastMCP 도구 세트 (`/work-week/mcp`)
-Google ADK `McpToolset`을 통해 7종의 도구가 `workweek_agent`에 자동 바인딩됩니다:
+#### 1. WorkWeek HRMS FastMCP 서버 도구 (`/work-week/mcp`)
+Google ADK `McpToolset`을 통해 7종의 도구가 자동 바인딩됩니다:
 1. `get_employee_balances(employee_id: str)`: 잔여 연차(12.0일) 및 병가(14.0일) 조회
 2. `request_time_off(employee_id: str, start_date: str, end_date: str, leave_type: str, days: float)`: 신규 휴가 신청 상신
-3. `cancel_leave_request(employee_id: str, request_id: int)`: 기존 승인/대기 휴가 취소 (실습 2 Agent Gateway 차단 대상)
+3. `cancel_leave_request(employee_id: str, request_id: int)`: 기존 승인/대기 휴가 취소
 4. `get_leave_requests(employee_id: str)`: 휴가 신청 이력 및 결재 상태 조회
 5. `get_personal_info(employee_id: str)`: 임직원 직급, 부서, 주소, 연락처 조회
-6. `update_personal_info(employee_id: str, address: str, phone: str)`: 연락처 및 주소 변경 (실습 2 Agent Gateway 차단 대상)
+6. `update_personal_info(employee_id: str, address: str, phone: str)`: 연락처 및 주소 변경
 7. `get_current_employee_id()`: 현재 토큰의 사번 확인
 
-#### 2. ServiceImmediately ITMS FastMCP 도구 세트 (`/service-immediately/mcp`)
-Google ADK `McpToolset`을 통해 4종의 도구가 `itsm_agent`에 자동 바인딩됩니다:
+#### 2. ServiceImmediately ITMS FastMCP 서버 도구 (`/service-immediately/mcp`)
+Google ADK `McpToolset`을 통해 4종의 도구가 자동 바인딩됩니다:
 1. `list_tickets(employee_id: str)`: 임직원 지급 장비 이력(AST-MBP-2022-819, 38개월 실사용) 및 인시던트 티켓 목록 조회
-2. `create_ticket(requested_by: str, category: str, short_description: str, priority: str, assignment_group: str)`: 장애 접수 및 M3 Max 랩톱 교체 티켓 발행 (실습 2 Model Armor 카드번호 검사 대상)
-3. `add_ticket_comment(ticket_id: str, author: str, comment: str)`: 티켓 타임라인 댓글 추가 (실습 2 Model Armor 간접 인젝션 방어 대상)
+2. `create_ticket(requested_by: str, category: str, short_description: str, priority: str, assignment_group: str)`: 장애 접수 및 M3 Max 랩톱 교체 티켓 발행
+3. `add_ticket_comment(ticket_id: str, author: str, comment: str)`: 티켓 타임라인 댓글 추가
 4. `update_ticket_status(ticket_id: str, status: str, resolution_notes: str)`: 티켓 처리 상태 변경
+
+#### 3. Python 편리 래퍼 함수 명세 (`tools/mcp_tools.py`)
+에이전트가 단독 또는 Hub 직접 호출 시 활용할 수 있는 표준 래퍼 함수:
+- `get_employee_leave_balance(employee_id: str = "EMP-10294") -> dict`: WorkWeek의 `get_employee_balances`를 호출하여 잔여 일수 반환
+- `submit_leave_request(employee_id: str, start_date: str, end_date: str, leave_type: str, days: float, reason: str = "") -> dict`: WorkWeek의 `request_time_off`를 호출하여 휴가 상신
+- `cancel_leave_request(employee_id: str, request_id: int) -> dict`: WorkWeek의 `cancel_leave_request` 호출
+- `list_hardware_assets_and_tickets(employee_id: str = "EMP-10294") -> dict`: ServiceImmediately의 `list_tickets`를 호출하여 지급 장비 및 티켓 반환
+- `create_hardware_incident_ticket(employee_id: str, title: str, description: str, category: str = "하드웨어", priority: str = "2 - 높음 (High)") -> dict`: ServiceImmediately의 `create_ticket`을 호출하여 인시던트 티켓 발행
+- `add_ticket_comment(ticket_id: str, comment: str, author: str = "이민우") -> dict`: ServiceImmediately의 `add_ticket_comment` 호출
 
 ---
 
@@ -156,12 +172,12 @@ Google ADK `McpToolset`을 통해 4종의 도구가 `itsm_agent`에 자동 바�
 
 - **실습 1 (로컬 멀티 에이전트 구축 및 검증, 80분)**:
   - Antigravity 2.0(`agy`) 프롬프트 주도 개발
-  - Google ADK 2.0 Hub-and-Spoke 멀티 에이전트 시스템(`agent.py`) 완성
+  - Google ADK 2.3.0 Hub-and-Spoke 멀티 에이전트 시스템(`agent.py`) 완성
   - 하이브리드 규정 RAG(`hr_policy_agent`) 및 FastMCP 11개 도구 바인딩(`workweek_agent`, `itsm_agent`)
-  - 개발자 로컬 웹 콘솔(`http://localhost:8081`)을 통한 다중 턴 대화 시나리오 검증
-  - 실습 2를 위한 골든 평가 데이터셋(`tests/eval/datasets/`) 준비
+  - 개발자 로컬 콘솔 및 자동 통합 테스트(`tests/test_scenarios.py`)를 통한 다중 턴 대화 시나리오 검증
+  - 실습 2를 위한 4-Tier 골든 평가 데이터셋(`tests/eval/datasets/`) 준비
   - 최종 산출물: 로컬 완성본 압축 패키지(`enterprise_ops_agent_completed.zip`)
-- **실습 2 (엔터프라이즈 평가, 거버넌스 및 프로덕션 배포, 80분)**:
+- **실습 2 (엔터프라이즈 평가, 거버넌스 및 프로덕션 배포, 75분)**:
   - `agents-cli eval run`을 통한 정량적 품질 평가 및 LLM-as-a-Judge 채점
   - Secret Manager 기반 MCP 토큰 보안 이관 및 Cloud Run / Agent Runtime 프로덕션 배포
   - Agent Registry 등록 및 Agent Identity (SPIFFE ID) 부여
@@ -214,7 +230,7 @@ Google ADK `McpToolset`을 통해 4종의 도구가 `itsm_agent`에 자동 바�
 
 | 항목 | 요구사항 규격 | 구현 메커니즘 |
 |:---|:---|:---|
-| **응답 지연시간 (Latency Budget)** | 총 E2E 지연시간 <= 3.5초 | RAG 인메모리 인덱싱(<=0.3s) + SaaS REST 호출(<=1.0s) + Gemini 3.8 Flash 추론(<=2.0s) |
+| **응답 지연시간 (Latency Budget)** | 총 E2E 지연시간 <= 3.5초 | RAG 인메모리 인덱싱(<=0.3s) + SaaS FastMCP 호출(<=1.0s) + Gemini 3.8 Flash 추론(<=2.0s) |
 | **처리량 및 제한 (Rate Limiting)** | 분당 120회/토큰, 300회/IP | Mock SaaS 내장 Rate Limiter 및 클라이언트 지수 백오프 적용 |
 | **보안 및 인증 (Security)** | Zero-Trust 테넌트 격리 | HMAC 서명 기반 토큰 분리 및 암호화 전송 |
 | **안정성 (Reliability)** | 가용성 99.9% 보장 | 네트워크 일시 장애 시 로컬 Fallback Mock 캐시 제공 |
@@ -238,11 +254,11 @@ Google ADK `McpToolset`을 통해 4종의 도구가 `itsm_agent`에 자동 바�
 | 마일스톤 | 산출물 | 검증 기준 | 실습 1 매핑 |
 |:---|:---|:---|:---|
 | **M1: 환경 및 그라운딩** | `docs/context_summary.md` | `agy`가 SDD 구조를 이해하고 요약 파일 생성 성공 | Task 1 |
-| **M2: 에이전트 뼈대** | `config.yaml`, `agent.py` | ADK 2.0 Agent 클래스 초기화 및 기본 모델 바인딩 성공 | Task 2 |
+| **M2: 에이전트 뼈대** | `config.yaml`, `agent.py` | ADK 2.3.0 Hub-and-Spoke Agent 클래스 초기화 및 서브 에이전트 바인딩 성공 | Task 2 |
 | **M3: 규정 RAG 도구** | `tools/policy_rag.py` | POL-HR/POL-IT 조항 검색 및 단위 테스트 통과 (신뢰도 >= 0.90) | Task 3 |
 | **M4: FastMCP SaaS 도구**| `tools/mcp_tools.py` | 실제 Cloud Run Mock SaaS와 연동 및 HTTP 200 OK 응답 확인 | Task 4 |
 | **M5: 오케스트레이션 검증**| 통합 `agent.py` | 4일 연차 신청 및 긴급 노트북 교체 시나리오 100% 통과 | Task 5 |
-| **M6: GE A2A 패키징** | `agent_manifest.json`, `a2a_server.py` | GE 표준 A2A 매니페스트 생성 및 curl 로컬 시뮬레이션 성공 | Task 6 |
+| **M6: 로컬 A2A 기동 & Eval 준비** | `a2a_server.py`, `tests/test_scenarios.py`, `tests/eval/` | 로컬 A2A 서버 기동 및 통합 테스트 통과, Golden Evalset 준비 완료 | Task 6 |
 
 ---
 
