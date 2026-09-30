@@ -114,7 +114,22 @@ Antigravity CLI는 가벼운 터미널 환경에서 여러 파일의 맥락을 �
 > [!NOTE]
 > Konsole 터미널을 열 때 `Warning: Could not find '', starting '/bin/bash' instead. Please check your profile settings.` 경고가 표시되더라도 정상 동작하므로 안전하게 무시하셔도 됩니다.
 
-2. 터미널에 다음 명령어를 입력해 Antigravity CLI를 실행합니다:
+2. **실습 필수 GCP API 사전 활성화**:  
+실습 1의 에이전트 개발 및 실습 2의 거버넌스(Agent Registry, Agent Gateway, Model Armor)를 지체 없이 진행하기 위해, 터미널에 다음 명령어를 입력하여 필수 API를 일괄 활성화합니다:
+
+```bash
+gcloud services enable \
+  aiplatform.googleapis.com \
+  agentregistry.googleapis.com \
+  networkservices.googleapis.com \
+  serviceextensions.googleapis.com \
+  networksecurity.googleapis.com \
+  modelarmor.googleapis.com \
+  discoveryengine.googleapis.com \
+  secretmanager.googleapis.com
+```
+
+3. 터미널에 다음 명령어를 입력해 Antigravity CLI를 실행합니다:
 
 ```bash
 agy
@@ -274,94 +289,106 @@ cat /config/workspace/docs/context_summary.md
 
 ---
 
-## Task 2. agy 프롬프트 기반 ADK 2.0 에이전트 뼈대 생성
+## Task 2. agy 프롬프트 기반 ADK 2.0 멀티 에이전트(MAS) 뼈대 생성
 
-이 단계에서는 코드를 직접 작성하지 않고, `agy`에게 지시하여 SDD 규격에 맞는 설정 파일(`config.yaml`)과 기본 `agent.py` 뼈대를 생성하도록 합니다.
+이 단계에서는 코드를 직접 수동 작성하지 않고, `agy`에게 지시하여 SDD 2.1절 규격에 맞는 Hub-and-Spoke 멀티 에이전트 설정 파일(`config.yaml`)과 기본 `agent.py` 뼈대를 생성하도록 합니다.
 
 ---
 
-### agents-cli 프로젝트 표준 아키텍처 및 핵심 파일별 역할
+### agents-cli 프로젝트 표준 아키텍처 및 멀티 에이전트(MAS) 핵심 구성
 
-Google Cloud 환경에서 엔터프라이즈 AI 에이전트를 개발, 평가(Evaluation), Cloud Run 컨테이너 배포, 사내 Gemini Enterprise 등록까지 일관되게 관리하는 공식 표준 규격 구조입니다.
+엔터프라이즈 환경에서는 하나의 거대한 단일 에이전트에 모든 도구를 몰아넣을 경우, 프롬프트 오염(Prompt Pollution), 도구 충돌, 보안 경계 모호화 문제가 발생합니다.
+따라서 본 실습에서는 중앙 컨시어지 허브(`enterprise_ops_agent`)와 도메인별 3대 전문 서브 에이전트로 분리된 **Hub-and-Spoke 멀티 에이전트 시스템**을 채택합니다.
+
+```mermaid
+flowchart TD
+    User["임직원 (사용자)"] --> Hub["Root Orchestrator Hub\n(enterprise_ops_agent)\ngemini-3.8-flash"]
+
+    subgraph Specialist_SubAgents ["도메인별 전문 서브 에이전트 계층 (Google ADK)"]
+        Hub -->|"1. 규정 확인 위임"| Spoke1["hr_policy_agent\n(사내 복무/IT 규정 RAG 전문가)"]
+        Hub -->|"2. 연차/근태 위임"| Spoke2["workweek_agent\n(WorkWeek HRMS 연동 전문가)"]
+        Hub -->|"3. 전산지원 위임"| Spoke3["itsm_agent\n(ServiceImmediately ITSM 연동 전문가)"]
+    end
+```
 
 `agents-cli`와 Google ADK의 모듈 로더는 파이썬의 동적 임포트 메커니즘(`importlib`)을 사용하므로, 프로젝트 디렉터리 이름은 하이픈(-)이 아닌 유효한 파이썬 식별자(언더스코어 `_`)인 `enterprise_ops_agent`로 명명해야 합니다.
 
 ```text
 enterprise_ops_agent/
 ├── agents-cli-manifest.yaml # CLI 프로젝트 식별 매니페스트 (진입점, 배포 타겟, A2A 플래그 선언)
-├── config.yaml              # 모델 파라미터(gemini-3.8-flash), 시스템 지침, 거버넌스 규칙
-├── agent.py                 # Google ADK Runner 기반 에이전트 핵심 오케스트레이션 로직
+├── config.yaml              # 모델 파라미터(gemini-3.8-flash), 멀티 에이전트 역할 정의, 거버넌스 규칙
+├── agent.py                 # Google ADK 기반 Root Hub 및 3대 전문 서브 에이전트 오케스트레이션 로직
 ├── tools/                   # 외부 시스템 연동 도구 디렉터리
-│   ├── policy_rag.py        # Cloud Storage PDF 사내 규정 검색 도구 (RAG 시맨틱 검색)
-│   └── mcp_tools.py         # WorkWeek & ServiceImmediately FastMCP 연동 클라이언트
-├── a2a_server.py            # Gemini Enterprise A2A JSON-RPC 2.0 서버 및 로컬 웹 콘솔
-├── tests/eval/              # 에이전트 신뢰성 및 품질 검증 디렉터리
+│   ├── policy_rag.py        # 하이브리드 사내 규정 RAG 검색 도구 (Vertex AI Search + Cloud Storage PDF)
+│   └── mcp_tools.py         # Google ADK McpToolset 기반 WorkWeek & ITSM FastMCP 연동 클라이언트
+├── a2a_server.py            # Gemini Enterprise A2A JSON-RPC 2.0 서버 및 로컬 웹 대시보드
+├── tests/eval/              # 실습 2를 위한 에이전트 신뢰성 및 정량 평가 디렉터리
 │   ├── eval_config.yaml     # 평가 지표(task_success, tool_quality, hallucination) 및 가중치
 │   ├── evaluation_report.md # 평가 방법론, 벤치마크 설계 및 진단 보고서
-│   └── datasets/            # 평가용 검증 데이터셋 (단일턴 및 멀티턴 JSON)
+│   └── datasets/            # 평가용 골든 데이터셋 (단일턴 및 멀티턴 JSON)
 ├── requirements.txt         # 파이썬 의존성 패키지 목록
 └── Dockerfile               # Cloud Run 컨테이너 빌드 명세
 ```
 
-#### 각 파일 및 디렉터리의 상세 역할:
+#### 각 구성 요소 및 전문 서브 에이전트의 역할:
 
-1. **agents-cli-manifest.yaml**:
-   - `agents-cli` 명령줄 도구가 프로젝트를 식별하는 루트 메니페스트입니다.
-   - 메인 에이전트 진입점(`agent.py:build_agent`), 배포 타겟(Cloud Run), A2A 인터페이스 활성화 여부, 프로젝트 메타데이터를 선언합니다.
-2. **config.yaml**:
-   - 에이전트의 동작 환경을 선언적으로 정의하는 설정 명세서입니다.
-   - 사용 언어 모델(`gemini-3.8-flash`), 추론 온도(Temperature 0.1), 시스템 지침, RAG 신뢰도 임계값(0.80), 기본 조직 및 사번 정보(EMP-10294)가 포함됩니다.
-3. **agent.py**:
-   - 에이전트의 두뇌 역할을 하는 메인 오케스트레이터입니다.
-   - Google ADK의 `Agent`와 `Runner` 클래스를 초기화하고, 사용자 질의를 받아 규정 확인(RAG)이 필요한지, SaaS 시스템 연동이 필요한지 판단하여 도구를 동적으로 호출합니다.
-4. **tools/ (외부 연동 도구)**:
-   - `policy_rag.py`: Cloud Storage에 업로드된 사내 규정 PDF를 기반으로 조항 번호와 근거를 정확히 찾아주는 시맨틱 검색 도구입니다.
-   - `mcp_tools.py`: 인사 포털(WorkWeek)과 IT 전산 포털(ServiceImmediately)의 FastMCP REST API를 호출하여 연차 조회/신청 및 랩톱 교체 티켓을 발행하는 실행 도구입니다.
-5. **a2a_server.py**:
-   - 사내 Gemini Enterprise(GE)와 통신하기 위한 FastAPI 기반 Agent-to-Agent 서빙 계층입니다.
-   - A2A v0.3 규약의 JSON-RPC 2.0 엔드포인트(`/a2a`), 에이전트 카드(`/.well-known/agent-card.json`), 그리고 브라우저에서 직접 테스트할 수 있는 대화형 웹 인터페이스를 제공합니다.
-6. **tests/eval/ (평가 및 품질 관리)**:
-   - 에이전트의 응답 정확도와 도구 호출 안정성을 측정하는 품질 검증 모듈입니다.
-   - `eval_config.yaml`(평가 지표 및 가중치), `datasets/`(단일턴/복합턴 테스트 질문셋), `evaluation_report.md`(벤치마크 설계 및 진단 보고서)로 구성됩니다.
-7. **requirements.txt & Dockerfile**:
-   - `google-adk`, `fastapi`, `uvicorn`, `httpx` 등 실행 라이브러리 목록을 정의하고, Cloud Run 서버리스 컨테이너로 패키징하기 위한 공식 빌드 명세입니다.
-
-> [!TIP]
-> **왜 `enterprise-ops-agent` 대신 `enterprise_ops_agent`인가요?**  
-> 파이썬에서는 하이픈(-)이 뺄셈 연산자로 해석되므로 모듈 이름으로 임포트할 수 없습니다. `agents-cli`와 Google ADK는 내부적으로 파이썬의 동적 모듈 로더를 사용하므로 언더스코어(_)를 사용해야 모듈 로딩 오류를 방지할 수 있습니다.
+1. **중앙 허브 (`enterprise_ops_agent`)**:
+   - 사용자의 초기 질의를 수신하여 의도를 분류하고, 적절한 서브 에이전트에게 작업을 위임한 뒤 최종 응답을 종합합니다.
+2. **규정 전문 서브 에이전트 (`hr_policy_agent`)**:
+   - `search_company_policy` 도구를 독점적으로 소유하며, 사내 복무 규정(POL-HR) 및 IT 지침(POL-IT)을 검색해 공식 조항과 조건을 검증합니다.
+3. **인사 시스템 서브 에이전트 (`workweek_agent`)**:
+   - WorkWeek FastMCP 도구 7종을 바인딩하여 연차/병가 조회, 휴가 신청, 휴가 취소를 전담합니다.
+4. **전산 지원 서브 에이전트 (`itsm_agent`)**:
+   - ServiceImmediately FastMCP 도구 4종을 바인딩하여 지급 장비 이력 조회, 인시던트 티켓 생성, 댓글 작성을 전담합니다.
 
 ---
 
-### 1단계: 설정 파일 및 에이전트 뼈대 생성 지시
+### 1단계: 설정 파일 및 멀티 에이전트 뼈대 생성 지시
 
 실행 중인 **Antigravity CLI (`agy`)** 터미널에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
 
 ```text
-/config/workspace/docs/SDD.md의 1절 시스템 개요와 설정 규격을 참고하여, 다음 두 개의 파일을 생성해주세요:
+/config/workspace/docs/SDD.md의 2.1절 멀티 에이전트 구조와 1절 설정 규격을 참고하여, 다음 두 개의 파일을 생성해주세요:
 
 1. config.yaml:
-   - agent 이름: enterprise_ops_agent
+   - agent 이름: enterprise_ops_agent, architecture: Hub-and-Spoke Multi-Agent System (MAS)
    - 모델: gemini-3.8-flash (temperature: 0.1, max_output_tokens: 2048)
+   - sub_agents 정의: hr_policy_agent(규정 RAG), workweek_agent(HRMS FastMCP), itsm_agent(ITSM FastMCP)
    - organization: Cymbal Group Korea, Cloud AI Platform Operations, 기본 사번 EMP-10294
    - governance: enforce_policy_grounding=true, rag_confidence_threshold=0.80
 
 2. agent.py:
-   - google.adk.agents.Agent 클래스를 사용한 기본 에이전트 뼈대
-   - config.yaml을 로드하여 기본 속성 설정
-   - SDD 3절의 기본 시스템 지침(규정 우선 확인, 사내 시스템 연동)을 SYSTEM_INSTRUCTION으로 정의
-   - 아직 도구(tools)는 빈 리스트([])로 초기화하고, build_agent() 함수 및 메인 실행문 작성
+   - google.adk.agents.Agent 클래스를 사용한 Hub-and-Spoke 멀티 에이전트 뼈대 작성
+   - 전문 서브 에이전트 3개 선언:
+     1) hr_policy_agent: 사내 복무 규정(POL-HR) 및 IT 지침(POL-IT) RAG 검색 전문가
+     2) workweek_agent: WorkWeek HRMS FastMCP 연동 전문가 (연차 조회, 휴가 신청/취소)
+     3) itsm_agent: ServiceImmediately ITSM FastMCP 연동 전문가 (장비 조회, 티켓 생성/댓글)
+   - 중앙 허브 root_agent(enterprise_ops_agent): sub_agents=[hr_policy_agent, workweek_agent, itsm_agent]로 구성
+   - SDD 3절의 규정 우선 확인(Policy-First) 및 위임 강령을 HUB_INSTRUCTION으로 정의
+   - build_agent() 및 get_enterprise_agent() 함수 작성
 ```
 
 `agy`가 파일 생성을 제안하면 내용을 확인한 뒤 **Allow**를 선택합니다.
 
 ---
 
-### 2단계: 생성된 에이전트 뼈대 검증
+### 2단계: 생성된 멀티 에이전트 뼈대 검증
 
-새 터미널 탭에서 `agy`가 올바르게 파일을 생성했는지 실행하여 확인합니다.
+새 터미널 탭에서 `agy`가 올바르게 멀티 에이전트를 생성했는지 실행하여 확인합니다.
 
 ```bash
 python3 /config/workspace/enterprise_ops_agent/agent.py
+```
+
+```
++-----------------------------------------------------------------------------------+
+| 출력 예시:                                                                          |
+| 2026-09-30 09:07:35 [INFO] enterprise_ops_agent: 멀티 에이전트 허브                   |
+| 'enterprise_ops_agent' 초기화 완료 (전문 서브 에이전트: 3개)                          |
+| 멀티 에이전트 준비 완료: enterprise_ops_agent                                        |
+|  - 전문 서브 에이전트: ['hr_policy_agent', 'workweek_agent', 'itsm_agent']            |
+|  - 허브 직접 도구 수: 5개                                                           |
++-----------------------------------------------------------------------------------+
 ```
 
 ```
@@ -469,18 +496,20 @@ print(json.dumps(r2, indent=2, ensure_ascii=False))
 **FastMCP 프로토콜이란:**  
 Anthropic과 오픈소스 커뮤니티가 주도하는 Model Context Protocol(MCP)을 경량 Streamable HTTP 기반으로 구현한 규격입니다. 에이전트가 브라우저 자동화나 복잡한 프로세스 통신 없이도 표준 REST 엔드포인트를 통해 사내 SaaS 시스템의 도구를 원격 실행할 수 있습니다.
 
-#### 사내 SaaS 연동 엔드포인트 규격
+#### FastMCP 표준 프로토콜 엔드포인트 및 도구 규격
 
-| 시스템 | 기능 | HTTP 메서드 및 엔드포인트 | 상세 설명 |
+| 시스템 | FastMCP 엔드포인트 | 프로토콜 및 도구 바인딩 | 주요 도구 목록 |
 |:---|:---|:---|:---|
-| **WorkWeek HRMS** | 잔여 연차 조회 | `GET /work-week/api/employees/{id}/timeoff` | 사번 EMP-10294(이민우 수석)의 잔여 연차/병가 일수 반환 |
-| **WorkWeek HRMS** | 휴가 신청 | `POST /work-week/api/employees/{id}/timeoff` | 시작일, 종료일, 사유를 전달하여 휴가 등록 |
-| **ServiceImmediately ITMS** | 장비 및 티켓 조회 | `GET /service-immediately/api/tickets?requested_by={id}` | 지급 장비(38개월 경과 M1 Max) 이력 및 접수 내역 반환 |
-| **ServiceImmediately ITMS** | 인시던트 티켓 발행 | `POST /service-immediately/api/tickets` | 하드웨어 결함 및 장비 교체 인시던트 접수 |
+| **WorkWeek HRMS** | `/work-week/mcp` | Streamable HTTP JSON-RPC 2.0 (`tools/call`) | `get_employee_balances`, `request_time_off`, `cancel_leave_request`, `get_leave_requests`, `get_personal_info`, `update_personal_info` |
+| **ServiceImmediately ITMS** | `/service-immediately/mcp` | Streamable HTTP JSON-RPC 2.0 (`tools/call`) | `list_tickets`, `create_ticket`, `add_ticket_comment`, `update_ticket_status` |
 
 > [!IMPORTANT]
-> **150명 멀티 테넌트 데이터 격리 원리 (`X-Student-Token` / `X-MCP-Token`):**  
-> 150명의 실습생이 동일한 Cloud Run 백엔드 SaaS 서버를 사용하더라도, 각자가 발급받은 개인 토큰을 HTTP 요청 헤더(`X-Student-Token` 또는 `X-MCP-Token`)에 포함하여 전송함으로써 다른 실습생의 연차나 티켓 데이터와 섞이지 않는 완전한 독립 샌드박스를 보장받습니다.
+> **왜 일반 REST API가 아닌 FastMCP(tools/call)인가요?**  
+> 실습 2에서 다룰 **Agent Gateway**와 **Model Armor**는 네트워크 패킷을 열어 MCP 표준 JSON-RPC 메시지(`mcp.toolName`, `tools/call` 인자 및 응답)를 검사하고 차단합니다. 일반 REST API를 호출하면 게이트웨이가 도구 사용 여부를 인지하지 못하므로, 반드시 FastMCP 엔드포인트를 통해 도구를 실행해야 합니다.
+
+> [!TIP]
+> **150명 멀티 테넌트 데이터 격리 원리 (`X-MCP-Token`):**  
+> 150명의 실습생이 동일한 Cloud Run 백엔드 SaaS 서버를 사용하더라도, 각자가 발급받은 개인 토큰을 HTTP 요청 헤더(`X-MCP-Token`)에 포함하여 전송함으로써 다른 실습생의 연차나 티켓 데이터와 섞이지 않는 완전한 독립 샌드박스를 보장받습니다.
 
 ![WorkWeek 메인 화면](./images/mock_saas_workweek.png)
 
@@ -489,7 +518,7 @@ Anthropic과 오픈소스 커뮤니티가 주도하는 Model Context Protocol(MC
 1. 웹 브라우저에서 아래 Mock SaaS 주소로 접속합니다.  
    `https://korean-mock-saas-dri5akvbzq-du.a.run.app/`
 2. 화면 오른쪽 상단의 **MCP 토큰 발급** 버튼을 클릭합니다.
-3. 팝업 창에 나타난 고유 토큰(예: `mcp_7b19df...`)을 복사합니다.
+3. 팝업 창에 나타난 고유 토큰(예: `mcp_eyJp...`)을 복사합니다.
 
 ![개인 MCP 토큰 발급](./images/mock_saas_mcp_modal.png)
 
@@ -501,23 +530,24 @@ export MCP_TOKEN="mcp_여러분의토큰값"
 
 ---
 
-### 2단계: FastMCP 연동 도구 구현 지시
+### 2단계: Google ADK 정식 McpToolset 기반 FastMCP 연동 도구 구현 지시
 
 실행 중인 **Antigravity CLI (`agy`)** 터미널에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
 
 ```text
-/config/workspace/docs/SDD.md의 2.2절 'FastMCP SaaS 연동 도구 명세'를 바탕으로 tools/mcp_tools.py 파일을 구현해주세요.
+/config/workspace/docs/SDD.md의 2.3절 'Google ADK FastMCP SaaS 연동 도구 명세'를 바탕으로 tools/mcp_tools.py 파일을 구현해주세요.
 
 요구사항:
-1. 서버 기본 URL: https://korean-mock-saas-dri5akvbzq-du.a.run.app
-2. 환경변수 MCP_TOKEN이 설정되어 있으면 헤더에 'X-MCP-Token'을 실어 보내고, 없으면 기본 헤더만 전송할 것.
-3. WorkWeek HRMS 도구 2종 구현:
-   - get_employee_leave_balance(employee_id="EMP-10294"): GET /work-week/api/employees/{employee_id}/timeoff 호출하여 연차/병가 잔여일수 반환
-   - submit_leave_request(employee_id, start_date, end_date, leave_type="연차", days=4.0, reason=""): POST /work-week/api/employees/{employee_id}/timeoff 호출하여 휴가 신청
-4. ServiceImmediately ITMS 도구 2종 구현:
-   - list_hardware_assets_and_tickets(employee_id="EMP-10294"): GET /service-immediately/api/tickets?requested_by={employee_id} 호출하여 장비 이력(AST-MBP-2022-819, 38개월 경과) 및 티켓 목록 반환
-   - create_hardware_incident_ticket(employee_id, title, description, category="하드웨어", priority="2 - 높음 (High)"): POST /service-immediately/api/tickets 호출하여 인시던트 티켓 발행
-5. 네트워크 예외 발생 시 안전한 Fallback Mock 데이터를 반환하도록 예외 처리를 구성할 것.
+1. 서버 기본 URL: https://korean-mock-saas-dri5akvbzq-du.a.run.app (URL 끝 슬래시 자동 제거 .rstrip('/') 처리 필수)
+2. Google ADK 공식 클래스 사용:
+   - from google.adk.tools.mcp_tool import McpToolset
+   - from google.adk.tools.mcp_tool.mcp_session_manager import StreamableHTTPConnectionParams
+   - get_workweek_mcp_toolset() 함수: /work-week/mcp 엔드포인트 연결 (헤더에 X-MCP-Token 포함)
+   - get_itsm_mcp_toolset() 함수: /service-immediately/mcp 엔드포인트 연결 (헤더에 X-MCP-Token 포함)
+3. 실습 2(거버넌스 및 평가)와의 완벽한 연계를 위해 FastMCP tools/call 표준 JSON-RPC 도구 래퍼 제공:
+   - WorkWeek: get_employee_leave_balance, submit_leave_request, cancel_leave_request, get_personal_info, update_personal_info
+   - ServiceImmediately: list_hardware_assets_and_tickets, create_hardware_incident_ticket, add_ticket_comment
+4. 네트워크 예외 또는 세션 만료 시 안전한 Fallback 데이터를 반환하도록 방어적 예외 처리를 구성할 것.
 ```
 
 `agy`가 파일 작성을 제안하면 **Allow**를 선택합니다.
@@ -794,73 +824,17 @@ curl -s -X POST http://localhost:8080/ \
 
 ---
 
-### 4단계: agents-cli를 통한 Gemini Enterprise (GE) 원클릭 등록 및 실시간 검증
+### 4단계: 실습 2(Evaluation & Governance) 연계를 위한 프로덕션 핸드오프 준비
 
-완성된 에이전트를 사내 Google Cloud 프로젝트의 Cloud Run에 배포하고, 구글 공식 `agents-cli` 명령어로 사내 Gemini Enterprise에 등록합니다.
+실습 1에서는 개발자 로컬 환경(VM)에서 Hub-and-Spoke 멀티 에이전트 시스템을 성공적으로 완성하고, 로컬 A2A 인터페이스를 통해 복합 시나리오 검증을 마쳤습니다.
 
-1. **Cloud Run 배포**:
-```bash
-gcloud run deploy enterprise-ops-agent \
-  --source . \
-  --region asia-northeast3 \
-  --allow-unauthenticated
-```
+엔터프라이즈 환경에서는 보안 정책과 정량적 품질 검증 없이 Cloud Run이나 사내 Gemini Enterprise에 성급히 배포하지 않습니다. 개발된 멀티 에이전트는 **실습 2(Part 2)**에서 다음 거버넌스 파이프라인을 거쳐 안전하게 프로덕션 환경으로 승격(Promote)됩니다:
 
-2. **agents-cli로 Gemini Enterprise에 A2A 에이전트 등록**:
-```bash
-agents-cli publish gemini-enterprise \
-  --agent-card-url https://[YOUR_CLOUD_RUN_URL]/.well-known/agent-card.json \
-  --gemini-enterprise-app-id projects/[PROJECT_NUMBER]/locations/global/collections/default_collection/engines/[ENGINE_ID] \
-  --display-name "Cymbal Enterprise Ops Agent" \
-  --description "사내 복무 규정 RAG 및 Mock SaaS 시스템 연동 엔터프라이즈 운영 에이전트"
-```
-
-3. **등록 완료 및 콘솔 확인**:
-등록이 완료되면 `✅ Successfully created agent registration!` 메시지와 함께 콘솔 링크가 제공되며, 사내 Gemini Enterprise Agent Gallery에서 상태가 **`ENABLED`**로 즉시 활성화됩니다.
-
-![Gemini Enterprise 에이전트 상세 콘솔](./images/ge_01_agent_console.png)
-
-콘솔에서 에이전트 이름, 설명, 배포된 Cloud Run 엔드포인트 URL, 프로토콜 버전(0.3.0), 등록된 스킬(HR Leave Management, IT Hardware Support) 목록을 확인할 수 있습니다.
-
-4. **사내 Gemini Enterprise 웹 채팅 진입**:
-사내 Gemini Enterprise 포털의 에이전트 갤러리에서 `@Cymbal Enterprise Ops Agent`를 선택하면 전용 대화창이 열립니다.
-
-![Gemini Enterprise 대화창 진입 화면](./images/ge_02_chat_entry.png)
-
-5. **추천 실무 샘플 프롬프트**:
-사내 구성원들은 다음과 같은 자연어 질문으로 복무 규정 확인, 연차 조회/신청, IT 하드웨어 결함 조치를 원스톱으로 처리할 수 있습니다:
-
-- `내 잔여 연차와 병가 일수 알려줘`
-- `회사 휴가 규정 및 발생 기준이 어떻게 돼?`
-- `업무용 노트북 및 IT 장비 교체 규정 알려줘`
-- `2026-11-20에 연차 1일 신청해줘`
-- `현재 내 오픈된 IT 지원 티켓 목록 확인해줘`
-- `모니터 화면이 깜빡거려. 하드웨어 점검 티켓 등록해줘`
-- `내 남은 연차랑 현재 접수된 랩톱 교체 티켓 상태 둘 다 확인해줘`
-
-6. **실제 Gemini Enterprise 대화 실행 화면 및 동작 원리**:
-
-- **사내 복무 규정 RAG 조회**:
-  "회사 휴가 규정 및 발생 기준이 어떻게 돼?" 질의 시, Cloud Storage에 저장된 사내 복무 규정(POL-HR-2026-004) 제3조와 제4조를 정확히 인용하여 사전 신청 기한(1일 이하: 24시간 전, 3일 이하: 3일 전, 3일 초과: 7영업일 전)을 체계적으로 안내합니다.
-
-  ![사내 복무 규정 RAG 조회 결과](./images/ge_05_policy_rag_grounding.png)
-
-- **WorkWeek 연차 및 병가 실시간 조회**:
-  "내 잔여 연차와 병가 일수 알려줘" 질의 시, WorkWeek HRMS 시스템을 호출하여 사번 EMP-10294의 실시간 잔여 연차(2.0일)와 병가(14.0일) 현황을 즉시 확인해 줍니다.
-
-  ![잔여 연차 및 병가 조회 결과](./images/ge_06_leave_balance_check.png)
-
-- **ServiceImmediately IT 티켓 목록 실시간 조회**:
-  "현재 내 오픈된 IT 지원 티켓 목록 확인해줘" 질의 시, ServiceImmediately ITMS 시스템에서 활성 티켓 3건(업무용 M3 Max 랩톱 교체 신청, 원격 근무용 VPN 권한 갱신, 모니터 점검)의 상태와 담당자를 집계하여 답변합니다.
-
-  ![IT 지원 티켓 목록 확인 결과](./images/ge_04_it_ticket_list.png)
-
-> **트러블슈팅 참고 (정적 Mock 반복 결함 방지)**:  
-> 초기 프로토타입에서 if/else 키워드 분기문 기반의 단순 Mock을 사용할 경우, 질문의 표현이 조금만 달라져도 아래와 같이 고정된 인사말만 무한 반복하는 결함이 발생합니다.
->
-> ![고정 응답 반복 결함 사례](./images/ge_03_defect_repeat_troubleshoot.png)
->
-> 본 실습에서는 Google ADK Runner와 Vertex AI Gemini 3.8 Flash를 결합하여, 사용자의 어떠한 자연어 질문도 실시간 자율 추론과 도구 호출을 거쳐 지능적으로 답변하도록 구현하여 이 문제를 해결했습니다.
+1. **품질 평가 (Evaluation)**: `agents-cli eval run`을 통해 3대 핵심 지표(과업 성공률, 도구 호출 정확도, 환각 차단율)를 자동 채점하고 진단 보고서(`artifacts/grade_results/results.html`) 생성.
+2. **시크릿 보호 배포**: `.env`에 평문 노출된 `MCP_TOKEN`을 GCP Secret Manager로 이관하고, Cloud Run / Agent Runtime에 안전한 보안 컨테이너로 프로덕션 배포 후 Gemini Enterprise 등록.
+3. **Agent Registry 등록**: 12개 전사 에이전트 카탈로그에 등록하고 고유 신원(SPIFFE ID) 및 도구 위험도 주석(`isReadOnly`, `isDestructive`) 부여.
+4. **Agent Gateway 중앙 통제**: 에이전트 코드 수정 없이 IAP 정책으로 위험 도구(`cancel_leave_request`, `update_personal_info`)를 전사 중앙 차단.
+5. **Model Armor 내용 검사**: 실시간 페이로드 필터링으로 티켓 본문 간접 프롬프트 인젝션 방어 및 법인카드 번호 외부 SaaS 노출 차단.
 
 ---
 

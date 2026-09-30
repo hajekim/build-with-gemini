@@ -36,25 +36,28 @@ Cymbal Group Korea 임직원은 일상 업무에서 분산된 사내 포털과 �
 
 ## 2. 아키텍처 및 도구 명세 (Architecture & Tool Specifications)
 
-### 2.1 논리 아키텍처 및 데이터 흐름
+### 2.1 논리 아키텍처 및 데이터 흐름 (Hub-and-Spoke Multi-Agent Architecture)
 
 ```mermaid
 flowchart TD
-    User["임직원 (사용자)"] -->|자연어 업무 질의| Agy["Google Antigravity 2.0 (agy)"]
-    Agy -->|프롬프트 오케스트레이션| RootAgent["ADK 2.0 Root Agent\n(Gemini 3.8 Flash)"]
-    
-    subgraph ExecutionLogic ["오케스트레이션 실행 로직"]
-        RootAgent -->|1. 규정 선검증 요청| PolicyRAG["사내 규정 RAG 도구\n(tools/policy_rag.py)"]
-        PolicyRAG -->|조항 인출 및 신뢰도 검증| GCS["Cloud Storage 정책 저장소\n(POL-HR-2026-004 / POL-IT-2026-009)"]
-        
-        RootAgent -->|2. 잔여 현황 확인 및 시스템 반영| FastMCP["FastMCP SaaS 연동 도구\n(tools/mcp_tools.py)"]
-        FastMCP -->|Streamable HTTP / X-MCP-Token| MockSaaS["Korean Mock SaaS Platform\n(WorkWeek & ServiceImmediately)"]
+    User["임직원 (사용자 질의)"] --> Agy["Google Antigravity 2.0 (agy)"]
+    Agy --> Hub["Root Orchestrator\n(enterprise_ops_agent / 컨시어지 허브)\ngemini-3.8-flash"]
+
+    subgraph Specialist_SubAgents ["도메인별 전문 서브 에이전트 계층 (Google ADK)"]
+        Hub -->|"1. 규정 선검증 위임"| Spoke1["hr_policy_agent\n(사내 복무/IT 규정 RAG 전문가)"]
+        Hub -->|"2. 연차/근태 업무 위임"| Spoke2["workweek_agent\n(WorkWeek HRMS 연동 전문가)"]
+        Hub -->|"3. 전산지원 업무 위임"| Spoke3["itsm_agent\n(ServiceImmediately ITSM 연동 전문가)"]
     end
-    
-    FastMCP -->|트랜잭션 실행 결과| RootAgent
-    PolicyRAG -->|근거 조항 인용 데이터| RootAgent
-    RootAgent -->|규정 근거 + 접수 완료 응답| Agy
-    Agy -->|최종 결과 안내| User
+
+    Spoke1 --> RAG_Engine["Hybrid Policy Engine\nVertex AI Search (우선)\n+ Cloud Storage PDF 규정 (폴백)"]
+    Spoke2 ==>|"Google ADK McpToolset (Streamable HTTP)\ntools/call JSON-RPC 표준 규약"| WW_MCP["WorkWeek FastMCP Server\n(/work-week/mcp)\n도구 7종 자동 바인딩"]
+    Spoke3 ==>|"Google ADK McpToolset (Streamable HTTP)\ntools/call JSON-RPC 표준 규약"| SI_MCP["ServiceImmediately FastMCP Server\n(/service-immediately/mcp)\n도구 4종 자동 바인딩"]
+
+    Spoke1 -->|근거 조항 인용 데이터| Hub
+    Spoke2 -->|휴가 처리 결과 데이터| Hub
+    Spoke3 -->|티켓 발행 결과 데이터| Hub
+    Hub -->|종합 검증 완료 안내| Agy
+    Agy -->|최종 응답| User
 ```
 
 ---
@@ -101,83 +104,69 @@ def search_company_policy(query: str, category: str = "ALL") -> dict:
 
 ---
 
-### 2.3 FastMCP SaaS 연동 도구 명세 (`tools/mcp_tools.py`)
+### 2.3 Google ADK FastMCP SaaS 연동 도구 명세 (`tools/mcp_tools.py`)
 
-#### 서버 통신 및 테넌트 격리 프로토콜
-- 엔드포인트 URL: `https://korean-mock-saas-dri5akvbzq-du.a.run.app`
-- 인증 및 격리 헤더: `X-MCP-Token: {MCP_TOKEN}` (참가자가 발급받은 개인 HMAC 서명 토큰 주입)
-- 타임아웃 정책: `Connect 5.0s`, `Read 10.0s`
+#### 서버 통신 및 FastMCP 표준 프로토콜 규격
+- FastMCP 서버 베이스 URL: `https://korean-mock-saas-dri5akvbzq-du.a.run.app` (Cloud Run Session Affinity 활성화)
+- 프로토콜: **Streamable HTTP 기반 JSON-RPC 2.0** (`initialize`, `tools/list`, `tools/call`)
+- 인증 및 테넌트 격리 헤더: `X-MCP-Token: {MCP_TOKEN}` (참가자별 발급된 개인 토큰 주입)
+- Google ADK 클라이언트: `google.adk.tools.mcp_tool.McpToolset` + `StreamableHTTPConnectionParams`
 
-#### WorkWeek HRMS 도구 목록
-1. `get_employee_leave_balance(employee_id: str = "EMP-10294") -> dict`:
-   - 엔드포인트: `GET /work-week/api/employees/{employee_id}/timeoff`
-   - 반환 스키마:
-     ```json
-     {
-       "status": "SUCCESS",
-       "employee_id": "EMP-10294",
-       "name": "이민우",
-       "annual_leave_accrued": 15.0,
-       "annual_leave_remaining": 12.0,
-       "sick_leave_remaining": 14.0,
-       "pending_leave_days": 3.0
-     }
-     ```
-2. `submit_leave_request(employee_id: str, start_date: str, end_date: str, leave_type: str = "연차", days: float = 4.0, reason: str = "") -> dict`:
-   - 엔드포인트: `POST /work-week/api/employees/{employee_id}/timeoff`
-   - 요청 본문: `{"start_date": start_date, "end_date": end_date, "leave_type": leave_type, "days": days}`
-   - 반환 스키마: `{"status": "SUCCESS", "request_id": "LV-2026-9481", "remaining_annual_leave": 8.0, "approval_status": "PENDING_MANAGER_APPROVAL"}`
+#### 1. WorkWeek HRMS FastMCP 도구 세트 (`/work-week/mcp`)
+Google ADK `McpToolset`을 통해 7종의 도구가 `workweek_agent`에 자동 바인딩됩니다:
+1. `get_employee_balances(employee_id: str)`: 잔여 연차(12.0일) 및 병가(14.0일) 조회
+2. `request_time_off(employee_id: str, start_date: str, end_date: str, leave_type: str, days: float)`: 신규 휴가 신청 상신
+3. `cancel_leave_request(employee_id: str, request_id: int)`: 기존 승인/대기 휴가 취소 (실습 2 Agent Gateway 차단 대상)
+4. `get_leave_requests(employee_id: str)`: 휴가 신청 이력 및 결재 상태 조회
+5. `get_personal_info(employee_id: str)`: 임직원 직급, 부서, 주소, 연락처 조회
+6. `update_personal_info(employee_id: str, address: str, phone: str)`: 연락처 및 주소 변경 (실습 2 Agent Gateway 차단 대상)
+7. `get_current_employee_id()`: 현재 토큰의 사번 확인
 
-#### ServiceImmediately ITMS 도구 목록
-1. `list_hardware_assets_and_tickets(employee_id: str = "EMP-10294") -> dict`:
-   - 엔드포인트: `GET /service-immediately/api/tickets?requested_by={employee_id}`
-   - 반환 스키마:
-     ```json
-     {
-       "status": "SUCCESS",
-       "employee_id": "EMP-10294",
-       "assigned_hardware": {
-         "asset_tag": "AST-MBP-2022-819",
-         "model": "MacBook Pro 16 (M1 Max / 32GB)",
-         "issued_date": "2022-07-15",
-         "elapsed_months": 38,
-         "lifecycle_status": "ELIGIBLE_FOR_REFRESH"
-       },
-       "active_tickets_count": 1,
-       "recent_tickets": [...]
-     }
-     ```
-2. `create_hardware_incident_ticket(employee_id: str, title: str, description: str, category: str = "하드웨어", priority: str = "2 - 높음 (High)") -> dict`:
-   - 엔드포인트: `POST /service-immediately/api/tickets`
-   - 요청 본문: `{"requested_by": employee_id, "category": category, "short_description": title, "priority": priority, "assignment_group": "IT 서비스데스크"}`
-   - 반환 스키마: `{"status": "SUCCESS", "ticket_id": "INC-2026-08129", "ticket_status": "접수", "sla": "4 근무시간 이내 진단 착수 및 임시 랩톱 대여"}`
+#### 2. ServiceImmediately ITMS FastMCP 도구 세트 (`/service-immediately/mcp`)
+Google ADK `McpToolset`을 통해 4종의 도구가 `itsm_agent`에 자동 바인딩됩니다:
+1. `list_tickets(employee_id: str)`: 임직원 지급 장비 이력(AST-MBP-2022-819, 38개월 실사용) 및 인시던트 티켓 목록 조회
+2. `create_ticket(requested_by: str, category: str, short_description: str, priority: str, assignment_group: str)`: 장애 접수 및 M3 Max 랩톱 교체 티켓 발행 (실습 2 Model Armor 카드번호 검사 대상)
+3. `add_ticket_comment(ticket_id: str, author: str, comment: str)`: 티켓 타임라인 댓글 추가 (실습 2 Model Armor 간접 인젝션 방어 대상)
+4. `update_ticket_status(ticket_id: str, status: str, resolution_notes: str)`: 티켓 처리 상태 변경
 
 ---
 
 ## 3. 오케스트레이션 및 거버넌스 강령 (Orchestration Policy)
 
-에이전트의 시스템 프롬프트(`SYSTEM_INSTRUCTION`)는 다음 4가지 핵심 강령을 엄격히 준수해야 합니다.
+에이전트의 시스템 프롬프트(`HUB_INSTRUCTION`)는 다음 4가지 핵심 강령을 엄격히 준수해야 합니다.
 
 1. **규정 우선 확인 원칙 (Policy-First Principle)**:
    - 어떠한 시스템 트랜잭션(휴가 신청, 인시던트 티켓 생성)도 사내 규정 조회 없이 먼저 실행되어서는 안 됩니다.
-   - 반드시 `search_company_policy` 도구를 호출하여 관련 지침의 요건을 먼저 확인해야 합니다.
+   - 반드시 `hr_policy_agent` 서브 에이전트에게 먼저 위임하여 관련 지침(POL-HR-2026-004, POL-IT-2026-009)의 요건을 확인해야 합니다.
 2. **명시적 근거 조항 인용 (Mandatory Policy Citations)**:
    - 사용자 응답 시 적용된 문서번호와 조항을 명확히 명기합니다 (예: `POL-HR-2026-004 제 4 조`, `POL-IT-2026-009 제 2 조 및 제 4 조`).
-3. **단계별 검증 파이프라인 (Two-Phase Validation Pipeline)**:
-   - **휴가 신청 파이프라인**:
-     1. [정책 검증]: `search_company_policy`로 사전 신청 기한(3일 초과 시 7영업일 전) 확인
-     2. [상태 확인]: `get_employee_leave_balance`로 잔여 연차 충분 여부 확인
-     3. [트랜잭션 실행]: `submit_leave_request`로 WorkWeek 시스템에 정식 접수
-   - **장비 교체/장애 파이프라인**:
-     1. [정책 검증]: `search_company_policy`로 직군별 기종(M3 Max 64GB) 및 교체 주기(36개월), 결함 기준 확인
-     2. [자산 확인]: `list_hardware_assets_and_tickets`로 지급일로부터 경과 개월 수(38개월) 확인
-     3. [트랜잭션 실행]: `create_hardware_incident_ticket`으로 긴급 인시던트 티켓 발행
+3. **도메인별 전문 서브 에이전트 위임 파이프라인**:
+   - **휴가 신청 워크플로**:
+     1. [규정 위임]: `hr_policy_agent`에게 위임하여 사전 신청 기한(3일 초과 시 7영업일 전) 확인
+     2. [인사 위임]: `workweek_agent`에게 위임하여 잔여 연차 확인 후 `request_time_off` 실행
+   - **장비 교체/장애 워크플로**:
+     1. [규정 위임]: `hr_policy_agent`에게 위임하여 직군별 기종(M3 Max 64GB) 및 교체 주기(36개월), 배터리 스웰링 결함 기준 확인
+     2. [전산 위임]: `itsm_agent`에게 위임하여 장비 실사용 개월 수(38개월) 확인 후 `create_ticket` 실행
 4. **자연스러운 한국어 소통**:
    - 전문적이고 정중한 한국어 톤을 유지합니다.
 
-### 3.1 Gemini Enterprise (GE) 배포용 A2A 규격 (Agent-to-Agent Specification)
+### 3.1 실습 1 & 실습 2 라이프사이클 경계 및 핸드오프 (Lifecycle Handoff Boundary)
 
-실습 환경(임시 Qwiklabs 샌드박스)을 벗어나 참여자가 소속 회사의 라이브 **Gemini Enterprise (GE)** 테넌트 또는 **Agent Engine**에 에이전트를 등록하기 위해, 표준 A2A 인터페이스 및 Agent Manifest를 산출물로 제공합니다.
+본 워크숍은 150명의 실습생이 3시간 동안 완주할 수 있도록 명확한 2부 단계로 설계되었습니다:
+
+- **실습 1 (로컬 멀티 에이전트 구축 및 검증, 80분)**:
+  - Antigravity 2.0(`agy`) 프롬프트 주도 개발
+  - Google ADK 2.0 Hub-and-Spoke 멀티 에이전트 시스템(`agent.py`) 완성
+  - 하이브리드 규정 RAG(`hr_policy_agent`) 및 FastMCP 11개 도구 바인딩(`workweek_agent`, `itsm_agent`)
+  - 개발자 로컬 웹 콘솔(`http://localhost:8081`)을 통한 다중 턴 대화 시나리오 검증
+  - 실습 2를 위한 골든 평가 데이터셋(`tests/eval/datasets/`) 준비
+  - 최종 산출물: 로컬 완성본 압축 패키지(`enterprise_ops_agent_completed.zip`)
+- **실습 2 (엔터프라이즈 평가, 거버넌스 및 프로덕션 배포, 80분)**:
+  - `agents-cli eval run`을 통한 정량적 품질 평가 및 LLM-as-a-Judge 채점
+  - Secret Manager 기반 MCP 토큰 보안 이관 및 Cloud Run / Agent Runtime 프로덕션 배포
+  - Agent Registry 등록 및 Agent Identity (SPIFFE ID) 부여
+  - Agent Gateway (이그레스) + IAP 정책을 통한 무수정 도구 중앙 차단
+  - Model Armor 실시간 페이로드 검사를 통한 간접 프롬프트 인젝션 및 카드번호 노출 방어
 
 - **산출물**: `agent_manifest.json` (A2A Manifest 규격)
 - **엔드포인트**: `POST /api/a2a/chat`
