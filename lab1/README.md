@@ -220,12 +220,16 @@ agy
 터미널 새 탭(**Ctrl+Shift+T**)을 열고 실습에 필요한 파이썬 패키지를 설치하고 실습 저장소를 클론합니다.
 
 ```bash
-# 1. 필수 라이브러리 설치 (Google ADK 2.3.0 및 FastMCP 연동 패키지)
+# 1. 필수 라이브러리 및 런타임 툴 설치 (Google ADK 2.3.0, uv, FastMCP)
 pip install --upgrade pip
-pip install google-agents-cli "google-adk>=2.3.0" mcp httpx pydantic pyyaml
+pip install google-agents-cli "google-adk>=2.3.0" mcp httpx pydantic pyyaml uv
 
-# 2. 실습 저장소 클론 (설계서 SDD, ADK 전문 스킬, 테스트 스위트 포함)
-git clone https://github.com/hajekim/build-with-gemini.git /config/workspace
+# 2. 실습 저장소 클론 및 작업 디렉터리 이동
+sudo mkdir -p /config/workspace 2>/dev/null || true
+sudo chown -R $USER:$USER /config/workspace 2>/dev/null || true
+if [ ! -d "/config/workspace/.git" ]; then
+  git clone https://github.com/hajekim/build-with-gemini.git /config/workspace
+fi
 cd /config/workspace/enterprise_ops_agent
 ```
 
@@ -251,6 +255,10 @@ agents-cli --version
 > - `eval-adk-skill`: 실습 2를 위한 4-Tier 골든 평가 데이터셋 규격
 > 
 > `agy` 터미널에서 `/skills`를 입력하면 이 스킬들이 활성화되어 있음을 직접 확인할 수 있습니다. `agy`는 프롬프트 처리 시 이 스킬들을 자율 참조하여 오차 없이 완벽한 코드를 작성합니다.
+
+> [!NOTE]
+> **실습 프로젝트 초기 구성 안내:**  
+> `enterprise_ops_agent/` 디렉터리에는 프로젝트 매니페스트(`agents-cli-manifest.yaml`), 실습 1 및 실습 2를 위한 통합 테스트 스위트(`tests/test_scenarios.py`)와 정량 평가 데이터셋(`tests/eval/`)이 사전에 준비되어 있습니다. 참가자 여러분은 `agy`를 통해 핵심 멀티 에이전트 로직(`agent.py`, `config.yaml`, `tools/`)을 대화형 프롬프트로 직접 구축해 나갑니다.
 
 ---
 
@@ -379,7 +387,10 @@ enterprise_ops_agent/
    - 중앙 허브 root_agent(enterprise_ops_agent): sub_agents=[hr_policy_agent, workweek_agent, itsm_agent]로 구성
    - SDD 3절의 규정 우선 확인(Policy-First) 및 위임 강령을 HUB_INSTRUCTION으로 정의
    - build_agent() 및 get_enterprise_agent() 함수 작성
-   - 주의사항: Agent 생성자 지시문은 반드시 단수형 'instruction' 키워드를 사용하고(instructions 복수형 사용 금지), 모듈 최상위에 'root_agent = build_agent()' 변수를 선언할 것
+   - 주의사항:
+     * Agent 생성자 지시문은 반드시 단수형 'instruction' 키워드를 사용하고(instructions 복수형 사용 금지), 모듈 최상위에 'root_agent = build_agent()' 변수를 선언할 것
+     * 모듈 임포트는 직접 실행과 패키지 임포트를 모두 지원하도록 try-except dual import 패턴(try: from tools.policy_rag import ... except: from enterprise_ops_agent.tools.policy_rag import ...)으로 작성할 것
+     * 아직 tools/ 구현 전이므로 초기 뼈대에서는 tools 임포트 실패 시 빈 리스트(tools=[])나 더미로 안전하게 폴백하도록 처리할 것
 ```
 
 `agy`가 파일 생성을 제안하면 내용을 확인한 뒤 **Allow**를 선택합니다.
@@ -409,7 +420,7 @@ python3 /config/workspace/enterprise_ops_agent/agent.py
 
 ## Task 3. agy 프롬프트 기반 사내 규정 RAG 도구 구현
 
-이 단계에서는 `docs/SDD.md`의 2.1절 명세에 따라 사내 복무 규정(POL-HR-2026-004)과 IT 하드웨어 지침(POL-IT-2026-009)을 검색하는 RAG 도구(`tools/policy_rag.py`)를 `agy`에게 구현하도록 지시합니다.
+이 단계에서는 `docs/SDD.md`의 2.2절 명세에 따라 사내 복무 규정(POL-HR-2026-004)과 IT 하드웨어 지침(POL-IT-2026-009)을 검색하는 RAG 도구(`tools/policy_rag.py`)를 `agy`에게 구현하도록 지시합니다.
 
 ### 사내 규정 원본 문서 및 핵심 조항 요약
 
@@ -439,7 +450,7 @@ python3 /config/workspace/enterprise_ops_agent/agent.py
 실행 중인 **Antigravity CLI (`agy`)** 터미널에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
 
 ```text
-/config/workspace/docs/SDD.md의 2.1절 '사내 규정 RAG 도구 명세'를 엄격히 준수하여 tools/policy_rag.py 파일을 구현해주세요.
+/config/workspace/docs/SDD.md의 2.2절 '사내 규정 RAG 도구 명세'를 엄격히 준수하여 tools/policy_rag.py 파일을 구현해주세요.
 
 요구사항:
 1. 함수 시그니처: search_company_policy(query: str, category: str = "ALL") -> dict
@@ -754,10 +765,14 @@ Gemini Enterprise가 A2A 프로토콜로 에이전트를 원격 호출할 때 �
        }
      }
 
-3. 상태 검사 엔드포인트:
+3. 로컬 브라우저 테스트 콘솔 및 채팅 엔드포인트:
+   - GET /: 브라우저(http://localhost:8080)에서 에이전트와 실시간 대화를 나누고 추천 질문 칩을 누를 수 있는 인터랙티브 HTML 웹 콘솔 제공
+   - POST /api/chat: 웹 콘솔과 통신하는 비동기 채팅 엔드포인트
+
+4. 상태 검사 엔드포인트:
    - GET /healthz: {"status": "ok", "agent": "enterprise-ops-agent"}
 
-4. uvicorn을 통해 포트 8080에서 실행 가능하도록 main 블록 구성.
+5. uvicorn을 통해 포트 8080에서 실행 가능하도록 main 블록 구성.
 ```
 
 `agy`가 `a2a_server.py` 생성을 제안하면 **Allow**를 선택합니다.
@@ -873,9 +888,19 @@ curl -s -X POST http://localhost:8080/ \
 새 터미널 탭에서 다음 명령어를 입력하여 로컬 자체 평가를 실행합니다:
 
 ```bash
+# Vertex AI 환경 변수 설정 후 로컬 종합 평가 실행
+export GOOGLE_GENAI_USE_VERTEXAI=true
+export GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project)
+export GOOGLE_CLOUD_LOCATION=global
+
 cd /config/workspace/enterprise_ops_agent
-agents-cli eval run
+agents-cli eval run \
+  --dataset tests/eval/datasets/eval-single-turn.json \
+  --config tests/eval/eval_config.yaml
 ```
+
+> [!NOTE]
+> `agents-cli eval run`은 플래그를 생략하더라도 디렉터리 내 `tests/eval/datasets/basic-dataset.json`을 기본값으로 자동 인식합니다. 실습 2(Part 2)에서는 이 평가 프레임워크를 바탕으로 과업 성공률, 도구 호출 정확도, 환각 방지 지표를 체계적으로 분석하고 진단 보고서를 도출합니다.
 
 이 명령어는 내부적으로 다음 3단계를 로컬에서 순차 수행합니다:
 1. **추론 실행 (eval generate)**: 로컬의 `agent.py`가 `datasets/`의 질문들을 순차 실행하며 생각과 도구 호출 내역을 `artifacts/traces/` 폴더에 JSON 형태로 기록합니다.

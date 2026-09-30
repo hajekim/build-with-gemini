@@ -1,0 +1,19 @@
+evaluation_name: "Cymbal Enterprise Ops Agent Benchmark Suite"
+version: "1.0.0"
+target_score_threshold: 85.0
+
+metrics_to_run:
+  - multi_turn_task_success
+  - multi_turn_tool_use_quality
+  - hallucination
+
+metric_weights:
+  multi_turn_task_success: 0.40
+  multi_turn_tool_use_quality: 0.35
+  hallucination: 0.25
+
+score_targets:
+  multi_turn_task_success: 85.0
+  multi_turn_tool_use_quality: 85.0
+  hallucination: 90.0
+  total_score_min: 85.0

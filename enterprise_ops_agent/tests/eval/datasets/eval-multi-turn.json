@@ -1,0 +1,25 @@
+{
+  "eval_set_id": "cymbal_ops_multi_turn",
+  "name": "Cymbal Enterprise Ops Agent Multi Turn Evaluation",
+  "description": "Multi-turn conversational scenarios involving policy check followed by SaaS action or laptop replacement ticket submission.",
+  "eval_cases": [
+    {
+      "eval_case_id": "leave_policy_and_request_flow",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {"text": "안녕하세요, 3일 이상 연차를 신청할 때 진단서나 사전 승인이 필요한가요? 그리고 제 현재 잔여 연차도 확인해주세요."}
+        ]
+      }
+    },
+    {
+      "eval_case_id": "laptop_defect_and_ticket_flow",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {"text": "노트북 배터리가 부풀어 올랐는데 교체 기준 규정이 어떻게 되나요? 신규 개발용 M3 Max 64GB 모델로 교체 티켓을 접수할 수 있는지 확인해주세요."}
+        ]
+      }
+    }
+  ]
+}
