@@ -836,8 +836,7 @@ pip install --upgrade pip
 pip install google-agents-cli "google-adk>=2.3.0" mcp httpx pydantic pyyaml uv
 
 # 2. agents-cli 공식 템플릿으로 프로젝트 뼈대 생성
-mkdir -p /config/workspace
-cd /config/workspace
+cd ~
 agents-cli create enterprise-ops-agent \
   --deployment-target cloud_run \
   --session-type in_memory \
@@ -846,7 +845,7 @@ agents-cli create enterprise-ops-agent \
   --yes \
   --skip-checks
 
-cd /config/workspace/enterprise-ops-agent</code></pre>
+cd enterprise-ops-agent</code></pre>
                 </div>
 
                 <!-- Scaffold Explanation Callout -->
@@ -961,15 +960,19 @@ docs/SDD.md 파일의 내용을 꼼꼼히 읽고, 전체 시스템 아키텍처�
 
                 <!-- Formatted Tree Pre Block -->
                 <div class="bg-[#090d16] border border-slate-800 rounded-xl p-4 shadow-inner">
-                  <pre class="font-mono text-xs text-slate-200 leading-relaxed overflow-x-auto whitespace-pre"><code><span class="text-indigo-400 font-bold">enterprise_ops_agent/</span>
-├── <span class="text-cyan-300">agents-cli-manifest.yaml</span> <span class="text-slate-500"># CLI 프로젝트 식별 매니페스트 (배포 타겟, A2A 플래그 선언)</span>
-├── <span class="text-amber-300">config.yaml</span>              <span class="text-slate-500"># 모델 파라미터(gemini-3.8-flash), 시스템 지침, 거버넌스 규칙</span>
-├── <span class="text-emerald-300">agent.py</span>                 <span class="text-slate-500"># Google ADK Runner 기반 에이전트 핵심 오케스트레이션 로직</span>
-├── <span class="text-blue-300">tools/</span>                   <span class="text-slate-500"># 외부 시스템 연동 도구 디렉토리</span>
-│   ├── <span class="text-blue-200">policy_rag.py</span>        <span class="text-slate-500"># Cloud Storage PDF 사내 규정 검색 도구 (RAG)</span>
-│   └── <span class="text-blue-200">mcp_tools.py</span>         <span class="text-slate-500"># WorkWeek & ServiceImmediately FastMCP 연동 클라이언트</span>
+                  <pre class="font-mono text-xs text-slate-200 leading-relaxed overflow-x-auto whitespace-pre"><code><span class="text-indigo-400 font-bold">enterprise-ops-agent/</span>
+├── <span class="text-cyan-300">agents-cli-manifest.yaml</span> <span class="text-slate-500"># CLI 프로젝트 식별 매니페스트 (agent_directory: app, root_agent: enterprise_ops_agent)</span>
+├── <span class="text-amber-300">config.yaml</span>              <span class="text-slate-500"># 모델 파라미터(gemini-3.8-flash), 멀티 에이전트 역할 정의, 거버넌스 규칙</span>
+├── <span class="text-emerald-300">app/</span>                     <span class="text-slate-500"># ADK 에이전트 패키지 디렉터리</span>
+│   ├── <span class="text-emerald-200">__init__.py</span>
+│   ├── <span class="text-emerald-200">agent.py</span>             <span class="text-slate-500"># Google ADK 기반 Root Hub 및 3대 전문 서브 에이전트 오케스트레이션 로직</span>
+│   ├── <span class="text-emerald-200">fast_api_app.py</span>      <span class="text-slate-500"># 로컬 SSE 스트리밍 서버 및 평가 엔드포인트</span>
+│   └── <span class="text-blue-300">tools/</span>               <span class="text-slate-500"># 외부 시스템 연동 도구 디렉터리 (app/tools/)</span>
+│       ├── <span class="text-blue-200">policy_rag.py</span>        <span class="text-slate-500"># Cloud Storage PDF 사내 규정 검색 도구 (RAG)</span>
+│       └── <span class="text-blue-200">mcp_tools.py</span>         <span class="text-slate-500"># WorkWeek & ITSM FastMCP 연동 클라이언트</span>
 ├── <span class="text-purple-300">a2a_server.py</span>            <span class="text-slate-500"># Gemini Enterprise A2A JSON-RPC 2.0 및 로컬 웹 콘솔</span>
-├── <span class="text-teal-300">tests/eval/</span>              <span class="text-slate-500"># 에이전트 신뢰성 및 품질 검증 디렉토리</span>
+├── <span class="text-slate-300">docs/</span>                    <span class="text-slate-500"># 소프트웨어 설계서(SDD.md) 및 사내 규정 원본 PDF</span>
+├── <span class="text-teal-300">tests/eval/</span>              <span class="text-slate-500"># 에이전트 신뢰성 및 품질 검증 디렉터리</span>
 │   ├── <span class="text-teal-200">eval_config.yaml</span>     <span class="text-slate-500"># 평가 지표(task_success, tool_quality, hallucination) 및 가중치</span>
 │   ├── <span class="text-teal-200">evaluation_report.md</span> <span class="text-slate-500"># 평가 방법론, 벤치마크 설계 및 진단 보고서</span>
 │   └── <span class="text-teal-200">datasets/</span>            <span class="text-slate-500"># 평가용 검증 데이터셋 (단일턴 및 멀티턴 JSON)</span>
@@ -1041,14 +1044,14 @@ docs/SDD.md 파일의 내용을 꼼꼼히 읽고, 전체 시스템 아키텍처�
                     </div>
                   </div>
 
-                  <!-- Python Identifier Rule Callout -->
-                  <div class="bg-amber-50 border border-amber-200 rounded-xl p-3.5 text-xs text-amber-900 space-y-1">
-                    <span class="font-bold text-amber-950 flex items-center gap-1.5">
-                      <i class="fa-solid fa-triangle-exclamation text-amber-600"></i>
-                      <span>중요: 디렉토리 명칭 규칙 (Python Identifier Rule)</span>
+                  <!-- ADK Package Structure Callout -->
+                  <div class="bg-blue-50 border border-blue-200 rounded-xl p-3.5 text-xs text-blue-900 space-y-1">
+                    <span class="font-bold text-blue-950 flex items-center gap-1.5">
+                      <i class="fa-solid fa-circle-info text-blue-600"></i>
+                      <span>표준 패키지 구조: agents-cli manifest와 app 패키지</span>
                     </span>
-                    <p class="text-[11px] text-amber-800 leading-relaxed font-medium">
-                      Google ADK 내부 모듈 로더는 파이썬 식별자 규칙을 엄격히 적용합니다. 폴더명에 하이픈(-)이 들어가면 파이썬 모듈 임포트 에러가 발생하므로, 반드시 언더스코어(_)를 사용한 <code class="font-mono text-amber-900 bg-amber-100 px-1 py-0.5 rounded font-bold">enterprise_ops_agent</code>로 디렉터리를 생성해야 합니다.
+                    <p class="text-[11px] text-blue-800 leading-relaxed font-medium">
+                      <code class="font-mono text-blue-950 bg-blue-100 px-1 py-0.5 rounded font-bold">agents-cli-manifest.yaml</code>에서 <code class="font-mono">agent_directory: app</code> 및 <code class="font-mono">root_agent_name: enterprise_ops_agent</code>로 지정되어 있으므로, 모든 에이전트 및 도구 코드는 <code class="font-mono text-blue-950 bg-blue-100 px-1 py-0.5 rounded font-bold">app/</code> 하위에서 안전하게 모듈로 로드됩니다.
                     </p>
                   </div>
                 </div>
@@ -1499,7 +1502,7 @@ print(json.dumps(search_company_policy('4일 연속 연차 신청 기한', categ
                       <i class="fa-regular fa-copy"></i> 프롬프트 복사
                     </button>
                   </div>
-                  <pre class="p-4 font-mono text-xs text-cyan-300 whitespace-pre-wrap leading-relaxed"><code>/config/workspace/docs/SDD.md의 3.1절 'Gemini Enterprise (GE) 배포용 A2A 규격'을 바탕으로, 우리 에이전트가 사내 Gemini Enterprise 또는 Agent Engine에 등록될 수 있도록 'agent_manifest.json' 파일을 생성해 주세요.
+                  <pre class="p-4 font-mono text-xs text-cyan-300 whitespace-pre-wrap leading-relaxed"><code>docs/SDD.md의 3.1절 'Gemini Enterprise (GE) 배포용 A2A 규격'을 바탕으로, 우리 에이전트가 사내 Gemini Enterprise 또는 Agent Engine에 등록될 수 있도록 'agent_manifest.json' 파일을 생성해 주세요.
 
 요구사항:
 - schema_version: "1.0.0"
@@ -1576,7 +1579,7 @@ print(json.dumps(search_company_policy('4일 연속 연차 신청 기한', categ
                     </button>
                   </div>
                   <pre class="p-4 font-mono text-xs text-emerald-300 leading-relaxed"><code># 1. 로컬 A2A / 웹 서빙 서버 실행
-cd /config/workspace/enterprise_ops_agent
+cd ~/enterprise-ops-agent
 python3 a2a_server.py</code></pre>
                 </div>
                 <p class="text-xs text-slate-600 font-medium">서버가 실행되면 브라우저에서 <code class="font-mono text-blue-700 bg-blue-50 px-1 py-0.5 rounded font-bold">http://localhost:8080</code>에 접속하여 로컬 테스트 콘솔을 엽니다:</p>
@@ -1612,15 +1615,15 @@ python3 a2a_server.py</code></pre>
                     <span>심화 옵션: Google ADK 2.3.0 개발자 대시보드 (agents-cli playground)</span>
                   </span>
                   <p class="text-[11px] text-indigo-900 leading-relaxed font-medium">
-                    ADK의 공식 이벤트 타임라인, 세션 상태(State), 아티팩트 트리 및 트레이스를 GUI에서 심층 디버깅하려면 폴더명을 <code class="font-mono text-indigo-800 bg-indigo-100 px-1 py-0.5 rounded font-bold">enterprise_ops_agent</code>로 맞추고 Vertex AI 환경 변수를 설정하여 실행합니다:
+                    ADK의 공식 이벤트 타임라인, 세션 상태(State), 아티팩트 트리 및 트레이스를 GUI에서 심층 디버깅하려면 프로젝트 루트에서 Vertex AI 환경 변수를 설정하고 플레이그라운드를 실행합니다:
                   </p>
                   <pre class="p-3 bg-[#090d16] rounded-lg font-mono text-[11px] text-indigo-300 overflow-x-auto leading-relaxed"><code># Vertex AI 환경 변수 설정 후 공식 플레이그라운드 기동
 export GOOGLE_GENAI_USE_VERTEXAI=true
 export GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project)
 export GOOGLE_CLOUD_LOCATION=global
-cd /config/workspace/enterprise_ops_agent
+cd ~/enterprise-ops-agent
 agents-cli playground --port 8085</code></pre>
-                  <p class="text-[10px] text-indigo-700 font-medium">브라우저에서 <code class="font-mono">http://localhost:8085/dev-ui/?app=enterprise_ops_agent</code>에 접속하면 공식 ADK 개발자 대시보드를 이용할 수 있습니다.</p>
+                  <p class="text-[10px] text-indigo-700 font-medium">브라우저에서 <code class="font-mono">http://localhost:8085/dev-ui/?app=app</code>에 접속하면 공식 ADK 개발자 대시보드를 이용할 수 있습니다.</p>
                 </div>
               </div>
 
@@ -1803,7 +1806,7 @@ export GOOGLE_GENAI_USE_VERTEXAI=true
 export GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project)
 export GOOGLE_CLOUD_LOCATION=global
 
-cd /config/workspace/enterprise_ops_agent
+cd ~/enterprise-ops-agent
 agents-cli eval run \
   --dataset tests/eval/datasets/eval-single-turn.json \
   --config tests/eval/eval_config.yaml
@@ -1856,10 +1859,10 @@ python3 -m http.server 8081 --directory artifacts/grade_results</code></pre>
                     </button>
                   </div>
                   <pre class="p-4 font-mono text-xs text-indigo-300 whitespace-pre-wrap leading-relaxed"><code># VM 터미널에서 한 줄로 완성본 다운로드 및 압축 해제
-cd /config/workspace && \
+cd ~ && \
 curl -fsSL https://raw.githubusercontent.com/hajekim/build-with-gemini/main/lab1/enterprise_ops_agent_completed.zip -o enterprise_ops_agent_completed.zip && \
 unzip -o enterprise_ops_agent_completed.zip && \
-cd enterprise_ops_agent</code></pre>
+cd enterprise-ops-agent</code></pre>
                 </div>
               </div>
 
@@ -2258,7 +2261,7 @@ cd enterprise_ops_agent</code></pre>
         tag: "Task 1",
         desc: "agents-cli 프로젝트 생성 & SDD 다운로드",
         btnText: "생성 및 다운로드 명령어 복사",
-        action: () => copyText("mkdir -p /config/workspace && cd /config/workspace\nagents-cli create enterprise-ops-agent -d cloud_run --session-type in_memory --cicd-runner skip -p -y -s\ncd enterprise-ops-agent\nmkdir -p docs/policies\ngsutil cp gs://oreobox/sdd/SDD.md docs/\ngsutil cp gs://oreobox/policy/*.pdf docs/policies/"),
+        action: () => copyText("cd ~\nagents-cli create enterprise-ops-agent -d cloud_run --session-type in_memory --cicd-runner skip -p -y -s\ncd enterprise-ops-agent\nmkdir -p docs/policies\ngsutil cp gs://oreobox/sdd/SDD.md docs/\ngsutil cp gs://oreobox/policy/*.pdf docs/policies/"),
         preview: "agents-cli create enterprise-ops-agent & gsutil cp SDD.md"
       },
       {
@@ -2293,7 +2296,7 @@ cd enterprise_ops_agent</code></pre>
         tag: "Task 6",
         desc: "로컬 A2A 기동 및 Eval 준비",
         btnText: "A2A 기동 및 Eval 명령어 복사",
-        action: () => copyText("cd /config/workspace/enterprise-ops-agent\npython3 a2a_server.py &\nexport GOOGLE_GENAI_USE_VERTEXAI=true\nexport GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project)\nexport GOOGLE_CLOUD_LOCATION=global\nagents-cli eval run"),
+        action: () => copyText("cd ~/enterprise-ops-agent\npython3 a2a_server.py &\nexport GOOGLE_GENAI_USE_VERTEXAI=true\nexport GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project)\nexport GOOGLE_CLOUD_LOCATION=global\nagents-cli eval run"),
         preview: "a2a_server.py 기동 및 agents-cli eval run 정량 평가 실행"
       }
     ];

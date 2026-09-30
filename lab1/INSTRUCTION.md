@@ -246,8 +246,7 @@ agents-cli --version
 터미널에서 다음 명령어를 실행하여 Cloud Run 배포와 인메모리 세션을 기본 지원하는 표준 에이전트 프로젝트를 생성합니다:
 
 ```bash
-mkdir -p /config/workspace
-cd /config/workspace
+cd ~
 
 # agents-cli 공식 템플릿으로 프로젝트 스캐폴딩 생성
 agents-cli create enterprise-ops-agent \
@@ -258,7 +257,7 @@ agents-cli create enterprise-ops-agent \
   --yes \
   --skip-checks
 
-cd /config/workspace/enterprise-ops-agent
+cd enterprise-ops-agent
 ```
 
 > [!NOTE]
@@ -317,7 +316,7 @@ ls -lh docs/policies/
 
 ### 4단계: agy를 통한 프로젝트 컨텍스트 그라운딩
 
-실행 중인 **Antigravity CLI (`agy`)** 터미널 창으로 전환합니다 (반드시 `/config/workspace/enterprise-ops-agent` 디렉터리에서 `agy`가 실행되어 있어야 합니다).
+실행 중인 **Antigravity CLI (`agy`)** 터미널 창으로 전환합니다 (반드시 생성된 `~/enterprise-ops-agent` 디렉터리에서 `agy`가 실행되어 있어야 합니다).
 
 `agy`의 입력창에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다:
 
@@ -428,7 +427,7 @@ docs/SDD.md의 2.1절 멀티 에이전트 구조와 1절 설정 규격을 참고
 새 터미널 탭에서 `agy`가 올바르게 멀티 에이전트를 구성했는지 실행하여 확인합니다:
 
 ```bash
-cd /config/workspace/enterprise-ops-agent
+cd ~/enterprise-ops-agent
 python3 -m app.agent
 ```
 
@@ -742,7 +741,7 @@ python3 tests/test_scenarios.py
 실행 중인 **Antigravity CLI (`agy`)** 터미널에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
 
 ```text
-/config/workspace/docs/SDD.md의 3.1절 'Gemini Enterprise (GE) 배포용 A2A 규격'을 바탕으로, 우리 에이전트가 사내 Gemini Enterprise 또는 Agent Engine에 등록될 수 있도록 'agent_manifest.json' 파일을 생성해 주세요.
+docs/SDD.md의 3.1절 'Gemini Enterprise (GE) 배포용 A2A 규격'을 바탕으로, 우리 에이전트가 사내 Gemini Enterprise 또는 Agent Engine에 등록될 수 있도록 'agent_manifest.json' 파일을 생성해 주세요.
 
 요구사항:
 - schema_version: "1.0.0"
@@ -811,7 +810,7 @@ Gemini Enterprise에 배포하기 전에, 개발자 로컬 환경에서 웹 애�
 새 터미널 창에서 `a2a_server.py`를 실행합니다.
 
 ```bash
-cd /config/workspace/enterprise_ops_agent
+cd ~/enterprise-ops-agent
 python3 a2a_server.py
 ```
 
@@ -875,11 +874,11 @@ curl -s -X POST http://localhost:8080/ \
    export GOOGLE_GENAI_USE_VERTEXAI=true
    export GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project)
    export GOOGLE_CLOUD_LOCATION=global
-   cd /config/workspace/enterprise_ops_agent
+   cd ~/enterprise-ops-agent
    agents-cli playground --port 8085
    ```
 
-   브라우저에서 `http://localhost:8085/dev-ui/?app=enterprise_ops_agent`에 접속하면 공식 ADK 개발자 대시보드를 이용할 수 있습니다.
+   브라우저에서 `http://localhost:8085/dev-ui/?app=app`에 접속하면 공식 ADK 개발자 대시보드를 이용할 수 있습니다.
 
 ---
 
@@ -997,7 +996,7 @@ export GOOGLE_GENAI_USE_VERTEXAI=true
 export GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project)
 export GOOGLE_CLOUD_LOCATION=global
 
-cd /config/workspace/enterprise_ops_agent
+cd ~/enterprise-ops-agent
 agents-cli eval run \
   --dataset tests/eval/datasets/eval-single-turn.json \
   --config tests/eval/eval_config.yaml
@@ -1035,15 +1034,15 @@ python3 -m http.server 8081 --directory artifacts/grade_results
 원격 가상 머신(VM) 터미널에서 다음 명령어를 실행하면 최종 완성본 프로젝트를 즉시 내려받아 압축을 풀고 실습 2 준비를 마칠 수 있습니다:
 
 ```bash
-# 1. 워크스페이스로 이동
-cd /config/workspace
+# 1. 홈 디렉터리로 이동
+cd ~
 
 # 2. 완성본 압축 파일 다운로드 및 해제
 curl -fsSL https://raw.githubusercontent.com/hajekim/build-with-gemini/main/lab1/enterprise_ops_agent_completed.zip -o enterprise_ops_agent_completed.zip
 unzip -o enterprise_ops_agent_completed.zip
 
 # 3. 프로젝트 디렉터리 이동 및 구성 확인
-cd enterprise_ops_agent
+cd enterprise-ops-agent
 ls -la
 ```
 
