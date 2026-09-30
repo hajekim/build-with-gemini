@@ -211,26 +211,17 @@ agy
 
 ---
 
-## Task 1. 개발 환경 설정 및 설계서(SDD) 기반 컨텍스트 그라운딩
+## Task 1. 개발 환경 설정, agents-cli 프로젝트 스캐폴딩 및 SDD 다운로드
 
-이 단계에서는 필요한 파이썬 환경을 구성하고, Antigravity CLI(`agy`)에게 설계 문서를 읽게 하여 프로젝트 전반의 맥락을 인식시킵니다.
+이 단계에서는 필요한 파이썬 환경을 구성하고, Google ADK 공식 CLI(`agents-cli`)로 표준 에이전트 프로젝트 뼈대를 생성한 뒤, 사내 소프트웨어 설계서(SDD) 및 규정 문서를 다운로드하여 Antigravity CLI(`agy`)에 프로젝트 컨텍스트를 그라운딩합니다.
 
-### 1단계: 파이썬 라이브러리 설치 및 실습 저장소 클론
+### 1단계: 필수 라이브러리 및 런타임 툴 설치
 
-터미널 새 탭(**Ctrl+Shift+T**)을 열고 실습에 필요한 파이썬 패키지를 설치하고 실습 저장소를 클론합니다.
+터미널 새 탭(**Ctrl+Shift+T**)을 열고 실습에 필요한 패키지와 Google Agent Development Kit(ADK) CLI를 설치합니다.
 
 ```bash
-# 1. 필수 라이브러리 및 런타임 툴 설치 (Google ADK 2.3.0, uv, FastMCP)
 pip install --upgrade pip
 pip install google-agents-cli "google-adk>=2.3.0" mcp httpx pydantic pyyaml uv
-
-# 2. 실습 저장소 클론 및 작업 디렉터리 이동
-sudo mkdir -p /config/workspace 2>/dev/null || true
-sudo chown -R $USER:$USER /config/workspace 2>/dev/null || true
-if [ ! -d "/config/workspace/.git" ]; then
-  git clone https://github.com/hajekim/build-with-gemini.git /config/workspace
-fi
-cd /config/workspace/enterprise_ops_agent
 ```
 
 설치된 버전을 확인합니다.
@@ -242,77 +233,111 @@ agents-cli --version
 ```
 +-----------------------------------------------------------------------------------+
 | 출력 예시:                                                                          |
-| google-agents-cli version 1.1.0 (Google Agent Development Kit 2.0 CLI)            |
+| google-agents-cli version 1.7.0 (Google Agent Development Kit CLI)                |
 +-----------------------------------------------------------------------------------+
 ```
 
-> [!TIP]
-> **Antigravity CLI(`agy`)의 ADK 전문 스킬 자동 인식:**
-> 저장소를 클론하면 워크스페이스 루트의 `.agents/skills/` 디렉터리에 Google 공식 에이전트 개발 스킬들이 자동으로 준비됩니다:
-> - `adk-skill`: Google ADK 2.3.0 멀티 에이전트(Hub-and-Spoke) 아키텍처 및 `McpToolset` 구현 지침
-> - `google-agents-cli-adk-code`: ADK 파이썬 패턴 및 도구 바인딩 표준
-> - `google-agents-cli-workflow`: 에이전트 개발 라이프사이클 및 코드 보존 가이드
-> - `eval-adk-skill`: 실습 2를 위한 4-Tier 골든 평가 데이터셋 규격
-> 
-> `agy` 터미널에서 `/skills`를 입력하면 이 스킬들이 활성화되어 있음을 직접 확인할 수 있습니다. `agy`는 프롬프트 처리 시 이 스킬들을 자율 참조하여 오차 없이 완벽한 코드를 작성합니다.
+---
+
+### 2단계: agents-cli를 활용한 공식 에이전트 프로젝트 뼈대 생성
+
+`agents-cli`는 Google Agent Platform 환경에서 에이전트 프로젝트 생성(`create`), 실행(`run`), 평가(`eval`), 배포(`deploy`)를 일관된 명령어로 관리하는 공식 CLI 도구입니다.
+
+터미널에서 다음 명령어를 실행하여 Cloud Run 배포와 인메모리 세션을 기본 지원하는 표준 에이전트 프로젝트를 생성합니다:
+
+```bash
+mkdir -p /config/workspace
+cd /config/workspace
+
+# agents-cli 공식 템플릿으로 프로젝트 스캐폴딩 생성
+agents-cli create enterprise-ops-agent \
+  --deployment-target cloud_run \
+  --session-type in_memory \
+  --cicd-runner skip \
+  --prototype \
+  --yes \
+  --skip-checks
+
+cd /config/workspace/enterprise-ops-agent
+```
 
 > [!NOTE]
-> **실습 프로젝트 초기 구성 안내:**  
-> `enterprise_ops_agent/` 디렉터리에는 프로젝트 매니페스트(`agents-cli-manifest.yaml`), 실습 1 및 실습 2를 위한 통합 테스트 스위트(`tests/test_scenarios.py`)와 정량 평가 데이터셋(`tests/eval/`)이 사전에 준비되어 있습니다. 참가자 여러분은 `agy`를 통해 핵심 멀티 에이전트 로직(`agent.py`, `config.yaml`, `tools/`)을 대화형 프롬프트로 직접 구축해 나갑니다.
+> **agents-cli create가 자동 생성한 표준 프로젝트 구조:**  
+> 명령어를 실행하면 `enterprise-ops-agent/` 디렉터리에 다음 표준 파일들이 즉시 준비됩니다:
+> - `agents-cli-manifest.yaml`: Google Agent Platform 공식 프로젝트 식별 매니페스트 (`agent_directory: app`, `root_agent_name: enterprise_ops_agent`)
+> - `app/agent.py`: 기본 단일 에이전트 뼈대 (임시 더미 날씨 조회 함수 `get_weather` 포함)
+> - `app/fast_api_app.py`: 로컬 SSE 스트리밍 서버 및 평가 엔드포인트
+> - `tests/eval/`: 실습 2를 위한 정량 평가 설정(`eval_config.yaml`) 및 기본 데이터셋(`basic-dataset.json`)
+> - `Dockerfile`, `pyproject.toml`, `uv.lock`: 컨테이너 빌드 및 의존성 고정 명세
+>
+> `agents-cli create`는 표준 디렉터리와 환경 설정을 완벽하게 잡아주지만, 생성된 `app/agent.py`는 단순한 날씨 봇 템플릿에 불과합니다. 우리는 Task 2에서 `agy`에게 지시하여 이 코드를 SDD 규격에 맞는 **Hub-and-Spoke 멀티 에이전트 시스템**으로 전면 리팩토링합니다.
 
 ---
 
-### 2단계: 작업 디렉터리 준비 및 SDD 확인
+### 3단계: 소프트웨어 설계서(SDD) 및 사내 규정 원본 다운로드
 
-작업 디렉터리의 소프트웨어 설계서(`docs/SDD.md`)를 확인합니다.
+프로젝트 디렉터리(`enterprise-ops-agent/`) 내부의 `docs/` 폴더에 사내 소프트웨어 설계서와 규정 PDF 원본 문서를 다운로드합니다.
+
+#### 옵션 A: Google Cloud Storage(GCS) 직접 다운로드 (기본 권장)
+실습 콘솔 계정 인증이 적용된 터미널에서 `gsutil` 명령어로 단 한 번에 다운로드합니다:
 
 ```bash
-cat /config/workspace/docs/SDD.md | head -n 45
+mkdir -p docs/policies
+gsutil cp gs://oreobox/sdd/SDD.md docs/
+gsutil cp gs://oreobox/policy/*.pdf docs/policies/
 ```
 
-또한 Cloud Storage에 보관된 사내 규정 PDF 파일 목록을 확인합니다.
+#### 옵션 B: HTTPS curl 직접 다운로드 (만약을 위한 백업)
+GCS 접근에 제약이 있거나 로컬 환경인 경우 다음 명령어로 웹에서 직접 다운로드합니다:
 
 ```bash
-gsutil ls -l gs://oreobox/policy/
+mkdir -p docs/policies
+curl -fsSL https://build.geap.dev/docs/SDD.md -o docs/SDD.md
+curl -fsSL https://build.geap.dev/docs/policies/leave_policy_2026.pdf -o docs/policies/leave_policy_2026.pdf
+curl -fsSL https://build.geap.dev/docs/policies/it_hardware_guidelines.pdf -o docs/policies/it_hardware_guidelines.pdf
+```
+
+다운로드된 파일 목록을 확인합니다:
+
+```bash
+ls -lh docs/
+ls -lh docs/policies/
 ```
 
 ```
 +-----------------------------------------------------------------------------------+
 | 출력 예시:                                                                          |
-|     68241  2026-01-01T00:00:00Z  gs://oreobox/policy/it_hardware_guidelines.pdf   |
-|     54920  2026-01-01T00:00:00Z  gs://oreobox/policy/leave_policy_2026.pdf        |
-| TOTAL: 2 objects, 123161 bytes (120.27 KiB)                                       |
+| docs/SDD.md (소프트웨어 설계서 완본 v2.2.0)                                          |
+| docs/policies/it_hardware_guidelines.pdf (POL-IT-2026-009 사내 IT 지침)            |
+| docs/policies/leave_policy_2026.pdf (POL-HR-2026-004 사내 복무 규정)                 |
 +-----------------------------------------------------------------------------------+
 ```
 
 ---
 
-### 3단계: agy를 통한 프로젝트 컨텍스트 그라운딩
+### 4단계: agy를 통한 프로젝트 컨텍스트 그라운딩
 
-실행 중인 **Antigravity CLI (`agy`)** 터미널 창으로 전환합니다.
+실행 중인 **Antigravity CLI (`agy`)** 터미널 창으로 전환합니다 (반드시 `/config/workspace/enterprise-ops-agent` 디렉터리에서 `agy`가 실행되어 있어야 합니다).
 
-`agy`의 입력창에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
-
-> [!NOTE]
-> Antigravity는 파일 생성이나 명령어 실행 전에 사용자에게 승인(Approval)을 요청할 수 있습니다. `agy`가 제안하는 동작을 검토한 뒤 **Yes, Allow this time** (또는 Enter)을 선택하여 진행합니다.
+`agy`의 입력창에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다:
 
 ```text
 당신은 Cymbal Group Korea의 엔터프라이즈 AI 에이전트 개발자입니다.
-/config/workspace/docs/SDD.md 파일의 내용을 꼼꼼히 읽고, 전체 아키텍처 개요와 도구 구성 요소를 파악하세요.
-그리고 현재 프로젝트 디렉터리(/config/workspace/enterprise_ops_agent)의 컨텍스트를 요약한 context_summary.md 파일을 docs/ 디렉터리에 생성하세요.
+docs/SDD.md 파일의 내용을 꼼꼼히 읽고, 전체 시스템 아키텍처와 도구 구성 요소를 파악하세요.
+그리고 현재 프로젝트 디렉터리의 컨텍스트를 요약한 context_summary.md 파일을 docs/ 디렉터리에 생성하세요.
 ```
 
-프롬프트 실행이 완료되면, 터미널에서 생성된 요약 파일을 확인합니다.
+`agy`가 파일 생성을 제안하면 **Allow**를 선택합니다. 생성이 완료되면 터미널에서 요약 파일을 확인합니다:
 
 ```bash
-cat /config/workspace/docs/context_summary.md
+cat docs/context_summary.md
 ```
 
 ---
 
-## Task 2. agy 프롬프트 기반 ADK 2.0 멀티 에이전트(MAS) 뼈대 생성
+## Task 2. agy 프롬프트 기반 ADK 2.0 멀티 에이전트(MAS) 뼈대 리팩토링
 
-이 단계에서는 코드를 직접 수동 작성하지 않고, `agy`에게 지시하여 SDD 2.1절 규격에 맞는 Hub-and-Spoke 멀티 에이전트 설정 파일(`config.yaml`)과 기본 `agent.py` 뼈대를 생성하도록 합니다.
+이 단계에서는 `agents-cli create`로 생성된 기본 단일 에이전트 뼈대(`app/agent.py`)를, `docs/SDD.md`의 명세에 따라 사내 복무 및 IT 전산 업무를 분담하는 **Hub-and-Spoke 멀티 에이전트 시스템**으로 전환합니다.
 
 ---
 
@@ -332,27 +357,28 @@ flowchart TD
     end
 ```
 
-`agents-cli`와 Google ADK의 모듈 로더는 파이썬의 동적 임포트 메커니즘(`importlib`)을 사용하므로, 프로젝트 디렉터리 이름은 하이픈(-)이 아닌 유효한 파이썬 식별자(언더스코어 `_`)인 `enterprise_ops_agent`로 명명해야 합니다.
+현재 워크스페이스의 프로젝트 디렉터리 구조는 다음과 같습니다:
 
 ```text
-enterprise_ops_agent/
-├── agents-cli-manifest.yaml # CLI 프로젝트 식별 매니페스트 (진입점, 배포 타겟, A2A 플래그 선언)
+enterprise-ops-agent/
+├── agents-cli-manifest.yaml # CLI 프로젝트 식별 매니페스트 (agent_directory: app, root_agent: enterprise_ops_agent)
 ├── config.yaml              # 모델 파라미터(gemini-3.8-flash), 멀티 에이전트 역할 정의, 거버넌스 규칙
-├── agent.py                 # Google ADK 기반 Root Hub 및 3대 전문 서브 에이전트 오케스트레이션 로직
-├── tools/                   # 외부 시스템 연동 도구 디렉터리
-│   ├── policy_rag.py        # 하이브리드 사내 규정 RAG 검색 도구 (Vertex AI Search + Cloud Storage PDF)
-│   └── mcp_tools.py         # Google ADK McpToolset 기반 WorkWeek & ITSM FastMCP 연동 클라이언트
-├── a2a_server.py            # Gemini Enterprise A2A JSON-RPC 2.0 서버 및 로컬 웹 대시보드
-├── tests/eval/              # 실습 2를 위한 에이전트 신뢰성 및 정량 평가 디렉터리
-│   ├── eval_config.yaml     # 평가 지표(task_success, tool_quality, hallucination) 및 가중치
-│   ├── evaluation_report.md # 평가 방법론, 벤치마크 설계 및 진단 보고서
-│   └── datasets/            # 평가용 골든 데이터셋 (단일턴 및 멀티턴 JSON)
-├── requirements.txt         # 파이썬 의존성 패키지 목록
-└── Dockerfile               # Cloud Run 컨테이너 빌드 명세
+├── app/
+│   ├── __init__.py
+│   ├── agent.py             # Google ADK 기반 Root Hub 및 3대 전문 서브 에이전트 오케스트레이션 로직
+│   ├── fast_api_app.py      # 로컬 SSE 스트리밍 서버 및 평가 엔드포인트
+│   └── tools/               # 외부 시스템 연동 도구 디렉터리 (app/tools/)
+│       ├── policy_rag.py    # 하이브리드 사내 규정 RAG 검색 도구
+│       └── mcp_tools.py     # WorkWeek & ITSM FastMCP 연동 클라이언트
+├── docs/                    # 소프트웨어 설계서(SDD.md) 및 사내 규정 원본 PDF
+├── tests/
+│   ├── test_scenarios.py    # 5대 핵심 시나리오 자동 검증 스위트
+│   └── eval/                # 실습 2를 위한 정량 평가 디렉터리
+├── Dockerfile               # Cloud Run 컨테이너 빌드 명세
+└── pyproject.toml           # 파이썬 의존성 패키지 명세
 ```
 
-#### 각 구성 요소 및 전문 서브 에이전트의 역할:
-
+#### 각 전문 서브 에이전트의 역할:
 1. **중앙 허브 (`enterprise_ops_agent`)**:
    - 사용자의 초기 질의를 수신하여 의도를 분류하고, 적절한 서브 에이전트에게 작업을 위임한 뒤 최종 응답을 종합합니다.
 2. **규정 전문 서브 에이전트 (`hr_policy_agent`)**:
@@ -364,22 +390,23 @@ enterprise_ops_agent/
 
 ---
 
-### 1단계: 설정 파일 및 멀티 에이전트 뼈대 생성 지시
+### 1단계: 설정 파일 생성 및 멀티 에이전트 뼈대 리팩토링 지시
 
-실행 중인 **Antigravity CLI (`agy`)** 터미널에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
+실행 중인 **Antigravity CLI (`agy`)** 터미널에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다:
 
 ```text
-/config/workspace/docs/SDD.md의 2.1절 멀티 에이전트 구조와 1절 설정 규격을 참고하여, 다음 두 개의 파일을 생성해주세요:
+docs/SDD.md의 2.1절 멀티 에이전트 구조와 1절 설정 규격을 참고하여, 우리가 방금 생성한 기본 뼈대를 Cymbal Group Korea의 Hub-and-Spoke 멀티 에이전트 시스템으로 전면 개편해주세요:
 
-1. config.yaml:
+1. config.yaml 생성:
    - agent 이름: enterprise_ops_agent, architecture: Hub-and-Spoke Multi-Agent System (MAS)
    - 모델: gemini-3.8-flash (temperature: 0.1, max_output_tokens: 2048)
    - sub_agents 정의: hr_policy_agent(규정 RAG), workweek_agent(HRMS FastMCP), itsm_agent(ITSM FastMCP)
    - organization: Cymbal Group Korea, Cloud AI Platform Operations, 기본 사번 EMP-10294
    - governance: enforce_policy_grounding=true, rag_confidence_threshold=0.80
 
-2. agent.py:
-   - google.adk.agents.Agent 클래스를 사용한 Hub-and-Spoke 멀티 에이전트 뼈대 작성
+2. app/agent.py 리팩토링:
+   - 기존 더미 날씨 함수(get_weather, get_current_time)를 완전히 제거
+   - google.adk.agents.Agent 클래스를 사용한 Hub-and-Spoke 멀티 에이전트 작성
    - 전문 서브 에이전트 3개 선언:
      1) hr_policy_agent: 사내 복무 규정(POL-HR) 및 IT 지침(POL-IT) RAG 검색 전문가
      2) workweek_agent: WorkWeek HRMS FastMCP 연동 전문가 (연차 조회, 휴가 신청/취소)
@@ -387,32 +414,29 @@ enterprise_ops_agent/
    - 중앙 허브 root_agent(enterprise_ops_agent): sub_agents=[hr_policy_agent, workweek_agent, itsm_agent]로 구성
    - SDD 3절의 규정 우선 확인(Policy-First) 및 위임 강령을 HUB_INSTRUCTION으로 정의
    - build_agent() 및 get_enterprise_agent() 함수 작성
-   - 주의사항:
-     * Agent 생성자 지시문은 반드시 단수형 'instruction' 키워드를 사용하고(instructions 복수형 사용 금지), 모듈 최상위에 'root_agent = build_agent()' 변수를 선언할 것
-     * 모듈 임포트는 직접 실행과 패키지 임포트를 모두 지원하도록 try-except dual import 패턴(try: from tools.policy_rag import ... except: from enterprise_ops_agent.tools.policy_rag import ...)으로 작성할 것
-     * 아직 tools/ 구현 전이므로 초기 뼈대에서는 tools 임포트 실패 시 빈 리스트(tools=[])나 더미로 안전하게 폴백하도록 처리할 것
+   - 주의사항: 
+     * Agent 생성자 지시문은 반드시 단수형 'instruction' 키워드를 사용하고(instructions 복수형 사용 금지), 모듈 최상위에 'root_agent = build_agent()' 변수와 'app = App(root_agent=root_agent, name="app")'을 선언할 것
+     * 아직 tools/ 구현 전이므로 초기 뼈대의 sub_agents tools는 빈 리스트(tools=[])로 선언할 것
 ```
 
-`agy`가 파일 생성을 제안하면 내용을 확인한 뒤 **Allow**를 선택합니다.
+`agy`가 파일 수정을 제안하면 변경 사항을 확인한 뒤 **Allow**를 선택합니다.
 
 ---
 
 ### 2단계: 생성된 멀티 에이전트 뼈대 검증
 
-새 터미널 탭에서 `agy`가 올바르게 멀티 에이전트를 생성했는지 실행하여 확인합니다.
+새 터미널 탭에서 `agy`가 올바르게 멀티 에이전트를 구성했는지 실행하여 확인합니다:
 
 ```bash
-python3 /config/workspace/enterprise_ops_agent/agent.py
+cd /config/workspace/enterprise-ops-agent
+python3 -m app.agent
 ```
 
 ```
 +-----------------------------------------------------------------------------------+
 | 출력 예시:                                                                          |
-| 2026-09-30 09:07:35 [INFO] enterprise_ops_agent: 멀티 에이전트 허브                   |
-| 'enterprise_ops_agent' 초기화 완료 (전문 서브 에이전트: 3개)                          |
 | 멀티 에이전트 준비 완료: enterprise_ops_agent                                        |
 |  - 전문 서브 에이전트: ['hr_policy_agent', 'workweek_agent', 'itsm_agent']            |
-|  - 허브 직접 도구 수: 5개                                                           |
 +-----------------------------------------------------------------------------------+
 ```
 
@@ -420,7 +444,7 @@ python3 /config/workspace/enterprise_ops_agent/agent.py
 
 ## Task 3. agy 프롬프트 기반 사내 규정 RAG 도구 구현
 
-이 단계에서는 `docs/SDD.md`의 2.2절 명세에 따라 사내 복무 규정(POL-HR-2026-004)과 IT 하드웨어 지침(POL-IT-2026-009)을 검색하는 RAG 도구(`tools/policy_rag.py`)를 `agy`에게 구현하도록 지시합니다.
+이 단계에서는 `docs/SDD.md`의 2.2절 명세에 따라 사내 복무 규정(POL-HR-2026-004)과 IT 하드웨어 지침(POL-IT-2026-009)을 검색하는 RAG 도구(`app/tools/policy_rag.py`)를 `agy`에게 구현하도록 지시합니다.
 
 ### 사내 규정 원본 문서 및 핵심 조항 요약
 
@@ -450,7 +474,7 @@ python3 /config/workspace/enterprise_ops_agent/agent.py
 실행 중인 **Antigravity CLI (`agy`)** 터미널에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
 
 ```text
-/config/workspace/docs/SDD.md의 2.2절 '사내 규정 RAG 도구 명세'를 엄격히 준수하여 tools/policy_rag.py 파일을 구현해주세요.
+docs/SDD.md의 2.2절 '사내 규정 RAG 도구 명세'를 엄격히 준수하여 app/tools/policy_rag.py 파일을 구현해주세요.
 
 요구사항:
 1. 함수 시그니처: search_company_policy(query: str, category: str = "ALL") -> dict
@@ -471,7 +495,7 @@ python3 /config/workspace/enterprise_ops_agent/agent.py
 
 ```bash
 python3 -c "
-from tools.policy_rag import search_company_policy
+from app.tools.policy_rag import search_company_policy
 import json
 
 print('=== 테스트 1: 4일 연속 연차 신청 기한 문의 ===')
@@ -505,7 +529,7 @@ print(json.dumps(r2, indent=2, ensure_ascii=False))
 
 ## Task 4. agy 프롬프트 기반 FastMCP SaaS 연동 도구 구현
 
-이번 단계에서는 웹 기반 Mock SaaS 플랫폼(`https://korean-mock-saas-dri5akvbzq-du.a.run.app/`)과 통신하는 FastMCP 클라이언트 도구(`tools/mcp_tools.py`)를 `agy`에게 구현하도록 요청합니다.
+이번 단계에서는 웹 기반 Mock SaaS 플랫폼(`https://korean-mock-saas-dri5akvbzq-du.a.run.app/`)과 통신하는 FastMCP 클라이언트 도구(`app/tools/mcp_tools.py`)를 `agy`에게 구현하도록 요청합니다.
 
 ### FastMCP 프로토콜 규격 및 한국형 Mock SaaS 명세
 
@@ -551,7 +575,7 @@ export MCP_TOKEN="mcp_여러분의토큰값"
 실행 중인 **Antigravity CLI (`agy`)** 터미널에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
 
 ```text
-/config/workspace/docs/SDD.md의 2.3절 'FastMCP SaaS 연동 도구 명세'를 바탕으로 tools/mcp_tools.py 파일을 구현해주세요.
+docs/SDD.md의 2.3절 'FastMCP SaaS 연동 도구 명세'를 바탕으로 app/tools/mcp_tools.py 파일을 구현해주세요.
 
 요구사항:
 1. Google ADK의 McpToolset과 StreamableHTTPConnectionParams를 사용하여 WorkWeek(/work-week/mcp) 및 ServiceImmediately(/service-immediately/mcp) 연결 도구 세트 생성 함수 구현:
@@ -582,7 +606,7 @@ export MCP_TOKEN="mcp_여러분의토큰값"
 
 ```bash
 python3 -c "
-from tools.mcp_tools import get_employee_leave_balance, list_hardware_assets_and_tickets
+from app.tools.mcp_tools import get_employee_leave_balance, list_hardware_assets_and_tickets
 import json
 
 print('=== WorkWeek 잔여 연차 조회 ===')
@@ -611,35 +635,35 @@ print(json.dumps(list_hardware_assets_and_tickets('EMP-10294'), indent=2, ensure
 
 ## Task 5. 오케스트레이션 프롬프트 완성 및 복수 턴 시나리오 검증
 
-이제 `agy`에게 SDD 3절의 오케스트레이션 행동 강령을 주입하여 `agent.py`를 최종 완성하게 하고, `agy` 터미널 대화창에서 실제 임직원 요청 시나리오를 직접 검증합니다.
+이제 `agy`에게 SDD 3절의 오케스트레이션 행동 강령을 주입하여 `app/agent.py`를 최종 완성하게 하고, `agy` 터미널 대화창에서 실제 임직원 요청 시나리오를 직접 검증합니다.
 
 ### 1단계: 최종 에이전트 완성 지시
 
 실행 중인 **Antigravity CLI (`agy`)** 터미널에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
 
 ```text
-/config/workspace/docs/SDD.md의 3절 '오케스트레이션 및 거버넌스 강령'을 반영하여 agent.py의 Hub-and-Spoke 멀티 에이전트 시스템을 최종 완성해주세요.
+docs/SDD.md의 3절 '오케스트레이션 및 거버넌스 강령'을 반영하여 app/agent.py의 Hub-and-Spoke 멀티 에이전트 시스템을 최종 완성해주세요.
 
 요구사항:
-1. 전문 서브 에이전트 3종 정의:
-   - hr_policy_agent: tools/policy_rag.py의 search_company_policy 도구를 소유하여 규정(POL-HR-2026-004, POL-IT-2026-009) 선검증 전담
-   - workweek_agent: tools/mcp_tools.py의 get_workweek_mcp_toolset() 및 FastMCP JSON-RPC 도구로 연차 조회, 휴가 상신/취소 전담
-   - itsm_agent: tools/mcp_tools.py의 get_itsm_mcp_toolset() 및 FastMCP JSON-RPC 도구로 장비 조회, 결함 티켓 생성 전담
+1. 전문 서브 에이전트 3종에 도구 바인딩:
+   - hr_policy_agent: app/tools/policy_rag.py의 search_company_policy 도구를 바인딩하여 규정(POL-HR-2026-004, POL-IT-2026-009) 선검증 전담
+   - workweek_agent: app/tools/mcp_tools.py의 get_workweek_mcp_toolset() 및 FastMCP JSON-RPC 도구로 연차 조회, 휴가 상신/취소 전담
+   - itsm_agent: app/tools/mcp_tools.py의 get_itsm_mcp_toolset() 및 FastMCP JSON-RPC 도구로 장비 조회, 결함 티켓 생성 전담
 2. 중앙 허브 root_agent (enterprise_ops_agent): sub_agents=[hr_policy_agent, workweek_agent, itsm_agent]로 구성
 3. HUB_INSTRUCTION에 다음 4대 핵심 거버넌스 행동 수칙을 강력하게 반영:
    - [규정 우선 원칙]: 시스템에 휴가 신청이나 티켓을 발행하기 전에 반드시 'hr_policy_agent'를 먼저 호출하여 사전 적합성을 검증할 것.
    - [근거 명시]: POL-HR-2026-004 또는 POL-IT-2026-009의 조항 번호와 사전 신청 기한, 승인 요건을 최종 답변에 반드시 포함할 것.
    - [단계별 검증]: 규정에 부합할 때만 workweek_agent 또는 itsm_agent를 호출하여 SaaS 작업을 진행할 것.
    - [친절하고 명확한 한국어 톤].
-4. get_enterprise_agent() 및 build_agent() 함수로 완성된 Hub-and-Spoke 루트 에이전트 객체를 반환하도록 구성할 것.
+4. get_enterprise_agent() 및 build_agent() 함수로 완성된 Hub-and-Spoke 루트 에이전트 객체를 반환하고, 최상위에 app = App(root_agent=root_agent, name="app")을 유지할 것.
 ```
 
-`agy`가 `agent.py` 업데이트를 제안하면 **Allow**를 선택합니다.
+`agy`가 `app/agent.py` 업데이트를 제안하면 **Allow**를 선택합니다.
 
 터미널에서 자동 통합 검증 스크립트를 실행하여 5대 시나리오가 모두 통과하는지 즉시 확인할 수 있습니다:
 
 ```bash
-python3 /config/workspace/enterprise_ops_agent/tests/test_scenarios.py
+python3 tests/test_scenarios.py
 ```
 
 ---

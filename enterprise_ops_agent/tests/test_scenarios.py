@@ -13,14 +13,24 @@ import time
 # Ensure package root is in sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from agent import root_agent
-from tools.policy_rag import search_company_policy
-from tools.mcp_tools import (
-    get_employee_leave_balance,
-    submit_leave_request,
-    list_hardware_assets_and_tickets,
-    create_hardware_incident_ticket,
-)
+try:
+    from app.agent import root_agent
+    from app.tools.policy_rag import search_company_policy
+    from app.tools.mcp_tools import (
+        get_employee_leave_balance,
+        submit_leave_request,
+        list_hardware_assets_and_tickets,
+        create_hardware_incident_ticket,
+    )
+except (ImportError, ModuleNotFoundError):
+    from agent import root_agent
+    from tools.policy_rag import search_company_policy
+    from tools.mcp_tools import (
+        get_employee_leave_balance,
+        submit_leave_request,
+        list_hardware_assets_and_tickets,
+        create_hardware_incident_ticket,
+    )
 
 
 def test_multi_agent_topology():

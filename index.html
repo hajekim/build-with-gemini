@@ -823,7 +823,7 @@
               </div>
 
               <div class="card-studio p-5 space-y-3">
-                <h3 class="font-bold text-slate-900 text-xs uppercase tracking-wider">1. 패키지 설치 및 저장소 클론 (터미널)</h3>
+                <h3 class="font-bold text-slate-900 text-xs uppercase tracking-wider">1. 패키지 설치 및 agents-cli 프로젝트 스캐폴딩 (터미널)</h3>
                 <div class="bg-[#090d16] border border-slate-800 rounded-xl overflow-hidden shadow-md">
                   <div class="bg-[#131b2e] px-4 py-2 border-b border-slate-800 flex items-center justify-between">
                     <span class="text-[11px] text-slate-400 font-mono">bash terminal</span>
@@ -835,31 +835,89 @@
 pip install --upgrade pip
 pip install google-agents-cli "google-adk>=2.3.0" mcp httpx pydantic pyyaml uv
 
-# 2. 실습 저장소 클론 및 작업 디렉터리 이동
-sudo mkdir -p /config/workspace 2>/dev/null || true
-sudo chown -R $USER:$USER /config/workspace 2>/dev/null || true
-if [ ! -d "/config/workspace/.git" ]; then
-  git clone https://github.com/hajekim/build-with-gemini.git /config/workspace
-fi
-cd /config/workspace/enterprise_ops_agent</code></pre>
+# 2. agents-cli 공식 템플릿으로 프로젝트 뼈대 생성
+mkdir -p /config/workspace
+cd /config/workspace
+agents-cli create enterprise-ops-agent \
+  --deployment-target cloud_run \
+  --session-type in_memory \
+  --cicd-runner skip \
+  --prototype \
+  --yes \
+  --skip-checks
+
+cd /config/workspace/enterprise-ops-agent</code></pre>
                 </div>
 
-                <!-- Skills Discovery Callout -->
+                <!-- Scaffold Explanation Callout -->
                 <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 space-y-1.5 text-xs text-indigo-950 font-medium">
                   <div class="font-bold flex items-center gap-2 text-indigo-900 text-xs">
-                    <i class="fa-solid fa-wand-magic-sparkles text-indigo-600"></i>
-                    <span>Antigravity CLI (agy)의 ADK 전문 스킬 자동 인식 안내</span>
+                    <i class="fa-solid fa-folder-tree text-indigo-600"></i>
+                    <span>agents-cli create가 자동 스캐폴딩한 표준 구성 요소</span>
                   </div>
                   <p class="text-[11px] text-slate-700 leading-relaxed font-normal">
-                    저장소를 클론하면 워크스페이스 내 <code class="font-mono text-indigo-800 bg-indigo-100 px-1 py-0.5 rounded font-bold">.agents/skills/</code>에 Google ADK 전문 스킬(adk-skill, google-agents-cli-adk-code 등)이 자동 탑재됩니다. agy 터미널에서 <code class="font-mono text-slate-800 bg-white px-1 py-0.5 rounded font-bold">/skills</code>를 입력하면 활성화된 스킬 목록을 확인할 수 있으며, agy는 이 지식을 참조하여 완성도 높은 코드를 자율 작성합니다.
+                    명령어를 실행하면 <code class="font-mono text-indigo-800 bg-indigo-100 px-1 py-0.5 rounded font-bold">enterprise-ops-agent/</code> 디렉터리에 프로젝트 매니페스트(<code class="font-mono text-slate-800">agents-cli-manifest.yaml</code>), 기본 에이전트 뼈대(<code class="font-mono text-slate-800">app/agent.py</code>), SSE 스트리밍 서버(<code class="font-mono text-slate-800">app/fast_api_app.py</code>), 정량 평가 설정(<code class="font-mono text-slate-800">tests/eval/</code>), 그리고 <code class="font-mono text-slate-800">Dockerfile</code>이 자동 생성됩니다.
                   </p>
                 </div>
               </div>
 
+              <!-- SDD & Policy Download Section -->
+              <div class="card-studio p-5 space-y-3">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                  <h3 class="font-bold text-slate-900 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-download text-emerald-600"></i>
+                    <span>2. 설계서(SDD.md) 및 사내 규정 원본 다운로드</span>
+                  </h3>
+                  <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">GCS 기본 / curl 백업</span>
+                </div>
+
+                <div class="space-y-3 text-xs">
+                  <!-- Option A: GCS -->
+                  <div class="bg-emerald-50/60 border border-emerald-200 rounded-xl p-3.5 space-y-2">
+                    <span class="font-bold text-emerald-900 block flex items-center gap-1.5">
+                      <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px]">A</span>
+                      <span>옵션 A: Google Cloud Storage (GCS) 직접 다운로드 (기본 권장)</span>
+                    </span>
+                    <div class="bg-[#090d16] border border-slate-800 rounded-lg overflow-hidden shadow-inner">
+                      <div class="bg-[#131b2e] px-3 py-1.5 border-b border-slate-800 flex items-center justify-between">
+                        <span class="text-[10px] text-emerald-400 font-mono">gsutil cp</span>
+                        <button class="px-2 py-0.5 rounded bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white font-semibold text-[10px] transition flex items-center gap-1" onclick="copyCode(this)">
+                          <i class="fa-regular fa-copy"></i> 복사
+                        </button>
+                      </div>
+                      <pre class="p-3 font-mono text-[11px] text-emerald-300 leading-relaxed"><code>mkdir -p docs/policies
+gsutil cp gs://oreobox/sdd/SDD.md docs/
+gsutil cp gs://oreobox/policy/*.pdf docs/policies/</code></pre>
+                    </div>
+                  </div>
+
+                  <!-- Option B: curl -->
+                  <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2">
+                    <span class="font-bold text-slate-800 block flex items-center gap-1.5">
+                      <span class="w-4 h-4 rounded-full bg-slate-400 text-white flex items-center justify-center text-[10px]">B</span>
+                      <span>옵션 B: HTTPS curl 직접 다운로드 (GCS 제약 시 백업)</span>
+                    </span>
+                    <div class="bg-[#090d16] border border-slate-800 rounded-lg overflow-hidden shadow-inner">
+                      <div class="bg-[#131b2e] px-3 py-1.5 border-b border-slate-800 flex items-center justify-between">
+                        <span class="text-[10px] text-slate-400 font-mono">curl download</span>
+                        <button class="px-2 py-0.5 rounded bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white font-semibold text-[10px] transition flex items-center gap-1" onclick="copyCode(this)">
+                          <i class="fa-regular fa-copy"></i> 복사
+                        </button>
+                      </div>
+                      <pre class="p-3 font-mono text-[11px] text-slate-300 leading-relaxed"><code>mkdir -p docs/policies
+curl -fsSL https://build.geap.dev/docs/SDD.md -o docs/SDD.md
+curl -fsSL https://build.geap.dev/docs/policies/leave_policy_2026.pdf -o docs/policies/leave_policy_2026.pdf
+curl -fsSL https://build.geap.dev/docs/policies/it_hardware_guidelines.pdf -o docs/policies/it_hardware_guidelines.pdf</code></pre>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Step 3: agy context grounding -->
               <div class="card-studio p-5 space-y-3">
                 <h3 class="font-bold text-blue-700 text-xs uppercase tracking-wider flex items-center gap-1.5">
                   <i class="fa-solid fa-terminal"></i>
-                  <span>2. agy에게 SDD 기반 컨텍스트 요약 지시 (agy 대화창)</span>
+                  <span>3. agy에게 SDD 기반 컨텍스트 요약 지시 (agy 대화창)</span>
                 </h3>
                 <div class="bg-[#090d16] border border-slate-800 rounded-xl overflow-hidden shadow-md">
                   <div class="bg-[#131b2e] px-4 py-2 border-b border-slate-800 flex items-center justify-between">
@@ -869,8 +927,8 @@ cd /config/workspace/enterprise_ops_agent</code></pre>
                     </button>
                   </div>
                   <pre class="p-4 font-mono text-xs text-slate-200 whitespace-pre-wrap leading-relaxed"><code>당신은 Cymbal Group Korea의 엔터프라이즈 AI 에이전트 개발자입니다.
-/config/workspace/docs/SDD.md 파일의 내용을 꼼꼼히 읽고, 전체 아키텍처 개요와 도구 구성 요소를 파악하세요.
-그리고 현재 프로젝트 디렉터리(/config/workspace/enterprise_ops_agent)의 컨텍스트를 요약한 context_summary.md 파일을 docs/ 디렉터리에 생성하세요.</code></pre>
+docs/SDD.md 파일의 내용을 꼼꼼히 읽고, 전체 시스템 아키텍처와 도구 구성 요소를 파악하세요.
+그리고 현재 프로젝트 디렉터리의 컨텍스트를 요약한 context_summary.md 파일을 docs/ 디렉터리에 생성하세요.</code></pre>
                 </div>
                 <p class="text-xs text-slate-600 font-medium">agy가 제안하는 파일 생성 변경사항을 확인하고 <strong>Allow</strong>를 선택합니다.</p>
               </div>
@@ -999,7 +1057,7 @@ cd /config/workspace/enterprise_ops_agent</code></pre>
               <div class="card-studio p-5 space-y-3">
                 <h3 class="font-bold text-blue-700 text-xs uppercase tracking-wider flex items-center gap-1.5">
                   <i class="fa-solid fa-terminal"></i>
-                  <span>1. 에이전트 뼈대 생성 지시 (agy 대화창)</span>
+                  <span>1. 멀티 에이전트 리팩토링 지시 (agy 대화창)</span>
                 </h3>
                 <div class="bg-[#090d16] border border-slate-800 rounded-xl overflow-hidden shadow-md">
                   <div class="bg-[#131b2e] px-4 py-2 border-b border-slate-800 flex items-center justify-between">
@@ -1008,17 +1066,18 @@ cd /config/workspace/enterprise_ops_agent</code></pre>
                       <i class="fa-regular fa-copy"></i> 프롬프트 복사
                     </button>
                   </div>
-                  <pre class="p-4 font-mono text-xs text-slate-200 whitespace-pre-wrap leading-relaxed"><code>/config/workspace/docs/SDD.md의 2.1절 멀티 에이전트 구조와 1절 설정 규격을 참고하여, 다음 두 개의 파일을 생성해주세요:
+                  <pre class="p-4 font-mono text-xs text-slate-200 whitespace-pre-wrap leading-relaxed"><code>docs/SDD.md의 2.1절 멀티 에이전트 구조와 1절 설정 규격을 참고하여, 우리가 방금 생성한 기본 뼈대를 Cymbal Group Korea의 Hub-and-Spoke 멀티 에이전트 시스템으로 전면 개편해주세요:
 
-1. config.yaml:
+1. config.yaml 생성:
    - agent 이름: enterprise_ops_agent, architecture: Hub-and-Spoke Multi-Agent System (MAS)
    - 모델: gemini-3.8-flash (temperature: 0.1, max_output_tokens: 2048)
    - sub_agents 정의: hr_policy_agent(규정 RAG), workweek_agent(HRMS FastMCP), itsm_agent(ITSM FastMCP)
    - organization: Cymbal Group Korea, Cloud AI Platform Operations, 기본 사번 EMP-10294
    - governance: enforce_policy_grounding=true, rag_confidence_threshold=0.80
 
-2. agent.py:
-   - google.adk.agents.Agent 클래스를 사용한 Hub-and-Spoke 멀티 에이전트 뼈대 작성
+2. app/agent.py 리팩토링:
+   - 기존 더미 날씨 함수(get_weather, get_current_time)를 완전히 제거
+   - google.adk.agents.Agent 클래스를 사용한 Hub-and-Spoke 멀티 에이전트 작성
    - 전문 서브 에이전트 3개 선언:
      1) hr_policy_agent: 사내 복무 규정(POL-HR) 및 IT 지침(POL-IT) RAG 검색 전문가
      2) workweek_agent: WorkWeek HRMS FastMCP 연동 전문가 (연차 조회, 휴가 신청/취소)
@@ -1026,10 +1085,9 @@ cd /config/workspace/enterprise_ops_agent</code></pre>
    - 중앙 허브 root_agent(enterprise_ops_agent): sub_agents=[hr_policy_agent, workweek_agent, itsm_agent]로 구성
    - SDD 3절의 규정 우선 확인(Policy-First) 및 위임 강령을 HUB_INSTRUCTION으로 정의
    - build_agent() 및 get_enterprise_agent() 함수 작성
-   - 주의사항:
-     * Agent 생성자 지시문은 반드시 단수형 'instruction' 키워드를 사용하고(instructions 복수형 사용 금지), 모듈 최상위에 'root_agent = build_agent()' 변수를 선언할 것
-     * 모듈 임포트는 직접 실행과 패키지 임포트를 모두 지원하도록 try-except dual import 패턴(try: from tools.policy_rag import ... except: from enterprise_ops_agent.tools.policy_rag import ...)으로 작성할 것
-     * 아직 tools/ 구현 전이므로 초기 뼈대에서는 tools 임포트 실패 시 빈 리스트(tools=[])나 더미로 안전하게 폴백하도록 처리할 것</code></pre>
+   - 주의사항: 
+     * Agent 생성자 지시문은 반드시 단수형 'instruction' 키워드를 사용하고(instructions 복수형 사용 금지), 모듈 최상위에 'root_agent = build_agent()' 변수와 'app = App(root_agent=root_agent, name="app")'을 선언할 것
+     * 아직 tools/ 구현 전이므로 초기 뼈대의 sub_agents tools는 빈 리스트(tools=[])로 선언할 것</code></pre>
                 </div>
               </div>
 
@@ -1042,7 +1100,7 @@ cd /config/workspace/enterprise_ops_agent</code></pre>
                       <i class="fa-regular fa-copy"></i> 복사
                     </button>
                   </div>
-                  <pre class="p-4 font-mono text-xs text-cyan-300"><code>python3 /config/workspace/enterprise_ops_agent/agent.py</code></pre>
+                  <pre class="p-4 font-mono text-xs text-cyan-300"><code>python3 -m app.agent</code></pre>
                 </div>
                 <div class="bg-emerald-50 border border-emerald-300 rounded-xl p-3 text-xs text-emerald-950 font-bold flex items-center gap-2">
                   <i class="fa-solid fa-circle-check text-emerald-600"></i>
@@ -1130,7 +1188,7 @@ cd /config/workspace/enterprise_ops_agent</code></pre>
                       <i class="fa-regular fa-copy"></i> 프롬프트 복사
                     </button>
                   </div>
-                  <pre class="p-4 font-mono text-xs text-slate-200 whitespace-pre-wrap leading-relaxed"><code>/config/workspace/docs/SDD.md의 2.2절 '사내 규정 RAG 도구 명세'를 엄격히 준수하여 tools/policy_rag.py 파일을 구현해주세요.
+                  <pre class="p-4 font-mono text-xs text-slate-200 whitespace-pre-wrap leading-relaxed"><code>docs/SDD.md의 2.2절 '사내 규정 RAG 도구 명세'를 엄격히 준수하여 app/tools/policy_rag.py 파일을 구현해주세요.
 
 요구사항:
 1. 함수 시그니처: search_company_policy(query: str, category: str = "ALL") -> dict
@@ -1152,7 +1210,7 @@ cd /config/workspace/enterprise_ops_agent</code></pre>
                     </button>
                   </div>
                   <pre class="p-4 font-mono text-xs text-cyan-300"><code>python3 -c "
-from tools.policy_rag import search_company_policy
+from app.tools.policy_rag import search_company_policy
 import json
 print(json.dumps(search_company_policy('4일 연속 연차 신청 기한', category='HR'), indent=2, ensure_ascii=False))
 "</code></pre>
@@ -1265,7 +1323,7 @@ print(json.dumps(search_company_policy('4일 연속 연차 신청 기한', categ
                       <i class="fa-regular fa-copy"></i> 프롬프트 복사
                     </button>
                   </div>
-                  <pre class="p-4 font-mono text-xs text-slate-200 whitespace-pre-wrap leading-relaxed"><code>/config/workspace/docs/SDD.md의 2.3절 'FastMCP SaaS 연동 도구 명세'를 바탕으로 tools/mcp_tools.py 파일을 구현해주세요.
+                  <pre class="p-4 font-mono text-xs text-slate-200 whitespace-pre-wrap leading-relaxed"><code>docs/SDD.md의 2.3절 'FastMCP SaaS 연동 도구 명세'를 바탕으로 app/tools/mcp_tools.py 파일을 구현해주세요.
 
 요구사항:
 1. Google ADK의 McpToolset과 StreamableHTTPConnectionParams를 사용하여 WorkWeek(/work-week/mcp) 및 ServiceImmediately(/service-immediately/mcp) 연결 도구 세트 생성 함수 구현:
@@ -1312,20 +1370,20 @@ print(json.dumps(search_company_policy('4일 연속 연차 신청 기한', categ
                       <i class="fa-regular fa-copy"></i> 프롬프트 복사
                     </button>
                   </div>
-                  <pre class="p-4 font-mono text-xs text-slate-200 whitespace-pre-wrap leading-relaxed"><code>/config/workspace/docs/SDD.md의 3절 '오케스트레이션 및 거버넌스 강령'을 반영하여 agent.py의 Hub-and-Spoke 멀티 에이전트 시스템을 최종 완성해주세요.
+                  <pre class="p-4 font-mono text-xs text-slate-200 whitespace-pre-wrap leading-relaxed"><code>docs/SDD.md의 3절 '오케스트레이션 및 거버넌스 강령'을 반영하여 app/agent.py의 Hub-and-Spoke 멀티 에이전트 시스템을 최종 완성해주세요.
 
 요구사항:
-1. 전문 서브 에이전트 3종 정의:
-   - hr_policy_agent: tools/policy_rag.py의 search_company_policy 도구를 소유하여 규정(POL-HR-2026-004, POL-IT-2026-009) 선검증 전담
-   - workweek_agent: tools/mcp_tools.py의 get_workweek_mcp_toolset() 및 FastMCP JSON-RPC 도구로 연차 조회, 휴가 상신/취소 전담
-   - itsm_agent: tools/mcp_tools.py의 get_itsm_mcp_toolset() 및 FastMCP JSON-RPC 도구로 장비 조회, 결함 티켓 생성 전담
+1. 전문 서브 에이전트 3종에 도구 바인딩:
+   - hr_policy_agent: app/tools/policy_rag.py의 search_company_policy 도구를 바인딩하여 규정(POL-HR-2026-004, POL-IT-2026-009) 선검증 전담
+   - workweek_agent: app/tools/mcp_tools.py의 get_workweek_mcp_toolset() 및 FastMCP JSON-RPC 도구로 연차 조회, 휴가 상신/취소 전담
+   - itsm_agent: app/tools/mcp_tools.py의 get_itsm_mcp_toolset() 및 FastMCP JSON-RPC 도구로 장비 조회, 결함 티켓 생성 전담
 2. 중앙 허브 root_agent (enterprise_ops_agent): sub_agents=[hr_policy_agent, workweek_agent, itsm_agent]로 구성
 3. HUB_INSTRUCTION에 다음 4대 핵심 거버넌스 행동 수칙을 강력하게 반영:
    - [규정 우선 원칙]: 시스템에 휴가 신청이나 티켓을 발행하기 전에 반드시 'hr_policy_agent'를 먼저 호출하여 사전 적합성을 검증할 것.
    - [근거 명시]: POL-HR-2026-004 또는 POL-IT-2026-009의 조항 번호와 사전 신청 기한, 승인 요건을 최종 답변에 반드시 포함할 것.
    - [단계별 검증]: 규정에 부합할 때만 workweek_agent 또는 itsm_agent를 호출하여 SaaS 작업을 진행할 것.
    - [친절하고 명확한 한국어 톤].
-4. get_enterprise_agent() 및 build_agent() 함수로 완성된 Hub-and-Spoke 루트 에이전트 객체를 반환하도록 구성할 것.</code></pre>
+4. get_enterprise_agent() 및 build_agent() 함수로 완성된 Hub-and-Spoke 루트 에이전트 객체를 반환하고, 최상위에 app = App(root_agent=root_agent, name="app")을 유지할 것.</code></pre>
                 </div>
 
                 <!-- Automated Verification Script Box -->
@@ -1341,7 +1399,7 @@ print(json.dumps(search_company_policy('4일 연속 연차 신청 기한', categ
                         <i class="fa-regular fa-copy"></i> 복사
                       </button>
                     </div>
-                    <pre class="p-3 font-mono text-[11px] text-emerald-300 whitespace-pre-wrap leading-relaxed"><code>python3 /config/workspace/enterprise_ops_agent/tests/test_scenarios.py</code></pre>
+                    <pre class="p-3 font-mono text-[11px] text-emerald-300 whitespace-pre-wrap leading-relaxed"><code>python3 tests/test_scenarios.py</code></pre>
                   </div>
                   <p class="text-[11px] text-slate-500">Hub-and-Spoke 토폴로지, 규정 RAG(연차/노트북), FastMCP 실시간 세션 연동이 모두 통과하는지 4초 만에 검증합니다.</p>
                 </div>
@@ -2198,31 +2256,31 @@ cd enterprise_ops_agent</code></pre>
       },
       {
         tag: "Task 1",
-        desc: "환경 패키지 설치 및 저장소 클론",
-        btnText: "설치 및 클론 명령어 복사",
-        action: () => copyText("pip install --upgrade pip\npip install google-agents-cli \"google-adk>=2.3.0\" mcp httpx pydantic pyyaml uv\nsudo mkdir -p /config/workspace 2>/dev/null || true\nsudo chown -R $USER:$USER /config/workspace 2>/dev/null || true\n[ -d /config/workspace/.git ] || git clone https://github.com/hajekim/build-with-gemini.git /config/workspace\ncd /config/workspace/enterprise_ops_agent"),
-        preview: "pip install google-agents-cli \"google-adk>=2.3.0\" uv ...\ngit clone 및 작업 디렉터리 이동"
+        desc: "agents-cli 프로젝트 생성 & SDD 다운로드",
+        btnText: "생성 및 다운로드 명령어 복사",
+        action: () => copyText("mkdir -p /config/workspace && cd /config/workspace\nagents-cli create enterprise-ops-agent -d cloud_run --session-type in_memory --cicd-runner skip -p -y -s\ncd enterprise-ops-agent\nmkdir -p docs/policies\ngsutil cp gs://oreobox/sdd/SDD.md docs/\ngsutil cp gs://oreobox/policy/*.pdf docs/policies/"),
+        preview: "agents-cli create enterprise-ops-agent & gsutil cp SDD.md"
       },
       {
         tag: "Task 2",
-        desc: "ADK 2.3.0 멀티 에이전트 뼈대 생성",
-        btnText: "멀티 에이전트 뼈대 프롬프트 복사",
-        action: () => copyText("/config/workspace/docs/SDD.md의 2.1절 멀티 에이전트 구조와 1절 설정 규격을 참고하여, 다음 두 개의 파일을 생성해주세요:\n\n1. config.yaml\n2. agent.py\n(Agent 지시문 인자는 단수형 'instruction' 사용, root_agent = build_agent() 선언 필수)"),
-        preview: "Hub-and-Spoke 멀티 에이전트 config.yaml 및 agent.py 뼈대 생성"
+        desc: "ADK 멀티 에이전트 뼈대 리팩토링",
+        btnText: "멀티 에이전트 리팩토링 프롬프트 복사",
+        action: () => copyText("docs/SDD.md의 2.1절 멀티 에이전트 구조와 1절 설정 규격을 참고하여, 우리가 방금 생성한 기본 뼈대를 Cymbal Group Korea의 Hub-and-Spoke 멀티 에이전트 시스템으로 전면 개편해주세요:\n\n1. config.yaml 생성\n2. app/agent.py 리팩토링 (더미 날씨 함수 제거, hr_policy_agent, workweek_agent, itsm_agent 및 중앙 허브 root_agent 구현, root_agent = build_agent() 및 app = App(...) 선언)"),
+        preview: "Hub-and-Spoke 멀티 에이전트 app/agent.py 리팩토링"
       },
       {
         tag: "Task 3",
         desc: "사내 규정 Policy RAG 도구 구현",
         btnText: "Policy RAG 프롬프트 복사",
-        action: () => copyText("/config/workspace/docs/SDD.md의 2.2절 '사내 규정 RAG 도구 명세'를 엄격히 준수하여 tools/policy_rag.py 파일을 구현해주세요."),
-        preview: "search_company_policy 도구 구현 (POL-HR, POL-IT 지침 인덱싱)"
+        action: () => copyText("docs/SDD.md의 2.2절 '사내 규정 RAG 도구 명세'를 엄격히 준수하여 app/tools/policy_rag.py 파일을 구현해주세요."),
+        preview: "app/tools/policy_rag.py 도구 구현 (POL-HR, POL-IT 지침 인덱싱)"
       },
       {
         tag: "Task 4",
         desc: "FastMCP SaaS 연동 도구 구현",
         btnText: "FastMCP 도구 프롬프트 복사",
-        action: () => copyText("/config/workspace/docs/SDD.md의 2.3절 'FastMCP SaaS 연동 도구 명세'를 바탕으로 tools/mcp_tools.py 파일을 구현해주세요.\n(Streamable HTTP JSON-RPC 2.0, GAESA 세션 어피니티, 토큰 자동 발급 포함)"),
-        preview: "WorkWeek 및 ServiceImmediately FastMCP 도구 6종 구현"
+        action: () => copyText("docs/SDD.md의 2.3절 'FastMCP SaaS 연동 도구 명세'를 바탕으로 app/tools/mcp_tools.py 파일을 구현해주세요.\n(Streamable HTTP JSON-RPC 2.0, GAESA 세션 어피니티, 토큰 자동 발급 포함)"),
+        preview: "app/tools/mcp_tools.py WorkWeek 및 ServiceImmediately FastMCP 도구 6종 구현"
       },
       {
         tag: "Task 5",
@@ -2235,7 +2293,7 @@ cd enterprise_ops_agent</code></pre>
         tag: "Task 6",
         desc: "로컬 A2A 기동 및 Eval 준비",
         btnText: "A2A 기동 및 Eval 명령어 복사",
-        action: () => copyText("cd /config/workspace/enterprise_ops_agent\npython3 a2a_server.py &\nexport GOOGLE_GENAI_USE_VERTEXAI=true\nexport GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project)\nexport GOOGLE_CLOUD_LOCATION=global\nagents-cli eval run --dataset tests/eval/datasets/eval-single-turn.json --config tests/eval/eval_config.yaml"),
+        action: () => copyText("cd /config/workspace/enterprise-ops-agent\npython3 a2a_server.py &\nexport GOOGLE_GENAI_USE_VERTEXAI=true\nexport GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project)\nexport GOOGLE_CLOUD_LOCATION=global\nagents-cli eval run"),
         preview: "a2a_server.py 기동 및 agents-cli eval run 정량 평가 실행"
       }
     ];
