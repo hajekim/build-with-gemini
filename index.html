@@ -158,11 +158,8 @@
             <i class="fa-solid fa-wand-magic-sparkles text-white text-xs"></i>
           </div>
           <div>
-            <div class="text-slate-900 font-extrabold text-sm tracking-tight flex items-center gap-2">
-              <span>Build with Gemini 핸즈온 Track 3</span>
-              <span class="text-[10px] bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded-full border border-blue-200">Architect: AI 엔지니어링</span>
-            </div>
-            <div class="text-[11px] text-slate-500 font-medium">[실습 Part 1] ADK 2.3.0 기반 Hub-and-Spoke 멀티 에이전트 구축 및 정량 평가 준비</div>
+            <div class="text-slate-900 font-extrabold text-sm tracking-tight">Build with Gemini 핸즈온 Track 3</div>
+            <div class="text-[11px] text-slate-500 font-medium">Architect: AI 엔지니어링</div>
           </div>
         </div>
       </div>
@@ -193,31 +190,13 @@
       </div>
     </header>
 
-    <!-- Developer Fun Micro-Status Bar (Dev Terminal) -->
-    <div class="bg-gradient-to-r from-blue-50/90 via-indigo-50/70 to-purple-50/90 border-b border-slate-200/80 px-6 py-2 flex items-center justify-between text-xs text-slate-600">
-      <div class="flex items-center space-x-2.5 overflow-hidden">
-        <span class="flex h-2 w-2 relative">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-        </span>
-        <span class="font-bold text-[10px] text-blue-800 uppercase tracking-wider bg-blue-100 px-2 py-0.5 rounded font-mono border border-blue-200">Dev Terminal</span>
-        <span id="dev-ticker-text" class="text-xs font-semibold text-slate-700 truncate">
-          Gemini 3.8 Flash 시냅스 정렬 및 커피 추출 준비 완료... ☕
-        </span>
-      </div>
-      <button onclick="randomDevPhrase()" class="text-[11px] font-semibold text-slate-500 hover:text-blue-600 flex items-center gap-1.5 shrink-0 transition bg-white/80 hover:bg-white px-2 py-1 rounded border border-slate-200 shadow-xs" title="새로운 엔지니어 문구 보기">
-        <i class="fa-solid fa-shuffle text-[10px]"></i>
-        <span class="hidden sm:inline">개발자 Fun 변경</span>
-      </button>
-    </div>
-
     <!-- Main Navigation Tabs -->
     <div class="bg-white border-b border-slate-200 px-6">
       <div class="max-w-[1500px] mx-auto flex items-center justify-between text-xs font-semibold overflow-x-auto">
         <div class="flex items-center space-x-6">
           <button onclick="switchMainTab('codelab')" id="tab-codelab" class="py-3 px-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition nav-tab-active flex items-center gap-2">
             <i class="fa-solid fa-laptop-code text-blue-600"></i>
-            <span>실습 워크스테이션 (Interactive Studio)</span>
+            <span>실습1</span>
           </button>
           <button onclick="switchMainTab('saas')" id="tab-saas" class="py-3 px-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition flex items-center gap-2">
             <i class="fa-solid fa-network-wired text-emerald-600"></i>
@@ -308,12 +287,12 @@
       </div>
 
       <!-- Main Studio Workstation (Left Action Guide + Right Companion Dock) -->
-      <div class="max-w-[1500px] w-full mx-auto p-6 flex flex-col lg:flex-row gap-6 items-start flex-1">
+      <div class="max-w-5xl w-full mx-auto p-6 flex flex-col gap-6 flex-1">
 
         <!-- =============================================================== -->
-        <!-- LEFT COLUMN: Step Action Guide (65% width) -->
+        <!-- Step Action Guide -->
         <!-- =============================================================== -->
-        <main class="flex-1 min-w-0 w-full space-y-6">
+        <main class="w-full space-y-6">
 
           <!-- STEP 0: OVERVIEW -->
           <div id="cstep-0" class="cstep-panel space-y-6">
@@ -2024,102 +2003,7 @@ python3 tests/test_scenarios.py</code></pre>
               <i class="fa-solid fa-arrow-right ml-1"></i>
             </button>
           </div>
-
         </main>
-
-        <!-- =============================================================== -->
-        <!-- RIGHT COLUMN: Sticky Workshop Companion Dock (35% width) -->
-        <!-- =============================================================== -->
-        <aside class="w-full lg:w-96 shrink-0 space-y-4 sticky top-[130px]">
-
-          <!-- Companion Card 1: Dynamic Quick Copier Dock -->
-          <div class="card-studio p-5 space-y-3.5 border-blue-200 bg-white shadow-sm">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
-              <span class="text-xs font-bold uppercase tracking-wider text-blue-700 flex items-center gap-1.5">
-                <i class="fa-solid fa-bolt text-amber-500"></i>
-                <span>원클릭 퀵 런처 (Quick Copier)</span>
-              </span>
-              <span class="text-[10px] bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded font-mono" id="dock-step-tag">Step 0</span>
-            </div>
-
-            <div>
-              <div class="text-[11px] text-slate-500 mb-1.5 font-medium" id="dock-action-desc">현재 스텝의 주요 실행 명령 또는 프롬프트:</div>
-              <button id="dock-copy-btn" onclick="executeDockCopy()"
-                class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold text-xs shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99]">
-                <i class="fa-regular fa-copy text-sm"></i>
-                <span id="dock-btn-text">현재 프롬프트 복사하기</span>
-              </button>
-            </div>
-
-            <div class="bg-[#090d16] p-3 rounded-lg border border-slate-800 font-mono text-[11px] text-slate-300 max-h-24 overflow-y-auto leading-relaxed shadow-inner" id="dock-snippet-preview">
-              Step 0은 전체 아키텍처 개요입니다. 상단 Stepper의 Step 1로 이동하세요.
-            </div>
-          </div>
-
-          <!-- Companion Card 2: Workshop Cheat Sheet -->
-          <div class="card-studio p-5 space-y-3 border-slate-200 bg-white shadow-sm">
-            <div class="font-bold text-xs uppercase tracking-wider text-slate-800 flex items-center justify-between border-b border-slate-100 pb-2">
-              <span class="flex items-center gap-1.5 text-slate-700 font-bold">
-                <i class="fa-solid fa-clipboard-list text-blue-600"></i>
-                <span>실습 치트시트 &amp; 환경 변수</span>
-              </span>
-              <span class="text-[10px] text-slate-400 font-mono">Reference</span>
-            </div>
-            <div class="space-y-2 text-xs text-slate-700">
-              <div class="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-slate-200">
-                <span class="text-slate-500 font-medium">기본 사번:</span>
-                <code class="font-mono text-blue-700 font-bold bg-white px-1.5 py-0.5 rounded border border-slate-200">EMP-10294 (이민우)</code>
-              </div>
-              <div class="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-slate-200">
-                <span class="text-slate-500 font-medium">기본 랩톱 자산:</span>
-                <code class="font-mono text-emerald-700 font-bold bg-white px-1.5 py-0.5 rounded border border-slate-200">AST-MBP-2022-819</code>
-              </div>
-              <div class="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-slate-200">
-                <span class="text-slate-500 font-medium">사내 규정 문서:</span>
-                <code class="font-mono text-rose-700 font-bold bg-white px-1.5 py-0.5 rounded border border-slate-200">POL-HR / POL-IT</code>
-              </div>
-              <div class="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-slate-200">
-                <span class="text-slate-500 font-medium">Mock SaaS 포털:</span>
-                <a href="https://korean-mock-saas-dri5akvbzq-du.a.run.app/" target="_blank" class="text-indigo-600 font-bold underline text-[11px] flex items-center gap-1">
-                  <span>Cloud Run 포털 열기</span>
-                  <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
-                </a>
-              </div>
-            </div>
-          </div>
-
-          <!-- Companion Card 3: Architecture Tracker Mini-Map -->
-          <div class="card-studio p-5 space-y-3 border-slate-200 bg-white shadow-sm">
-            <div class="font-bold text-xs uppercase tracking-wider text-slate-800 flex items-center gap-1.5 border-b border-slate-100 pb-2">
-              <i class="fa-solid fa-layer-group text-indigo-600"></i>
-              <span>아키텍처 레이어 트래커</span>
-            </div>
-            <div class="space-y-1.5 text-[11px] font-medium" id="arch-tracker-list">
-              <div id="arch-layer-0" class="p-2 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-between">
-                <span>1. Google agy &amp; Gemini 3.8 Flash</span>
-                <span class="text-[9px] bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-bold">CLI/LLM</span>
-              </div>
-              <div id="arch-layer-1" class="p-2 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-between">
-                <span>2. ADK 2.0 Agent Core (config/agent)</span>
-                <span class="text-[9px] bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-bold">ADK</span>
-              </div>
-              <div id="arch-layer-2" class="p-2 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-between">
-                <span>3. 사내 규정 Grounding (GCS PDF RAG)</span>
-                <span class="text-[9px] bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-bold">RAG</span>
-              </div>
-              <div id="arch-layer-3" class="p-2 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-between">
-                <span>4. Korean Mock SaaS (FastMCP)</span>
-                <span class="text-[9px] bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-bold">MCP</span>
-              </div>
-              <div id="arch-layer-4" class="p-2 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-between">
-                <span>5. Gemini Enterprise (A2A Protocol)</span>
-                <span class="text-[9px] bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-bold">A2A</span>
-              </div>
-            </div>
-          </div>
-
-        </aside>
-
       </div>
     </div>
 
@@ -2215,37 +2099,9 @@ python3 tests/test_scenarios.py</code></pre>
     }
 
     // -------------------------------------------------------------
-    // Developer Fun Phrases
-    // -------------------------------------------------------------
-    const devPhrases = [
-      "Gemini 3.8 Flash 시냅스 정렬 및 커피 추출 완료... ☕",
-      "사내 복무 규정 PDF 제 4 조에서 폰트 깨짐 정밀 검사 중... 🔍",
-      "WorkWeek FastMCP 토큰 양자 난수 생성 중... 🔑",
-      "M3 Max 맥북 배터리 스웰링 온도 측정 중... 💻 (정상 38℃)",
-      "팀장님 부재중 여부 및 Slack 메신저 상태 확인 중... 🏃",
-      "진짜 엔지니어는 코드를 복사하지 않고 agy에게 프롬프트를 칩니다... ✨",
-      "Cloud Run 오토스케일링 인스턴스 2대 Warm 상태 대기 완료 🚀",
-      "FastMCP 프로토콜 스트림 핸드셰이크 수립 성공 (Latency: 12ms)",
-      "A2A-1.0 에이전트 매니페스트 JSON-RPC 스키마 검증 통과 🛡️"
-    ];
-
-    function randomDevPhrase() {
-      const idx = Math.floor(Math.random() * devPhrases.length);
-      const el = document.getElementById("dev-ticker-text");
-      if (el) {
-        el.style.opacity = '0';
-        setTimeout(() => {
-          el.textContent = devPhrases[idx];
-          el.style.opacity = '1';
-        }, 150);
-      }
-    }
-
-    // -------------------------------------------------------------
     // Main Tab Switching
     // -------------------------------------------------------------
     function switchMainTab(tabId) {
-      randomDevPhrase();
       document.querySelectorAll(".main-view").forEach(el => el.classList.add("hidden"));
       document.querySelectorAll("[id^='tab-']").forEach(el => el.classList.remove("nav-tab-active"));
 
@@ -2281,104 +2137,6 @@ python3 tests/test_scenarios.py</code></pre>
     }
 
     // -------------------------------------------------------------
-    // Dynamic Dock Snippets
-    // -------------------------------------------------------------
-    const dockSnippets = [
-      {
-        tag: "Step 0",
-        desc: "Step 0은 전체 아키텍처 개요입니다.",
-        btnText: "Step 1로 이동하기",
-        action: () => goToCodelabStep(1),
-        preview: "전체 구성도와 실습 Part 1, Part 2 로드맵을 확인하셨다면 상단의 Step 1을 클릭하세요."
-      },
-      {
-        tag: "Step 1",
-        desc: "Qwiklabs 콘솔 로그인",
-        btnText: "콘솔 새 시크릿 창 열기",
-        action: () => window.open("https://console.cloud.google.com", "_blank"),
-        preview: "임시 자격증명(Username/Password)으로 Google Cloud Console에 로그인하세요."
-      },
-      {
-        tag: "Step 2",
-        desc: "agy CLI 실행 및 모델 설정",
-        btnText: "agy 실행 명령어 복사",
-        action: () => copyText("agy"),
-        preview: "Konsole 터미널에서 'agy'를 입력하고 /model gemini-3.8-flash 를 지정하세요."
-      },
-      {
-        tag: "Task 1",
-        desc: "agents-cli 프로젝트 생성 & SDD 다운로드",
-        btnText: "생성 및 다운로드 명령어 복사",
-        action: () => copyText("cd ~\nagents-cli create enterprise-ops-agent -d cloud_run --session-type in_memory --cicd-runner skip -p -y -s\ncd enterprise-ops-agent\nmkdir -p docs/policies\ngsutil cp gs://oreobox/sdd/SDD.md docs/\ngsutil cp gs://oreobox/policy/*.pdf docs/policies/\nagents-cli install"),
-        preview: "agents-cli create & gsutil cp SDD.md & agents-cli install"
-      },
-      {
-        tag: "Task 2",
-        desc: "ADK 멀티 에이전트 뼈대 리팩토링",
-        btnText: "멀티 에이전트 리팩토링 프롬프트 복사",
-        action: () => copyText("docs/SDD.md의 2.1절 멀티 에이전트 구조와 1절 설정 규격을 참고하여, 우리가 방금 생성한 기본 뼈대를 Cymbal Group Korea의 Hub-and-Spoke 멀티 에이전트 시스템으로 전면 개편해주세요:\n\n1. config.yaml 생성\n2. app/agent.py 리팩토링 (더미 날씨 함수 제거, hr_policy_agent, workweek_agent, itsm_agent 및 중앙 허브 root_agent 구현, root_agent = build_agent() 및 app = App(...) 선언)"),
-        preview: "Hub-and-Spoke 멀티 에이전트 app/agent.py 리팩토링"
-      },
-      {
-        tag: "Task 3",
-        desc: "사내 규정 Policy RAG 도구 구현",
-        btnText: "Policy RAG 프롬프트 복사",
-        action: () => copyText("docs/SDD.md의 2.2절 '사내 규정 RAG 도구 명세'를 엄격히 준수하여 app/tools/policy_rag.py 파일을 구현해주세요."),
-        preview: "app/tools/policy_rag.py 도구 구현 (POL-HR, POL-IT 지침 인덱싱)"
-      },
-      {
-        tag: "Task 4",
-        desc: "FastMCP SaaS 연동 도구 구현",
-        btnText: "FastMCP 도구 프롬프트 복사",
-        action: () => copyText("docs/SDD.md의 2.3절 'FastMCP SaaS 연동 도구 명세'를 바탕으로 app/tools/mcp_tools.py 파일을 구현해주세요.\n(Streamable HTTP JSON-RPC 2.0, GAESA 세션 어피니티, 토큰 자동 발급 포함)"),
-        preview: "app/tools/mcp_tools.py WorkWeek 및 ServiceImmediately FastMCP 도구 6종 구현"
-      },
-      {
-        tag: "Task 5",
-        desc: "오케스트레이션 및 시나리오 검증",
-        btnText: "시나리오 1 질의 복사",
-        action: () => copyText("안녕하세요, 이민우입니다 (EMP-10294). 다음 주 월요일부터 목요일까지 4일 동안 연속으로 연차를 사용하고 싶습니다. 사내 규정상 신청 기한에 문제가 없는지 확인해 주시고, 제 잔여 연차를 조회한 뒤 WorkWeek 시스템에 휴가 신청을 상신해 주세요."),
-        preview: "이민우 수석 아키텍트의 4일 연속 연차 신청 질의 전송"
-      },
-      {
-        tag: "Task 6",
-        desc: "로컬 A2A 기동 및 Eval 준비",
-        btnText: "A2A 기동 및 Eval 명령어 복사",
-        action: () => copyText("cd ~/enterprise-ops-agent\npython3 a2a_server.py &\nexport GOOGLE_GENAI_USE_VERTEXAI=true\nexport GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project)\nexport GOOGLE_CLOUD_LOCATION=global\nagents-cli eval run"),
-        preview: "a2a_server.py 기동 및 agents-cli eval run 정량 평가 실행"
-      }
-    ];
-
-    function updateCompanionDock(step) {
-      const data = dockSnippets[step] || dockSnippets[0];
-      document.getElementById("dock-step-tag").textContent = data.tag;
-      document.getElementById("dock-action-desc").textContent = data.desc;
-      document.getElementById("dock-btn-text").textContent = data.btnText;
-      document.getElementById("dock-snippet-preview").textContent = data.preview;
-
-      // Update architecture layer tracker highlight
-      const archMap = [0, 0, 0, 1, 1, 2, 3, 3, 4];
-      const activeArchIdx = archMap[step] || 0;
-      for (let i = 0; i <= 4; i++) {
-        const row = document.getElementById(`arch-layer-${i}`);
-        if (row) {
-          if (i === activeArchIdx) {
-            row.className = "p-2 rounded-lg border border-blue-400 bg-blue-50 text-blue-900 font-bold flex items-center justify-between shadow-xs";
-          } else {
-            row.className = "p-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-700 flex items-center justify-between";
-          }
-        }
-      }
-    }
-
-    function executeDockCopy() {
-      const data = dockSnippets[currentCodelabStep];
-      if (data && data.action) {
-        data.action();
-      }
-    }
-
-    // -------------------------------------------------------------
     // Codelab Step Navigation
     // -------------------------------------------------------------
     let currentCodelabStep = 0;
@@ -2387,8 +2145,6 @@ python3 tests/test_scenarios.py</code></pre>
     function goToCodelabStep(step) {
       if (step < 0 || step >= totalCodelabSteps) return;
       currentCodelabStep = step;
-
-      randomDevPhrase();
 
       document.querySelectorAll(".cstep-panel").forEach((el, idx) => {
         if (idx === currentCodelabStep) {
@@ -2414,7 +2170,6 @@ python3 tests/test_scenarios.py</code></pre>
       document.getElementById("step-counter").textContent = `Step ${currentCodelabStep + 1} of ${totalCodelabSteps}`;
       document.getElementById("codelab-indicator").textContent = `Step ${currentCodelabStep + 1} of ${totalCodelabSteps}`;
 
-      updateCompanionDock(currentCodelabStep);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
@@ -2488,7 +2243,6 @@ python3 tests/test_scenarios.py</code></pre>
 
     // Check auth on load
     checkAuth();
-    updateCompanionDock(0);
     initImageZoom();
   </script>
 
