@@ -873,19 +873,99 @@ curl -s -X POST http://localhost:8080/ \
 
 ---
 
-### 5단계: agents-cli 기반 로컬 자체 평가 (tests/eval) 및 품질 검증
+### 5단계: Google Agent Platform 정량 평가 엔진(agents-cli eval) 심층 가이드 및 품질 검증
 
-에이전트를 배포하기 전이나 기능 변경 후 품질을 지속 검증하기 위해, 외부 평가 서버나 별도 사이트 없이도 개발자의 로컬 환경에서 100% 독립적으로 에이전트 품질을 측정할 수 있습니다.
+에이전트를 프로덕션 환경이나 사내 Gemini Enterprise에 배포하기 전, 그리고 프롬프트나 도구 로직을 수정한 후 품질 저하(회귀, Regression)를 지속적으로 검증하기 위해 **Google Agent Development Kit(ADK)의 공식 정량 평가 프레임워크인 `agents-cli eval`**을 활용합니다.
 
-#### 1. tests/eval 디렉토리의 구성 요소
-프로젝트의 `tests/eval/` 디렉토리는 Project Elevate 및 Google 엔터프라이즈 에이전트 평가 표준을 그대로 따릅니다:
-- **`eval_config.yaml`**: 평가에 적용할 핵심 지표와 가중치를 선언합니다. 작업 완료율(`multi_turn_task_success`: 40%), 도구 호출 정확도(`multi_turn_tool_use_quality`: 35%), 규정 그라운딩 및 환각 방지(`hallucination`: 25%)를 측정합니다.
-- **`datasets/eval-single-turn.json`**: 단발성 규정 문의(미사용 연차 이월 규정, 활성 IT 티켓 수량 조회)를 평가하는 데이터셋입니다.
-- **`datasets/eval-multi-turn.json`**: 규정 확인 후 신청까지 이어지는 복합 대화 흐름(연차 사전 승인 기준 확인 후 신청, 랩톱 배터리 부풀림 규정 확인 후 교체 접수)을 평가하는 데이터셋입니다.
-- **`evaluation_report.md`**: 평가 설계 원칙, 벤치마크 점수, 테스트 케이스별 상세 진단 결과를 기록하는 엔터프라이즈 평가 보고서입니다.
+외부 별도 평가 서버나 복잡한 웹 서비스 구축 없이도, 개발자의 로컬 워크스페이스에서 100% 독립적으로 에이전트의 사고 과정(Thought), 도구 호출 궤적(Tool Trace), 사내 규정 부합 여부를 LLM-as-a-Judge로 자동 채점할 수 있습니다.
 
-#### 2. 로컬 종합 평가 실행
-새 터미널 탭에서 다음 명령어를 입력하여 로컬 자체 평가를 실행합니다:
+---
+
+#### 1. 에이전트 품질 선순환 루프 (The Quality Flywheel)
+
+Google Agent Platform은 에이전트의 품질을 지속적으로 향상시키기 위해 다음 5단계의 **Quality Flywheel** 아키텍처를 표준으로 채택하고 있습니다:
+
+```mermaid
+flowchart LR
+    D["1. Prepare Data\n(eval_cases.json)"] --> G["2. Run Inference\n(eval generate)"]
+    G --> R["3. Grade Traces\n(eval grade\nLLM-as-a-Judge)"]
+    R --> A["4. Analyze Failures\n(eval analyze\nHTML Dashboard)"]
+    A --> O["5. Optimize & Code\n(Prompt/Tool Tuning)"]
+    O -->|"회귀 검증 (eval compare)"| G
+```
+
+1. **데이터 준비 (Prepare Data)**: 실제 사용자 시나리오를 반영한 골든 데이터셋(`tests/eval/datasets/`)을 작성합니다.
+2. **추론 실행 (Run Inference / `eval generate`)**: 로컬 에이전트가 데이터셋을 순차 실행하며 모든 사고 과정과 도구 입출력을 `artifacts/traces/`에 JSON 궤적으로 기록합니다.
+3. **루브릭 채점 (Grade Traces / `eval grade`)**: Vertex AI의 고정된 채점관(LLM-as-a-Judge)이 생성된 궤적을 읽고, 미리 정의된 평가 기준(루브릭)에 따라 객관적인 점수(0.0~1.0)와 상세 판정 사유를 도출합니다.
+4. **실패 원인 분석 (Analyze Failures / `eval analyze`)**: 감점되거나 실패한 케이스의 원인을 도구 호출 실패, 규정 왜곡, 오케스트레이션 이탈 등으로 자동 분류합니다.
+5. **최적화 및 코드 수정 (Optimize & Code Fix)**: 프롬프트 지침이나 도구 반환값을 수정하고, 이전 결과와 비교(`eval compare`)하여 다른 케이스가 퇴보하지 않았는지 확인합니다.
+
+> [!TIP]
+> **원클릭 단축 명령어 (`eval run`):**  
+> `agents-cli eval run`은 위 2단계(`generate`)와 3단계(`grade`)를 하나의 명령어로 체이닝하여 로컬에서 즉시 채점 결과(`results_<timestamp>.html`)까지 도출하는 가장 빠르고 편리한 표준 실행 방법입니다.
+
+---
+
+#### 2. 핵심 3대 평가 지표 (Core Evaluation Metrics) 및 채점 루브릭
+
+본 프로젝트의 `tests/eval/eval_config.yaml`에는 엔터프라이즈 환경에서 가장 중요한 3가지 핵심 지표가 선언되어 있습니다:
+
+| 평가 지표 (Metric) | 가중치 | 합격 목표 | 판정 질문 및 루브릭 (Rubric) | 실패 시 개선 방안 |
+|:---|:---:|:---:|:---|:---|
+| **과업 완료율**<br>`multi_turn_task_success` | **40%** | **>= 0.80** | **"에이전트가 사용자의 궁극적인 비즈니스 목적을 달성했는가?"**<br>- 1.0: 규정 확인 후 연차 상신 또는 IT 티켓 발행까지 완료<br>- 0.5: 규정이나 잔여 일수만 조회하고 상신을 누락함<br>- 0.0: 시스템 에러 또는 엉뚱한 답변으로 대화 중단 | `agent.py`의 `HUB_INSTRUCTION`에 최종 단계 상신 의무 및 태스크 완수 행동 수칙 강화 |
+| **도구 호출 품질**<br>`multi_turn_tool_use_quality` | **35%** | **>= 0.85** | **"올바른 순서와 유효한 파라미터로 필수 도구를 호출했는가?"**<br>- 1.0: 규정 RAG 선검증 -> FastMCP 잔여일수/장비 조회 -> SaaS 트랜잭션의 올바른 시퀀스 준수<br>- 0.0: 규정 검증 없이 바로 신청하거나 불필요한 도구를 반복 호출 | 서브 에이전트 지시문 및 도구 함수의 파라미터 docstring/스키마 보강 |
+| **규정 그라운딩 (환각 차단)**<br>`hallucination` | **25%** | **>= 0.90** | **"사내 공식 지침(POL-HR, POL-IT)에 기반한 사실만을 답변했는가?"**<br>- 1.0: 문서번호(POL-HR-2026-004 등) 및 조항별 기한/조건을 정확히 인용<br>- 0.0: 사내 지침에 없는 규정을 임의로 지어내거나 기한을 잘못 안내 | RAG 검색 신뢰도 임계값(0.80) 적용 확인 및 추측 답변 금지 강령 주입 |
+
+---
+
+#### 3. tests/eval 평가 디렉토리의 내부 구조 및 데이터셋 스키마
+
+```text
+tests/eval/
+├── eval_config.yaml      # 평가 지표(metrics_to_run), 가중치 및 커스텀 채점 기준 선언
+├── evaluation_report.md  # 벤치마크 설계 원칙, 시스템 구성, 테스트 진단 보고서
+└── datasets/             # 평가용 골든 데이터셋 (EvaluationDataset JSON)
+    ├── basic-dataset.json       # CLI 인자 생략 시 자동 인식되는 기본 평가 세트
+    ├── eval-single-turn.json    # 단발성 규정 문의 및 단순 잔여 일수 조회 케이스
+    └── eval-multi-turn.json     # 규정 확인 후 신청까지 이어지는 복합 대화 시나리오
+```
+
+##### 골든 데이터셋 (`eval-single-turn.json`) 스키마 예시:
+```json
+{
+  "eval_cases": [
+    {
+      "eval_case_id": "hr-leave-lead-time",
+      "prompt": {
+        "role": "user",
+        "parts": [{"text": "4일 연속으로 휴가를 쓰려면 며칠 전에 신청해야 하나요?"}]
+      },
+      "expected_outputs": {
+        "keywords": ["7영업일", "POL-HR-2026-004", "부서장 사전 승인"]
+      }
+    }
+  ]
+}
+```
+
+---
+
+#### 4. `agents-cli eval` 핵심 명령어 레퍼런스
+
+| 명령어 | 역할 및 용도 | 주요 옵션 및 사용 예시 |
+|:---|:---|:---|
+| **`eval run`** | 추론 실행(`generate`)과 LLM 채점(`grade`)을 한 번에 원클릭 실행 | `agents-cli eval run --dataset tests/eval/datasets/eval-single-turn.json --config tests/eval/eval_config.yaml` |
+| **`eval generate`** | 에이전트를 구동하여 대화 및 도구 호출 궤적(Trace)만 `artifacts/traces/`에 저장 | `agents-cli eval generate --dataset tests/eval/datasets/eval-multi-turn.json` |
+| **`eval grade`** | 기 수집된 트레이스를 읽고 LLM 채점관을 통해 점수 및 HTML 리포트 생성 | `agents-cli eval grade --traces artifacts/traces/` |
+| **`eval compare`** | 프롬프트 수정 전후 두 결과 파일(.json)의 점수를 비교하여 회귀(퇴보) 여부 검증 | `agents-cli eval compare artifacts/grade_results/results_v1.json artifacts/grade_results/results_v2.json` |
+| **`eval analyze`** | 10개 이상의 실패 케이스 발생 시 실패 유형을 자동 클러스터링하여 원인 제시 | `agents-cli eval analyze --eval-result artifacts/grade_results/results_latest.json` |
+
+---
+
+#### 5. 로컬 평가 실행 및 시각적 HTML 대시보드 열람
+
+1. **로컬 종합 평가 실행**:
+   터미널에서 Vertex AI 환경 변수를 설정한 뒤 `agents-cli eval run`을 실행합니다.
 
 ```bash
 # Vertex AI 환경 변수 설정 후 로컬 종합 평가 실행
@@ -899,23 +979,24 @@ agents-cli eval run \
   --config tests/eval/eval_config.yaml
 ```
 
-> [!NOTE]
-> `agents-cli eval run`은 플래그를 생략하더라도 디렉터리 내 `tests/eval/datasets/basic-dataset.json`을 기본값으로 자동 인식합니다. 실습 2(Part 2)에서는 이 평가 프레임워크를 바탕으로 과업 성공률, 도구 호출 정확도, 환각 방지 지표를 체계적으로 분석하고 진단 보고서를 도출합니다.
-
-이 명령어는 내부적으로 다음 3단계를 로컬에서 순차 수행합니다:
-1. **추론 실행 (eval generate)**: 로컬의 `agent.py`가 `datasets/`의 질문들을 순차 실행하며 생각과 도구 호출 내역을 `artifacts/traces/` 폴더에 JSON 형태로 기록합니다.
-2. **LLM 채점관 채점 (eval grade)**: Vertex AI의 Gemini 모델이 채점관(LLM-as-a-judge) 역할을 수행하여, 기록된 실행 궤적을 `eval_config.yaml`에 정의된 기준과 대조하여 객관적인 점수를 매깁니다.
-3. **로컬 HTML 리포트 생성**: 채점이 끝나면 `artifacts/grade_results/results_<timestamp>.html` 파일과 `.json` 파일이 로컬 디스크에 즉시 생성됩니다.
-
-#### 3. 평가 결과 대시보드 확인
-생성된 HTML 리포트를 확인하려면 파이썬 내장 웹서버를 실행하여 브라우저에서 직접 열람합니다:
+2. **로컬 웹 서버로 결과 열람 (포트 8081)**:
+   채점이 완료되면 `artifacts/grade_results/results_<timestamp>.html` 파일이 생성됩니다. 파이썬 내장 웹서버를 기동하여 시각적 보고서를 확인합니다:
 
 ```bash
 # 로컬 웹 서버로 채점 리포트 브라우징 (포트 8081)
 python3 -m http.server 8081 --directory artifacts/grade_results
 ```
 
-원격 브라우저 창에서 새 탭을 열고 `http://localhost:8081`에 접속하면 각 테스트 케이스의 성공/실패 여부, 도구 호출 궤적, 상세 판정 사유가 일목요연하게 정리된 시각적 대시보드를 바로 확인할 수 있습니다.
+3. **브라우저 접속 및 결과 분석**:
+   원격 브라우저(또는 로컬 PC)에서 `http://localhost:8081`에 접속하여 생성된 HTML 파일을 열어 다음 핵심 사항을 검토합니다:
+   - 각 테스트 케이스별 통과 여부(PASS/FAIL)
+   - 3대 핵심 지표별 점수 그래프 및 가중치 반영 종합 점수
+   - LLM 채점관의 상세한 정성적 판정 근거(Judge Verdicts)
+   - 에이전트의 내부 도구 호출 타임라인 및 파라미터 내역
+
+> [!IMPORTANT]
+> **실습 2(Part 2: Evaluation & Governance)로의 연결 로드맵:**  
+> 실습 1에서 준비된 `tests/eval` 프레임워크와 평가 기준은 **실습 2의 핵심 기반**이 됩니다. 실습 2에서는 이 평가 엔진을 CI/CD 파이프라인에 통합하여 점수가 미달하는 에이전트의 배포를 자동 차단하고, Agent Gateway와 Model Armor를 결합하여 규정과 보안을 완벽히 통제하는 엔터프라이즈 거버넌스를 완성하게 됩니다.
 
 ---
 
