@@ -192,7 +192,7 @@
 
     <!-- Main Navigation Tabs -->
     <div class="bg-white border-b border-slate-200 px-6">
-      <div class="max-w-[1500px] mx-auto flex items-center justify-between text-xs font-semibold overflow-x-auto">
+      <div class="max-w-[1500px] mx-auto flex items-center justify-between text-sm font-bold overflow-x-auto">
         <div class="flex items-center space-x-6">
           <button onclick="switchMainTab('codelab')" id="tab-codelab" class="py-3 px-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition nav-tab-active flex items-center gap-2">
             <i class="fa-solid fa-laptop-code text-blue-600"></i>
@@ -293,13 +293,24 @@
             <!-- Architecture Diagram -->
             <div class="card-studio p-5 shadow-sm space-y-3">
               <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-slate-800 flex items-center gap-2">
+                <span class="text-sm font-bold text-slate-800 flex items-center gap-2">
                   <i class="fa-solid fa-diagram-project text-blue-600"></i>
                   <span>엔터프라이즈 Orchestrator-Worker 멀티 에이전트 시스템 아키텍처</span>
                 </span>
-                <span class="text-xs font-mono text-slate-500 bg-slate-100 px-2 py-0.5 rounded">AgentPatterns.ai Standard &bull; Centralized Orchestration</span>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-mono text-slate-500 bg-slate-100 px-2.5 py-1 rounded">AgentPatterns.ai Standard &bull; Centralized Orchestration</span>
+                  <a href="lab1/images/agent_architecture.png" target="_blank" rel="noopener noreferrer" class="px-3 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition flex items-center gap-1.5 border border-blue-200 shadow-2xs">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    <span>고해상도 원본 새 탭 열기 (100% Zoom)</span>
+                  </a>
+                </div>
               </div>
-              <img src="lab1/images/agent_architecture.png" alt="Orchestrator-Worker 에이전트 아키텍처" class="w-full rounded-xl border border-slate-200 shadow-sm">
+              <a href="lab1/images/agent_architecture.png" target="_blank" rel="noopener noreferrer" class="block cursor-zoom-in group relative" title="클릭하여 고해상도 다이어그램 원본 열기">
+                <img src="lab1/images/agent_architecture.png" alt="Orchestrator-Worker 에이전트 아키텍처" class="w-full rounded-xl border border-slate-200 shadow-sm group-hover:border-blue-400 transition-all duration-200">
+                <div class="absolute bottom-3 right-3 bg-slate-900/80 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <i class="fa-solid fa-magnifying-glass-plus"></i> 클릭하여 확대
+                </div>
+              </a>
             </div>
 
             <!-- 150 Attendees Multi-Agent Breakdown (Lead Orchestrator + 3 Workers) -->
@@ -312,20 +323,20 @@
                 <span class="text-xs text-indigo-600 font-semibold bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">Centralized Orchestration</span>
               </div>
 
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <!-- Lead Orchestrator -->
                 <div class="card-studio p-4 border-slate-300 bg-gradient-to-br from-slate-50 to-blue-50/30 space-y-2">
                   <div class="flex items-center justify-between">
-                    <span class="font-bold text-slate-900 flex items-center gap-1.5 text-xs">
+                    <span class="font-bold text-slate-900 flex items-center gap-1.5 text-base font-bold">
                       <span class="w-2 h-2 rounded-full bg-blue-600"></span>
                       <span>Central Orchestrator (enterprise_ops_agent)</span>
                     </span>
                     <span class="text-xs font-mono bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-bold">Lead Agent</span>
                   </div>
-                  <p class="text-slate-600 text-xs leading-relaxed">
+                  <p class="text-slate-700 text-sm leading-relaxed font-normal">
                     임직원의 자연어 요청(복합 업무, 규정 문의, 근태 신청, 장비 교체 등)을 분석하여 최적의 전문 워커에게 작업을 분배(Delegation)하고, 취합된 결과를 비즈니스 룰에 맞게 종합하여 최종 답변을 반환합니다.
                   </p>
-                  <div class="text-xs text-slate-500 bg-white/80 p-2 rounded border border-slate-200 font-mono">
+                  <div class="text-[13px] text-slate-600 bg-white/90 p-2.5 rounded-lg border border-slate-200 font-mono">
                     <strong class="text-slate-700">모델:</strong> gemini-3.8-flash (global) &bull; <strong class="text-slate-700">관리 Workers:</strong> hr_policy_agent, workweek_agent, itsm_agent
                   </div>
                 </div>
@@ -333,16 +344,16 @@
                 <!-- Worker 1: hr_policy_agent -->
                 <div class="card-studio p-4 border-amber-200 bg-gradient-to-br from-amber-50/40 to-white space-y-2">
                   <div class="flex items-center justify-between">
-                    <span class="font-bold text-amber-900 flex items-center gap-1.5 text-xs">
+                    <span class="font-bold text-amber-900 flex items-center gap-1.5 text-base font-bold">
                       <span class="w-2 h-2 rounded-full bg-amber-500"></span>
                       <span>사내 규정 선검증 전문가 (hr_policy_agent)</span>
                     </span>
                     <span class="text-xs font-mono bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold">Worker 1</span>
                   </div>
-                  <p class="text-slate-600 text-xs leading-relaxed">
+                  <p class="text-slate-700 text-sm leading-relaxed font-normal">
                     복무 규정(POL-HR-2026-004) 및 IT 장비 지침(POL-IT-2026-009)을 검색하여 '3일 초과 연속 연차 최소 7영업일 전 신청', '노트북 교체 주기 36개월' 등 시스템 조작 전 필수 규정 부합 여부를 검증하고 근거 조항을 제공합니다.
                   </p>
-                  <div class="text-xs text-slate-500 bg-white/80 p-2 rounded border border-amber-100 font-mono">
+                  <div class="text-[13px] text-slate-600 bg-white/90 p-2.5 rounded-lg border border-amber-200 font-mono">
                     <strong class="text-slate-700">도구 스키마 격리:</strong> search_company_policy (Vertex AI Search / GCS PDF Hybrid RAG)
                   </div>
                 </div>
@@ -350,16 +361,16 @@
                 <!-- Worker 2: workweek_agent -->
                 <div class="card-studio p-4 border-emerald-200 bg-gradient-to-br from-emerald-50/40 to-white space-y-2">
                   <div class="flex items-center justify-between">
-                    <span class="font-bold text-emerald-900 flex items-center gap-1.5 text-xs">
+                    <span class="font-bold text-emerald-900 flex items-center gap-1.5 text-base font-bold">
                       <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                       <span>인사 근태 SaaS 전담 워커 (workweek_agent)</span>
                     </span>
                     <span class="text-xs font-mono bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold">Worker 2</span>
                   </div>
-                  <p class="text-slate-600 text-xs leading-relaxed">
+                  <p class="text-slate-700 text-sm leading-relaxed font-normal">
                     Google ADK McpToolset을 통해 표준 FastMCP 프로토콜(/work-week/mcp)로 Korean Mock SaaS 인사 시스템과 실시간 연동되어 잔여 연차 조회, 휴가 상신, 부서원 근태 현황 조회를 전담합니다.
                   </p>
-                  <div class="text-xs text-slate-500 bg-white/80 p-2 rounded border border-emerald-100 font-mono">
+                  <div class="text-[13px] text-slate-600 bg-white/90 p-2.5 rounded-lg border border-emerald-200 font-mono">
                     <strong class="text-slate-700">도구 스키마 격리:</strong> FastMCP Streamable HTTP JSON-RPC tools/call (WorkWeek 전용)
                   </div>
                 </div>
@@ -367,16 +378,16 @@
                 <!-- Worker 3: itsm_agent -->
                 <div class="card-studio p-4 border-purple-200 bg-gradient-to-br from-purple-50/40 to-white space-y-2">
                   <div class="flex items-center justify-between">
-                    <span class="font-bold text-purple-900 flex items-center gap-1.5 text-xs">
+                    <span class="font-bold text-purple-900 flex items-center gap-1.5 text-base font-bold">
                       <span class="w-2 h-2 rounded-full bg-purple-500"></span>
                       <span>전산 지원 ITSM 전담 워커 (itsm_agent)</span>
                     </span>
                     <span class="text-xs font-mono bg-purple-100 text-purple-800 px-1.5 py-0.5 rounded font-bold">Worker 3</span>
                   </div>
-                  <p class="text-slate-600 text-xs leading-relaxed">
+                  <p class="text-slate-700 text-sm leading-relaxed font-normal">
                     Google ADK McpToolset을 통해 표준 FastMCP 프로토콜(/service-immediately/mcp)로 ServiceImmediately IT 서비스 데스크와 연동되어 사원별 지급 장비 스펙 조회, 장애 티켓 발권, 신규 기종 교체를 처리합니다.
                   </p>
-                  <div class="text-xs text-slate-500 bg-white/80 p-2 rounded border border-purple-100 font-mono">
+                  <div class="text-[13px] text-slate-600 bg-white/90 p-2.5 rounded-lg border border-purple-200 font-mono">
                     <strong class="text-slate-700">도구 스키마 격리:</strong> FastMCP Streamable HTTP JSON-RPC tools/call (ITSM 전용)
                   </div>
                 </div>
@@ -384,10 +395,10 @@
             </div>
 
             <!-- Why Orchestrator-Worker Pattern? Callout -->
-            <div class="bg-blue-50/60 border border-blue-200 rounded-2xl p-6 space-y-4 shadow-xs text-xs">
+            <div class="bg-blue-50/60 border border-blue-200 rounded-2xl p-6 space-y-4 shadow-xs text-sm">
               <div class="flex items-center justify-between border-b border-blue-200/70 pb-3">
-                <div class="font-bold text-blue-950 flex items-center gap-2.5 text-sm">
-                  <i class="fa-solid fa-sitemap text-blue-600 text-base"></i>
+                <div class="font-bold text-blue-950 flex items-center gap-2.5 text-base">
+                  <i class="fa-solid fa-sitemap text-blue-600 text-lg"></i>
                   <span>왜 단일(Monolithic) 에이전트가 아닌 Orchestrator-Worker 패턴인가?</span>
                 </div>
                 <div class="text-xs text-blue-700 bg-white px-3 py-1 rounded-full border border-blue-200 font-medium">
@@ -395,47 +406,47 @@
                 </div>
               </div>
 
-              <p class="text-slate-700 text-xs leading-relaxed font-normal">
+              <p class="text-slate-700 text-sm leading-relaxed font-normal">
                 소프트웨어 엔지니어링에서 멀티 에이전트를 도입하는 주된 이유는 '역할 분담'과 '도구 격리'입니다. 단일 에이전트에 수십 개의 시스템 도구와 규정을 몰아넣으면 모델의 컨텍스트 윈도우가 빠르게 포화되고 엉뚱한 도구를 호출하는 오류가 빈번해집니다. AgentPatterns.ai의 <strong>Orchestrator-Worker 패턴</strong>은 이를 중앙 리드 에이전트와 전문 워커로 명확히 분리하여 해결합니다.
               </p>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-slate-700">
                 <div class="bg-white p-4 rounded-xl border border-blue-100 shadow-2xs space-y-1.5">
-                  <div class="font-bold text-blue-900 text-xs flex items-center gap-2">
+                  <div class="font-bold text-blue-900 text-base flex items-center gap-2">
                     <span class="w-5 h-5 rounded-md bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">1</span>
                     <span>도구 스키마 오염(Tool Schema Pollution) 방지</span>
                   </div>
-                  <p class="text-xs text-slate-600 leading-relaxed font-normal">
+                  <p class="text-sm text-slate-600 leading-relaxed font-normal">
                     단일 프롬프트에 인사·전산·규정 등 15개 이상의 도구 스키마를 동시에 주입하면, LLM이 유사한 이름의 도구를 혼동하거나 불필요한 인자를 날조하는 환각이 급증합니다. 워커 단위로 필요한 최소 도구만 바인딩(Subagent Schema-Level Tool Filtering)함으로써 도구 호출 정확도를 극대화합니다.
                   </p>
                 </div>
 
                 <div class="bg-white p-4 rounded-xl border border-blue-100 shadow-2xs space-y-1.5">
-                  <div class="font-bold text-blue-900 text-xs flex items-center gap-2">
+                  <div class="font-bold text-blue-900 text-base flex items-center gap-2">
                     <span class="w-5 h-5 rounded-md bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold">2</span>
                     <span>규정 우선(Policy-First) 거버넌스 파이프라인 강제</span>
                   </div>
-                  <p class="text-xs text-slate-600 leading-relaxed font-normal">
+                  <p class="text-sm text-slate-600 leading-relaxed font-normal">
                     단일 에이전트는 사용자가 "휴가 상신해 줘"라고 요구하면 사내 복무 규정 검증을 건너뛰고 곧바로 SaaS API를 호출하는 위험이 있습니다. 오케스트레이터는 작업 순서를 엄격히 제어하여, 반드시 규정 선검증 전문가(hr_policy_agent)의 승인 및 근거 조항을 확보한 뒤에만 SaaS 워커에게 작업을 위임하도록 강제합니다.
                   </p>
                 </div>
 
                 <div class="bg-white p-4 rounded-xl border border-blue-100 shadow-2xs space-y-1.5">
-                  <div class="font-bold text-blue-900 text-xs flex items-center gap-2">
+                  <div class="font-bold text-blue-900 text-base flex items-center gap-2">
                     <span class="w-5 h-5 rounded-md bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold">3</span>
                     <span>시스템 권한 격리 및 최소 권한 원칙(Least Privilege)</span>
                   </div>
-                  <p class="text-xs text-slate-600 leading-relaxed font-normal">
+                  <p class="text-sm text-slate-600 leading-relaxed font-normal">
                     인사 시스템(WorkWeek)과 IT 전산 시스템(ServiceImmediately)의 인증 토큰과 API 접근 범위를 워커별로 물리적으로 격리합니다. 전산 지원 워커가 임직원의 민감한 인사 평가나 잔여 연차 데이터에 접근하거나 임의로 변조하는 것을 원천 차단합니다.
                   </p>
                 </div>
 
                 <div class="bg-white p-4 rounded-xl border border-blue-100 shadow-2xs space-y-1.5">
-                  <div class="font-bold text-blue-900 text-xs flex items-center gap-2">
+                  <div class="font-bold text-blue-900 text-base flex items-center gap-2">
                     <span class="w-5 h-5 rounded-md bg-purple-100 text-purple-700 flex items-center justify-center text-xs font-bold">4</span>
                     <span>독립적 오류 진단 및 점진적 품질 개선 (Hillclimbing)</span>
                   </div>
-                  <p class="text-xs text-slate-600 leading-relaxed font-normal">
+                  <p class="text-sm text-slate-600 leading-relaxed font-normal">
                     단일 에이전트 실패는 어디서 문제가 발생했는지 파악하기 어렵습니다. Orchestrator-Worker 구조에서는 오케스트레이터의 라우팅 실패인지, RAG 워커의 검색 실패인지, SaaS 워커의 API 연동 오류인지 명확히 분리되며, 각 워커의 프롬프트와 툴셋을 개별적으로 튜닝하고 평가(Eval)할 수 있습니다.
                   </p>
                 </div>
@@ -452,20 +463,20 @@
                 <span class="text-xs text-slate-500 font-mono">Total 180 Minutes Timeline</span>
               </div>
 
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <!-- Part 1 Card -->
                 <div class="card-studio p-5 border-blue-200 bg-blue-50/50 space-y-3">
                   <div class="flex items-center justify-between">
-                    <div class="font-bold text-blue-800 flex items-center gap-2 text-sm">
+                    <div class="font-bold text-blue-800 flex items-center gap-2 text-base">
                       <i class="fa-solid fa-code"></i>
                       <span>[실습 Part 1] 멀티 에이전트 구축 및 정량 평가 준비</span>
                     </div>
                     <span class="text-xs font-bold bg-blue-200/80 text-blue-900 px-2 py-0.5 rounded-full font-mono">80분</span>
                   </div>
-                  <p class="text-slate-700 leading-relaxed text-xs font-normal">
+                  <p class="text-slate-700 leading-relaxed text-sm font-normal">
                     Antigravity 2.0 (agy) 개발 환경에서 Google ADK 2.3.0을 기반으로 Orchestrator-Worker 멀티 에이전트 핵심 로직을 구축하고, FastMCP 실시간 연동 및 Golden Evalset 평가 데이터셋을 준비합니다.
                   </p>
-                  <ul class="space-y-1.5 text-slate-700 text-xs font-medium">
+                  <ul class="space-y-2 text-slate-700 text-sm font-medium">
                     <li class="flex items-center gap-2"><i class="fa-solid fa-check text-blue-600"></i><span>Google Antigravity 2.0 (agy) 프롬프트 주도 개발 환경 설정</span></li>
                     <li class="flex items-center gap-2"><i class="fa-solid fa-check text-blue-600"></i><span>Google ADK 2.3.0 Orchestrator-Worker 멀티 에이전트 뼈대 구현</span></li>
                     <li class="flex items-center gap-2"><i class="fa-solid fa-check text-blue-600"></i><span>Vertex AI Search &amp; GCS PDF 하이브리드 Policy RAG 도구 연동</span></li>
@@ -477,16 +488,16 @@
                 <!-- Part 2 Card -->
                 <div class="card-studio p-5 border-purple-200 bg-purple-50/50 space-y-3">
                   <div class="flex items-center justify-between">
-                    <div class="font-bold text-purple-800 flex items-center gap-2 text-sm">
+                    <div class="font-bold text-purple-800 flex items-center gap-2 text-base">
                       <i class="fa-solid fa-shield-halved"></i>
                       <span>[실습 Part 2] 보안 배포, 정량 평가(Eval) 및 GE 연동</span>
                     </div>
                     <span class="text-xs font-bold bg-purple-200/80 text-purple-900 px-2 py-0.5 rounded-full font-mono">75분</span>
                   </div>
-                  <p class="text-slate-700 leading-relaxed text-xs font-normal">
+                  <p class="text-slate-700 leading-relaxed text-sm font-normal">
                     실습 1의 결과물을 인계받아 agents-cli를 이용한 정량적 품질 평가(Eval Flywheel)를 수행하고, Secret Manager와 VPC를 적용한 Cloud Run 보안 배포 및 Gemini Enterprise 사내 서비스 등록을 완성합니다.
                   </p>
-                  <ul class="space-y-1.5 text-slate-700 text-xs font-medium">
+                  <ul class="space-y-2 text-slate-700 text-sm font-medium">
                     <li class="flex items-center gap-2"><i class="fa-solid fa-arrow-right text-purple-600"></i><span>agents-cli 기반 정량적 성능 평가 (도구 호출 정확도, RAG 지표)</span></li>
                     <li class="flex items-center gap-2"><i class="fa-solid fa-arrow-right text-purple-600"></i><span>Secret Manager 및 IAM 최소 권한 기반 Cloud Run 프로덕션 배포</span></li>
                     <li class="flex items-center gap-2"><i class="fa-solid fa-arrow-right text-purple-600"></i><span>Agent Gateway 및 Model Armor 기반 엔터프라이즈 거버넌스 가드레일</span></li>
@@ -496,7 +507,7 @@
               </div>
 
               <!-- Workshop Timeline Ribbon -->
-              <div class="bg-slate-100 p-3.5 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-700 font-medium">
+              <div class="bg-slate-100 p-3.5 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-2 text-sm text-slate-700 font-medium">
                 <div class="flex items-center gap-2">
                   <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
                   <strong class="text-slate-900">Part 1 (80분):</strong> 멀티 에이전트 개발 &amp; Eval 준비
@@ -531,7 +542,7 @@
             </div>
 
             <!-- Warning Callout (WCAG AAA High Contrast) -->
-            <div class="bg-amber-50 border border-amber-300 rounded-2xl p-5 text-xs text-amber-950 font-medium flex items-start space-x-3.5 shadow-xs">
+            <div class="bg-amber-50 border border-amber-300 rounded-2xl p-5 text-sm text-amber-950 font-medium flex items-start space-x-3.5 shadow-xs">
               <i class="fa-solid fa-triangle-exclamation text-amber-600 text-lg mt-0.5 shrink-0"></i>
               <div class="space-y-1.5">
                 <strong class="text-amber-900 text-sm">시작 전 필수 주의사항:</strong>
@@ -547,10 +558,10 @@
                   <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">1</span>
                   <span>Start Lab 클릭 및 자격증명 확인</span>
                 </div>
-                <p class="text-xs text-slate-600">실습 화면 좌측 상단의 [Start Lab] 버튼을 누르면 1~2분 내에 자격증명이 생성됩니다:</p>
+                <p class="text-sm text-slate-700 leading-relaxed font-normal">실습 화면 좌측 상단의 [Start Lab] 버튼을 누르면 1~2분 내에 자격증명이 생성됩니다:</p>
                 
                 <!-- Terminal Card -->
-                <div class="bg-[#090d16] border border-slate-800 rounded-xl overflow-hidden font-mono text-xs text-slate-200 shadow-inner">
+                <div class="bg-[#090d16] border border-slate-800 rounded-xl overflow-hidden font-mono text-[13.5px] text-slate-200 shadow-inner">
                   <div class="bg-[#131b2e] px-4 py-2 border-b border-slate-800 flex items-center justify-between">
                     <div class="flex items-center gap-1.5">
                       <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
@@ -572,10 +583,10 @@
                   <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">2</span>
                   <span>시크릿 창에서 콘솔 열기 및 로그인</span>
                 </div>
-                <p class="text-xs text-slate-600">
+                <p class="text-sm text-slate-700 leading-relaxed font-normal">
                   <strong>Open Google Cloud console</strong> 버튼을 마우스 우클릭 &rarr; <strong>시크릿 창에서 링크 열기</strong>를 선택합니다.
                 </p>
-                <div class="bg-slate-50 p-4 rounded-xl text-xs text-slate-700 space-y-2 border border-slate-200 font-medium">
+                <div class="bg-slate-50 p-4 rounded-xl text-sm text-slate-700 space-y-2 border border-slate-200 font-medium">
                   <div class="flex items-center gap-2"><i class="fa-solid fa-check text-blue-600"></i><span>복사한 Username 붙여넣기 후 [Next]</span></div>
                   <div class="flex items-center gap-2"><i class="fa-solid fa-check text-blue-600"></i><span>복사한 Password 붙여넣기 후 [Next]</span></div>
                   <div class="flex items-center gap-2"><i class="fa-solid fa-check text-blue-600"></i><span>서비스 약관 동의 (2단계 인증 및 복구 이메일 추가는 모두 건너뜁니다)</span></div>
@@ -602,7 +613,7 @@
                   <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">1</span>
                   <span>원격 브라우저 세션 접속 (Cloud Run Proxy)</span>
                 </div>
-                <p class="text-xs text-slate-600 leading-relaxed font-normal">
+                <p class="text-sm text-slate-600 leading-relaxed font-normal">
                   사전 프로비저닝된 개발자 가상 머신(VM)과 Cloud Run 프록시 서비스를 통해 브라우저에서 바로 개발 환경에 접속합니다.
                 </p>
 
@@ -627,7 +638,7 @@
                 </div>
 
                 <!-- Info Callout -->
-                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-xs text-blue-950 font-medium flex items-start gap-2.5">
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-950 font-medium flex items-start gap-2.5">
                   <i class="fa-solid fa-circle-info text-blue-600 text-base mt-0.5 shrink-0"></i>
                   <div>
                     <strong class="text-blue-900 font-bold">클립보드 매니저 팁:</strong>
@@ -642,19 +653,19 @@
                   <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">2</span>
                   <span>Konsole 터미널 열기 및 Antigravity CLI (agy) 실행</span>
                 </div>
-                <p class="text-xs text-slate-600 leading-relaxed font-normal">
+                <p class="text-sm text-slate-600 leading-relaxed font-normal">
                   원격 화면 좌측 하단 <strong>Application Launcher &gt; System &gt; Konsole</strong>을 클릭하여 터미널을 실행합니다:
                 </p>
                 <img src="lab1/images/05_konsole_terminal_access.png" alt="Konsole 터미널 실행" class="rounded-xl border border-slate-200 shadow-sm max-w-md">
 
                 <!-- Note Callout -->
-                <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-700 font-medium">
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 font-medium">
                   <strong>참고:</strong> 터미널 실행 시 <code>Warning: Could not find '', starting '/bin/bash' instead.</code> 경고가 표시되더라도 정상 동작하므로 안전하게 무시하셔도 됩니다.
                 </div>
 
                 <!-- Pre-flight API enable block (Resolves Risk 1) -->
                 <div class="space-y-2 pt-1">
-                  <p class="text-xs font-bold text-slate-800">1. 실습 필수 GCP API 일괄 활성화 (사전 준비):</p>
+                  <p class="text-sm font-bold text-slate-900">1. 실습 필수 GCP API 일괄 활성화 (사전 준비):</p>
                   <div class="bg-[#090d16] border border-slate-800 rounded-xl overflow-hidden shadow-md">
                     <div class="bg-[#131b2e] px-4 py-2 border-b border-slate-800 flex items-center justify-between">
                       <span class="text-xs text-slate-400 font-mono">Konsole Terminal &bull; API Setup</span>
@@ -662,7 +673,7 @@
                         <i class="fa-regular fa-copy"></i> 복사
                       </button>
                     </div>
-                    <pre class="p-4 font-mono text-xs text-amber-300 overflow-x-auto"><code>gcloud services enable \
+                    <pre class="p-4 font-mono text-[13.5px] text-amber-300 overflow-x-auto leading-relaxed"><code>gcloud services enable \
   aiplatform.googleapis.com \
   agentregistry.googleapis.com \
   networkservices.googleapis.com \
@@ -675,7 +686,7 @@
                 </div>
 
                 <div class="space-y-2 pt-1">
-                  <p class="text-xs font-bold text-slate-800">2. 터미널에 다음 명령어를 입력하여 agy를 실행합니다:</p>
+                  <p class="text-sm font-bold text-slate-900">2. 터미널에 다음 명령어를 입력하여 agy를 실행합니다:</p>
                   <div class="bg-[#090d16] border border-slate-800 rounded-xl overflow-hidden shadow-md">
                     <div class="bg-[#131b2e] px-4 py-2 border-b border-slate-800 flex items-center justify-between">
                       <span class="text-xs text-slate-400 font-mono">Konsole Terminal</span>
@@ -735,8 +746,8 @@
                   <span>설정 검증 및 Gemini 3.8 Flash 모델 설정</span>
                 </div>
 
-                <div class="space-y-3 text-xs">
-                  <p class="text-slate-700">환경 설정을 검증하려면 <code>/config</code> 명령어를 실행하고 색상 테마를 확인합니다:</p>
+                <div class="space-y-3 text-sm">
+                  <p class="text-slate-700 font-normal leading-relaxed">환경 설정을 검증하려면 <code>/config</code> 명령어를 실행하고 색상 테마를 확인합니다:</p>
                   <div class="bg-[#090d16] border border-slate-800 rounded-xl overflow-hidden shadow-md">
                     <div class="bg-[#131b2e] px-4 py-2 border-b border-slate-800 flex items-center justify-between">
                       <span class="text-xs text-slate-400 font-mono">agy command</span>
@@ -749,7 +760,7 @@
                   <img src="lab1/images/12_agy_select_color_scheme.png" alt="색상 테마 확인" class="rounded-xl border border-slate-200 shadow-sm max-w-md">
 
                   <div class="pt-2 space-y-2">
-                    <p class="text-slate-700">사용할 모델을 확인하고 <strong>gemini-3.8-flash</strong>로 지정합니다:</p>
+                    <p class="text-slate-700 font-normal leading-relaxed">사용할 모델을 확인하고 <strong>gemini-3.8-flash</strong>로 지정합니다:</p>
                     <div class="bg-[#090d16] border border-slate-800 rounded-xl overflow-hidden shadow-md">
                       <div class="bg-[#131b2e] px-4 py-2 border-b border-slate-800 flex items-center justify-between">
                         <span class="text-xs text-slate-400 font-mono">agy command</span>
@@ -814,22 +825,22 @@ cd enterprise-ops-agent</code></pre>
                 <!-- agents-cli Deep Dive Card -->
                 <div class="bg-gradient-to-r from-blue-50/80 via-indigo-50/60 to-white border border-blue-200 rounded-xl p-4 space-y-3 shadow-xs">
                   <div class="flex items-center justify-between border-b border-blue-100 pb-2">
-                    <span class="font-bold text-blue-950 text-xs flex items-center gap-2">
+                    <span class="font-bold text-blue-950 text-sm flex items-center gap-2">
                       <i class="fa-solid fa-cube text-blue-600"></i>
                       <span>Google Agent Platform 공식 툴체인: agents-cli 아키텍처 가이드</span>
                     </span>
                     <span class="text-xs bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded-full font-mono">ADK 2.3.0 Ecosystem</span>
                   </div>
-                  <p class="text-xs text-slate-700 leading-relaxed font-normal">
+                  <p class="text-sm text-slate-700 leading-relaxed font-normal">
                     <strong>agents-cli란:</strong> 단순한 코드 생성기를 넘어, 에이전트의 <strong>스캐폴딩(create) &bull; 의존성 동기화(install) &bull; 로컬 추론(run) &bull; 대화형 디버깅(playground) &bull; 정량 평가(eval) &bull; 프로덕션 배포(deploy) &bull; 사내 레지스트리 공개(publish)</strong>까지 엔드-투-엔드 라이프사이클 전 과정을 표준화한 Google Cloud 공식 프레임워크입니다.
                   </p>
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-xs">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 text-sm">
                     <div class="bg-white p-2.5 rounded-lg border border-slate-200 space-y-1">
                       <span class="font-bold text-slate-800 flex items-center gap-1.5">
                         <i class="fa-solid fa-play text-blue-600 text-xs"></i>
                         <span>로컬 이너루프 (run &amp; playground)</span>
                       </span>
-                      <p class="text-slate-600 text-xs leading-relaxed">
+                      <p class="text-slate-600 text-sm leading-relaxed font-normal">
                         <code class="font-mono text-blue-700">agents-cli run "질의"</code>로 터미널에서 즉시 스트리밍 추론을 검증하고, <code class="font-mono text-blue-700">agents-cli playground</code>로 ADK 공식 시각적 웹 대시보드를 구동합니다.
                       </p>
                     </div>
@@ -838,7 +849,7 @@ cd enterprise-ops-agent</code></pre>
                         <i class="fa-solid fa-rocket text-indigo-600 text-xs"></i>
                         <span>배포 및 거버넌스 (deploy &amp; publish)</span>
                       </span>
-                      <p class="text-slate-600 text-xs leading-relaxed">
+                      <p class="text-slate-600 text-sm leading-relaxed font-normal">
                         <code class="font-mono text-indigo-700">agents-cli deploy</code> 한 줄로 Cloud Run 컨테이너를 빌드/배포하고, <code class="font-mono text-indigo-700">agents-cli publish gemini-enterprise</code>로 사내 갤러리에 A2A로 등록합니다.
                       </p>
                     </div>
@@ -847,11 +858,11 @@ cd enterprise-ops-agent</code></pre>
 
                 <!-- Step 1-B: agents-cli install -->
                 <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2">
-                  <span class="font-bold text-slate-800 text-xs block flex items-center gap-1.5">
+                  <span class="font-bold text-slate-800 text-sm block flex items-center gap-1.5">
                     <i class="fa-solid fa-arrows-rotate text-emerald-600"></i>
                     <span>프로젝트 전용 가상 환경 동기화 (agents-cli install)</span>
                   </span>
-                  <p class="text-xs text-slate-600 leading-relaxed font-normal">
+                  <p class="text-sm text-slate-600 leading-relaxed font-normal">
                     프로젝트 디렉터리에서 <code class="font-mono text-emerald-700 font-bold bg-white px-1.5 py-0.5 rounded border border-slate-200">agents-cli install</code>을 실행하면, <code class="font-mono">pyproject.toml</code>에 선언된 170여 개 공식 패키지가 프로젝트 전용 가상 환경(<code class="font-mono">.venv</code>)에 자동 동기화(uv sync)됩니다.
                   </p>
                   <pre class="p-3 bg-[#090d16] rounded-lg font-mono text-[13px] text-emerald-300"><code>cd ~/enterprise-ops-agent && agents-cli install</code></pre>
@@ -869,27 +880,27 @@ cd enterprise-ops-agent</code></pre>
                 </div>
 
                 <!-- SDD Purpose & Structure Summary -->
-                <div class="space-y-2 text-xs text-slate-700 leading-relaxed font-medium">
+                <div class="space-y-2 text-sm text-slate-700 leading-relaxed font-normal">
                   <p>
                     <strong>소프트웨어 설계서(SDD)의 목적:</strong> 프롬프트에 방대한 코드를 일일이 나열하지 않고, 시스템 명세서, 데이터 모델, 도구 인터페이스 규격을 단일 문서로 정의하여 에이전트에게 맥락으로 주입하는 설계서 기반 프롬프트 엔지니어링(Spec-Driven Development)의 핵심 기준 문서입니다.
                   </p>
-                  <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5 pt-1 text-xs">
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1 text-sm">
                     <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs space-y-1">
-                      <span class="font-bold text-blue-800 block">제 1 절: 시스템 개요</span>
-                      <p class="text-slate-600">사용 모델(Gemini 3.8 Flash), RAG 신뢰도 임계값(0.80), 기본 사번(EMP-10294) 등 런타임 기준을 정의합니다.</p>
+                      <span class="font-bold text-blue-800 block text-sm">제 1 절: 시스템 개요</span>
+                      <p class="text-slate-600 text-sm leading-relaxed">사용 모델(Gemini 3.8 Flash), RAG 신뢰도 임계값(0.80), 기본 사번(EMP-10294) 등 런타임 기준을 정의합니다.</p>
                     </div>
                     <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs space-y-1">
-                      <span class="font-bold text-indigo-800 block">제 2 절: 도구 명세</span>
-                      <p class="text-slate-600">사내 복무/IT 규정 RAG 도구와 WorkWeek 연차 API, ServiceImmediately IT 티켓 API의 파라미터 및 반환값을 선언합니다.</p>
+                      <span class="font-bold text-indigo-800 block text-sm">제 2 절: 도구 명세</span>
+                      <p class="text-slate-600 text-sm leading-relaxed">사내 복무/IT 규정 RAG 도구와 WorkWeek 연차 API, ServiceImmediately IT 티켓 API의 파라미터 및 반환값을 선언합니다.</p>
                     </div>
                     <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs space-y-1">
-                      <span class="font-bold text-purple-800 block">제 3 절: 에이전트 행동 수칙</span>
-                      <p class="text-slate-600">규정 우선 확인 원칙(Policy-First), 근거 조항 인용 의무, 사전 승인 조건 등 필수 오케스트레이션 지침을 담고 있습니다.</p>
+                      <span class="font-bold text-purple-800 block text-sm">제 3 절: 에이전트 행동 수칙</span>
+                      <p class="text-slate-600 text-sm leading-relaxed">규정 우선 확인 원칙(Policy-First), 근거 조항 인용 의무, 사전 승인 조건 등 필수 오케스트레이션 지침을 담고 있습니다.</p>
                     </div>
                   </div>
                 </div>
 
-                <div class="space-y-3 text-xs pt-1">
+                <div class="space-y-3 text-sm pt-1">
                   <!-- Dedicated Standalone Viewers Prompt Card -->
                   <div class="bg-gradient-to-r from-indigo-50/90 via-blue-50/70 to-emerald-50/80 border border-indigo-200 rounded-xl p-3.5 space-y-2">
                     <div class="flex items-center justify-between">
@@ -899,7 +910,7 @@ cd enterprise-ops-agent</code></pre>
                       </span>
                       <span class="text-xs font-bold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-full">집중 열람 모드</span>
                     </div>
-                    <p class="text-xs text-slate-600 leading-relaxed font-normal">
+                    <p class="text-sm text-slate-600 leading-relaxed font-normal">
                       실습 중 설계서나 사내 복무/IT 지침 원문을 편리하게 참조하실 수 있도록, 방해 요소 없이 문서에만 집중할 수 있는 <strong>독립형 전용 뷰어 페이지</strong>를 새 탭으로 제공합니다:
                     </p>
                     <div class="flex flex-wrap items-center gap-2 pt-1">
@@ -971,7 +982,7 @@ curl -fsSL https://build.geap.dev/docs/policies/it_hardware_guidelines.pdf -o do
                   <span class="text-xs font-mono bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded-full">agy --continue</span>
                 </div>
 
-                <div class="space-y-3 text-xs">
+                <div class="space-y-3 text-sm">
                   <div class="bg-[#090d16] border border-slate-800 rounded-xl overflow-hidden shadow-md">
                     <div class="bg-[#131b2e] px-4 py-2 border-b border-slate-800 flex items-center justify-between">
                       <span class="text-xs text-emerald-400 font-mono">bash terminal</span>
@@ -979,25 +990,25 @@ curl -fsSL https://build.geap.dev/docs/policies/it_hardware_guidelines.pdf -o do
                         <i class="fa-regular fa-copy"></i> 명령어 복사
                       </button>
                     </div>
-                    <pre class="p-4 font-mono text-xs text-emerald-300 leading-relaxed"><code># 1. 반드시 프로젝트 루트 디렉터리로 이동 후 agy 실행
+                    <pre class="p-4 font-mono text-[13.5px] text-emerald-300 leading-relaxed"><code># 1. 반드시 프로젝트 루트 디렉터리로 이동 후 agy 실행
 cd ~/enterprise-ops-agent
 agy</code></pre>
                   </div>
 
                   <!-- agy Session Continuation Guide Box -->
-                  <div class="bg-amber-50 border border-amber-200 rounded-xl p-3.5 text-xs text-amber-950 space-y-1.5 font-medium">
-                    <span class="font-bold flex items-center gap-1.5 text-amber-900">
+                  <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-950 space-y-2 font-medium">
+                    <span class="font-bold flex items-center gap-1.5 text-amber-900 text-sm">
                       <i class="fa-solid fa-arrows-split-up-and-left text-amber-600"></i>
                       <span>핵심: agy 대화 중단 -> 터미널 CLI 실행 -> 이전 세션 복귀 워크플로</span>
                     </span>
-                    <p class="text-xs text-slate-700 leading-relaxed font-normal">
+                    <p class="text-sm text-slate-700 leading-relaxed font-normal">
                       1. <strong>agy 일시 종료</strong>: 대화창에서 <code class="font-mono font-bold bg-white px-1 py-0.5 rounded border border-amber-200">Ctrl+D</code> (두 번) 또는 <code class="font-mono font-bold bg-white px-1 py-0.5 rounded border border-amber-200">/exit</code>를 입력하여 터미널로 복귀합니다.<br>
                       2. <strong>터미널 CLI 작업</strong>: 단위 테스트(<code class="font-mono text-slate-900">python3 tests/test_scenarios.py</code>)나 스모크 테스트(<code class="font-mono text-slate-900">agents-cli run ...</code>)를 실행합니다.<br>
                       3. <strong>기존 agy 세션 복귀</strong>: 터미널에서 <code class="font-mono font-bold text-amber-900 bg-amber-100 px-1.5 py-0.5 rounded border border-amber-300">agy --continue</code> (또는 <code class="font-mono font-bold text-amber-900">agy -c</code>)를 입력하면, 이전 대화 기록과 작업 기억이 100% 유지된 상태로 복귀하여 연속 작업을 지시할 수 있습니다.
                     </p>
                   </div>
 
-                  <p class="text-xs text-slate-600 font-medium">실행 중인 agy 대화창에 다음 프롬프트를 입력하여 소프트웨어 설계서(SDD) 내용을 요약시킵니다:</p>
+                  <p class="text-sm text-slate-600 font-medium">실행 중인 agy 대화창에 다음 프롬프트를 입력하여 소프트웨어 설계서(SDD) 내용을 요약시킵니다:</p>
 
                   <div class="bg-[#090d16] border border-slate-800 rounded-xl overflow-hidden shadow-md">
                     <div class="bg-[#131b2e] px-4 py-2 border-b border-slate-800 flex items-center justify-between">
@@ -1010,7 +1021,7 @@ agy</code></pre>
 docs/SDD.md 파일의 내용을 꼼꼼히 읽고, 전체 시스템 아키텍처와 도구 구성 요소를 파악하세요.
 그리고 현재 프로젝트 디렉터리의 컨텍스트를 요약한 context_summary.md 파일을 docs/ 디렉터리에 생성하세요.</code></pre>
                   </div>
-                  <p class="text-xs text-slate-600 font-medium">agy가 제안하는 파일 생성 변경사항을 확인하고 <strong>Allow</strong>를 선택합니다.</p>
+                  <p class="text-sm text-slate-600 font-medium">agy가 제안하는 파일 생성 변경사항을 확인하고 <strong>Allow</strong>를 선택합니다.</p>
                 </div>
               </div>
             </div>
@@ -1035,14 +1046,14 @@ docs/SDD.md 파일의 내용을 꼼꼼히 읽고, 전체 시스템 아키텍처�
                     <i class="fa-solid fa-folder-tree text-indigo-600"></i>
                     <span>agents-cli 표준 프로젝트 아키텍처 및 핵심 파일별 역할</span>
                   </h3>
-                  <p class="text-xs text-slate-600 mt-1 leading-relaxed font-medium">
+                  <p class="text-sm text-slate-700 mt-1 leading-relaxed font-normal">
                     Google Cloud 환경에서 엔터프라이즈 AI 에이전트를 개발, 평가(Evaluation), Cloud Run 배포, Gemini Enterprise 등록까지 일관되게 관리하는 공식 표준 규격 구조입니다.
                   </p>
                 </div>
 
                 <!-- Formatted Tree Pre Block -->
                 <div class="bg-[#090d16] border border-slate-800 rounded-xl p-4 shadow-inner">
-                  <pre class="font-mono text-xs text-slate-200 leading-relaxed overflow-x-auto whitespace-pre"><code><span class="text-indigo-400 font-bold">enterprise-ops-agent/</span>
+                  <pre class="font-mono text-[13px] text-slate-200 leading-relaxed overflow-x-auto whitespace-pre"><code><span class="text-indigo-400 font-bold">enterprise-ops-agent/</span>
 ├── <span class="text-cyan-300">agents-cli-manifest.yaml</span> <span class="text-slate-500"># CLI 프로젝트 식별 매니페스트 (agent_directory: app, root_agent: enterprise_ops_agent)</span>
 ├── <span class="text-amber-300">config.yaml</span>              <span class="text-slate-500"># 모델 파라미터(gemini-3.8-flash), 멀티 에이전트 역할 정의, 거버넌스 규칙</span>
 ├── <span class="text-emerald-300">app/</span>                     <span class="text-slate-500"># ADK 에이전트 패키지 디렉터리</span>
@@ -1063,14 +1074,14 @@ docs/SDD.md 파일의 내용을 꼼꼼히 읽고, 전체 시스템 아키텍처�
                 </div>
 
                 <!-- Deep Explanation Cards for 150 Attendees -->
-                <div class="space-y-2.5 text-xs text-slate-700 leading-relaxed font-medium">
+                <div class="space-y-3 text-sm text-slate-700 leading-relaxed font-normal">
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs space-y-1">
                       <span class="font-bold text-slate-900 block flex items-center gap-1.5">
                         <i class="fa-solid fa-file-code text-cyan-600"></i>
                         <span>agents-cli-manifest.yaml</span>
                       </span>
-                      <p class="text-xs text-slate-600">
+                      <p class="text-sm text-slate-600 leading-relaxed font-normal">
                         agents-cli가 이 디렉터리를 에이전트 프로젝트로 인식하도록 선언하는 메타데이터 파일입니다. 배포 대상(Cloud Run), 세션 저장 방식(in_memory), 리전, A2A 활성화 여부를 정의합니다.
                       </p>
                     </div>
@@ -1080,7 +1091,7 @@ docs/SDD.md 파일의 내용을 꼼꼼히 읽고, 전체 시스템 아키텍처�
                         <i class="fa-solid fa-sliders text-amber-600"></i>
                         <span>config.yaml</span>
                       </span>
-                      <p class="text-xs text-slate-600">
+                      <p class="text-sm text-slate-600 leading-relaxed font-normal">
                         에이전트의 런타임 설정 명세서입니다. 코드를 직접 수정하지 않고도 언어 모델(Gemini 3.8 Flash), temperature(0.1), RAG 신뢰도 임계값(0.80), 기본 사번(EMP-10294)을 변경할 수 있도록 환경과 코드를 분리합니다.
                       </p>
                     </div>
@@ -1090,7 +1101,7 @@ docs/SDD.md 파일의 내용을 꼼꼼히 읽고, 전체 시스템 아키텍처�
                         <i class="fa-solid fa-brain text-emerald-600"></i>
                         <span>agent.py</span>
                       </span>
-                      <p class="text-xs text-slate-600">
+                      <p class="text-sm text-slate-600 leading-relaxed font-normal">
                         에이전트의 핵심 두뇌입니다. Google ADK의 Agent 및 Runner 인스턴스를 초기화하고, 시스템 지침을 주입하며, 사용자 질문에 따라 RAG 도구와 SaaS API 도구를 자율적으로 호출하는 오케스트레이션 로직을 담당합니다.
                       </p>
                     </div>
@@ -1100,7 +1111,7 @@ docs/SDD.md 파일의 내용을 꼼꼼히 읽고, 전체 시스템 아키텍처�
                         <i class="fa-solid fa-wrench text-blue-600"></i>
                         <span>tools/ (도구 모음)</span>
                       </span>
-                      <p class="text-xs text-slate-600">
+                      <p class="text-sm text-slate-600 leading-relaxed font-normal">
                         에이전트의 손발 역할을 하는 파이썬 함수 모음입니다. 사내 규정 PDF를 임베딩 검색하는 RAG 모듈과 WorkWeek, ServiceImmediately SaaS와 통신하는 API 클라이언트가 위치합니다.
                       </p>
                     </div>
@@ -1110,7 +1121,7 @@ docs/SDD.md 파일의 내용을 꼼꼼히 읽고, 전체 시스템 아키텍처�
                         <i class="fa-solid fa-server text-purple-600"></i>
                         <span>a2a_server.py</span>
                       </span>
-                      <p class="text-xs text-slate-600">
+                      <p class="text-sm text-slate-600 leading-relaxed font-normal">
                         사내 Gemini Enterprise와 통신하기 위한 A2A(Agent-to-Agent) 표준 게이트웨이입니다. JSON-RPC 2.0 프로토콜을 처리하여 사내 챗봇에 연결하고, 브라우저(포트 8080)에서 바로 대화할 수 있는 로컬 웹 콘솔을 일체형으로 제공합니다.
                       </p>
                     </div>
@@ -1120,19 +1131,19 @@ docs/SDD.md 파일의 내용을 꼼꼼히 읽고, 전체 시스템 아키텍처�
                         <i class="fa-solid fa-vial-circle-check text-teal-600"></i>
                         <span>tests/eval/ (평가 스위트)</span>
                       </span>
-                      <p class="text-xs text-slate-600">
+                      <p class="text-sm text-slate-600 leading-relaxed font-normal">
                         에이전트가 사람 개입 없이도 안전하고 정확하게 동작하는지 검증하는 정량적 평가 공간입니다. 평가 지표 설정(eval_config.yaml), 검증 데이터셋(datasets/), 진단 보고서(evaluation_report.md)로 구성됩니다.
                       </p>
                     </div>
                   </div>
 
                   <!-- ADK Package Structure Callout -->
-                  <div class="bg-blue-50 border border-blue-200 rounded-xl p-3.5 text-xs text-blue-900 space-y-1">
-                    <span class="font-bold text-blue-950 flex items-center gap-1.5">
+                  <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-900 space-y-1.5">
+                    <span class="font-bold text-blue-950 flex items-center gap-1.5 text-sm">
                       <i class="fa-solid fa-circle-info text-blue-600"></i>
                       <span>표준 패키지 구조: agents-cli manifest와 app 패키지</span>
                     </span>
-                    <p class="text-xs text-blue-800 leading-relaxed font-medium">
+                    <p class="text-sm text-blue-900 leading-relaxed font-normal">
                       <code class="font-mono text-blue-950 bg-blue-100 px-1 py-0.5 rounded font-bold">agents-cli-manifest.yaml</code>에서 <code class="font-mono">agent_directory: app</code> 및 <code class="font-mono">root_agent_name: enterprise_ops_agent</code>로 지정되어 있으므로, 모든 에이전트 및 도구 코드는 <code class="font-mono text-blue-950 bg-blue-100 px-1 py-0.5 rounded font-bold">app/</code> 하위에서 안전하게 모듈로 로드됩니다.
                     </p>
                   </div>
@@ -1177,7 +1188,7 @@ docs/SDD.md 파일의 내용을 꼼꼼히 읽고, 전체 시스템 아키텍처�
               </div>
 
               <!-- Session Transition: agy to Terminal -->
-              <div class="bg-slate-100 border border-slate-300 rounded-xl p-3 text-xs text-slate-800 font-medium flex items-center justify-between shadow-2xs">
+              <div class="bg-slate-100 border border-slate-300 rounded-xl p-3.5 text-sm text-slate-800 font-medium flex items-center justify-between shadow-2xs">
                 <div class="flex items-center gap-2">
                   <i class="fa-solid fa-terminal text-slate-600 text-sm"></i>
                   <span><strong>[터미널 전환]</strong> 생성 결과 검증을 위해 agy 프롬프트 빠져나오기:</span>
@@ -1197,7 +1208,7 @@ docs/SDD.md 파일의 내용을 꼼꼼히 읽고, 전체 시스템 아키텍처�
                   </div>
                   <pre class="p-4 font-mono text-[13.5px] text-cyan-300"><code>python3 -m app.agent</code></pre>
                 </div>
-                <div class="bg-emerald-50 border border-emerald-300 rounded-xl p-3 text-xs text-emerald-950 font-bold flex items-center gap-2">
+                <div class="bg-emerald-50 border border-emerald-300 rounded-xl p-3.5 text-sm text-emerald-950 font-bold flex items-center gap-2">
                   <i class="fa-solid fa-circle-check text-emerald-600"></i>
                   <span>기대 출력: 멀티 에이전트 준비 완료: enterprise_ops_agent / 전문 서브 에이전트: ['hr_policy_agent', 'workweek_agent', 'itsm_agent']</span>
                 </div>
@@ -1240,7 +1251,7 @@ docs/SDD.md 파일의 내용을 꼼꼼히 읽고, 전체 시스템 아키텍처�
                         <i class="fa-solid fa-download"></i> 다운로드
                       </a>
                     </div>
-                    <ul class="text-xs text-slate-600 space-y-1 list-disc pl-4 leading-relaxed font-medium">
+                    <ul class="text-sm text-slate-700 space-y-1.5 list-disc pl-4 leading-relaxed font-normal">
                       <li><strong>연차 발생:</strong> 입사 1년 미만 월 1.25일 개근 발생, 1년 차 기본 15일 부여, 3년 이상 2년마다 1일 가산(최대 25일).</li>
                       <li><strong>사전 신청 기한:</strong> 1일 이하 24시간 전 상신, 3일 이하 3일 전 상신, 3일 초과 7영업일 전 상신 및 팀장 사전 승인 필수.</li>
                       <li><strong>병가 규정:</strong> 연간 14일 유급 병가 지원, 연속 3일 초과 시 진단서 제출 필수.</li>
@@ -1258,7 +1269,7 @@ docs/SDD.md 파일의 내용을 꼼꼼히 읽고, 전체 시스템 아키텍처�
                         <i class="fa-solid fa-download"></i> 다운로드
                       </a>
                     </div>
-                    <ul class="text-xs text-slate-600 space-y-1 list-disc pl-4 leading-relaxed font-medium">
+                    <ul class="text-sm text-slate-700 space-y-1.5 list-disc pl-4 leading-relaxed font-normal">
                       <li><strong>표준 기종 기준:</strong> 데이터/엔지니어링 직군은 MacBook Pro 16 M3 Max (64GB RAM), 일반 사무직군은 M3 Pro 모델 지급.</li>
                       <li><strong>정기 교체 주기:</strong> 지급일로부터 36개월 경과 시 신규 기종 교체 신청 가능.</li>
                       <li><strong>긴급 결함 조치:</strong> 배터리 부풀림(스웰링) 등 안전 결함 발생 시 내구연한과 무관하게 4시간 내 점검 및 당일 대여 장비 선지급.</li>
@@ -1266,14 +1277,14 @@ docs/SDD.md 파일의 내용을 꼼꼼히 읽고, 전체 시스템 아키텍처�
                   </div>
                 </div>
 
-                <div class="text-xs text-slate-600 leading-relaxed font-medium bg-white/80 p-2.5 rounded-lg border border-slate-200">
+                <div class="text-sm text-slate-700 leading-relaxed font-normal bg-white/80 p-3 rounded-xl border border-slate-200">
                   <p><strong>RAG 도구의 동작 원리:</strong> 에이전트가 규정을 추측(Hallucination)하지 않도록, Cloud Storage에 업로드된 위 PDF 문서들을 바탕으로 관련 조항을 발췌하여 신뢰도 0.80 이상일 때만 답변의 근거로 채택합니다.</p>
                 </div>
               </div>
 
               <!-- Session Transition: Terminal to agy (Copyable Terminal Block) -->
               <div class="bg-amber-50/70 border border-amber-300 rounded-xl p-3.5 space-y-2 shadow-2xs">
-                <div class="flex items-center justify-between text-xs text-amber-950 font-semibold">
+                <div class="flex items-center justify-between text-sm text-amber-950 font-bold">
                   <span class="flex items-center gap-2">
                     <i class="fa-solid fa-arrows-split-up-and-left text-amber-600 text-sm"></i>
                     <span><strong>[세션 복귀]</strong> 이전 터미널 검증 후, 기존 agy 세션으로 재접속</span>
@@ -1316,7 +1327,7 @@ docs/SDD.md 파일의 내용을 꼼꼼히 읽고, 전체 시스템 아키텍처�
               </div>
 
               <!-- Session Transition: agy to Terminal -->
-              <div class="bg-slate-100 border border-slate-300 rounded-xl p-3 text-xs text-slate-800 font-medium flex items-center justify-between shadow-2xs">
+              <div class="bg-slate-100 border border-slate-300 rounded-xl p-3.5 text-sm text-slate-800 font-medium flex items-center justify-between shadow-2xs">
                 <div class="flex items-center gap-2">
                   <i class="fa-solid fa-terminal text-slate-600 text-sm"></i>
                   <span><strong>[터미널 전환]</strong> RAG 단독 테스트를 위해 agy 프롬프트 빠져나오기:</span>
@@ -1376,7 +1387,7 @@ print(json.dumps(search_company_policy('4일 연속 연차 신청 기한', categ
                   </a>
                 </div>
 
-                <div class="space-y-2.5 text-xs text-slate-700 leading-relaxed font-medium">
+                <div class="space-y-3 text-sm text-slate-700 leading-relaxed font-normal">
                   <p>
                     <strong>FastMCP 프로토콜이란:</strong> Anthropic과 오픈소스 커뮤니티가 주도하는 Model Context Protocol(MCP)을 가벼운 Streamable HTTP 기반으로 구현한 규격입니다. 에이전트가 브라우저나 복잡한 프로세스 통신 없이도 표준 REST 엔드포인트를 통해 사내 SaaS 시스템의 도구를 원격 실행할 수 있습니다.
                   </p>
@@ -1387,8 +1398,8 @@ print(json.dumps(search_company_policy('4일 연속 연차 신청 기한', categ
                         <i class="fa-solid fa-calendar-check text-blue-600"></i>
                         <span>WorkWeek FastMCP Server (/work-week/mcp)</span>
                       </span>
-                      <p class="text-xs text-slate-600">Google ADK McpToolset으로 연결되어 연차/병가 조회, 휴가 신청, 휴가 취소를 처리합니다.</p>
-                      <div class="font-mono text-xs text-slate-700 bg-slate-50 p-2 rounded border border-slate-200 space-y-1">
+                      <p class="text-sm text-slate-700 leading-relaxed font-normal">Google ADK McpToolset으로 연결되어 연차/병가 조회, 휴가 신청, 휴가 취소를 처리합니다.</p>
+                      <div class="font-mono text-[13px] text-slate-700 bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1">
                         <div><strong>프로토콜:</strong> <span class="text-blue-700 font-bold">Streamable HTTP JSON-RPC 2.0</span></div>
                         <div><strong>주요 도구:</strong> <code class="text-blue-800">get_employee_balances, request_time_off, cancel_leave_request</code></div>
                       </div>
@@ -1399,8 +1410,8 @@ print(json.dumps(search_company_policy('4일 연속 연차 신청 기한', categ
                         <i class="fa-solid fa-ticket text-emerald-600"></i>
                         <span>ServiceImmediately FastMCP Server (/service-immediately/mcp)</span>
                       </span>
-                      <p class="text-xs text-slate-600">지급 장비(38개월 경과된 M1 Max 랩톱) 이력 조회 및 하드웨어 결함 인시던트 티켓을 발행합니다.</p>
-                      <div class="font-mono text-xs text-slate-700 bg-slate-50 p-2 rounded border border-slate-200 space-y-1">
+                      <p class="text-sm text-slate-700 leading-relaxed font-normal">지급 장비(38개월 경과된 M1 Max 랩톱) 이력 조회 및 하드웨어 결함 인시던트 티켓을 발행합니다.</p>
+                      <div class="font-mono text-[13px] text-slate-700 bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1">
                         <div><strong>프로토콜:</strong> <span class="text-emerald-700 font-bold">Streamable HTTP JSON-RPC 2.0</span></div>
                         <div><strong>주요 도구:</strong> <code class="text-emerald-800">list_tickets, create_ticket, add_ticket_comment</code></div>
                       </div>
@@ -1408,12 +1419,12 @@ print(json.dumps(search_company_policy('4일 연속 연차 신청 기한', categ
                   </div>
 
                   <!-- 150 Student Multi-tenant Isolation Callout -->
-                  <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-950 space-y-1">
-                    <span class="font-bold flex items-center gap-1.5">
+                  <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-950 space-y-1.5">
+                    <span class="font-bold flex items-center gap-1.5 text-sm">
                       <i class="fa-solid fa-shield-halved text-blue-600"></i>
                       <span>150명 멀티 테넌트 데이터 격리 원리 (X-MCP-Token)</span>
                     </span>
-                    <p class="text-xs text-blue-900 leading-relaxed font-medium">
+                    <p class="text-sm text-blue-900 leading-relaxed font-normal">
                       150명의 실습생이 동시에 공유 SaaS 서버를 사용하더라도, 각자가 발급받은 개인 MCP 토큰을 HTTP 헤더(<code class="font-mono bg-blue-100 px-1 py-0.5 rounded font-bold">X-MCP-Token</code>)에 실어 보냄으로써 다른 실습생의 연차나 티켓 데이터와 섞이지 않는 완전한 독립 샌드박스를 보장받습니다.
                     </p>
                   </div>
@@ -1422,7 +1433,7 @@ print(json.dumps(search_company_policy('4일 연속 연차 신청 기한', categ
 
               <div class="card-studio p-5 space-y-3">
                 <h3 class="font-bold text-slate-900 text-sm uppercase tracking-wider">1. 개인 MCP 토큰 발급 및 환경변수 등록 (터미널)</h3>
-                <p class="text-xs text-slate-600 font-medium">
+                <p class="text-sm text-slate-600 font-medium">
                   <a href="https://korean-mock-saas-dri5akvbzq-du.a.run.app/" target="_blank" class="text-blue-600 underline font-bold">Mock SaaS 포털</a>에서 [MCP 토큰 발급]을 눌러 복사한 뒤 등록합니다:
                 </p>
                 <div class="bg-[#090d16] border border-slate-800 rounded-xl overflow-hidden shadow-md">
@@ -1434,14 +1445,14 @@ print(json.dumps(search_company_policy('4일 연속 연차 신청 기한', categ
                   </div>
                   <pre class="p-4 font-mono text-[13.5px] text-cyan-300"><code>export MCP_TOKEN="mcp_여러분의토큰값"</code></pre>
                 </div>
-                <p class="text-xs text-slate-500 font-medium">
+                <p class="text-sm text-slate-600 font-normal leading-relaxed">
                   <strong>참고:</strong> 위 환경변수를 등록한 뒤 동일한 터미널에서 아래 <code class="font-mono text-slate-700 bg-slate-100 px-1 py-0.5 rounded">agy --continue</code>를 실행하면 토큰이 agy 프로세스에 정상 상속됩니다. (만약 멀티 탭에서 작업하여 토큰이 상속되지 않더라도, 에이전트 코드의 자동 발급 기능으로 인해 정상 동작합니다.)
                 </p>
               </div>
 
               <!-- Session Transition: Terminal to agy (Copyable Terminal Block) -->
               <div class="bg-amber-50/70 border border-amber-300 rounded-xl p-3.5 space-y-2 shadow-2xs">
-                <div class="flex items-center justify-between text-xs text-amber-950 font-semibold">
+                <div class="flex items-center justify-between text-sm text-amber-950 font-bold">
                   <span class="flex items-center gap-2">
                     <i class="fa-solid fa-arrows-split-up-and-left text-amber-600 text-sm"></i>
                     <span><strong>[세션 복귀]</strong> 환경변수 등록 후, 터미널에서 기존 agy 세션으로 재접속</span>
@@ -1494,7 +1505,7 @@ print(json.dumps(search_company_policy('4일 연속 연차 신청 기한', categ
               </div>
 
               <!-- Session Transition: agy to Terminal -->
-              <div class="bg-slate-100 border border-slate-300 rounded-xl p-3 text-xs text-slate-800 font-medium flex items-center justify-between shadow-2xs">
+              <div class="bg-slate-100 border border-slate-300 rounded-xl p-3.5 text-sm text-slate-800 font-medium flex items-center justify-between shadow-2xs">
                 <div class="flex items-center gap-2">
                   <i class="fa-solid fa-terminal text-slate-600 text-sm"></i>
                   <span><strong>[터미널 전환]</strong> 도구 통신 테스트를 위해 agy 프롬프트 빠져나오기:</span>
@@ -1535,7 +1546,7 @@ print(json.dumps(get_employee_leave_balance('EMP-10294'), indent=2, ensure_ascii
             <div class="space-y-4 text-sm">
               <!-- Session Transition: Terminal to agy (Copyable Terminal Block) -->
               <div class="bg-amber-50/70 border border-amber-300 rounded-xl p-3.5 space-y-2 shadow-2xs">
-                <div class="flex items-center justify-between text-xs text-amber-950 font-semibold">
+                <div class="flex items-center justify-between text-sm text-amber-950 font-bold">
                   <span class="flex items-center gap-2">
                     <i class="fa-solid fa-arrows-split-up-and-left text-amber-600 text-sm"></i>
                     <span><strong>[세션 복귀]</strong> 이전 터미널 테스트 후, 기존 agy 세션으로 재접속</span>
@@ -1583,7 +1594,7 @@ print(json.dumps(get_employee_leave_balance('EMP-10294'), indent=2, ensure_ascii
                 </div>
 
                 <!-- Session Transition: agy to Terminal -->
-                <div class="mt-4 bg-slate-100 border border-slate-300 rounded-xl p-3 text-xs text-slate-800 font-medium flex items-center justify-between shadow-2xs">
+                <div class="mt-4 bg-slate-100 border border-slate-300 rounded-xl p-3.5 text-sm text-slate-800 font-medium flex items-center justify-between shadow-2xs">
                   <div class="flex items-center gap-2">
                     <i class="fa-solid fa-terminal text-slate-600 text-sm"></i>
                     <span><strong>[터미널 전환]</strong> 통합 테스트 스크립트 실행을 위해 agy 프롬프트 빠져나오기:</span>
@@ -1593,8 +1604,8 @@ print(json.dumps(get_employee_leave_balance('EMP-10294'), indent=2, ensure_ascii
                 </div>
 
                 <!-- Automated Verification Script Box -->
-                <div class="mt-4 p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
-                  <div class="font-bold text-slate-800 flex items-center gap-2 text-xs">
+                <div class="mt-4 p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-sm">
+                  <div class="font-bold text-slate-900 flex items-center gap-2 text-sm">
                     <i class="fa-solid fa-vial-circle-check text-emerald-600"></i>
                     <span>자동 통합 테스트 스크립트로 즉시 검증 (5대 시나리오 100% PASS 확인)</span>
                   </div>
@@ -1607,13 +1618,13 @@ print(json.dumps(get_employee_leave_balance('EMP-10294'), indent=2, ensure_ascii
                     </div>
                     <pre class="p-3 font-mono text-[13px] text-emerald-300 whitespace-pre-wrap leading-relaxed"><code>python3 tests/test_scenarios.py</code></pre>
                   </div>
-                  <p class="text-xs text-slate-500">Orchestrator-Worker 토폴로지, 규정 RAG(연차/노트북), FastMCP 실시간 세션 연동이 모두 통과하는지 4초 만에 검증합니다.</p>
+                  <p class="text-sm text-slate-600 font-normal">Orchestrator-Worker 토폴로지, 규정 RAG(연차/노트북), FastMCP 실시간 세션 연동이 모두 통과하는지 4초 만에 검증합니다.</p>
                 </div>
               </div>
 
               <!-- Session Transition: Terminal to agy (Copyable Terminal Block) -->
               <div class="bg-amber-50/70 border border-amber-300 rounded-xl p-3.5 space-y-2 shadow-2xs">
-                <div class="flex items-center justify-between text-xs text-amber-950 font-semibold">
+                <div class="flex items-center justify-between text-sm text-amber-950 font-bold">
                   <span class="flex items-center gap-2">
                     <i class="fa-solid fa-arrows-split-up-and-left text-amber-600 text-sm"></i>
                     <span><strong>[세션 복귀]</strong> 실시간 복수 턴 대화 시뮬레이션을 위해 agy 세션으로 재접속</span>
@@ -1670,7 +1681,7 @@ print(json.dumps(get_employee_leave_balance('EMP-10294'), indent=2, ensure_ascii
               <!-- Mock SaaS live check -->
               <div class="card-studio p-5 space-y-3">
                 <h3 class="font-bold text-slate-900 text-sm uppercase tracking-wider">Mock SaaS 포털 실시간 반영 확인</h3>
-                <p class="text-xs text-slate-600 font-medium">
+                <p class="text-sm text-slate-600 font-medium">
                   실제 웹 브라우저에서 Mock SaaS 포털을 열어 휴가 신청 내역과 하드웨어 인시던트 티켓이 실시간 등록되었는지 확인합니다:
                 </p>
                 <img src="lab1/images/mock_saas_serviceimmediately.png" alt="ServiceImmediately 실시간 확인" class="rounded-xl border border-slate-200 shadow-sm">
@@ -1682,7 +1693,7 @@ print(json.dumps(get_employee_leave_balance('EMP-10294'), indent=2, ensure_ascii
                   <i class="fa-solid fa-arrow-right text-indigo-600"></i>
                   <span>Task 5 검증 완료 &bull; 다음: Gemini Enterprise 등록 규격 패키징</span>
                 </div>
-                <p class="text-xs text-slate-700 leading-relaxed font-normal">
+                <p class="text-sm text-slate-700 leading-relaxed font-normal">
                   에이전트 핵심 로직과 멀티 툴 연동이 모두 검증되었습니다. 이제 마지막 단계로, 사내 Gemini Enterprise 또는 Agent Engine에 등록할 수 있는 A2A 인터페이스 규격을 완성합니다.
                 </p>
               </div>
@@ -1700,7 +1711,7 @@ print(json.dumps(get_employee_leave_balance('EMP-10294'), indent=2, ensure_ascii
             </div>
 
             <!-- Info Callout -->
-            <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 text-xs text-indigo-950 font-medium flex items-start space-x-3 shadow-xs">
+            <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 text-sm text-indigo-950 font-medium flex items-start space-x-3 shadow-xs">
               <i class="fa-solid fa-circle-info text-indigo-600 text-base mt-0.5 shrink-0"></i>
               <div>
                 <strong class="text-indigo-900">사내 GE 등록을 위한 A2A (Agent-to-Agent) 아키텍처:</strong>
@@ -1717,7 +1728,7 @@ print(json.dumps(get_employee_leave_balance('EMP-10294'), indent=2, ensure_ascii
                   <span class="w-2 h-2 rounded-full bg-blue-600"></span>
                   <span>1단계: agy를 통한 A2A Agent Manifest (agent_manifest.json) 생성</span>
                 </h3>
-                <p class="text-xs text-slate-600">실행 중인 Antigravity CLI (agy) 터미널에 아래 프롬프트를 입력합니다:</p>
+                <p class="text-sm text-slate-700 font-medium">실행 중인 Antigravity CLI (agy) 터미널에 아래 프롬프트를 입력합니다:</p>
                 <div class="bg-[#090d16] border border-slate-800 rounded-xl overflow-hidden shadow-md">
                   <div class="bg-[#131b2e] px-4 py-2 border-b border-slate-800 flex items-center justify-between">
                     <span class="text-xs text-cyan-400 font-mono">agy prompt</span>
@@ -1745,7 +1756,7 @@ print(json.dumps(get_employee_leave_balance('EMP-10294'), indent=2, ensure_ascii
                   <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
                   <span>2단계: Google ADK Runner 기반 A2A 프로토콜 서비스 래퍼 (a2a_server.py) 생성</span>
                 </h3>
-                <p class="text-xs text-slate-600">Antigravity CLI (agy) 터미널에 아래 프롬프트를 입력합니다:</p>
+                <p class="text-sm text-slate-700 font-medium">Antigravity CLI (agy) 터미널에 아래 프롬프트를 입력합니다:</p>
                 <div class="bg-[#090d16] border border-slate-800 rounded-xl overflow-hidden shadow-md">
                   <div class="bg-[#131b2e] px-4 py-2 border-b border-slate-800 flex items-center justify-between">
                     <span class="text-xs text-indigo-300 font-mono">agy prompt</span>
@@ -1753,7 +1764,7 @@ print(json.dumps(get_employee_leave_balance('EMP-10294'), indent=2, ensure_ascii
                       <i class="fa-regular fa-copy"></i> 프롬프트 복사
                     </button>
                   </div>
-                  <pre class="p-4 font-mono text-xs text-indigo-300 whitespace-pre-wrap leading-relaxed"><code>우리가 완성한 agent.py의 root_agent와 Google ADK Runner를 결합하여, Gemini Enterprise A2A v0.3 JSON-RPC 표준 규격을 완벽하게 지원하는 FastAPI 서버 'a2a_server.py'를 작성해 주세요.
+                  <pre class="p-4 font-mono text-[13.5px] text-indigo-300 whitespace-pre-wrap leading-relaxed"><code>우리가 완성한 agent.py의 root_agent와 Google ADK Runner를 결합하여, Gemini Enterprise A2A v0.3 JSON-RPC 표준 규격을 완벽하게 지원하는 FastAPI 서버 'a2a_server.py'를 작성해 주세요.
 
 요구사항:
 1. 에이전트 카드 엔드포인트:
@@ -1788,7 +1799,7 @@ print(json.dumps(get_employee_leave_balance('EMP-10294'), indent=2, ensure_ascii
               </div>
 
               <!-- Session Transition: agy to Terminal -->
-              <div class="bg-slate-100 border border-slate-300 rounded-xl p-3 text-xs text-slate-800 font-medium flex items-center justify-between shadow-2xs">
+              <div class="bg-slate-100 border border-slate-300 rounded-xl p-3.5 text-sm text-slate-800 font-medium flex items-center justify-between shadow-2xs">
                 <div class="flex items-center gap-2">
                   <i class="fa-solid fa-terminal text-slate-600 text-sm"></i>
                   <span><strong>[터미널 전환]</strong> 로컬 서버 기동 및 평가 실행을 위해 agy 프롬프트 빠져나오기:</span>
@@ -1810,20 +1821,20 @@ print(json.dumps(get_employee_leave_balance('EMP-10294'), indent=2, ensure_ascii
                       <i class="fa-regular fa-copy"></i> 명령어 복사
                     </button>
                   </div>
-                  <pre class="p-4 font-mono text-xs text-emerald-300 leading-relaxed"><code># 1. 기존 점유 포트(8080) 정리 및 로컬 A2A 서버 백그라운드(&) 기동
+                  <pre class="p-4 font-mono text-[13.5px] text-emerald-300 leading-relaxed"><code># 1. 기존 점유 포트(8080) 정리 및 로컬 A2A 서버 백그라운드(&) 기동
 fuser -k 8080/tcp 2>/dev/null || true
 cd ~/enterprise-ops-agent && python3 a2a_server.py &
 
 # 2. 서버 정상 기동 확인 (200 OK)
 sleep 2 && curl -s http://localhost:8080/healthz</code></pre>
                 </div>
-                <p class="text-xs text-slate-600 font-medium">
+                <p class="text-sm text-slate-600 font-medium">
                   백그라운드(&amp;)로 실행하여 동일한 터미널에서 아래 curl 테스트와 평가 명령어(agents-cli eval run)를 멈춤 없이 즉시 실행할 수 있습니다. (서버 실시간 로그를 보려면 새 터미널 탭에서 실행하셔도 됩니다.)
                 </p>
-                <p class="text-xs text-slate-600 font-medium">서버가 실행되면 브라우저에서 <code class="font-mono text-blue-700 bg-blue-50 px-1 py-0.5 rounded font-bold">http://localhost:8080</code>에 접속하여 로컬 테스트 콘솔을 엽니다:</p>
+                <p class="text-sm text-slate-600 font-medium">서버가 실행되면 브라우저에서 <code class="font-mono text-blue-700 bg-blue-50 px-1 py-0.5 rounded font-bold">http://localhost:8080</code>에 접속하여 로컬 테스트 콘솔을 엽니다:</p>
                 <div class="space-y-2">
                   <img src="lab1/images/local_agent_web_chat.png" alt="로컬 에이전트 웹 콘솔" class="rounded-xl border border-slate-200 shadow-sm w-full">
-                  <p class="text-xs text-slate-500 font-medium">화면 상단에서 에이전트 상태(Active)를 확인하고, 하단 질문 칩을 누르거나 직접 입력하여 사내 RAG 및 Mock SaaS 연동 결과를 즉시 확인합니다.</p>
+                  <p class="text-sm text-slate-600 font-normal">화면 상단에서 에이전트 상태(Active)를 확인하고, 하단 질문 칩을 누르거나 직접 입력하여 사내 RAG 및 Mock SaaS 연동 결과를 즉시 확인합니다.</p>
                 </div>
 
                 <!-- curl simulation test -->
@@ -1848,11 +1859,11 @@ sleep 2 && curl -s http://localhost:8080/healthz</code></pre>
 
                 <!-- ADK Playground Tip Box -->
                 <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 space-y-2 shadow-xs">
-                  <span class="font-bold text-indigo-950 text-xs flex items-center gap-1.5">
+                  <span class="font-bold text-indigo-950 text-sm flex items-center gap-1.5">
                     <i class="fa-solid fa-laptop-code text-indigo-600"></i>
                     <span>심화 옵션: Google ADK 2.3.0 개발자 대시보드 (agents-cli playground)</span>
                   </span>
-                  <p class="text-xs text-indigo-900 leading-relaxed font-medium">
+                  <p class="text-sm text-indigo-950 leading-relaxed font-normal">
                     ADK의 공식 이벤트 타임라인, 세션 상태(State), 아티팩트 트리 및 트레이스를 GUI에서 심층 디버깅하려면 프로젝트 루트에서 Vertex AI 환경 변수를 설정하고 플레이그라운드를 실행합니다:
                   </p>
                   <pre class="p-3 bg-[#090d16] rounded-lg font-mono text-[13px] text-indigo-300 overflow-x-auto leading-relaxed"><code># Vertex AI 환경 변수 설정 후 공식 플레이그라운드 기동
@@ -1861,7 +1872,7 @@ export GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project)
 export GOOGLE_CLOUD_LOCATION=global
 cd ~/enterprise-ops-agent
 agents-cli playground --port 8085</code></pre>
-                  <p class="text-xs text-indigo-700 font-medium">브라우저에서 <code class="font-mono">http://localhost:8085/dev-ui/?app=app</code>에 접속하면 공식 ADK 개발자 대시보드를 이용할 수 있습니다.</p>
+                  <p class="text-sm text-indigo-800 font-normal">브라우저에서 <code class="font-mono">http://localhost:8085/dev-ui/?app=app</code>에 접속하면 공식 ADK 개발자 대시보드를 이용할 수 있습니다.</p>
                 </div>
               </div>
 
@@ -1871,17 +1882,17 @@ agents-cli playground --port 8085</code></pre>
                   <i class="fa-solid fa-shield-halved text-purple-600"></i>
                   <span>4단계: 실습 2(Evaluation &amp; Governance) 연계를 위한 프로덕션 핸드오프 안내</span>
                 </h3>
-                <p class="text-xs text-slate-700 leading-relaxed font-medium">
+                <p class="text-sm text-slate-700 leading-relaxed font-medium">
                   실습 1에서는 개발자 로컬 환경(VM)에서 Orchestrator-Worker 멀티 에이전트 시스템을 완성하고 기능 검증을 마쳤습니다. 보안 검증이 없는 상태로 Cloud Run에 성급히 배포하지 않고, <strong>실습 2(Part 2)</strong>에서 다음 엔터프라이즈 거버넌스 파이프라인을 거쳐 안전하게 프로덕션 환경으로 승격(Promote)됩니다:
                 </p>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-sm">
                   <div class="bg-white p-3.5 rounded-xl border border-purple-200 shadow-2xs space-y-1.5">
                     <span class="font-bold text-purple-950 flex items-center gap-1.5">
                       <span class="w-5 h-5 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-xs font-bold">1</span>
                       <span>정량적 품질 평가 (Evaluation)</span>
                     </span>
-                    <p class="text-xs text-slate-600 leading-relaxed">
+                    <p class="text-sm text-slate-600 leading-relaxed font-normal">
                       <code>agents-cli eval run</code>을 통해 단일턴/멀티턴 골든 데이터셋으로 과업 성공률, 도구 호출 정확도, 환각 차단율을 LLM-as-a-Judge로 자동 채점합니다.
                     </p>
                   </div>
@@ -1891,7 +1902,7 @@ agents-cli playground --port 8085</code></pre>
                       <span class="w-5 h-5 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-xs font-bold">2</span>
                       <span>시크릿 관리 &amp; 프로덕션 배포</span>
                     </span>
-                    <p class="text-xs text-slate-600 leading-relaxed">
+                    <p class="text-sm text-slate-600 leading-relaxed font-normal">
                       평문 토큰을 GCP Secret Manager로 안전하게 이관하고, Cloud Run / Agent Runtime에 프로덕션 보안 컨테이너로 배포 후 Gemini Enterprise에 등록합니다.
                     </p>
                   </div>
@@ -1901,7 +1912,7 @@ agents-cli playground --port 8085</code></pre>
                       <span class="w-5 h-5 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-xs font-bold">3</span>
                       <span>Agent Registry &amp; 고유 신원 (SPIFFE ID)</span>
                     </span>
-                    <p class="text-xs text-slate-600 leading-relaxed">
+                    <p class="text-sm text-slate-600 leading-relaxed font-normal">
                       전사 에이전트 카탈로그에 등록하고 도구별 위험도 주석(isReadOnly, isDestructive)을 부여하여 감사 요구에 명령 한 줄로 대응합니다.
                     </p>
                   </div>
@@ -1911,7 +1922,7 @@ agents-cli playground --port 8085</code></pre>
                       <span class="w-5 h-5 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-xs font-bold">4</span>
                       <span>Agent Gateway &amp; Model Armor</span>
                     </span>
-                    <p class="text-xs text-slate-600 leading-relaxed">
+                    <p class="text-sm text-slate-600 leading-relaxed font-normal">
                       코드 수정 없이 IAP 정책으로 위험 도구(휴가 취소)를 중앙 차단하고, Model Armor 실시간 페이로드 검사로 티켓 인젝션과 카드번호 유출을 방어합니다.
                     </p>
                   </div>
@@ -1931,48 +1942,48 @@ agents-cli playground --port 8085</code></pre>
                   <span class="text-xs font-mono text-slate-500 bg-white px-2 py-1 rounded border border-slate-200">LLM-as-a-Judge</span>
                 </div>
 
-                <p class="text-xs text-slate-700 leading-relaxed font-medium">
+                <p class="text-sm text-slate-700 leading-relaxed font-medium">
                   외부 별도 평가 서버 없이도 개발자의 로컬 환경에서 100% 독립적으로 에이전트의 사고 과정(Thought), 도구 호출 궤적(Tool Trace), 사내 규정 부합 여부를 LLM-as-a-Judge로 자동 채점합니다.
                 </p>
 
                 <!-- Quality Flywheel 5-Stage Step Visual -->
-                <div class="bg-white border border-slate-200 rounded-xl p-4 space-y-2.5 shadow-2xs">
-                  <span class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                <div class="bg-white border border-slate-200 rounded-xl p-4 space-y-3 shadow-2xs">
+                  <span class="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
                     <i class="fa-solid fa-rotate text-indigo-600"></i>
                     <span>Google Agent Platform 품질 선순환 루프 (The Quality Flywheel)</span>
                   </span>
-                  <div class="grid grid-cols-1 sm:grid-cols-5 gap-2 text-center text-xs">
-                    <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1">
+                  <div class="grid grid-cols-1 sm:grid-cols-5 gap-2.5 text-center text-sm">
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
                       <span class="font-bold text-blue-700 block text-xs">1. Data Prep</span>
-                      <p class="text-xs text-slate-500">골든 데이터셋 (eval_cases.json) 정의</p>
+                      <p class="text-[13px] text-slate-600 leading-snug">골든 데이터셋 (eval_cases.json) 정의</p>
                     </div>
-                    <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1">
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
                       <span class="font-bold text-cyan-700 block text-xs">2. Inference</span>
-                      <p class="text-xs text-slate-500">eval generate 궤적(traces) 수집</p>
+                      <p class="text-[13px] text-slate-600 leading-snug">eval generate 궤적(traces) 수집</p>
                     </div>
-                    <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1">
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
                       <span class="font-bold text-indigo-700 block text-xs">3. Grade Traces</span>
-                      <p class="text-xs text-slate-500">eval grade LLM-as-a-Judge 채점</p>
+                      <p class="text-[13px] text-slate-600 leading-snug">eval grade LLM-as-a-Judge 채점</p>
                     </div>
-                    <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1">
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
                       <span class="font-bold text-amber-700 block text-xs">4. Analyze</span>
-                      <p class="text-xs text-slate-500">eval analyze 실패 원인 클러스터링</p>
+                      <p class="text-[13px] text-slate-600 leading-snug">eval analyze 실패 원인 클러스터링</p>
                     </div>
-                    <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1">
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
                       <span class="font-bold text-emerald-700 block text-xs">5. Optimize</span>
-                      <p class="text-xs text-slate-500">eval compare 회귀 검증 및 코드 개선</p>
+                      <p class="text-[13px] text-slate-600 leading-snug">eval compare 회귀 검증 및 코드 개선</p>
                     </div>
                   </div>
                 </div>
 
                 <!-- 3 Core Metrics Table Card -->
-                <div class="bg-white border border-slate-200 rounded-xl p-4 space-y-2.5 shadow-2xs text-xs">
-                  <span class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                <div class="bg-white border border-slate-200 rounded-xl p-5 space-y-3 shadow-2xs text-sm">
+                  <span class="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
                     <i class="fa-solid fa-chart-pie text-emerald-600"></i>
                     <span>핵심 3대 평가 지표 (Core Evaluation Metrics) 및 채점 루브릭</span>
                   </span>
                   <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs border-collapse">
+                    <table class="w-full text-left text-sm border-collapse">
                       <thead>
                         <tr class="bg-slate-50 border-b border-slate-200 text-slate-700">
                           <th class="p-2 font-bold">지표명 (Metric)</th>
@@ -2006,12 +2017,12 @@ agents-cli playground --port 8085</code></pre>
                 </div>
 
                 <!-- 5 CLI Commands Table Card -->
-                <div class="bg-white border border-slate-200 rounded-xl p-4 space-y-2.5 shadow-2xs text-xs">
-                  <span class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                <div class="bg-white border border-slate-200 rounded-xl p-5 space-y-3 shadow-2xs text-sm">
+                  <span class="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
                     <i class="fa-solid fa-terminal text-blue-600"></i>
                     <span>agents-cli eval 핵심 명령어 레퍼런스</span>
                   </span>
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                     <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-0.5">
                       <code class="font-bold text-blue-800 font-mono">agents-cli eval run</code>
                       <p class="text-slate-600">추론(generate)과 채점(grade)을 체이닝하여 원클릭 실행 (가장 추천되는 표준 워크플로우)</p>
@@ -2039,7 +2050,7 @@ agents-cli playground --port 8085</code></pre>
                       <i class="fa-regular fa-copy"></i> 명령어 복사
                     </button>
                   </div>
-                  <pre class="p-4 font-mono text-xs text-blue-300 whitespace-pre-wrap leading-relaxed"><code># 1. Vertex AI 환경 변수 설정 후 로컬 종합 평가 실행
+                  <pre class="p-4 font-mono text-[13.5px] text-blue-300 whitespace-pre-wrap leading-relaxed"><code># 1. Vertex AI 환경 변수 설정 후 로컬 종합 평가 실행
 export GOOGLE_GENAI_USE_VERTEXAI=true
 export GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project)
 export GOOGLE_CLOUD_LOCATION=global
@@ -2059,7 +2070,7 @@ python3 -m http.server 8081 --directory artifacts/grade_results</code></pre>
                     <span class="text-xs text-emerald-400 font-mono font-bold">agents-cli eval run 실측 결과 출력</span>
                     <span class="text-xs text-slate-400 font-mono">Evaluation Summary</span>
                   </div>
-                  <pre class="font-mono text-xs text-slate-300 leading-relaxed overflow-x-auto whitespace-pre"><code>multi_turn_task_success_v1:
+                  <pre class="font-mono text-[13px] text-slate-300 leading-relaxed overflow-x-auto whitespace-pre"><code>multi_turn_task_success_v1:
   num_cases_total: 3
   mean_score: 0.6667
   pass_rate: 0.0000
@@ -2078,18 +2089,18 @@ Saved full results to artifacts/grade_results/results_*.json
 Saved HTML results to artifacts/grade_results/results_*.html</code></pre>
                 </div>
 
-                <div class="text-xs text-slate-700 space-y-1.5 leading-relaxed font-medium">
+                <div class="text-sm text-slate-700 space-y-2 leading-relaxed font-normal">
                   <p>명령어를 실행하면 로컬 <code class="font-mono text-slate-900 bg-slate-100 px-1 py-0.5 rounded">agent.py</code>가 질문들을 순차 실행하고, Vertex AI Gemini 모델이 채점관(LLM-as-a-judge) 역할을 맡아 객관적인 품질 점수를 산출합니다.</p>
                   <p>원격 브라우저에서 <code class="font-mono text-blue-800 bg-blue-100 px-1 py-0.5 rounded font-bold">http://localhost:8081</code>을 열면 각 케이스별 판정 사유와 지연 시간, 성공률이 포함된 시각적 리포트(<code class="font-mono text-slate-800">results_*.html</code>)를 즉시 열람할 수 있습니다.</p>
                 </div>
 
                 <!-- Bridge to Lab 2 Callout -->
-                <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3.5 text-xs text-indigo-950 space-y-1">
-                  <span class="font-bold flex items-center gap-1.5 text-indigo-900">
+                <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 text-sm text-indigo-950 space-y-1.5">
+                  <span class="font-bold flex items-center gap-1.5 text-indigo-900 text-sm">
                     <i class="fa-solid fa-arrow-up-right-dots text-indigo-600"></i>
                     <span>실습 2(Part 2: Evaluation &amp; Governance)로의 연결 로드맵</span>
                   </span>
-                  <p class="text-xs text-indigo-900 leading-relaxed font-normal">
+                  <p class="text-sm text-indigo-950 leading-relaxed font-normal">
                     실측 결과에서 <code class="font-mono font-bold">hallucination_v1</code>은 1.0000(100% 무환각)을 기록했으나, <code class="font-mono font-bold">multi_turn_task_success_v1</code>과 <code class="font-mono font-bold">multi_turn_tool_use_quality_v1</code>은 0.6667로 측정되었습니다. 실습 2에서는 이 베이스라인 점수를 바탕으로 감점 원인을 진단하고, 프롬프트 지침을 체계적으로 교정(Hillclimbing)하여 합격선(0.85 이상)으로 도약시킨 뒤, Cloud Run에 안전하게 프로덕션 배포(<code class="font-mono font-bold">agents-cli deploy</code>)하는 과정을 마스터하게 됩니다.
                   </p>
                 </div>
@@ -2104,7 +2115,7 @@ Saved HTML results to artifacts/grade_results/results_*.html</code></pre>
                       <i class="fa-solid fa-box-archive text-indigo-600"></i>
                       <span>실습 1 최종 완성본 프로젝트 다운로드 (ZIP)</span>
                     </h3>
-                    <p class="text-xs text-slate-600 leading-relaxed font-medium">
+                    <p class="text-sm text-slate-600 leading-relaxed font-normal">
                       실습 1에서 코드를 완성하지 못했더라도 실습 2를 즉시 진행하실 수 있도록, 검증 완료된 전체 프로젝트 코드를 압축 패키지로 제공합니다.
                     </p>
                   </div>
@@ -2121,7 +2132,7 @@ Saved HTML results to artifacts/grade_results/results_*.html</code></pre>
                       <i class="fa-regular fa-copy"></i> 명령어 복사
                     </button>
                   </div>
-                  <pre class="p-4 font-mono text-xs text-indigo-300 whitespace-pre-wrap leading-relaxed"><code># VM 터미널에서 한 줄로 완성본 다운로드 및 압축 해제
+                  <pre class="p-4 font-mono text-[13.5px] text-indigo-300 whitespace-pre-wrap leading-relaxed"><code># VM 터미널에서 한 줄로 완성본 다운로드 및 압축 해제
 cd ~ && \
 curl -fsSL https://raw.githubusercontent.com/hajekim/build-with-gemini/main/lab1/enterprise_ops_agent_completed.zip -o enterprise_ops_agent_completed.zip && \
 unzip -o enterprise_ops_agent_completed.zip && \
@@ -2137,7 +2148,7 @@ python3 tests/test_scenarios.py</code></pre>
                   <i class="fa-solid fa-circle-check text-emerald-600"></i>
                   <span>축하합니다! 실습 Part 1을 성공적으로 완수하셨습니다.</span>
                 </div>
-                <p class="text-xs text-slate-700 leading-relaxed font-medium">
+                <p class="text-sm text-slate-700 leading-relaxed font-medium">
                   Google Antigravity 2.0 (agy)과 Google ADK 2.3.0을 결합하여, 사내 복무/IT 규정 RAG 검증과 FastMCP SaaS 트랜잭션을 능동적으로 오케스트레이션하는 Orchestrator-Worker 멀티 에이전트를 완성하고, 실습 2의 정량 평가(Eval)와 Cloud Run 및 Gemini Enterprise 보안 배포를 위한 모든 준비를 마쳤습니다.
                 </p>
               </div>
@@ -2145,12 +2156,12 @@ python3 tests/test_scenarios.py</code></pre>
           </div>
 
           <!-- Bottom Stepper Navigation Controls -->
-          <div class="mt-8 pt-6 border-t border-slate-200 flex justify-between items-center text-xs">
-            <button id="btn-prev" onclick="navigateCodelab(-1)" class="px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold transition disabled:opacity-30 disabled:cursor-not-allowed shadow-xs">
+          <div class="mt-8 pt-6 border-t border-slate-200 flex justify-between items-center text-sm">
+            <button id="btn-prev" onclick="navigateCodelab(-1)" class="px-5 py-3 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-sm transition disabled:opacity-30 disabled:cursor-not-allowed shadow-xs">
               <i class="fa-solid fa-arrow-left mr-1.5"></i> 이전 단계
             </button>
-            <div id="codelab-indicator" class="text-slate-600 font-mono text-xs font-bold">Step 1 of 9</div>
-            <button id="btn-next" onclick="navigateCodelab(1)" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold shadow-md shadow-blue-500/25 transition flex items-center gap-1.5">
+            <div id="codelab-indicator" class="text-slate-600 font-mono text-sm font-bold">Step 1 of 9</div>
+            <button id="btn-next" onclick="navigateCodelab(1)" class="px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-md shadow-blue-500/25 transition flex items-center gap-1.5">
               <span>다음 단계</span>
               <i class="fa-solid fa-arrow-right ml-1"></i>
             </button>
@@ -2170,7 +2181,7 @@ python3 tests/test_scenarios.py</code></pre>
         <p class="text-sm text-slate-600 mt-1">실습에서 에이전트가 통신하는 실제 Cloud Run Mock SaaS 서비스 정보입니다.</p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
         <div class="card-studio p-6 border-slate-200 space-y-4">
           <div class="flex items-center justify-between">
             <div class="font-bold text-sm text-blue-700 flex items-center gap-2">
