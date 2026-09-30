@@ -284,9 +284,9 @@
           <div id="cstep-0" class="cstep-panel space-y-6">
             <div class="border-b border-slate-200 pb-4">
               <span class="text-xs font-bold text-blue-600 uppercase tracking-widest">Step 0 &bull; Overview</span>
-              <h2 class="text-2xl font-black text-slate-900 mt-1">개요 및 Hub-and-Spoke 멀티 에이전트 아키텍처</h2>
+              <h2 class="text-2xl font-black text-slate-900 mt-1">개요 및 Orchestrator-Worker 멀티 에이전트 아키텍처</h2>
               <p class="text-sm text-slate-600 mt-2 leading-relaxed font-normal">
-                사내 복무/IT 규정 검증(Policy RAG)과 분산된 인사(WorkWeek)/전산(ServiceImmediately) SaaS 시스템을 표준 FastMCP 프로토콜로 유기적으로 연계하는 Hub-and-Spoke 멀티 에이전트(Multi-Agent System)를 Antigravity 2.0 (agy) 환경에서 구축합니다. (총 3시간 / 180분 핸즈온)
+                사내 복무/IT 규정 검증(Policy RAG)과 분산된 인사(WorkWeek)/전산(ServiceImmediately) SaaS 시스템을 표준 FastMCP 프로토콜로 유기적으로 연계하는 Orchestrator-Worker 멀티 에이전트 시스템을 Antigravity 2.0 (agy) 환경에서 구축합니다. (총 3시간 / 180분 핸즈온)
               </p>
             </div>
 
@@ -383,35 +383,60 @@
               </div>
             </div>
 
-            <!-- Why Multi-Agent? Callout -->
-            <div class="bg-blue-50/60 border border-blue-200 rounded-2xl p-5 space-y-3 shadow-xs text-xs">
-              <div class="font-bold text-blue-900 flex items-center gap-2 text-sm">
-                <i class="fa-solid fa-lightbulb text-amber-500 text-base"></i>
-                <span>왜 단일(Monolithic) 에이전트가 아닌 Hub-and-Spoke 멀티 에이전트인가?</span>
+            <!-- Why Orchestrator-Worker Pattern? Callout -->
+            <div class="bg-blue-50/60 border border-blue-200 rounded-2xl p-6 space-y-4 shadow-xs text-xs">
+              <div class="flex items-center justify-between border-b border-blue-200/70 pb-3">
+                <div class="font-bold text-blue-950 flex items-center gap-2.5 text-sm">
+                  <i class="fa-solid fa-sitemap text-blue-600 text-base"></i>
+                  <span>왜 단일(Monolithic) 에이전트가 아닌 Orchestrator-Worker 패턴인가?</span>
+                </div>
+                <div class="text-[11px] text-blue-700 bg-white px-3 py-1 rounded-full border border-blue-200 font-medium">
+                  참고: <a href="https://agentpatterns.ai/patterns/multi-agent/orchestrator-worker/" target="_blank" rel="noopener noreferrer" class="font-bold underline hover:text-blue-900">AgentPatterns.ai - Orchestrator-Worker Pattern</a>
+                </div>
               </div>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-slate-700">
-                <div class="bg-white p-3.5 rounded-xl border border-blue-100 shadow-2xs space-y-1">
-                  <div class="font-bold text-blue-800 text-[11px] flex items-center gap-1.5">
-                    <i class="fa-solid fa-ban text-rose-500"></i> 도구 환각(Hallucination) 방지
+
+              <p class="text-slate-700 text-xs leading-relaxed font-normal">
+                소프트웨어 엔지니어링에서 멀티 에이전트를 도입하는 주된 이유는 '역할 분담'과 '도구 격리'입니다. 단일 에이전트에 수십 개의 시스템 도구와 규정을 몰아넣으면 모델의 컨텍스트 윈도우가 빠르게 포화되고 엉뚱한 도구를 호출하는 오류가 빈번해집니다. AgentPatterns.ai의 <strong>Orchestrator-Worker 패턴</strong>은 이를 중앙 리드 에이전트와 전문 워커로 명확히 분리하여 해결합니다.
+              </p>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-slate-700">
+                <div class="bg-white p-4 rounded-xl border border-blue-100 shadow-2xs space-y-1.5">
+                  <div class="font-bold text-blue-900 text-xs flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-md bg-blue-100 text-blue-700 flex items-center justify-center text-[10px] font-bold">1</span>
+                    <span>도구 스키마 오염(Tool Schema Pollution) 방지</span>
                   </div>
                   <p class="text-[11px] text-slate-600 leading-relaxed font-normal">
-                    단일 프롬프트에 15개 이상의 도구를 주입하면 LLM의 도구 선택 오류율이 급증합니다. 도메인별 Spoke로 도구를 분리하여 높은 도구 호출 정확도를 보장합니다.
+                    단일 프롬프트에 인사·전산·규정 등 15개 이상의 도구 스키마를 동시에 주입하면, LLM이 유사한 이름의 도구를 혼동하거나 불필요한 인자를 날조하는 환각이 급증합니다. 워커 단위로 필요한 최소 도구만 바인딩(Subagent Schema-Level Tool Filtering)함으로써 도구 호출 정확도를 극대화합니다.
                   </p>
                 </div>
-                <div class="bg-white p-3.5 rounded-xl border border-blue-100 shadow-2xs space-y-1">
-                  <div class="font-bold text-blue-800 text-[11px] flex items-center gap-1.5">
-                    <i class="fa-solid fa-user-shield text-indigo-500"></i> 최소 권한 원칙 (Least Privilege)
+
+                <div class="bg-white p-4 rounded-xl border border-blue-100 shadow-2xs space-y-1.5">
+                  <div class="font-bold text-blue-900 text-xs flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-md bg-indigo-100 text-indigo-700 flex items-center justify-center text-[10px] font-bold">2</span>
+                    <span>규정 우선(Policy-First) 거버넌스 파이프라인 강제</span>
                   </div>
                   <p class="text-[11px] text-slate-600 leading-relaxed font-normal">
-                    인사 데이터 조작과 IT 자산 관리 권한을 격리하여, IT 전산 에이전트가 직원 급여나 민감 근태 정보를 임의로 변조하지 못하도록 원천 차단합니다.
+                    단일 에이전트는 사용자가 "휴가 상신해 줘"라고 요구하면 사내 복무 규정 검증을 건너뛰고 곧바로 SaaS API를 호출하는 위험이 있습니다. 오케스트레이터는 작업 순서를 엄격히 제어하여, 반드시 규정 선검증 전문가(hr_policy_agent)의 승인 및 근거 조항을 확보한 뒤에만 SaaS 워커에게 작업을 위임하도록 강제합니다.
                   </p>
                 </div>
-                <div class="bg-white p-3.5 rounded-xl border border-blue-100 shadow-2xs space-y-1">
-                  <div class="font-bold text-blue-800 text-[11px] flex items-center gap-1.5">
-                    <i class="fa-solid fa-gavel text-emerald-600"></i> 결정론적 규정 검증 파이프라인
+
+                <div class="bg-white p-4 rounded-xl border border-blue-100 shadow-2xs space-y-1.5">
+                  <div class="font-bold text-blue-900 text-xs flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-md bg-emerald-100 text-emerald-700 flex items-center justify-center text-[10px] font-bold">3</span>
+                    <span>시스템 권한 격리 및 최소 권한 원칙(Least Privilege)</span>
                   </div>
                   <p class="text-[11px] text-slate-600 leading-relaxed font-normal">
-                    SaaS 트랜잭션을 실행하기 전에 반드시 hr_policy_agent의 RAG 검증을 먼저 거치도록 오케스트레이션하여 규정 위반 신청을 사전 차단합니다.
+                    인사 시스템(WorkWeek)과 IT 전산 시스템(ServiceImmediately)의 인증 토큰과 API 접근 범위를 워커별로 물리적으로 격리합니다. 전산 지원 워커가 임직원의 민감한 인사 평가나 잔여 연차 데이터에 접근하거나 임의로 변조하는 것을 원천 차단합니다.
+                  </p>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl border border-blue-100 shadow-2xs space-y-1.5">
+                  <div class="font-bold text-blue-900 text-xs flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-md bg-purple-100 text-purple-700 flex items-center justify-center text-[10px] font-bold">4</span>
+                    <span>독립적 오류 진단 및 점진적 품질 개선 (Hillclimbing)</span>
+                  </div>
+                  <p class="text-[11px] text-slate-600 leading-relaxed font-normal">
+                    단일 에이전트 실패는 어디서 문제가 발생했는지 파악하기 어렵습니다. Orchestrator-Worker 구조에서는 오케스트레이터의 라우팅 실패인지, RAG 워커의 검색 실패인지, SaaS 워커의 API 연동 오류인지 명확히 분리되며, 각 워커의 프롬프트와 툴셋을 개별적으로 튜닝하고 평가(Eval)할 수 있습니다.
                   </p>
                 </div>
               </div>
@@ -438,11 +463,11 @@
                     <span class="text-[10px] font-bold bg-blue-200/80 text-blue-900 px-2 py-0.5 rounded-full font-mono">80분</span>
                   </div>
                   <p class="text-slate-700 leading-relaxed text-xs font-normal">
-                    Antigravity 2.0 (agy) 개발 환경에서 Google ADK 2.3.0을 기반으로 Hub-and-Spoke 멀티 에이전트 핵심 로직을 구축하고, FastMCP 실시간 연동 및 Golden Evalset 평가 데이터셋을 준비합니다.
+                    Antigravity 2.0 (agy) 개발 환경에서 Google ADK 2.3.0을 기반으로 Orchestrator-Worker 멀티 에이전트 핵심 로직을 구축하고, FastMCP 실시간 연동 및 Golden Evalset 평가 데이터셋을 준비합니다.
                   </p>
                   <ul class="space-y-1.5 text-slate-700 text-[11px] font-medium">
                     <li class="flex items-center gap-2"><i class="fa-solid fa-check text-blue-600"></i><span>Google Antigravity 2.0 (agy) 프롬프트 주도 개발 환경 설정</span></li>
-                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-blue-600"></i><span>Google ADK 2.3.0 Hub-and-Spoke 멀티 에이전트 뼈대 구현</span></li>
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-blue-600"></i><span>Google ADK 2.3.0 Orchestrator-Worker 멀티 에이전트 뼈대 구현</span></li>
                     <li class="flex items-center gap-2"><i class="fa-solid fa-check text-blue-600"></i><span>Vertex AI Search &amp; GCS PDF 하이브리드 Policy RAG 도구 연동</span></li>
                     <li class="flex items-center gap-2"><i class="fa-solid fa-check text-blue-600"></i><span>Google ADK McpToolset 기반 FastMCP SaaS 실시간 연동</span></li>
                     <li class="flex items-center gap-2"><i class="fa-solid fa-check text-blue-600"></i><span>시나리오 통합 테스트 &amp; 4-Tier Golden Evalset 평가 데이터셋 생성</span></li>
@@ -1126,10 +1151,10 @@ docs/SDD.md 파일의 내용을 꼼꼼히 읽고, 전체 시스템 아키텍처�
                       <i class="fa-regular fa-copy"></i> 프롬프트 복사
                     </button>
                   </div>
-                  <pre class="p-4 font-mono text-xs text-slate-200 whitespace-pre-wrap leading-relaxed"><code>docs/SDD.md의 2.1절 멀티 에이전트 구조와 1절 설정 규격을 참고하여, 우리가 방금 생성한 기본 뼈대를 Cymbal Group Korea의 Hub-and-Spoke 멀티 에이전트 시스템으로 전면 개편해주세요:
+                  <pre class="p-4 font-mono text-xs text-slate-200 whitespace-pre-wrap leading-relaxed"><code>docs/SDD.md의 2.1절 멀티 에이전트 구조와 1절 설정 규격을 참고하여, 우리가 방금 생성한 기본 뼈대를 Cymbal Group Korea의 Orchestrator-Worker 멀티 에이전트 시스템으로 전면 개편해주세요:
 
 1. config.yaml 생성:
-   - agent 이름: enterprise_ops_agent, architecture: Hub-and-Spoke Multi-Agent System (MAS)
+   - agent 이름: enterprise_ops_agent, architecture: Orchestrator-Worker Multi-Agent System (MAS)
    - 모델: gemini-3.8-flash (temperature: 0.1, max_output_tokens: 2048)
    - sub_agents 정의: hr_policy_agent(규정 RAG), workweek_agent(HRMS FastMCP), itsm_agent(ITSM FastMCP)
    - organization: Cymbal Group Korea, Cloud AI Platform Operations, 기본 사번 EMP-10294
@@ -1137,12 +1162,12 @@ docs/SDD.md 파일의 내용을 꼼꼼히 읽고, 전체 시스템 아키텍처�
 
 2. app/agent.py 리팩토링:
    - 기존 더미 날씨 함수(get_weather, get_current_time)를 완전히 제거
-   - google.adk.agents.Agent 클래스를 사용한 Hub-and-Spoke 멀티 에이전트 작성
+   - google.adk.agents.Agent 클래스를 사용한 Orchestrator-Worker 멀티 에이전트 작성
    - 전문 서브 에이전트 3개 선언:
      1) hr_policy_agent: 사내 복무 규정(POL-HR) 및 IT 지침(POL-IT) RAG 검색 전문가
      2) workweek_agent: WorkWeek HRMS FastMCP 연동 전문가 (연차 조회, 휴가 신청/취소)
      3) itsm_agent: ServiceImmediately ITSM FastMCP 연동 전문가 (장비 조회, 티켓 생성/댓글)
-   - 중앙 허브 root_agent(enterprise_ops_agent): sub_agents=[hr_policy_agent, workweek_agent, itsm_agent]로 구성
+   - 중앙 오케스트레이터 root_agent(enterprise_ops_agent): sub_agents=[hr_policy_agent, workweek_agent, itsm_agent]로 구성
    - SDD 3절의 규정 우선 확인(Policy-First) 및 위임 강령을 HUB_INSTRUCTION으로 정의
    - build_agent() 및 get_enterprise_agent() 함수 작성
    - 주의사항: 
@@ -1540,20 +1565,20 @@ print(json.dumps(get_employee_leave_balance('EMP-10294'), indent=2, ensure_ascii
                       <i class="fa-regular fa-copy"></i> 프롬프트 복사
                     </button>
                   </div>
-                  <pre class="p-4 font-mono text-xs text-slate-200 whitespace-pre-wrap leading-relaxed"><code>docs/SDD.md의 3절 '오케스트레이션 및 거버넌스 강령'을 반영하여 app/agent.py의 Hub-and-Spoke 멀티 에이전트 시스템을 최종 완성해주세요.
+                  <pre class="p-4 font-mono text-xs text-slate-200 whitespace-pre-wrap leading-relaxed"><code>docs/SDD.md의 3절 '오케스트레이션 및 거버넌스 강령'을 반영하여 app/agent.py의 Orchestrator-Worker 멀티 에이전트 시스템을 최종 완성해주세요.
 
 요구사항:
 1. 전문 서브 에이전트 3종에 도구 바인딩:
    - hr_policy_agent: app/tools/policy_rag.py의 search_company_policy 도구를 바인딩하여 규정(POL-HR-2026-004, POL-IT-2026-009) 선검증 전담
    - workweek_agent: app/tools/mcp_tools.py의 get_workweek_mcp_toolset() 및 FastMCP JSON-RPC 도구로 연차 조회, 휴가 상신/취소 전담
    - itsm_agent: app/tools/mcp_tools.py의 get_itsm_mcp_toolset() 및 FastMCP JSON-RPC 도구로 장비 조회, 결함 티켓 생성 전담
-2. 중앙 허브 root_agent (enterprise_ops_agent): sub_agents=[hr_policy_agent, workweek_agent, itsm_agent]로 구성
+2. 중앙 오케스트레이터 root_agent (enterprise_ops_agent): sub_agents=[hr_policy_agent, workweek_agent, itsm_agent]로 구성
 3. HUB_INSTRUCTION에 다음 4대 핵심 거버넌스 행동 수칙을 강력하게 반영:
    - [규정 우선 원칙]: 시스템에 휴가 신청이나 티켓을 발행하기 전에 반드시 'hr_policy_agent'를 먼저 호출하여 사전 적합성을 검증할 것.
    - [근거 명시]: POL-HR-2026-004 또는 POL-IT-2026-009의 조항 번호와 사전 신청 기한, 승인 요건을 최종 답변에 반드시 포함할 것.
    - [단계별 검증]: 규정에 부합할 때만 workweek_agent 또는 itsm_agent를 호출하여 SaaS 작업을 진행할 것.
    - [친절하고 명확한 한국어 톤].
-4. get_enterprise_agent() 및 build_agent() 함수로 완성된 Hub-and-Spoke 루트 에이전트 객체를 반환하고, 최상위에 app = App(root_agent=root_agent, name="app")을 유지할 것.
+4. get_enterprise_agent() 및 build_agent() 함수로 완성된 Orchestrator-Worker 루트 에이전트 객체를 반환하고, 최상위에 app = App(root_agent=root_agent, name="app")을 유지할 것.
 5. 모든 Agent(root_agent 및 3개 sub_agent)의 model 파라미터는 반드시 'gemini-3.8-flash'로 명시적으로 지정할 것 (Vertex AI global 엔드포인트 연동).</code></pre>
                 </div>
 
@@ -1582,7 +1607,7 @@ print(json.dumps(get_employee_leave_balance('EMP-10294'), indent=2, ensure_ascii
                     </div>
                     <pre class="p-3 font-mono text-[11px] text-emerald-300 whitespace-pre-wrap leading-relaxed"><code>python3 tests/test_scenarios.py</code></pre>
                   </div>
-                  <p class="text-[11px] text-slate-500">Hub-and-Spoke 토폴로지, 규정 RAG(연차/노트북), FastMCP 실시간 세션 연동이 모두 통과하는지 4초 만에 검증합니다.</p>
+                  <p class="text-[11px] text-slate-500">Orchestrator-Worker 토폴로지, 규정 RAG(연차/노트북), FastMCP 실시간 세션 연동이 모두 통과하는지 4초 만에 검증합니다.</p>
                 </div>
               </div>
 
@@ -1847,7 +1872,7 @@ agents-cli playground --port 8085</code></pre>
                   <span>4단계: 실습 2(Evaluation &amp; Governance) 연계를 위한 프로덕션 핸드오프 안내</span>
                 </h3>
                 <p class="text-xs text-slate-700 leading-relaxed font-medium">
-                  실습 1에서는 개발자 로컬 환경(VM)에서 Hub-and-Spoke 멀티 에이전트 시스템을 완성하고 기능 검증을 마쳤습니다. 보안 검증이 없는 상태로 Cloud Run에 성급히 배포하지 않고, <strong>실습 2(Part 2)</strong>에서 다음 엔터프라이즈 거버넌스 파이프라인을 거쳐 안전하게 프로덕션 환경으로 승격(Promote)됩니다:
+                  실습 1에서는 개발자 로컬 환경(VM)에서 Orchestrator-Worker 멀티 에이전트 시스템을 완성하고 기능 검증을 마쳤습니다. 보안 검증이 없는 상태로 Cloud Run에 성급히 배포하지 않고, <strong>실습 2(Part 2)</strong>에서 다음 엔터프라이즈 거버넌스 파이프라인을 거쳐 안전하게 프로덕션 환경으로 승격(Promote)됩니다:
                 </p>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
@@ -2113,7 +2138,7 @@ python3 tests/test_scenarios.py</code></pre>
                   <span>축하합니다! 실습 Part 1을 성공적으로 완수하셨습니다.</span>
                 </div>
                 <p class="text-xs text-slate-700 leading-relaxed font-medium">
-                  Google Antigravity 2.0 (agy)과 Google ADK 2.3.0을 결합하여, 사내 복무/IT 규정 RAG 검증과 FastMCP SaaS 트랜잭션을 능동적으로 오케스트레이션하는 Hub-and-Spoke 멀티 에이전트를 완성하고, 실습 2의 정량 평가(Eval)와 Cloud Run 및 Gemini Enterprise 보안 배포를 위한 모든 준비를 마쳤습니다.
+                  Google Antigravity 2.0 (agy)과 Google ADK 2.3.0을 결합하여, 사내 복무/IT 규정 RAG 검증과 FastMCP SaaS 트랜잭션을 능동적으로 오케스트레이션하는 Orchestrator-Worker 멀티 에이전트를 완성하고, 실습 2의 정량 평가(Eval)와 Cloud Run 및 Gemini Enterprise 보안 배포를 위한 모든 준비를 마쳤습니다.
                 </p>
               </div>
             </div>

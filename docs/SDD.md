@@ -23,7 +23,7 @@ Cymbal Group Korea 임직원은 일상 업무에서 분산된 사내 포털과 �
    - 정기 교체 주기(36개월) 및 직군별 표준 기종(엔지니어링: M3 Max 64GB)을 인지하지 못한 채 무분별한 교체 요청이 발행되어 IT 서비스데스크 업무 과부하 유발.
 
 ### 1.2 시스템 목표 및 핵심 성과 지표 (Target & KPIs)
-본 프로젝트는 **Google Antigravity 2.0**과 **Google ADK 2.3.0**을 활용하여, 사내 규정을 실시간으로 선검증한 후 SaaS 시스템과 동기화하는 **엔터프라이즈 Hub-and-Spoke 멀티 에이전트 시스템**을 구축합니다.
+본 프로젝트는 **Google Antigravity 2.0**과 **Google ADK 2.3.0**을 활용하여, 사내 규정을 실시간으로 선검증한 후 SaaS 시스템과 동기화하는 **엔터프라이즈 Orchestrator-Worker 멀티 에이전트 시스템**을 구축합니다.
 
 | 목표 지표 (KPI) | 목표 수준 | 측정 및 검증 방식 |
 |:---|:---|:---|
@@ -36,7 +36,7 @@ Cymbal Group Korea 임직원은 일상 업무에서 분산된 사내 포털과 �
 
 ## 2. 아키텍처 및 도구 명세 (Architecture & Tool Specifications)
 
-### 2.1 논리 아키텍처 및 데이터 흐름 (Hub-and-Spoke Multi-Agent Architecture)
+### 2.1 논리 아키텍처 및 데이터 흐름 (Orchestrator-Worker Multi-Agent Architecture)
 
 ```mermaid
 flowchart TD
@@ -191,7 +191,7 @@ FastMCP 서버와 통신할 때는 반드시 다음 HTTP 헤더 및 세션 핸�
 
 - **실습 1 (로컬 멀티 에이전트 구축 및 검증, 80분)**:
   - Antigravity 2.0(`agy`) 프롬프트 주도 개발
-  - Google ADK 2.3.0 Hub-and-Spoke 멀티 에이전트 시스템(`agent.py`) 완성
+  - Google ADK 2.3.0 Orchestrator-Worker 멀티 에이전트 시스템(`agent.py`) 완성
   - 하이브리드 규정 RAG(`hr_policy_agent`) 및 FastMCP 11개 도구 바인딩(`workweek_agent`, `itsm_agent`)
   - 개발자 로컬 콘솔 및 자동 통합 테스트(`tests/test_scenarios.py`)를 통한 다중 턴 대화 시나리오 검증
   - 실습 2를 위한 4-Tier 골든 평가 데이터셋(`tests/eval/datasets/`) 준비
@@ -273,7 +273,7 @@ FastMCP 서버와 통신할 때는 반드시 다음 HTTP 헤더 및 세션 핸�
 | 마일스톤 | 산출물 | 검증 기준 | 실습 1 매핑 |
 |:---|:---|:---|:---|
 | **M1: 환경 및 그라운딩** | `docs/context_summary.md` | `agy`가 SDD 구조를 이해하고 요약 파일 생성 성공 | Task 1 |
-| **M2: 에이전트 뼈대** | `config.yaml`, `agent.py` | ADK 2.3.0 Hub-and-Spoke Agent 클래스 초기화 및 서브 에이전트 바인딩 성공 | Task 2 |
+| **M2: 에이전트 뼈대** | `config.yaml`, `agent.py` | ADK 2.3.0 Orchestrator-Worker Agent 클래스 초기화 및 서브 에이전트 바인딩 성공 | Task 2 |
 | **M3: 규정 RAG 도구** | `tools/policy_rag.py` | POL-HR/POL-IT 조항 검색 및 단위 테스트 통과 (신뢰도 >= 0.90) | Task 3 |
 | **M4: FastMCP SaaS 도구**| `tools/mcp_tools.py` | 실제 Cloud Run Mock SaaS와 연동 및 HTTP 200 OK 응답 확인 | Task 4 |
 | **M5: 오케스트레이션 검증**| 통합 `agent.py` | 4일 연차 신청 및 긴급 노트북 교체 시나리오 100% 통과 | Task 5 |

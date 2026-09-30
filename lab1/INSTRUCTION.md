@@ -434,23 +434,23 @@ cat docs/context_summary.md
 
 ## Task 2. agy 프롬프트 기반 ADK 2.0 멀티 에이전트(MAS) 뼈대 리팩토링
 
-이 단계에서는 `agents-cli create`로 생성된 기본 단일 에이전트 뼈대(`app/agent.py`)를, `docs/SDD.md`의 명세에 따라 사내 복무 및 IT 전산 업무를 분담하는 **Hub-and-Spoke 멀티 에이전트 시스템**으로 전환합니다.
+이 단계에서는 `agents-cli create`로 생성된 기본 단일 에이전트 뼈대(`app/agent.py`)를, `docs/SDD.md`의 명세에 따라 사내 복무 및 IT 전산 업무를 분담하는 **Orchestrator-Worker 멀티 에이전트 시스템**으로 전환합니다.
 
 ---
 
 ### agents-cli 프로젝트 표준 아키텍처 및 멀티 에이전트(MAS) 핵심 구성
 
-엔터프라이즈 환경에서는 하나의 거대한 단일 에이전트에 모든 도구를 몰아넣을 경우, 프롬프트 오염(Prompt Pollution), 도구 충돌, 보안 경계 모호화 문제가 발생합니다.
-따라서 본 실습에서는 중앙 컨시어지 허브(`enterprise_ops_agent`)와 도메인별 3대 전문 서브 에이전트로 분리된 **Hub-and-Spoke 멀티 에이전트 시스템**을 채택합니다.
+엔터프라이즈 환경에서는 하나의 거대한 단일(Monolithic) 에이전트에 모든 도구를 몰아넣을 경우, 프롬프트 오염(Prompt Pollution), 도구 환각, 보안 경계 모호화 문제가 발생합니다.
+따라서 본 실습에서는 중앙 리드 오케스트레이터(`enterprise_ops_agent`)와 도메인별 3대 전문 워커로 분리된 **Orchestrator-Worker 패턴 (참고: [AgentPatterns.ai - Orchestrator-Worker Pattern](https://agentpatterns.ai/patterns/multi-agent/orchestrator-worker/))**을 채택합니다.
 
 ```mermaid
 flowchart TD
-    User["임직원 (사용자)"] --> Hub["Root Orchestrator Hub\n(enterprise_ops_agent)\ngemini-3.8-flash"]
+    User["임직원 (사용자)"] --> Orch["Central Orchestrator (Lead Agent)\n(enterprise_ops_agent)\ngemini-3.8-flash"]
 
-    subgraph Specialist_SubAgents ["도메인별 전문 서브 에이전트 계층 (Google ADK)"]
-        Hub -->|"1. 규정 확인 위임"| Spoke1["hr_policy_agent\n(사내 복무/IT 규정 RAG 전문가)"]
-        Hub -->|"2. 연차/근태 위임"| Spoke2["workweek_agent\n(WorkWeek HRMS 연동 전문가)"]
-        Hub -->|"3. 전산지원 위임"| Spoke3["itsm_agent\n(ServiceImmediately ITSM 연동 전문가)"]
+    subgraph Specialist_Workers ["도메인별 전문 워커 계층 (Google ADK)"]
+        Orch -->|"1. 규정 확인 위임"| W1["Worker 1: hr_policy_agent\n(사내 복무/IT 규정 RAG 전문가)"]
+        Orch -->|"2. 연차/근태 위임"| W2["Worker 2: workweek_agent\n(WorkWeek HRMS 연동 전담)"]
+        Orch -->|"3. 전산지원 위임"| W3["Worker 3: itsm_agent\n(ServiceImmediately ITSM 전담)"]
     end
 ```
 
@@ -492,10 +492,10 @@ enterprise-ops-agent/
 실행 중인 **Antigravity CLI (`agy`)** 터미널에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다:
 
 ```text
-docs/SDD.md의 2.1절 멀티 에이전트 구조와 1절 설정 규격을 참고하여, 우리가 방금 생성한 기본 뼈대를 Cymbal Group Korea의 Hub-and-Spoke 멀티 에이전트 시스템으로 전면 개편해주세요:
+docs/SDD.md의 2.1절 멀티 에이전트 구조와 1절 설정 규격을 참고하여, 우리가 방금 생성한 기본 뼈대를 Cymbal Group Korea의 Orchestrator-Worker 멀티 에이전트 시스템으로 전면 개편해주세요:
 
 1. config.yaml 생성:
-   - agent 이름: enterprise_ops_agent, architecture: Hub-and-Spoke Multi-Agent System (MAS)
+   - agent 이름: enterprise_ops_agent, architecture: Orchestrator-Worker Multi-Agent System (MAS)
    - 모델: gemini-3.8-flash (temperature: 0.1, max_output_tokens: 2048)
    - sub_agents 정의: hr_policy_agent(규정 RAG), workweek_agent(HRMS FastMCP), itsm_agent(ITSM FastMCP)
    - organization: Cymbal Group Korea, Cloud AI Platform Operations, 기본 사번 EMP-10294
@@ -503,12 +503,12 @@ docs/SDD.md의 2.1절 멀티 에이전트 구조와 1절 설정 규격을 참고
 
 2. app/agent.py 리팩토링:
    - 기존 더미 날씨 함수(get_weather, get_current_time)를 완전히 제거
-   - google.adk.agents.Agent 클래스를 사용한 Hub-and-Spoke 멀티 에이전트 작성
+   - google.adk.agents.Agent 클래스를 사용한 Orchestrator-Worker 멀티 에이전트 작성
    - 전문 서브 에이전트 3개 선언:
      1) hr_policy_agent: 사내 복무 규정(POL-HR) 및 IT 지침(POL-IT) RAG 검색 전문가
      2) workweek_agent: WorkWeek HRMS FastMCP 연동 전문가 (연차 조회, 휴가 신청/취소)
      3) itsm_agent: ServiceImmediately ITSM FastMCP 연동 전문가 (장비 조회, 티켓 생성/댓글)
-   - 중앙 허브 root_agent(enterprise_ops_agent): sub_agents=[hr_policy_agent, workweek_agent, itsm_agent]로 구성
+   - 중앙 오케스트레이터 root_agent(enterprise_ops_agent): sub_agents=[hr_policy_agent, workweek_agent, itsm_agent]로 구성
    - SDD 3절의 규정 우선 확인(Policy-First) 및 위임 강령을 HUB_INSTRUCTION으로 정의
    - build_agent() 및 get_enterprise_agent() 함수 작성
    - 주의사항: 
@@ -770,20 +770,20 @@ print(json.dumps(list_hardware_assets_and_tickets('EMP-10294'), indent=2, ensure
 실행 중인 **Antigravity CLI (`agy`)** 터미널에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
 
 ```text
-docs/SDD.md의 3절 '오케스트레이션 및 거버넌스 강령'을 반영하여 app/agent.py의 Hub-and-Spoke 멀티 에이전트 시스템을 최종 완성해주세요.
+docs/SDD.md의 3절 '오케스트레이션 및 거버넌스 강령'을 반영하여 app/agent.py의 Orchestrator-Worker 멀티 에이전트 시스템을 최종 완성해주세요.
 
 요구사항:
 1. 전문 서브 에이전트 3종에 도구 바인딩:
    - hr_policy_agent: app/tools/policy_rag.py의 search_company_policy 도구를 바인딩하여 규정(POL-HR-2026-004, POL-IT-2026-009) 선검증 전담
    - workweek_agent: app/tools/mcp_tools.py의 get_workweek_mcp_toolset() 및 FastMCP JSON-RPC 도구로 연차 조회, 휴가 상신/취소 전담
    - itsm_agent: app/tools/mcp_tools.py의 get_itsm_mcp_toolset() 및 FastMCP JSON-RPC 도구로 장비 조회, 결함 티켓 생성 전담
-2. 중앙 허브 root_agent (enterprise_ops_agent): sub_agents=[hr_policy_agent, workweek_agent, itsm_agent]로 구성
+2. 중앙 오케스트레이터 root_agent (enterprise_ops_agent): sub_agents=[hr_policy_agent, workweek_agent, itsm_agent]로 구성
 3. HUB_INSTRUCTION에 다음 4대 핵심 거버넌스 행동 수칙을 강력하게 반영:
    - [규정 우선 원칙]: 시스템에 휴가 신청이나 티켓을 발행하기 전에 반드시 'hr_policy_agent'를 먼저 호출하여 사전 적합성을 검증할 것.
    - [근거 명시]: POL-HR-2026-004 또는 POL-IT-2026-009의 조항 번호와 사전 신청 기한, 승인 요건을 최종 답변에 반드시 포함할 것.
    - [단계별 검증]: 규정에 부합할 때만 workweek_agent 또는 itsm_agent를 호출하여 SaaS 작업을 진행할 것.
    - [친절하고 명확한 한국어 톤].
-4. get_enterprise_agent() 및 build_agent() 함수로 완성된 Hub-and-Spoke 루트 에이전트 객체를 반환하고, 최상위에 root_agent = build_agent()와 app = App(root_agent=root_agent, name="app")을 선언할 것.
+4. get_enterprise_agent() 및 build_agent() 함수로 완성된 Orchestrator-Worker 루트 에이전트 객체를 반환하고, 최상위에 root_agent = build_agent()와 app = App(root_agent=root_agent, name="app")을 선언할 것.
 5. 모든 Agent(root_agent 및 3개 sub_agent)의 model 파라미터는 반드시 'gemini-3.8-flash'로 명시적으로 지정할 것 (Vertex AI global 엔드포인트 연동).
 ```
 
@@ -809,9 +809,9 @@ python3 tests/test_scenarios.py
 | =====================================================================             |
 |    Cymbal Group Enterprise Ops Agent - Integration Test Suite                     |
 | =====================================================================             |
-| [1/5] Hub-and-Spoke 멀티 에이전트 토폴로지 검증...                                     |
+| [1/5] Orchestrator-Worker 멀티 에이전트 토폴로지 검증...                               |
 |       - 등록된 전문 서브 에이전트: ['hr_policy_agent', 'workweek_agent', 'itsm_agent']     |
-|       -> [PASS] 토폴로지 검증 완료 (Hub: 1, Spokes: 3)                             |
+|       -> [PASS] 토폴로지 검증 완료 (Lead: 1, Workers: 3)                             |
 |                                                                                   |
 | [2/5] Policy RAG: 4일 연속 연차 규정(POL-HR-2026-004) 검색 검증...                    |
 |       - 매칭 문서: POL-HR-2026-004 (제 3 조 (연차 발생 및 부여))                     |
@@ -1119,7 +1119,7 @@ curl -s -X POST http://localhost:8080/ \
 
 ### 4단계: 실습 2(Evaluation & Governance) 연계를 위한 프로덕션 핸드오프 준비
 
-실습 1에서는 개발자 로컬 환경(VM)에서 Hub-and-Spoke 멀티 에이전트 시스템을 성공적으로 완성하고, 로컬 A2A 인터페이스를 통해 복합 시나리오 검증을 마쳤습니다.
+실습 1에서는 개발자 로컬 환경(VM)에서 Orchestrator-Worker 멀티 에이전트 시스템을 성공적으로 완성하고, 로컬 A2A 인터페이스를 통해 복합 시나리오 검증을 마쳤습니다.
 
 엔터프라이즈 환경에서는 보안 정책과 정량적 품질 검증 없이 Cloud Run이나 사내 Gemini Enterprise에 성급히 배포하지 않습니다. 개발된 멀티 에이전트는 **실습 2(Part 2)**에서 다음 거버넌스 파이프라인을 거쳐 안전하게 프로덕션 환경으로 승격(Promote)됩니다:
 
