@@ -215,13 +215,18 @@ agy
 
 이 단계에서는 필요한 파이썬 환경을 구성하고, Antigravity CLI(`agy`)에게 설계 문서를 읽게 하여 프로젝트 전반의 맥락을 인식시킵니다.
 
-### 1단계: 파이썬 라이브러리 설치
+### 1단계: 파이썬 라이브러리 설치 및 실습 저장소 클론
 
-터미널 새 탭(**Ctrl+Shift+T**)을 열고 실습에 필요한 파이썬 패키지를 설치합니다.
+터미널 새 탭(**Ctrl+Shift+T**)을 열고 실습에 필요한 파이썬 패키지를 설치하고 실습 저장소를 클론합니다.
 
 ```bash
+# 1. 필수 라이브러리 설치 (Google ADK 2.3.0 및 FastMCP 연동 패키지)
 pip install --upgrade pip
-pip install google-agents-cli google-adk mcp httpx pydantic pyyaml
+pip install google-agents-cli "google-adk>=2.3.0" mcp httpx pydantic pyyaml
+
+# 2. 실습 저장소 클론 (설계서 SDD, ADK 전문 스킬, 테스트 스위트 포함)
+git clone https://github.com/hajekim/build-with-gemini.git /config/workspace
+cd /config/workspace/enterprise_ops_agent
 ```
 
 설치된 버전을 확인합니다.
@@ -237,15 +242,23 @@ agents-cli --version
 +-----------------------------------------------------------------------------------+
 ```
 
+> [!TIP]
+> **Antigravity CLI(`agy`)의 ADK 전문 스킬 자동 인식:**
+> 저장소를 클론하면 워크스페이스 루트의 `.agents/skills/` 디렉터리에 Google 공식 에이전트 개발 스킬들이 자동으로 준비됩니다:
+> - `adk-skill`: Google ADK 2.3.0 멀티 에이전트(Hub-and-Spoke) 아키텍처 및 `McpToolset` 구현 지침
+> - `google-agents-cli-adk-code`: ADK 파이썬 패턴 및 도구 바인딩 표준
+> - `google-agents-cli-workflow`: 에이전트 개발 라이프사이클 및 코드 보존 가이드
+> - `eval-adk-skill`: 실습 2를 위한 4-Tier 골든 평가 데이터셋 규격
+> 
+> `agy` 터미널에서 `/skills`를 입력하면 이 스킬들이 활성화되어 있음을 직접 확인할 수 있습니다. `agy`는 프롬프트 처리 시 이 스킬들을 자율 참조하여 오차 없이 완벽한 코드를 작성합니다.
+
 ---
 
 ### 2단계: 작업 디렉터리 준비 및 SDD 확인
 
-작업 디렉터리를 만들고 제공된 설계서(`docs/SDD.md`)를 확인합니다.
+작업 디렉터리의 소프트웨어 설계서(`docs/SDD.md`)를 확인합니다.
 
 ```bash
-mkdir -p /config/workspace/enterprise_ops_agent/tools
-cd /config/workspace/enterprise_ops_agent
 cat /config/workspace/docs/SDD.md | head -n 45
 ```
 

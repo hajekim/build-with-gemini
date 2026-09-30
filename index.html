@@ -832,9 +832,20 @@
                     </button>
                   </div>
                   <pre class="p-4 font-mono text-xs text-cyan-300 leading-relaxed"><code>pip install --upgrade pip
-pip install google-agents-cli google-adk mcp httpx pydantic pyyaml
+pip install google-agents-cli "google-adk>=2.3.0" mcp httpx pydantic pyyaml
 git clone https://github.com/hajekim/build-with-gemini.git /config/workspace
 cd /config/workspace/enterprise_ops_agent</code></pre>
+                </div>
+
+                <!-- Skills Discovery Callout -->
+                <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 space-y-1.5 text-xs text-indigo-950 font-medium">
+                  <div class="font-bold flex items-center gap-2 text-indigo-900 text-xs">
+                    <i class="fa-solid fa-wand-magic-sparkles text-indigo-600"></i>
+                    <span>Antigravity CLI (agy)의 ADK 전문 스킬 자동 인식 안내</span>
+                  </div>
+                  <p class="text-[11px] text-slate-700 leading-relaxed font-normal">
+                    저장소를 클론하면 워크스페이스 내 <code class="font-mono text-indigo-800 bg-indigo-100 px-1 py-0.5 rounded font-bold">.agents/skills/</code>에 Google ADK 전문 스킬(adk-skill, google-agents-cli-adk-code 등)이 자동 탑재됩니다. agy 터미널에서 <code class="font-mono text-slate-800 bg-white px-1 py-0.5 rounded font-bold">/skills</code>를 입력하면 활성화된 스킬 목록을 확인할 수 있으며, agy는 이 지식을 참조하여 완성도 높은 코드를 자율 작성합니다.
+                  </p>
                 </div>
               </div>
 
@@ -2062,31 +2073,31 @@ cd enterprise_ops_agent</code></pre>
       },
       {
         tag: "Task 1",
-        desc: "환경 패키지 설치 및 SDD 요약",
-        btnText: "패키지 설치 명령어 복사",
-        action: () => copyText("pip install --upgrade pip\npip install google-agents-cli google-adk mcp httpx pydantic pyyaml\ngit clone https://github.com/hajekim/build-with-gemini.git /config/workspace\ncd /config/workspace/enterprise_ops_agent"),
-        preview: "pip install google-agents-cli google-adk mcp ...\n/config/workspace/docs/SDD.md 요약 프롬프트 실행"
+        desc: "환경 패키지 설치 및 저장소 클론",
+        btnText: "설치 및 클론 명령어 복사",
+        action: () => copyText("pip install --upgrade pip\npip install google-agents-cli \"google-adk>=2.3.0\" mcp httpx pydantic pyyaml\ngit clone https://github.com/hajekim/build-with-gemini.git /config/workspace\ncd /config/workspace/enterprise_ops_agent"),
+        preview: "pip install google-agents-cli \"google-adk>=2.3.0\" ...\ngit clone 저장소 및 작업 디렉터리 이동"
       },
       {
         tag: "Task 2",
-        desc: "ADK 뼈대 생성 지시",
-        btnText: "ADK 뼈대 프롬프트 복사",
-        action: () => copyText("/config/workspace/docs/SDD.md의 1절 시스템 개요와 설정 규격을 참고하여, 다음 두 개의 파일을 생성해주세요:\n\n1. config.yaml\n2. agent.py"),
-        preview: "config.yaml 및 agent.py 생성 프롬프트"
+        desc: "ADK 2.3.0 멀티 에이전트 뼈대 생성",
+        btnText: "멀티 에이전트 뼈대 프롬프트 복사",
+        action: () => copyText("/config/workspace/docs/SDD.md의 2.1절 멀티 에이전트 구조와 1절 설정 규격을 참고하여, 다음 두 개의 파일을 생성해주세요:\n\n1. config.yaml\n2. agent.py\n(Agent 지시문 인자는 단수형 'instruction' 사용, root_agent = build_agent() 선언 필수)"),
+        preview: "Hub-and-Spoke 멀티 에이전트 config.yaml 및 agent.py 뼈대 생성"
       },
       {
         tag: "Task 3",
-        desc: "사내 규정 RAG 도구 구현",
-        btnText: "RAG 도구 프롬프트 복사",
-        action: () => copyText("/config/workspace/docs/SDD.md의 2.1절 '사내 규정 RAG 도구 명세'를 엄격히 준수하여 tools/policy_rag.py 파일을 구현해주세요."),
+        desc: "사내 규정 Policy RAG 도구 구현",
+        btnText: "Policy RAG 프롬프트 복사",
+        action: () => copyText("/config/workspace/docs/SDD.md의 2.2절 '사내 규정 RAG 도구 명세'를 엄격히 준수하여 tools/policy_rag.py 파일을 구현해주세요."),
         preview: "search_company_policy 도구 구현 (POL-HR, POL-IT 지침 인덱싱)"
       },
       {
         tag: "Task 4",
-        desc: "FastMCP SaaS 연동 도구",
+        desc: "FastMCP SaaS 연동 도구 구현",
         btnText: "FastMCP 도구 프롬프트 복사",
-        action: () => copyText("/config/workspace/docs/SDD.md의 2.2절 'FastMCP SaaS 연동 도구 명세'를 바탕으로 tools/mcp_tools.py 파일을 구현해주세요."),
-        preview: "WorkWeek 및 ServiceImmediately 4개 도구 구현"
+        action: () => copyText("/config/workspace/docs/SDD.md의 2.3절 'FastMCP SaaS 연동 도구 명세'를 바탕으로 tools/mcp_tools.py 파일을 구현해주세요.\n(Streamable HTTP JSON-RPC 2.0, GAESA 세션 어피니티, 토큰 자동 발급 포함)"),
+        preview: "WorkWeek 및 ServiceImmediately FastMCP 도구 6종 구현"
       },
       {
         tag: "Task 5",
