@@ -752,49 +752,6 @@
             </div>
 
             <div class="space-y-4 text-sm">
-              <!-- SDD Purpose & Download Card -->
-              <div class="card-studio p-5 space-y-3.5 bg-gradient-to-r from-blue-50/70 via-indigo-50/40 to-white border-blue-200">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-blue-100 pb-3">
-                  <div class="space-y-0.5">
-                    <span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded-full uppercase tracking-wider">단일 진실 공급원 (SSOT)</span>
-                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
-                      <i class="fa-solid fa-file-lines text-blue-600"></i>
-                      <span>소프트웨어 설계서 (SDD.md v2.2.0) 다운로드 및 뷰어 안내</span>
-                    </h3>
-                  </div>
-                  <div class="flex flex-wrap items-center gap-2">
-                    <a href="?tab=sdd" target="_blank" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer" title="새 브라우저 탭에서 SDD 설계서 뷰어를 엽니다">
-                      <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                      <span>새 탭에서 뷰어 열기</span>
-                    </a>
-                    <a href="docs/SDD.md" download class="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-semibold text-xs shadow-2xs transition flex items-center gap-1.5" title="SDD.md 마크다운 원본 파일을 로컬에 저장합니다">
-                      <i class="fa-solid fa-download"></i>
-                      <span>파일 다운로드</span>
-                    </a>
-                  </div>
-                </div>
-
-                <div class="space-y-2 text-xs text-slate-700 leading-relaxed font-medium">
-                  <p>
-                    <strong>소프트웨어 설계서(SDD)의 목적:</strong> 프롬프트에 방대한 코드를 일일이 나열하지 않고, 시스템 명세서, 데이터 모델, 도구 인터페이스 규격을 단일 문서로 정의하여 에이전트에게 맥락으로 주입하는 설계서 기반 프롬프트 엔지니어링(Spec-Driven Development)의 핵심 기준 문서입니다.
-                  </p>
-                  <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5 pt-1 text-[11px]">
-                    <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs space-y-1">
-                      <span class="font-bold text-blue-800 block">제 1 절: 시스템 개요</span>
-                      <p class="text-slate-600">사용 모델(Gemini 3.8 Flash), RAG 신뢰도 임계값(0.80), 기본 사번(EMP-10294) 등 런타임 기준을 정의합니다.</p>
-                    </div>
-                    <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs space-y-1">
-                      <span class="font-bold text-indigo-800 block">제 2 절: 도구 명세</span>
-                      <p class="text-slate-600">사내 복무/IT 규정 RAG 도구와 WorkWeek 연차 API, ServiceImmediately IT 티켓 API의 파라미터 및 반환값을 선언합니다.</p>
-                    </div>
-                    <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs space-y-1">
-                      <span class="font-bold text-purple-800 block">제 3 절: 에이전트 행동 수칙</span>
-                      <p class="text-slate-600">규정 우선 확인 원칙(Policy-First), 근거 조항 인용 의무, 사전 승인 조건 등 필수 오케스트레이션 지침을 담고 있습니다.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
               <div class="card-studio p-5 space-y-3">
                 <h3 class="font-bold text-slate-900 text-xs uppercase tracking-wider">1. 패키지 설치 및 agents-cli 프로젝트 스캐폴딩 (터미널)</h3>
                 <div class="bg-[#090d16] border border-slate-800 rounded-xl overflow-hidden shadow-md">
@@ -873,7 +830,7 @@ cd enterprise-ops-agent</code></pre>
               </div>
 
               <!-- SDD & Policy Download Section -->
-              <div class="card-studio p-5 space-y-3">
+              <div class="card-studio p-5 space-y-3.5">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-2">
                   <h3 class="font-bold text-slate-900 text-xs uppercase tracking-wider flex items-center gap-1.5">
                     <i class="fa-solid fa-download text-emerald-600"></i>
@@ -882,7 +839,28 @@ cd enterprise-ops-agent</code></pre>
                   <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">GCS 기본 / curl 백업</span>
                 </div>
 
-                <div class="space-y-3 text-xs">
+                <!-- SDD Purpose & Structure Summary -->
+                <div class="space-y-2 text-xs text-slate-700 leading-relaxed font-medium">
+                  <p>
+                    <strong>소프트웨어 설계서(SDD)의 목적:</strong> 프롬프트에 방대한 코드를 일일이 나열하지 않고, 시스템 명세서, 데이터 모델, 도구 인터페이스 규격을 단일 문서로 정의하여 에이전트에게 맥락으로 주입하는 설계서 기반 프롬프트 엔지니어링(Spec-Driven Development)의 핵심 기준 문서입니다.
+                  </p>
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5 pt-1 text-[11px]">
+                    <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs space-y-1">
+                      <span class="font-bold text-blue-800 block">제 1 절: 시스템 개요</span>
+                      <p class="text-slate-600">사용 모델(Gemini 3.8 Flash), RAG 신뢰도 임계값(0.80), 기본 사번(EMP-10294) 등 런타임 기준을 정의합니다.</p>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs space-y-1">
+                      <span class="font-bold text-indigo-800 block">제 2 절: 도구 명세</span>
+                      <p class="text-slate-600">사내 복무/IT 규정 RAG 도구와 WorkWeek 연차 API, ServiceImmediately IT 티켓 API의 파라미터 및 반환값을 선언합니다.</p>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs space-y-1">
+                      <span class="font-bold text-purple-800 block">제 3 절: 에이전트 행동 수칙</span>
+                      <p class="text-slate-600">규정 우선 확인 원칙(Policy-First), 근거 조항 인용 의무, 사전 승인 조건 등 필수 오케스트레이션 지침을 담고 있습니다.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="space-y-3 text-xs pt-1">
                   <!-- Dedicated Standalone Viewers Prompt Card -->
                   <div class="bg-gradient-to-r from-indigo-50/90 via-blue-50/70 to-emerald-50/80 border border-indigo-200 rounded-xl p-3.5 space-y-2">
                     <div class="flex items-center justify-between">
@@ -905,6 +883,10 @@ cd enterprise-ops-agent</code></pre>
                         <i class="fa-solid fa-book-bookmark"></i>
                         <span>사내 규정 PDF (POL-HR/IT) 원본 열람실 열기</span>
                         <i class="fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75"></i>
+                      </a>
+                      <a href="docs/SDD.md" download class="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-semibold text-xs shadow-2xs transition flex items-center gap-1.5 ml-auto">
+                        <i class="fa-solid fa-download"></i>
+                        <span>SDD.md 다운로드</span>
                       </a>
                     </div>
                   </div>
@@ -1260,14 +1242,24 @@ docs/SDD.md 파일의 내용을 꼼꼼히 읽고, 전체 시스템 아키텍처�
                 </div>
               </div>
 
-              <!-- Session Transition: Terminal to agy -->
-              <div class="bg-amber-50 border border-amber-300 rounded-xl p-3 text-xs text-amber-950 font-medium flex items-center justify-between shadow-2xs">
-                <div class="flex items-center gap-2">
-                  <i class="fa-solid fa-arrows-split-up-and-left text-amber-600 text-sm"></i>
-                  <span><strong>[세션 복귀]</strong> 이전 터미널 검증을 마친 후, 기존 agy 세션으로 재접속:</span>
-                  <code class="font-mono font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded border border-amber-300">cd ~/enterprise-ops-agent && agy --continue</code>
+              <!-- Session Transition: Terminal to agy (Copyable Terminal Block) -->
+              <div class="bg-amber-50/70 border border-amber-300 rounded-xl p-3.5 space-y-2 shadow-2xs">
+                <div class="flex items-center justify-between text-xs text-amber-950 font-semibold">
+                  <span class="flex items-center gap-2">
+                    <i class="fa-solid fa-arrows-split-up-and-left text-amber-600 text-sm"></i>
+                    <span><strong>[세션 복귀]</strong> 이전 터미널 검증 후, 기존 agy 세션으로 재접속</span>
+                  </span>
+                  <span class="text-[10px] text-amber-800 font-mono">(또는 agy -c / 멀티 탭 사용 시 agy 탭으로 전환)</span>
                 </div>
-                <span class="text-[10px] text-amber-700 font-mono">(또는 agy -c / 멀티 탭 사용 시 agy 탭으로 전환)</span>
+                <div class="bg-[#090d16] border border-slate-800 rounded-lg overflow-hidden shadow-inner">
+                  <div class="bg-[#131b2e] px-3 py-1.5 border-b border-slate-800 flex items-center justify-between">
+                    <span class="text-[10px] text-amber-400 font-mono">bash terminal (세션 복귀)</span>
+                    <button class="px-2 py-0.5 rounded bg-slate-800 hover:bg-amber-600 text-slate-300 hover:text-white font-semibold text-[10px] transition flex items-center gap-1" onclick="copyCode(this)">
+                      <i class="fa-regular fa-copy"></i> 복사
+                    </button>
+                  </div>
+                  <pre class="p-3 font-mono text-[11px] text-amber-300 leading-relaxed"><code>cd ~/enterprise-ops-agent && agy --continue</code></pre>
+                </div>
               </div>
 
               <div class="card-studio p-5 space-y-3">
@@ -1415,14 +1407,24 @@ print(json.dumps(search_company_policy('4일 연속 연차 신청 기한', categ
                 </div>
               </div>
 
-              <!-- Session Transition: Terminal to agy -->
-              <div class="bg-amber-50 border border-amber-300 rounded-xl p-3 text-xs text-amber-950 font-medium flex items-center justify-between shadow-2xs">
-                <div class="flex items-center gap-2">
-                  <i class="fa-solid fa-arrows-split-up-and-left text-amber-600 text-sm"></i>
-                  <span><strong>[세션 복귀]</strong> 환경변수 등록 후, 터미널에서 기존 agy 세션으로 재접속:</span>
-                  <code class="font-mono font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded border border-amber-300">cd ~/enterprise-ops-agent && agy --continue</code>
+              <!-- Session Transition: Terminal to agy (Copyable Terminal Block) -->
+              <div class="bg-amber-50/70 border border-amber-300 rounded-xl p-3.5 space-y-2 shadow-2xs">
+                <div class="flex items-center justify-between text-xs text-amber-950 font-semibold">
+                  <span class="flex items-center gap-2">
+                    <i class="fa-solid fa-arrows-split-up-and-left text-amber-600 text-sm"></i>
+                    <span><strong>[세션 복귀]</strong> 환경변수 등록 후, 터미널에서 기존 agy 세션으로 재접속</span>
+                  </span>
+                  <span class="text-[10px] text-amber-800 font-mono">(또는 agy -c / 멀티 탭 사용 시 agy 탭으로 전환)</span>
                 </div>
-                <span class="text-[10px] text-amber-700 font-mono">(또는 agy -c / 멀티 탭 사용 시 agy 탭으로 전환)</span>
+                <div class="bg-[#090d16] border border-slate-800 rounded-lg overflow-hidden shadow-inner">
+                  <div class="bg-[#131b2e] px-3 py-1.5 border-b border-slate-800 flex items-center justify-between">
+                    <span class="text-[10px] text-amber-400 font-mono">bash terminal (세션 복귀)</span>
+                    <button class="px-2 py-0.5 rounded bg-slate-800 hover:bg-amber-600 text-slate-300 hover:text-white font-semibold text-[10px] transition flex items-center gap-1" onclick="copyCode(this)">
+                      <i class="fa-regular fa-copy"></i> 복사
+                    </button>
+                  </div>
+                  <pre class="p-3 font-mono text-[11px] text-amber-300 leading-relaxed"><code>cd ~/enterprise-ops-agent && agy --continue</code></pre>
+                </div>
               </div>
 
               <div class="card-studio p-5 space-y-3">
@@ -1499,14 +1501,24 @@ print(json.dumps(get_employee_leave_balance('EMP-10294'), indent=2, ensure_ascii
             </div>
 
             <div class="space-y-4 text-sm">
-              <!-- Session Transition: Terminal to agy -->
-              <div class="bg-amber-50 border border-amber-300 rounded-xl p-3 text-xs text-amber-950 font-medium flex items-center justify-between shadow-2xs">
-                <div class="flex items-center gap-2">
-                  <i class="fa-solid fa-arrows-split-up-and-left text-amber-600 text-sm"></i>
-                  <span><strong>[세션 복귀]</strong> 이전 터미널 테스트 후, 기존 agy 세션으로 재접속:</span>
-                  <code class="font-mono font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded border border-amber-300">cd ~/enterprise-ops-agent && agy --continue</code>
+              <!-- Session Transition: Terminal to agy (Copyable Terminal Block) -->
+              <div class="bg-amber-50/70 border border-amber-300 rounded-xl p-3.5 space-y-2 shadow-2xs">
+                <div class="flex items-center justify-between text-xs text-amber-950 font-semibold">
+                  <span class="flex items-center gap-2">
+                    <i class="fa-solid fa-arrows-split-up-and-left text-amber-600 text-sm"></i>
+                    <span><strong>[세션 복귀]</strong> 이전 터미널 테스트 후, 기존 agy 세션으로 재접속</span>
+                  </span>
+                  <span class="text-[10px] text-amber-800 font-mono">(또는 agy -c / 멀티 탭 사용 시 agy 탭으로 전환)</span>
                 </div>
-                <span class="text-[10px] text-amber-700 font-mono">(또는 agy -c / 멀티 탭 사용 시 agy 탭으로 전환)</span>
+                <div class="bg-[#090d16] border border-slate-800 rounded-lg overflow-hidden shadow-inner">
+                  <div class="bg-[#131b2e] px-3 py-1.5 border-b border-slate-800 flex items-center justify-between">
+                    <span class="text-[10px] text-amber-400 font-mono">bash terminal (세션 복귀)</span>
+                    <button class="px-2 py-0.5 rounded bg-slate-800 hover:bg-amber-600 text-slate-300 hover:text-white font-semibold text-[10px] transition flex items-center gap-1" onclick="copyCode(this)">
+                      <i class="fa-regular fa-copy"></i> 복사
+                    </button>
+                  </div>
+                  <pre class="p-3 font-mono text-[11px] text-amber-300 leading-relaxed"><code>cd ~/enterprise-ops-agent && agy --continue</code></pre>
+                </div>
               </div>
 
               <div class="card-studio p-5 space-y-3">
@@ -1566,14 +1578,24 @@ print(json.dumps(get_employee_leave_balance('EMP-10294'), indent=2, ensure_ascii
                 </div>
               </div>
 
-              <!-- Session Transition: Terminal to agy -->
-              <div class="bg-amber-50 border border-amber-300 rounded-xl p-3 text-xs text-amber-950 font-medium flex items-center justify-between shadow-2xs">
-                <div class="flex items-center gap-2">
-                  <i class="fa-solid fa-arrows-split-up-and-left text-amber-600 text-sm"></i>
-                  <span><strong>[세션 복귀]</strong> 실시간 복수 턴 대화 시뮬레이션을 위해 agy 세션으로 재접속:</span>
-                  <code class="font-mono font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded border border-amber-300">cd ~/enterprise-ops-agent && agy --continue</code>
+              <!-- Session Transition: Terminal to agy (Copyable Terminal Block) -->
+              <div class="bg-amber-50/70 border border-amber-300 rounded-xl p-3.5 space-y-2 shadow-2xs">
+                <div class="flex items-center justify-between text-xs text-amber-950 font-semibold">
+                  <span class="flex items-center gap-2">
+                    <i class="fa-solid fa-arrows-split-up-and-left text-amber-600 text-sm"></i>
+                    <span><strong>[세션 복귀]</strong> 실시간 복수 턴 대화 시뮬레이션을 위해 agy 세션으로 재접속</span>
+                  </span>
+                  <span class="text-[10px] text-amber-800 font-mono">(또는 agy -c / 멀티 탭 사용 시 agy 탭으로 전환)</span>
                 </div>
-                <span class="text-[10px] text-amber-700 font-mono">(또는 agy -c / 멀티 탭 사용 시 agy 탭으로 전환)</span>
+                <div class="bg-[#090d16] border border-slate-800 rounded-lg overflow-hidden shadow-inner">
+                  <div class="bg-[#131b2e] px-3 py-1.5 border-b border-slate-800 flex items-center justify-between">
+                    <span class="text-[10px] text-amber-400 font-mono">bash terminal (세션 복귀)</span>
+                    <button class="px-2 py-0.5 rounded bg-slate-800 hover:bg-amber-600 text-slate-300 hover:text-white font-semibold text-[10px] transition flex items-center gap-1" onclick="copyCode(this)">
+                      <i class="fa-regular fa-copy"></i> 복사
+                    </button>
+                  </div>
+                  <pre class="p-3 font-mono text-[11px] text-amber-300 leading-relaxed"><code>cd ~/enterprise-ops-agent && agy --continue</code></pre>
+                </div>
               </div>
 
               <!-- Scenario 1 -->
