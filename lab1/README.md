@@ -673,6 +673,9 @@ Anthropic과 오픈소스 커뮤니티가 주도하는 Model Context Protocol(MC
 export MCP_TOKEN="mcp_여러분의토큰값"
 ```
 
+> [!NOTE]
+> **환경변수 상속 및 자동 세션 발급 안내**: 위 환경변수를 등록한 뒤 동일한 터미널에서 `cd ~/enterprise-ops-agent && agy --continue`를 실행하면 토큰이 agy 프로세스에 정상 상속됩니다. 만약 멀티 탭에서 작업하여 토큰이 상속되지 않더라도, 에이전트 도구 코드의 자동 세션 발급 기능으로 인해 정상 동작합니다.
+
 ---
 
 ### 2단계: Google ADK 정식 McpToolset 기반 FastMCP 연동 도구 구현 지시
@@ -1022,14 +1025,20 @@ Gemini Enterprise가 A2A 프로토콜로 에이전트를 원격 호출할 때 �
 Gemini Enterprise에 배포하기 전에, 개발자 로컬 환경에서 웹 애플리케이션을 직접 띄워 에이전트와 실시간 대화를 나누고 동작을 검증할 수 있습니다.
 
 1. **로컬 서버 기동**:
-터미널에서 `a2a_server.py`를 실행합니다:
+기존 점유 포트(8080)를 안전하게 정리하고, 터미널 블로킹을 방지하기 위해 `a2a_server.py`를 백그라운드(`&`)로 기동합니다:
 
 ```bash
-cd ~/enterprise-ops-agent
-python3 a2a_server.py
+# 1. 기존 점유 포트(8080) 정리 및 로컬 A2A 서버 백그라운드(&) 기동
+fuser -k 8080/tcp 2>/dev/null || true
+cd ~/enterprise-ops-agent && python3 a2a_server.py &
+
+# 2. 서버 정상 기동 확인 (200 OK)
+sleep 2 && curl -s http://localhost:8080/healthz
 ```
 
-`Uvicorn running on http://0.0.0.0:8080` 로그가 출력되면 서버가 정상 실행된 것입니다.
+백그라운드로 실행하면 동일한 터미널에서 다음 단계의 curl 검증과 정량 평가(`agents-cli eval run`)를 멈춤 없이 곧바로 실행할 수 있습니다. (서버 실시간 로그를 보려면 새 터미널 탭에서 실행하셔도 됩니다.)
+
+`Uvicorn running on http://0.0.0.0:8080` 로그 및 healthz 응답이 출력되면 서버가 정상 실행된 것입니다.
 
 2. **로컬 테스트 콘솔 브라우징**:
 원격 브라우저 또는 로컬 브라우저에서 `http://localhost:8080`에 접속합니다.

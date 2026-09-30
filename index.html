@@ -1405,6 +1405,9 @@ print(json.dumps(search_company_policy('4일 연속 연차 신청 기한', categ
                   </div>
                   <pre class="p-4 font-mono text-xs text-cyan-300"><code>export MCP_TOKEN="mcp_여러분의토큰값"</code></pre>
                 </div>
+                <p class="text-[11px] text-slate-500 font-medium">
+                  <strong>참고:</strong> 위 환경변수를 등록한 뒤 동일한 터미널에서 아래 <code class="font-mono text-slate-700 bg-slate-100 px-1 py-0.5 rounded">agy --continue</code>를 실행하면 토큰이 agy 프로세스에 정상 상속됩니다. (만약 멀티 탭에서 작업하여 토큰이 상속되지 않더라도, 에이전트 코드의 자동 발급 기능으로 인해 정상 동작합니다.)
+                </p>
               </div>
 
               <!-- Session Transition: Terminal to agy (Copyable Terminal Block) -->
@@ -1770,7 +1773,6 @@ print(json.dumps(get_employee_leave_balance('EMP-10294'), indent=2, ensure_ascii
                   <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
                   <span>3단계: GE 배포 없이 로컬에서 에이전트 웹 앱 구동 및 검증</span>
                 </h3>
-                <p class="text-xs text-slate-600">Gemini Enterprise에 배포하기 전, 개발자 로컬 환경에서 웹 콘솔을 띄워 에이전트와 실시간 대화를 나눌 수 있습니다:</p>
                 <div class="bg-[#090d16] border border-slate-800 rounded-xl overflow-hidden shadow-md">
                   <div class="bg-[#131b2e] px-4 py-2 border-b border-slate-800 flex items-center justify-between">
                     <span class="text-[11px] text-emerald-400 font-mono">bash server run</span>
@@ -1778,10 +1780,16 @@ print(json.dumps(get_employee_leave_balance('EMP-10294'), indent=2, ensure_ascii
                       <i class="fa-regular fa-copy"></i> 명령어 복사
                     </button>
                   </div>
-                  <pre class="p-4 font-mono text-xs text-emerald-300 leading-relaxed"><code># 1. 로컬 A2A / 웹 서빙 서버 실행
-cd ~/enterprise-ops-agent
-python3 a2a_server.py</code></pre>
+                  <pre class="p-4 font-mono text-xs text-emerald-300 leading-relaxed"><code># 1. 기존 점유 포트(8080) 정리 및 로컬 A2A 서버 백그라운드(&) 기동
+fuser -k 8080/tcp 2>/dev/null || true
+cd ~/enterprise-ops-agent && python3 a2a_server.py &
+
+# 2. 서버 정상 기동 확인 (200 OK)
+sleep 2 && curl -s http://localhost:8080/healthz</code></pre>
                 </div>
+                <p class="text-xs text-slate-600 font-medium">
+                  백그라운드(&amp;)로 실행하여 동일한 터미널에서 아래 curl 테스트와 평가 명령어(agents-cli eval run)를 멈춤 없이 즉시 실행할 수 있습니다. (서버 실시간 로그를 보려면 새 터미널 탭에서 실행하셔도 됩니다.)
+                </p>
                 <p class="text-xs text-slate-600 font-medium">서버가 실행되면 브라우저에서 <code class="font-mono text-blue-700 bg-blue-50 px-1 py-0.5 rounded font-bold">http://localhost:8080</code>에 접속하여 로컬 테스트 콘솔을 엽니다:</p>
                 <div class="space-y-2">
                   <img src="lab1/images/local_agent_web_chat.png" alt="로컬 에이전트 웹 콘솔" class="rounded-xl border border-slate-200 shadow-sm w-full">
