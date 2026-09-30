@@ -10,7 +10,7 @@
 
 실습생들은 브라우저에서 아래 Cloud Run 전용 웹사이트를 열어 Qwiklabs 환경 접속부터 단계별 가이드, 원클릭 프롬프트 복사 기능을 활용할 수 있습니다.
 
-🚀 **[공식 핸즈온 가이드 웹사이트 열기 (Google Cloud Run)](https://build-with-gemini-guide-330751298968.asia-northeast3.run.app/)**  
+🚀 **[공식 핸즈온 가이드 웹사이트 열기 (Google Cloud Run)](https://build-with-gemini-guide-dri5akvbzq-du.a.run.app/)**  
 *(도메인 주소: [build.geap.dev](https://build.geap.dev/))*
 
 ---
@@ -62,6 +62,6 @@ build-with-gemini/
 
 ## 🔗 실습용 외부 서비스
 
-- **한국형 Mock SaaS 웹 포털**: https://korean-mock-saas-330751298968.asia-northeast3.run.app/
-- **WorkWeek HRMS FastMCP 엔드포인트**: `https://korean-mock-saas-330751298968.asia-northeast3.run.app/work-week/mcp`
-- **ServiceImmediately ITMS FastMCP 엔드포인트**: `https://korean-mock-saas-330751298968.asia-northeast3.run.app/service-immediately/mcp`
+- **한국형 Mock SaaS 웹 포털**: https://korean-mock-saas-dri5akvbzq-du.a.run.app/
+- **WorkWeek HRMS FastMCP 엔드포인트**: `https://korean-mock-saas-dri5akvbzq-du.a.run.app/work-week/mcp`
+- **ServiceImmediately ITMS FastMCP 엔드포인트**: `https://korean-mock-saas-dri5akvbzq-du.a.run.app/service-immediately/mcp`

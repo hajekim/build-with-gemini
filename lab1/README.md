@@ -40,7 +40,7 @@
 2. **소프트웨어 설계서(SDD) 기반 컨텍스트 그라운딩**: `docs/SDD.md` 문서를 `agy`에 주입하여 전체 아키텍처와 도구 명세를 인식시킵니다.
 3. **agy 프롬프트 기반 ADK 2.0 뼈대 생성**: `agy`에게 지시하여 `config.yaml`과 ADK 2.0 기본 에이전트 코드를 생성하도록 합니다.
 4. **agy 프롬프트 기반 사내 규정 RAG 도구 구현**: SDD 2.1절과 Cloud Storage(`gs://oreobox/policy/`) 규정 문서를 바탕으로 조항 번호와 근거를 정확히 찾아주는 시맨틱 검색 도구(`tools/policy_rag.py`)를 개발합니다.
-5. **agy 프롬프트 기반 FastMCP SaaS 연동 도구 구현**: 한국형 Mock SaaS 플랫폼(`https://korean-mock-saas-330751298968.asia-northeast3.run.app/`)에 개인별 토큰으로 연결되는 FastMCP 도구(`tools/mcp_tools.py`)를 개발합니다.
+5. **agy 프롬프트 기반 FastMCP SaaS 연동 도구 구현**: 한국형 Mock SaaS 플랫폼(`https://korean-mock-saas-dri5akvbzq-du.a.run.app/`)에 개인별 토큰으로 연결되는 FastMCP 도구(`tools/mcp_tools.py`)를 개발합니다.
 6. **오케스트레이션 프롬프트 완성 및 복수 턴 시나리오 검증**: 규정 검증 우선(Policy-First) 규칙을 적용한 최종 에이전트를 완성하고, `agy` 대화창에서 실제 연차 신청 및 고성능 노트북 교체 요청을 테스트한 뒤 웹 화면에서 실시간 반영 결과를 확인합니다.
 7. **Gemini Enterprise (GE) 배포용 A2A 인터페이스 규격 패키징**: 사내 본인 테넌트의 Gemini Enterprise에 에이전트를 원클릭 등록할 수 있도록 Agent-to-Agent(A2A) 매니페스트(`agent_manifest.json`)를 생성하고, 로컬 A2A 시뮬레이터를 통해 프로토콜 규격 준수 여부를 검증합니다.
 
@@ -191,12 +191,12 @@ agy
 
 워크스페이스 내 `docs/SDD.md` 파일에 소프트웨어 설계 명세서가 사전에 준비되어 있습니다.
 
-| 구분 | 파일 및 리소스 경로 | 세부 설명 | 링크/다운로드 |
+| 구분 | 파일 및 리소스 경로 | 세부 설명 | 링크 / 전용 뷰어 |
 |:---|:---|:---|:---|
-| **소프트웨어 설계서** | `docs/SDD.md` | 시스템 구조, RAG 데이터 규격, FastMCP API 명세, 오케스트레이션 강령 | [📥 docs/SDD.md 다운로드](../docs/SDD.md) |
-| **사내 복무 규정 PDF** | `gs://oreobox/policy/leave_policy_2026.pdf` | 문서번호 POL-HR-2026-004 (연차 및 병가 운영 지침) | [📥 leave_policy_2026.pdf 다운로드](../docs/policies/leave_policy_2026.pdf) |
-| **IT 자산 지침 PDF** | `gs://oreobox/policy/it_hardware_guidelines.pdf` | 문서번호 POL-IT-2026-009 (PC 및 하드웨어 지원 규정) | [📥 it_hardware_guidelines.pdf 다운로드](../docs/policies/it_hardware_guidelines.pdf) |
-| **한국형 Mock SaaS 웹 포털** | `https://korean-mock-saas-330751298968.asia-northeast3.run.app/` | 인사관리(WorkWeek) 및 IT서비스(ServiceImmediately) 통합 포털 | [🔗 SaaS 포털 열기](https://korean-mock-saas-330751298968.asia-northeast3.run.app/) |
+| **소프트웨어 설계서** | `docs/SDD.md` | 시스템 구조, RAG 데이터 규격, FastMCP API 명세, 오케스트레이션 강령 | [📥 다운로드](../docs/SDD.md) &bull; [📖 전용 뷰어](../sdd_viewer.html) |
+| **사내 복무 규정 PDF** | `gs://oreobox/policy/leave_policy_2026.pdf` | 문서번호 POL-HR-2026-004 (연차 및 병가 운영 지침) | [📥 다운로드](../docs/policies/leave_policy_2026.pdf) &bull; [📖 열람실](../policy_viewer.html) |
+| **IT 자산 지침 PDF** | `gs://oreobox/policy/it_hardware_guidelines.pdf` | 문서번호 POL-IT-2026-009 (PC 및 하드웨어 지원 규정) | [📥 다운로드](../docs/policies/it_hardware_guidelines.pdf) &bull; [📖 열람실](../policy_viewer.html) |
+| **한국형 Mock SaaS 웹 포털** | `https://korean-mock-saas-dri5akvbzq-du.a.run.app/` | 인사관리(WorkWeek) 및 IT서비스(ServiceImmediately) 통합 포털 | [🔗 SaaS 포털 열기](https://korean-mock-saas-dri5akvbzq-du.a.run.app/) |
 
 ### 소프트웨어 설계서(SDD)의 목적과 스펙 기반 개발(Spec-Driven Development)
 
@@ -249,7 +249,23 @@ agents-cli --version
 
 ### 2단계: agents-cli를 활용한 공식 에이전트 프로젝트 뼈대 생성
 
-`agents-cli`는 Google Agent Platform에서 에이전트 프로젝트 생성(`create`), 로컬 실행(`run`), 평가(`eval`), 프로덕션 배포(`deploy`)를 일관되게 관리하는 공식 라이프사이클 도구입니다.
+Google Agent Platform의 공식 툴체인인 `agents-cli`를 사용하여 프로덕션 표준 에이전트 프로젝트를 초기화합니다.
+
+#### agents-cli 개요 및 5대 핵심 기능 그룹
+`agents-cli`는 단순한 코드 스캐폴딩 도구를 넘어, Google ADK(Agent Development Kit) 기반 에이전트의 전체 수명주기(Lifecycle)를 엔드-투-엔드로 표준화한 Google Cloud 공식 프레임워크입니다:
+
+1. **프로젝트 스캐폴딩 및 의존성 관리 (`create`, `install`, `scaffold enhance`)**: 프로덕션 표준 디렉터리 구조를 생성하고, `pyproject.toml`에 선언된 170여 개 공식 패키지를 uv 기반 프로젝트 전용 가상 환경(`.venv`)에 고속 동기화합니다.
+2. **로컬 이너루프 검증 및 디버깅 (`run`, `playground`)**: `agents-cli run "질의"`로 터미널에서 즉시 스트리밍 추론을 검증하고, `agents-cli playground`로 ADK 공식 시각적 웹 대시보드(이벤트 타임라인, 도구 호출, 아티팩트 트리)를 실행합니다.
+3. **정량적 품질 평가 엔진 (`eval run`, `generate`, `grade`)**: 골든 데이터셋 기반으로 작업 완수율(Task Success Rate), 도구 선택 정확도(Tool Selection Accuracy), 환각 차단율(Faithfulness/Hallucination Check)을 LLM-as-a-Judge로 자동 채점합니다.
+4. **프로덕션 인프라 배포 (`deploy`)**: Cloud Run 또는 GKE 환경으로 컨테이너 빌드 및 서버리스 배포를 자동화합니다.
+5. **Gemini Enterprise 사내 갤러리 공개 (`publish gemini-enterprise`)**: 사내 테넌트의 Gemini Enterprise 또는 Agent Registry에 A2A(Agent-to-Agent) 규격으로 원클릭 등록합니다.
+
+#### agents-cli-manifest.yaml의 역할과 구조
+프로젝트 루트에 생성되는 `agents-cli-manifest.yaml`은 `agents-cli`가 해당 디렉터리를 에이전트 프로젝트로 인식하도록 선언하는 핵심 메타데이터 파일입니다:
+- `agent_directory`: 에이전트 패키지 디렉터리 경로 (`app`)
+- `root_agent_name`: 최상위 오케스트레이터 에이전트 식별자 (`enterprise_ops_agent`)
+- `deployment_target`: 배포 대상 인프라 (`cloud_run`)
+- `session_type`: 세션 지속성 계층 (`in_memory`)
 
 터미널에서 다음 명령어를 실행하여 Cloud Run 배포와 인메모리 세션을 기본 지원하는 표준 에이전트 프로젝트를 생성합니다:
 
@@ -308,6 +324,12 @@ cd enterprise-ops-agent
 ### 3단계: 소프트웨어 설계서(SDD) 및 사내 규정 원본 다운로드
 
 프로젝트 디렉터리(`~/enterprise-ops-agent/`) 내부의 `docs/` 폴더에 사내 소프트웨어 설계서와 규정 PDF 원본 문서를 다운로드합니다.
+
+> [!NOTE]
+> **소프트웨어 설계서 및 사내 규정 전용 뷰어 열람 안내**  
+> 실습 중 설계서나 사내 복무/IT 지침 원문을 편리하게 참조하실 수 있도록, 방해 요소 없이 문서에만 집중할 수 있는 **독립형 전용 뷰어 페이지**를 새 탭으로 제공합니다:
+> - [소프트웨어 설계서 (SDD.md) 전용 뷰어 열기 (새 탭)](../sdd_viewer.html)
+> - [사내 규정 PDF (POL-HR/IT) 원본 열람실 열기 (새 탭)](../policy_viewer.html)
 
 #### 옵션 A: Google Cloud Storage(GCS) 직접 다운로드 (기본 권장)
 실습 콘솔 계정 인증이 적용된 터미널에서 `gsutil` 명령어로 단 한 번에 다운로드합니다:
@@ -368,11 +390,29 @@ agents-cli install
 
 ---
 
-### 5단계: agy를 통한 프로젝트 컨텍스트 그라운딩
+### 5단계: agy 기동 및 세션 관리 (디렉터리 위치, 종료, CLI 실행, agy --continue 복귀)
 
-실행 중인 **Antigravity CLI (`agy`)** 터미널 창으로 전환합니다 (반드시 생성된 `~/enterprise-ops-agent` 디렉터리에서 `agy`가 실행되어 있어야 합니다).
+#### 1. 반드시 프로젝트 루트 디렉터리로 이동 후 agy 실행
+Antigravity CLI(`agy`)는 실행 시점의 현재 작업 디렉터리를 프로젝트 워크스페이스로 인식합니다. 따라서 반드시 `enterprise-ops-agent` 디렉터리 내부로 이동한 후 `agy`를 실행해야 하위 `docs/SDD.md` 및 `app/` 코드를 온전히 그라운딩할 수 있습니다:
 
-`agy`의 입력창에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다:
+```bash
+cd ~/enterprise-ops-agent
+agy
+```
+
+#### 2. 핵심: agy 세션 일시 종료 -> 터미널 CLI 실행 -> 기존 세션 복귀 워크플로
+에이전트 개발 중 단위 테스트나 `agents-cli` 명령어를 직접 터미널에서 실행해야 할 때가 있습니다:
+1. **agy 일시 종료**: 대화창에서 `Ctrl+D` (두 번) 또는 `/exit`를 입력하여 터미널 bash 프롬프트로 빠져나옵니다.
+2. **터미널 CLI 작업**: 단위 테스트(`python3 tests/test_scenarios.py`)나 스모크 테스트(`agents-cli run ...`)를 실행합니다.
+3. **기존 agy 세션 복귀 (`agy --continue` / `agy -c`)**: 터미널에서 `agy --continue` (또는 `agy -c`)를 입력하면, 이전 대화 기록과 작업 기억이 100% 유지된 상태로 복귀하여 연속 작업을 지시할 수 있습니다.
+   *(중요: 단순히 `agy`만 입력하면 대화 기록이 초기화된 새 세션이 시작되므로, 반드시 `agy --continue`를 사용하여 이전 컨텍스트를 복원하세요.)*
+
+> [!TIP]
+> **멀티 터미널 탭 대안 안내**  
+> Konsole 터미널에서 새 탭(**Ctrl+Shift+T**)을 하나 더 열어, 탭 1에서는 `agy`를 계속 띄워두고 탭 2에서 bash 명령어를 실행하는 멀티 탭 분리 방식도 지원됩니다.
+
+#### 3. agy를 통한 프로젝트 컨텍스트 그라운딩 프롬프트 입력
+실행 중인 `agy` 대화창에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다:
 
 ```text
 당신은 Cymbal Group Korea의 엔터프라이즈 AI 에이전트 개발자입니다.
@@ -478,7 +518,7 @@ docs/SDD.md의 2.1절 멀티 에이전트 구조와 1절 설정 규격을 참고
 
 ### 2단계: 생성된 멀티 에이전트 뼈대 검증
 
-새 터미널 탭에서 `agy`가 올바르게 멀티 에이전트를 구성했는지 실행하여 확인합니다:
+새 터미널 탭(**Ctrl+Shift+T**)을 열거나, `agy` 대화창에서 `Ctrl+D`(또는 `/exit`)로 터미널에 나온 뒤 멀티 에이전트 구성을 실행 검증합니다 (검증 후 `agy --continue`로 복귀 가능):
 
 ```bash
 cd ~/enterprise-ops-agent
@@ -544,7 +584,7 @@ docs/SDD.md의 2.2절 '사내 규정 RAG 도구 명세'를 엄격히 준수하�
 
 ### 2단계: RAG 도구 독립 실행 테스트
 
-터미널에서 `agy`가 구현한 RAG 도구를 직접 테스트하여 조항이 정확히 인출되는지 확인합니다.
+새 터미널 탭에서 실행하거나, `agy` 대화창에서 `Ctrl+D`(또는 `/exit`)로 터미널에 나온 뒤 RAG 도구를 직접 테스트하여 조항이 정확히 인출되는지 확인합니다 (검증 후 `agy --continue`로 복귀):
 
 ```bash
 python3 -c "
@@ -582,7 +622,7 @@ print(json.dumps(r2, indent=2, ensure_ascii=False))
 
 ## Task 4. agy 프롬프트 기반 FastMCP SaaS 연동 도구 구현
 
-이번 단계에서는 웹 기반 Mock SaaS 플랫폼(`https://korean-mock-saas-330751298968.asia-northeast3.run.app/`)과 통신하는 FastMCP 클라이언트 도구(`app/tools/mcp_tools.py`)를 `agy`에게 구현하도록 요청합니다.
+이번 단계에서는 웹 기반 Mock SaaS 플랫폼(`https://korean-mock-saas-dri5akvbzq-du.a.run.app/`)과 통신하는 FastMCP 클라이언트 도구(`app/tools/mcp_tools.py`)를 `agy`에게 구현하도록 요청합니다.
 
 ### FastMCP 프로토콜 규격 및 한국형 Mock SaaS 명세
 
@@ -609,7 +649,7 @@ Anthropic과 오픈소스 커뮤니티가 주도하는 Model Context Protocol(MC
 ### 1단계: Mock SaaS 웹 화면 접속 및 개인 토큰 발급
 
 1. 웹 브라우저에서 아래 Mock SaaS 주소로 접속합니다.  
-   `https://korean-mock-saas-330751298968.asia-northeast3.run.app/`
+   `https://korean-mock-saas-dri5akvbzq-du.a.run.app/`
 2. 화면 오른쪽 상단의 **MCP 토큰 발급** 버튼을 클릭합니다.
 3. 팝업 창에 나타난 고유 토큰(예: `mcp_eyJp...`)을 복사합니다.
 
@@ -642,7 +682,7 @@ docs/SDD.md의 2.3절 'FastMCP SaaS 연동 도구 명세'를 바탕으로 app/to
    - create_hardware_incident_ticket(employee_id: str, title: str, description: str, category: str, priority: str)
    - add_ticket_comment(ticket_id: str, author: str, comment: str)
 3. HTTP 통신 필수 규칙:
-   - BASE_URL은 os.environ.get("KOREAN_MOCK_SAAS_URL", "https://korean-mock-saas-330751298968.asia-northeast3.run.app")을 사용할 것
+   - BASE_URL은 os.environ.get("KOREAN_MOCK_SAAS_URL", "https://korean-mock-saas-dri5akvbzq-du.a.run.app")을 사용할 것
    - 헤더: {'Content-Type': 'application/json', 'Accept': 'application/json, text/event-stream', 'MCP-Protocol-Version': '2025-06-18', 'X-MCP-Token': token}
    - 엔드포인트별로 최초 1회 initialize 핸드셰이크를 호출하여 'mcp-session-id'를 획득하고, 이후 모든 tools/call 요청 헤더에 'Mcp-Session-Id'로 전달할 것 (엔드포인트별 딕셔너리로 세션 분리 관리)
    - tools/call SSE 응답(data: 접두어) 파싱하여 result 객체 반환
@@ -718,7 +758,7 @@ docs/SDD.md의 3절 '오케스트레이션 및 거버넌스 강령'을 반영하
 
 ### 2단계: 자동 통합 검증 스크립트 실행 (5대 시나리오)
 
-새 터미널 탭에서 자동 통합 검증 스크립트를 실행하여 5대 시나리오가 모두 정상 통과하는지 확인합니다:
+새 터미널 탭에서 실행하거나, `agy` 대화창에서 `Ctrl+D`(또는 `/exit`)로 터미널에 나온 뒤 자동 통합 검증 스크립트를 실행하여 5대 시나리오가 모두 정상 통과하는지 확인합니다 (검증 후 `agy --continue`로 복귀):
 
 ```bash
 cd ~/enterprise-ops-agent
@@ -850,7 +890,7 @@ agents-cli run "안녕하세요, 이민우입니다 (EMP-10294). 다음 주 4일
 ### 4단계: Mock SaaS 웹 화면에서 실시간 반영 확인
 
 1. 웹 브라우저에서 열어둔 **Korean Enterprise Mock SaaS 플랫폼** 탭으로 이동합니다.  
-   `https://korean-mock-saas-330751298968.asia-northeast3.run.app/`
+   `https://korean-mock-saas-dri5akvbzq-du.a.run.app/`
 2. **WorkWeek** 탭을 클릭합니다.
    - 에이전트가 신청한 연차 내역이 **휴가 신청 내역 (Leave Requests)** 목록에 `승인 대기` 상태로 등록되어 있는지 확인합니다.
 3. **ServiceImmediately** 탭을 클릭합니다.

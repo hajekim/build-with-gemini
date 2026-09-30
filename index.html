@@ -174,7 +174,7 @@
           <span class="font-bold text-[11px]">실습 시스템 정상 가동 중</span>
         </div>
 
-        <a href="https://korean-mock-saas-330751298968.asia-northeast3.run.app/" target="_blank"
+        <a href="https://korean-mock-saas-dri5akvbzq-du.a.run.app/" target="_blank"
           class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold px-3 py-1.5 rounded-lg flex items-center space-x-1.5 shadow-xs transition">
           <i class="fa-solid fa-server text-xs"></i>
           <span>Mock SaaS 포털</span>
@@ -213,23 +213,31 @@
 
     <!-- Main Navigation Tabs -->
     <div class="bg-white border-b border-slate-200 px-6">
-      <div class="max-w-[1500px] mx-auto flex items-center space-x-6 text-xs font-semibold overflow-x-auto">
-        <button onclick="switchMainTab('codelab')" id="tab-codelab" class="py-3 px-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition nav-tab-active flex items-center gap-2">
-          <i class="fa-solid fa-laptop-code text-blue-600"></i>
-          <span>실습 워크스테이션 (Interactive Studio)</span>
-        </button>
-        <button onclick="switchMainTab('sdd')" id="tab-sdd" class="py-3 px-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition flex items-center gap-2">
-          <i class="fa-solid fa-file-shield text-indigo-600"></i>
-          <span>소프트웨어 설계서 (SDD.md 뷰어)</span>
-        </button>
-        <button onclick="switchMainTab('policies')" id="tab-policies" class="py-3 px-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition flex items-center gap-2">
-          <i class="fa-solid fa-book-bookmark text-rose-500"></i>
-          <span>사내 규정 PDF 원본 열람실</span>
-        </button>
-        <button onclick="switchMainTab('saas')" id="tab-saas" class="py-3 px-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition flex items-center gap-2">
-          <i class="fa-solid fa-network-wired text-emerald-600"></i>
-          <span>Mock SaaS 및 FastMCP 스펙</span>
-        </button>
+      <div class="max-w-[1500px] mx-auto flex items-center justify-between text-xs font-semibold overflow-x-auto">
+        <div class="flex items-center space-x-6">
+          <button onclick="switchMainTab('codelab')" id="tab-codelab" class="py-3 px-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition nav-tab-active flex items-center gap-2">
+            <i class="fa-solid fa-laptop-code text-blue-600"></i>
+            <span>실습 워크스테이션 (Interactive Studio)</span>
+          </button>
+          <button onclick="switchMainTab('saas')" id="tab-saas" class="py-3 px-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition flex items-center gap-2">
+            <i class="fa-solid fa-network-wired text-emerald-600"></i>
+            <span>Mock SaaS 및 FastMCP 스펙</span>
+          </button>
+        </div>
+
+        <!-- Standalone Dedicated Viewers (New Tab) -->
+        <div class="hidden sm:flex items-center gap-2.5 py-2">
+          <a href="sdd_viewer.html" target="_blank" class="py-1.5 px-3 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold transition flex items-center gap-1.5 border border-indigo-200 shadow-2xs">
+            <i class="fa-solid fa-file-shield text-indigo-600"></i>
+            <span>설계서(SDD) 전용 뷰어</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-[9px] opacity-70"></i>
+          </a>
+          <a href="policy_viewer.html" target="_blank" class="py-1.5 px-3 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold transition flex items-center gap-1.5 border border-emerald-200 shadow-2xs">
+            <i class="fa-solid fa-book-bookmark text-emerald-600"></i>
+            <span>사내 규정 전용 열람실</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-[9px] opacity-70"></i>
+          </a>
+        </div>
       </div>
     </div>
 
@@ -852,15 +860,50 @@ agents-cli create enterprise-ops-agent \
 cd enterprise-ops-agent</code></pre>
                 </div>
 
-                <!-- Scaffold Explanation Callout -->
-                <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 space-y-1.5 text-xs text-indigo-950 font-medium">
-                  <div class="font-bold flex items-center gap-2 text-indigo-900 text-xs">
-                    <i class="fa-solid fa-folder-tree text-indigo-600"></i>
-                    <span>agents-cli create가 자동 스캐폴딩한 표준 구성 요소</span>
+                <!-- agents-cli Deep Dive Card -->
+                <div class="bg-gradient-to-r from-blue-50/80 via-indigo-50/60 to-white border border-blue-200 rounded-xl p-4 space-y-3 shadow-xs">
+                  <div class="flex items-center justify-between border-b border-blue-100 pb-2">
+                    <span class="font-bold text-blue-950 text-xs flex items-center gap-2">
+                      <i class="fa-solid fa-cube text-blue-600"></i>
+                      <span>Google Agent Platform 공식 툴체인: agents-cli 아키텍처 가이드</span>
+                    </span>
+                    <span class="text-[10px] bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded-full font-mono">ADK 2.3.0 Ecosystem</span>
                   </div>
                   <p class="text-[11px] text-slate-700 leading-relaxed font-normal">
-                    명령어를 실행하면 <code class="font-mono text-indigo-800 bg-indigo-100 px-1 py-0.5 rounded font-bold">enterprise-ops-agent/</code> 디렉터리에 프로젝트 매니페스트(<code class="font-mono text-slate-800">agents-cli-manifest.yaml</code>), 기본 에이전트 뼈대(<code class="font-mono text-slate-800">app/agent.py</code>), SSE 스트리밍 서버(<code class="font-mono text-slate-800">app/fast_api_app.py</code>), 정량 평가 설정(<code class="font-mono text-slate-800">tests/eval/</code>), 그리고 <code class="font-mono text-slate-800">Dockerfile</code>이 자동 생성됩니다.
+                    <strong>agents-cli란:</strong> 단순한 코드 생성기를 넘어, 에이전트의 <strong>스캐폴딩(create) &bull; 의존성 동기화(install) &bull; 로컬 추론(run) &bull; 대화형 디버깅(playground) &bull; 정량 평가(eval) &bull; 프로덕션 배포(deploy) &bull; 사내 레지스트리 공개(publish)</strong>까지 엔드-투-엔드 라이프사이클 전 과정을 표준화한 Google Cloud 공식 프레임워크입니다.
                   </p>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-[11px]">
+                    <div class="bg-white p-2.5 rounded-lg border border-slate-200 space-y-1">
+                      <span class="font-bold text-slate-800 flex items-center gap-1.5">
+                        <i class="fa-solid fa-play text-blue-600 text-[10px]"></i>
+                        <span>로컬 이너루프 (run &amp; playground)</span>
+                      </span>
+                      <p class="text-slate-600 text-[10px] leading-relaxed">
+                        <code class="font-mono text-blue-700">agents-cli run "질의"</code>로 터미널에서 즉시 스트리밍 추론을 검증하고, <code class="font-mono text-blue-700">agents-cli playground</code>로 ADK 공식 시각적 웹 대시보드를 구동합니다.
+                      </p>
+                    </div>
+                    <div class="bg-white p-2.5 rounded-lg border border-slate-200 space-y-1">
+                      <span class="font-bold text-slate-800 flex items-center gap-1.5">
+                        <i class="fa-solid fa-rocket text-indigo-600 text-[10px]"></i>
+                        <span>배포 및 거버넌스 (deploy &amp; publish)</span>
+                      </span>
+                      <p class="text-slate-600 text-[10px] leading-relaxed">
+                        <code class="font-mono text-indigo-700">agents-cli deploy</code> 한 줄로 Cloud Run 컨테이너를 빌드/배포하고, <code class="font-mono text-indigo-700">agents-cli publish gemini-enterprise</code>로 사내 갤러리에 A2A로 등록합니다.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Step 1-B: agents-cli install -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2">
+                  <span class="font-bold text-slate-800 text-xs block flex items-center gap-1.5">
+                    <i class="fa-solid fa-arrows-rotate text-emerald-600"></i>
+                    <span>프로젝트 전용 가상 환경 동기화 (agents-cli install)</span>
+                  </span>
+                  <p class="text-[11px] text-slate-600 leading-relaxed font-normal">
+                    프로젝트 디렉터리에서 <code class="font-mono text-emerald-700 font-bold bg-white px-1.5 py-0.5 rounded border border-slate-200">agents-cli install</code>을 실행하면, <code class="font-mono">pyproject.toml</code>에 선언된 170여 개 공식 패키지가 프로젝트 전용 가상 환경(<code class="font-mono">.venv</code>)에 자동 동기화(uv sync)됩니다.
+                  </p>
+                  <pre class="p-2.5 bg-[#090d16] rounded-lg font-mono text-[11px] text-emerald-300"><code>cd ~/enterprise-ops-agent && agents-cli install</code></pre>
                 </div>
               </div>
 
@@ -875,6 +918,32 @@ cd enterprise-ops-agent</code></pre>
                 </div>
 
                 <div class="space-y-3 text-xs">
+                  <!-- Dedicated Standalone Viewers Prompt Card -->
+                  <div class="bg-gradient-to-r from-indigo-50/90 via-blue-50/70 to-emerald-50/80 border border-indigo-200 rounded-xl p-3.5 space-y-2">
+                    <div class="flex items-center justify-between">
+                      <span class="font-bold text-indigo-950 flex items-center gap-1.5">
+                        <i class="fa-solid fa-window-maximize text-indigo-600"></i>
+                        <span>소프트웨어 설계서 및 사내 규정 전용 뷰어 열람실 안내</span>
+                      </span>
+                      <span class="text-[10px] font-bold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-full">집중 열람 모드</span>
+                    </div>
+                    <p class="text-[11px] text-slate-600 leading-relaxed font-normal">
+                      실습 중 설계서나 사내 복무/IT 지침 원문을 편리하게 참조하실 수 있도록, 방해 요소 없이 문서에만 집중할 수 있는 <strong>독립형 전용 뷰어 페이지</strong>를 새 탭으로 제공합니다:
+                    </p>
+                    <div class="flex flex-wrap items-center gap-2 pt-1">
+                      <a href="sdd_viewer.html" target="_blank" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-file-shield"></i>
+                        <span>소프트웨어 설계서 (SDD.md) 전용 뷰어 열기</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75"></i>
+                      </a>
+                      <a href="policy_viewer.html" target="_blank" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-book-bookmark"></i>
+                        <span>사내 규정 PDF (POL-HR/IT) 원본 열람실 열기</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75"></i>
+                      </a>
+                    </div>
+                  </div>
+
                   <!-- Option A: GCS -->
                   <div class="bg-emerald-50/60 border border-emerald-200 rounded-xl p-3.5 space-y-2">
                     <span class="font-bold text-emerald-900 block flex items-center gap-1.5">
@@ -916,23 +985,57 @@ curl -fsSL https://build.geap.dev/docs/policies/it_hardware_guidelines.pdf -o do
                 </div>
               </div>
 
-              <!-- Step 3: agy context grounding -->
+              <!-- Step 3: agy context grounding & workflow execution sequence -->
               <div class="card-studio p-5 space-y-3">
-                <h3 class="font-bold text-blue-700 text-xs uppercase tracking-wider flex items-center gap-1.5">
-                  <i class="fa-solid fa-terminal"></i>
-                  <span>3. agy에게 SDD 기반 컨텍스트 요약 지시 (agy 대화창)</span>
-                </h3>
-                <div class="bg-[#090d16] border border-slate-800 rounded-xl overflow-hidden shadow-md">
-                  <div class="bg-[#131b2e] px-4 py-2 border-b border-slate-800 flex items-center justify-between">
-                    <span class="text-[11px] text-cyan-400 font-mono">agy prompt</span>
-                    <button class="px-2.5 py-1 rounded bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white font-semibold text-[11px] transition flex items-center gap-1" onclick="copyCode(this)">
-                      <i class="fa-regular fa-copy"></i> 프롬프트 복사
-                    </button>
+                <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                  <h3 class="font-bold text-blue-700 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-terminal"></i>
+                    <span>3. agy 기동 및 세션 관리 (종료 &bull; CLI 실행 &bull; 세션 복귀)</span>
+                  </h3>
+                  <span class="text-[10px] font-mono bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded-full">agy --continue</span>
+                </div>
+
+                <div class="space-y-3 text-xs">
+                  <div class="bg-[#090d16] border border-slate-800 rounded-xl overflow-hidden shadow-md">
+                    <div class="bg-[#131b2e] px-4 py-2 border-b border-slate-800 flex items-center justify-between">
+                      <span class="text-[11px] text-emerald-400 font-mono">bash terminal</span>
+                      <button class="px-2.5 py-1 rounded bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white font-semibold text-[11px] transition flex items-center gap-1" onclick="copyCode(this)">
+                        <i class="fa-regular fa-copy"></i> 명령어 복사
+                      </button>
+                    </div>
+                    <pre class="p-4 font-mono text-xs text-emerald-300 leading-relaxed"><code># 1. 반드시 프로젝트 루트 디렉터리로 이동 후 agy 실행
+cd ~/enterprise-ops-agent
+agy</code></pre>
                   </div>
-                  <pre class="p-4 font-mono text-xs text-slate-200 whitespace-pre-wrap leading-relaxed"><code>당신은 Cymbal Group Korea의 엔터프라이즈 AI 에이전트 개발자입니다.
+
+                  <!-- agy Session Continuation Guide Box -->
+                  <div class="bg-amber-50 border border-amber-200 rounded-xl p-3.5 text-xs text-amber-950 space-y-1.5 font-medium">
+                    <span class="font-bold flex items-center gap-1.5 text-amber-900">
+                      <i class="fa-solid fa-arrows-split-up-and-left text-amber-600"></i>
+                      <span>핵심: agy 대화 중단 -> 터미널 CLI 실행 -> 이전 세션 복귀 워크플로</span>
+                    </span>
+                    <p class="text-[11px] text-slate-700 leading-relaxed font-normal">
+                      1. <strong>agy 일시 종료</strong>: 대화창에서 <code class="font-mono font-bold bg-white px-1 py-0.5 rounded border border-amber-200">Ctrl+D</code> (두 번) 또는 <code class="font-mono font-bold bg-white px-1 py-0.5 rounded border border-amber-200">/exit</code>를 입력하여 터미널로 복귀합니다.<br>
+                      2. <strong>터미널 CLI 작업</strong>: 단위 테스트(<code class="font-mono text-slate-900">python3 tests/test_scenarios.py</code>)나 스모크 테스트(<code class="font-mono text-slate-900">agents-cli run ...</code>)를 실행합니다.<br>
+                      3. <strong>기존 agy 세션 복귀</strong>: 터미널에서 <code class="font-mono font-bold text-amber-900 bg-amber-100 px-1.5 py-0.5 rounded border border-amber-300">agy --continue</code> (또는 <code class="font-mono font-bold text-amber-900">agy -c</code>)를 입력하면, 이전 대화 기록과 작업 기억이 100% 유지된 상태로 복귀하여 연속 작업을 지시할 수 있습니다.
+                    </p>
+                  </div>
+
+                  <p class="text-xs text-slate-600 font-medium">실행 중인 agy 대화창에 다음 프롬프트를 입력하여 소프트웨어 설계서(SDD) 내용을 요약시킵니다:</p>
+
+                  <div class="bg-[#090d16] border border-slate-800 rounded-xl overflow-hidden shadow-md">
+                    <div class="bg-[#131b2e] px-4 py-2 border-b border-slate-800 flex items-center justify-between">
+                      <span class="text-[11px] text-cyan-400 font-mono">agy prompt</span>
+                      <button class="px-2.5 py-1 rounded bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white font-semibold text-[11px] transition flex items-center gap-1" onclick="copyCode(this)">
+                        <i class="fa-regular fa-copy"></i> 프롬프트 복사
+                      </button>
+                    </div>
+                    <pre class="p-4 font-mono text-xs text-slate-200 whitespace-pre-wrap leading-relaxed"><code>당신은 Cymbal Group Korea의 엔터프라이즈 AI 에이전트 개발자입니다.
 docs/SDD.md 파일의 내용을 꼼꼼히 읽고, 전체 시스템 아키텍처와 도구 구성 요소를 파악하세요.
 그리고 현재 프로젝트 디렉터리의 컨텍스트를 요약한 context_summary.md 파일을 docs/ 디렉터리에 생성하세요.</code></pre>
+                  </div>
                 </div>
+              </div>
                 <p class="text-xs text-slate-600 font-medium">agy가 제안하는 파일 생성 변경사항을 확인하고 <strong>Allow</strong>를 선택합니다.</p>
               </div>
             </div>
@@ -1252,7 +1355,7 @@ print(json.dumps(search_company_policy('4일 연속 연차 신청 기한', categ
                       <span>Korean Mock SaaS 포털 및 FastMCP 프로토콜 규격</span>
                     </h3>
                   </div>
-                  <a href="https://korean-mock-saas-330751298968.asia-northeast3.run.app/" target="_blank" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 shrink-0">
+                  <a href="https://korean-mock-saas-dri5akvbzq-du.a.run.app/" target="_blank" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 shrink-0">
                     <span>Mock SaaS 포털 열기</span>
                     <i class="fa-solid fa-arrow-up-right-from-square"></i>
                   </a>
@@ -1305,7 +1408,7 @@ print(json.dumps(search_company_policy('4일 연속 연차 신청 기한', categ
               <div class="card-studio p-5 space-y-3">
                 <h3 class="font-bold text-slate-900 text-xs uppercase tracking-wider">1. 개인 MCP 토큰 발급 및 환경변수 등록 (터미널)</h3>
                 <p class="text-xs text-slate-600 font-medium">
-                  <a href="https://korean-mock-saas-330751298968.asia-northeast3.run.app/" target="_blank" class="text-blue-600 underline font-bold">Mock SaaS 포털</a>에서 [MCP 토큰 발급]을 눌러 복사한 뒤 등록합니다:
+                  <a href="https://korean-mock-saas-dri5akvbzq-du.a.run.app/" target="_blank" class="text-blue-600 underline font-bold">Mock SaaS 포털</a>에서 [MCP 토큰 발급]을 눌러 복사한 뒤 등록합니다:
                 </p>
                 <div class="bg-[#090d16] border border-slate-800 rounded-xl overflow-hidden shadow-md">
                   <div class="bg-[#131b2e] px-4 py-2 border-b border-slate-800 flex items-center justify-between">
@@ -1977,7 +2080,7 @@ python3 tests/test_scenarios.py</code></pre>
               </div>
               <div class="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-slate-200">
                 <span class="text-slate-500 font-medium">Mock SaaS 포털:</span>
-                <a href="https://korean-mock-saas-330751298968.asia-northeast3.run.app/" target="_blank" class="text-indigo-600 font-bold underline text-[11px] flex items-center gap-1">
+                <a href="https://korean-mock-saas-dri5akvbzq-du.a.run.app/" target="_blank" class="text-indigo-600 font-bold underline text-[11px] flex items-center gap-1">
                   <span>Cloud Run 포털 열기</span>
                   <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
                 </a>
@@ -2020,92 +2123,6 @@ python3 tests/test_scenarios.py</code></pre>
       </div>
     </div>
 
-    <!-- =================================================================== -->
-    <!-- TAB 2: SDD VIEWER TAB -->
-    <!-- =================================================================== -->
-    <div id="view-sdd" class="main-view flex-1 max-w-[1500px] w-full mx-auto p-6 overflow-y-auto hidden">
-      <div class="card-studio p-6 border-slate-200 space-y-4">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-200 pb-4">
-          <div>
-            <span class="text-xs font-bold text-blue-600 uppercase tracking-widest">Document Spec</span>
-            <h2 class="text-xl font-bold text-slate-900">소프트웨어 설계서 (SDD.md v2.2.0)</h2>
-            <p class="text-xs text-slate-500 mt-1">3.1절 Gemini Enterprise A2A 규격 및 M6 마일스톤 포함 완본</p>
-          </div>
-          <div class="flex flex-wrap items-center gap-2">
-            <a href="https://github.com/hajekim/build-with-gemini/blob/main/docs/SDD.md" target="_blank" class="text-xs bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition font-semibold shadow-2xs" title="GitHub 웹사이트의 서식 렌더러로 SDD 문서를 봅니다">
-              <i class="fa-brands fa-github text-slate-800"></i>
-              <span>GitHub 렌더링 보기</span>
-            </a>
-            <a href="docs/SDD.md" target="_blank" class="text-xs bg-white hover:bg-slate-50 text-blue-600 border border-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition font-semibold shadow-2xs" title="브라우저 새 탭에서 텍스트 원본으로 열람합니다">
-              <i class="fa-solid fa-arrow-up-right-from-square"></i>
-              <span>새 탭에서 텍스트 원본 열기</span>
-            </a>
-            <a href="docs/SDD.md" download class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition font-bold shadow-xs" title="로컬 PC로 SDD.md 파일을 다운로드합니다">
-              <i class="fa-solid fa-download"></i>
-              <span>파일 다운로드</span>
-            </a>
-          </div>
-        </div>
-        <div class="bg-[#090d16] p-5 rounded-xl border border-slate-800 font-mono text-xs text-slate-200 overflow-x-auto whitespace-pre-wrap leading-relaxed shadow-inner" id="sdd-content">
-          설계서 로딩 중...
-        </div>
-      </div>
-    </div>
-
-    <!-- =================================================================== -->
-    <!-- TAB 3: POLICY PDF VIEWER TAB -->
-    <!-- =================================================================== -->
-    <div id="view-policies" class="main-view flex-1 max-w-[1500px] w-full mx-auto p-6 overflow-y-auto hidden space-y-6">
-      <div>
-        <span class="text-xs font-bold text-blue-600 uppercase tracking-widest">Authoritative Documents</span>
-        <h2 class="text-2xl font-black text-slate-900 mt-1">사내 규정 PDF 원본 열람실</h2>
-        <p class="text-sm text-slate-600 mt-1">에이전트가 RAG로 참조하는 Cloud Storage 내 Ground Truth 원본 지침서입니다.</p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Leave Policy Card -->
-        <div class="card-studio p-6 border-slate-200 flex flex-col justify-between space-y-4 hover:border-slate-300">
-          <div class="space-y-3">
-            <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center text-xl shadow-xs">
-              <i class="fa-solid fa-file-pdf"></i>
-            </div>
-            <div>
-              <span class="text-[10px] font-bold uppercase tracking-wider text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">POL-HR-2026-004</span>
-              <h3 class="text-lg font-bold text-slate-900 mt-1">사내 복무 규정: 연차 및 병가 운영 지침</h3>
-              <p class="text-xs text-slate-600 mt-1.5 leading-relaxed font-normal">
-                연차 발생 기준(월 1.25일/1년 15일), 사전 신청 기한(3일 초과 연속 연차 시 7영업일 전 및 팀장 승인), 유급 병가(14일) 증빙 제출 기준 수록.
-              </p>
-            </div>
-          </div>
-          <div class="pt-4 border-t border-slate-200 flex gap-2">
-            <a href="docs/policies/leave_policy_2026.pdf" target="_blank" class="flex-1 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold text-center transition shadow-xs">
-              PDF 열람하기 (새 탭)
-            </a>
-          </div>
-        </div>
-
-        <!-- Hardware Policy Card -->
-        <div class="card-studio p-6 border-slate-200 flex flex-col justify-between space-y-4 hover:border-slate-300">
-          <div class="space-y-3">
-            <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center text-xl shadow-xs">
-              <i class="fa-solid fa-file-pdf"></i>
-            </div>
-            <div>
-              <span class="text-[10px] font-bold uppercase tracking-wider text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">POL-IT-2026-009</span>
-              <h3 class="text-lg font-bold text-slate-900 mt-1">사내 IT 자산 운용 지침: PC 및 하드웨어 지원</h3>
-              <p class="text-xs text-slate-600 mt-1.5 leading-relaxed font-normal">
-                엔지니어링 직군 고성능 노트북(MacBook Pro M3 Max 64GB) 사양, 정기 교체 주기(36개월), 배터리 스웰링 결함 시 4시간 내 점검 SLA 수록.
-              </p>
-            </div>
-          </div>
-          <div class="pt-4 border-t border-slate-200 flex gap-2">
-            <a href="docs/policies/it_hardware_guidelines.pdf" target="_blank" class="flex-1 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold text-center transition shadow-xs">
-              PDF 열람하기 (새 탭)
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- =================================================================== -->
     <!-- TAB 4: MOCK SAAS SPEC TAB -->

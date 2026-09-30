@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ko" class="h-full bg-slate-50">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>소프트웨어 설계서 (SDD.md v2.2.0) - Cymbal Enterprise Ops Agent</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Markdown-it & Mermaid -->
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    pre, code { font-family: 'JetBrains Mono', monospace; }
+    .prose h1 { font-size: 1.75rem; font-weight: 800; color: #0f172a; margin-top: 1.5rem; margin-bottom: 1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+    .prose h2 { font-size: 1.35rem; font-weight: 700; color: #1e293b; margin-top: 2rem; margin-bottom: 0.75rem; border-bottom: 1px solid #cbd5e1; padding-bottom: 0.35rem; }
+    .prose h3 { font-size: 1.1rem; font-weight: 700; color: #334155; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+    .prose p { margin-top: 0.6rem; margin-bottom: 0.6rem; line-height: 1.65; color: #334155; }
+    .prose ul, .prose ol { margin-left: 1.5rem; margin-top: 0.5rem; margin-bottom: 0.5rem; }
+    .prose li { margin-top: 0.25rem; margin-bottom: 0.25rem; line-height: 1.6; color: #334155; }
+    .prose table { width: 100%; border-collapse: collapse; margin-top: 1rem; margin-bottom: 1rem; font-size: 0.85rem; }
+    .prose th, .prose td { border: 1px solid #cbd5e1; padding: 0.5rem 0.75rem; text-align: left; }
+    .prose th { background-color: #f1f5f9; font-weight: 700; color: #1e293b; }
+    .prose code:not(pre code) { background-color: #f1f5f9; color: #0284c7; padding: 0.15rem 0.35rem; border-radius: 0.25rem; font-weight: 600; font-size: 0.825em; border: 1px solid #e2e8f0; }
+    .prose pre { background-color: #090d16; color: #e2e8f0; padding: 1rem; border-radius: 0.75rem; overflow-x: auto; margin-top: 0.75rem; margin-bottom: 0.75rem; border: 1px solid #1e293b; font-size: 0.825rem; line-height: 1.5; }
+    .prose blockquote { border-left: 4px solid #3b82f6; padding-left: 1rem; color: #475569; background: #eff6ff; padding-top: 0.5rem; padding-bottom: 0.5rem; border-radius: 0 0.5rem 0.5rem 0; margin-top: 0.75rem; margin-bottom: 0.75rem; font-size: 0.875rem; }
+    .toc-item.active { background-color: #eff6ff; color: #1d4ed8; font-weight: 700; border-left: 3px solid #2563eb; }
+  </style>
+</head>
+<body class="h-full flex flex-col text-slate-800 antialiased">
+
+  <!-- Top Sticky Navigation Bar -->
+  <header class="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="px-2.5 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 text-xs font-semibold transition flex items-center gap-1.5 shadow-2xs">
+          <i class="fa-solid fa-arrow-left"></i>
+          <span>실습 가이드로 복귀</span>
+        </a>
+        <div class="h-4 w-px bg-slate-200"></div>
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
+          <span class="font-bold text-sm text-slate-900 tracking-tight">소프트웨어 설계서 (SDD)</span>
+          <span class="text-[10px] font-mono bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded-full">v2.2.0</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2.5">
+        <a href="docs/SDD.md" download="SDD.md" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition flex items-center gap-1.5 shadow-xs">
+          <i class="fa-solid fa-download text-[11px]"></i>
+          <span>SDD.md 다운로드</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Split Layout -->
+  <div class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex gap-8 overflow-hidden">
+    
+    <!-- Left Sticky Sidebar: TOC -->
+    <aside class="hidden lg:block w-72 shrink-0 overflow-y-auto pr-2 border-r border-slate-200 h-[calc(100vh-6rem)] sticky top-20 text-xs">
+      <div class="space-y-4">
+        <div>
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-2">목차 (Table of Contents)</span>
+          <nav id="toc-nav" class="space-y-1">
+            <a href="#1" class="toc-item block px-2.5 py-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">1. 시스템 개요 및 목표</a>
+            <a href="#11" class="toc-item block px-4 py-1 rounded-md text-slate-500 hover:text-slate-900 transition">1.1 배경 및 문제 정의</a>
+            <a href="#12" class="toc-item block px-4 py-1 rounded-md text-slate-500 hover:text-slate-900 transition">1.2 시스템 목표 및 KPI</a>
+            <a href="#2" class="toc-item block px-2.5 py-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">2. 아키텍처 및 도구 명세</a>
+            <a href="#21" class="toc-item block px-4 py-1 rounded-md text-slate-500 hover:text-slate-900 transition">2.1 Hub-and-Spoke 멀티 에이전트</a>
+            <a href="#22" class="toc-item block px-4 py-1 rounded-md text-slate-500 hover:text-slate-900 transition">2.2 사내 규정 RAG 도구 명세</a>
+            <a href="#23" class="toc-item block px-4 py-1 rounded-md text-slate-500 hover:text-slate-900 transition">2.3 FastMCP SaaS 연동 도구 명세</a>
+            <a href="#3" class="toc-item block px-2.5 py-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">3. 오케스트레이션 및 거버넌스</a>
+            <a href="#31" class="toc-item block px-4 py-1 rounded-md text-slate-500 hover:text-slate-900 transition">3.1 실습 1 & 2 핸드오프 경계</a>
+          </nav>
+        </div>
+
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-[11px] text-blue-900 space-y-1.5">
+          <span class="font-bold flex items-center gap-1.5 text-blue-950">
+            <i class="fa-solid fa-lightbulb text-blue-600"></i>
+            <span>설계서 활용 가이드</span>
+          </span>
+          <p class="leading-relaxed text-slate-600">
+            이 설계서는 Antigravity(agy)에 주입되는 단일 진실 공급원(SSOT)입니다. 도구 함수 시그니처와 허브 거버넌스 지침이 엄격하게 명시되어 있습니다.
+          </p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 min-w-0 overflow-y-auto max-h-[calc(100vh-6rem)] pr-2">
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-8 lg:p-10">
+        <div id="loading" class="text-center py-12 text-slate-400">
+          <i class="fa-solid fa-circle-notch fa-spin text-2xl text-blue-600 mb-2"></i>
+          <p class="text-xs">소프트웨어 설계서(docs/SDD.md) 문서를 렌더링 중입니다...</p>
+        </div>
+        <article id="sdd-rendered-content" class="prose max-w-none text-xs sm:text-sm">
+          <!-- Rendered Markdown goes here -->
+        </article>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    mermaid.initialize({ startOnLoad: false, theme: 'neutral' });
+    const md = window.markdownit({
+      html: true,
+      linkify: true,
+      typographer: true
+    });
+
+    // Custom code block renderer to support Mermaid
+    const defaultFence = md.renderer.rules.fence;
+    md.renderer.rules.fence = function (tokens, idx, options, env, self) {
+      const token = tokens[idx];
+      const info = token.info ? token.info.trim() : '';
+      if (info === 'mermaid') {
+        return `<div class="mermaid my-4 p-4 bg-slate-50 border border-slate-200 rounded-xl overflow-x-auto flex justify-center">${token.content}</div>`;
+      }
+      return defaultFence(tokens, idx, options, env, self);
+    };
+
+    async function loadDocument() {
+      try {
+        const resp = await fetch('docs/SDD.md');
+        if (!resp.ok) throw new Error('SDD.md 로드 실패');
+        const text = await resp.text();
+        const html = md.render(text);
+        document.getElementById('loading').style.display = 'none';
+        const contentDiv = document.getElementById('sdd-rendered-content');
+        contentDiv.innerHTML = html;
+        await mermaid.run({ nodes: contentDiv.querySelectorAll('.mermaid') });
+      } catch (err) {
+        document.getElementById('loading').innerHTML = `
+          <div class="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs">
+            <i class="fa-solid fa-triangle-exclamation mr-1"></i> 문서 로드 중 오류가 발생했습니다: ${err.message}
+          </div>
+        `;
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', loadDocument);
+  </script>
+</body>
+</html>
