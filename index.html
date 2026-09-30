@@ -1275,7 +1275,7 @@ print(json.dumps(search_company_policy('4일 연속 연차 신청 기한', categ
               <div class="card-studio p-5 space-y-3">
                 <h3 class="font-bold text-blue-700 text-xs uppercase tracking-wider flex items-center gap-1.5">
                   <i class="fa-solid fa-terminal"></i>
-                  <span>1. 최종 에이전트 완성 프롬프트 (agy 대화창)</span>
+                  <span>1. 최종 멀티 에이전트 완성 프롬프트 (agy 대화창)</span>
                 </h3>
                 <div class="bg-[#090d16] border border-slate-800 rounded-xl overflow-hidden shadow-md">
                   <div class="bg-[#131b2e] px-4 py-2 border-b border-slate-800 flex items-center justify-between">
@@ -1284,17 +1284,38 @@ print(json.dumps(search_company_policy('4일 연속 연차 신청 기한', categ
                       <i class="fa-regular fa-copy"></i> 프롬프트 복사
                     </button>
                   </div>
-                  <pre class="p-4 font-mono text-xs text-slate-200 whitespace-pre-wrap leading-relaxed"><code>/config/workspace/docs/SDD.md의 3절 '오케스트레이션 및 거버넌스 강령'을 반영하여 agent.py를 최종 완성해주세요.
+                  <pre class="p-4 font-mono text-xs text-slate-200 whitespace-pre-wrap leading-relaxed"><code>/config/workspace/docs/SDD.md의 3절 '오케스트레이션 및 거버넌스 강령'을 반영하여 agent.py의 Hub-and-Spoke 멀티 에이전트 시스템을 최종 완성해주세요.
 
 요구사항:
-1. tools/policy_rag.py의 search_company_policy 도구 등록
-2. tools/mcp_tools.py의 get_employee_leave_balance, submit_leave_request, list_hardware_assets_and_tickets, create_hardware_incident_ticket 4개 도구 등록 (총 5개 도구)
-3. SYSTEM_INSTRUCTION에 다음 4대 핵심 행동 수칙을 강력하게 반영:
-   - [규정 우선 원칙]: 시스템에 휴가 신청이나 티켓을 발행하기 전에 반드시 'search_company_policy'를 먼저 호출할 것.
-   - [근거 명시]: POL-HR-2026-004 또는 POL-IT-2026-009의 조항 번호와 사전 신청 기한, 승인 요건을 답변에 반드시 포함할 것.
-   - [단계별 검증]: 휴가 신청 시 잔여 일수 확인 후 상신, 장비 교체 시 36개월 경과 및 긴급 결함 여부 확인 후 티켓 발행.
+1. 전문 서브 에이전트 3종 정의:
+   - hr_policy_agent: tools/policy_rag.py의 search_company_policy 도구를 소유하여 규정(POL-HR-2026-004, POL-IT-2026-009) 선검증 전담
+   - workweek_agent: tools/mcp_tools.py의 get_workweek_mcp_toolset() 및 FastMCP JSON-RPC 도구로 연차 조회, 휴가 상신/취소 전담
+   - itsm_agent: tools/mcp_tools.py의 get_itsm_mcp_toolset() 및 FastMCP JSON-RPC 도구로 장비 조회, 결함 티켓 생성 전담
+2. 중앙 허브 root_agent (enterprise_ops_agent): sub_agents=[hr_policy_agent, workweek_agent, itsm_agent]로 구성
+3. HUB_INSTRUCTION에 다음 4대 핵심 거버넌스 행동 수칙을 강력하게 반영:
+   - [규정 우선 원칙]: 시스템에 휴가 신청이나 티켓을 발행하기 전에 반드시 'hr_policy_agent'를 먼저 호출하여 사전 적합성을 검증할 것.
+   - [근거 명시]: POL-HR-2026-004 또는 POL-IT-2026-009의 조항 번호와 사전 신청 기한, 승인 요건을 최종 답변에 반드시 포함할 것.
+   - [단계별 검증]: 규정에 부합할 때만 workweek_agent 또는 itsm_agent를 호출하여 SaaS 작업을 진행할 것.
    - [친절하고 명확한 한국어 톤].
-4. get_enterprise_agent() 함수로 완성된 에이전트 객체를 반환하도록 구성할 것.</code></pre>
+4. get_enterprise_agent() 및 build_agent() 함수로 완성된 Hub-and-Spoke 루트 에이전트 객체를 반환하도록 구성할 것.</code></pre>
+                </div>
+
+                <!-- Automated Verification Script Box -->
+                <div class="mt-4 p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
+                  <div class="font-bold text-slate-800 flex items-center gap-2 text-xs">
+                    <i class="fa-solid fa-vial-circle-check text-emerald-600"></i>
+                    <span>자동 통합 테스트 스크립트로 즉시 검증 (5대 시나리오 100% PASS 확인)</span>
+                  </div>
+                  <div class="bg-[#090d16] border border-slate-800 rounded-lg overflow-hidden shadow-inner">
+                    <div class="bg-[#131b2e] px-3 py-1.5 border-b border-slate-800 flex items-center justify-between">
+                      <span class="text-[10px] text-emerald-400 font-mono">bash terminal</span>
+                      <button class="px-2 py-0.5 rounded bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white font-semibold text-[10px] transition flex items-center gap-1" onclick="copyCode(this)">
+                        <i class="fa-regular fa-copy"></i> 복사
+                      </button>
+                    </div>
+                    <pre class="p-3 font-mono text-[11px] text-emerald-300 whitespace-pre-wrap leading-relaxed"><code>python3 /config/workspace/enterprise_ops_agent/tests/test_scenarios.py</code></pre>
+                  </div>
+                  <p class="text-[11px] text-slate-500">Hub-and-Spoke 토폴로지, 규정 RAG(연차/노트북), FastMCP 실시간 세션 연동이 모두 통과하는지 4초 만에 검증합니다.</p>
                 </div>
               </div>
 

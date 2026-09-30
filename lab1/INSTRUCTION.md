@@ -391,15 +391,6 @@ python3 /config/workspace/enterprise_ops_agent/agent.py
 +-----------------------------------------------------------------------------------+
 ```
 
-```
-+-----------------------------------------------------------------------------------+
-| 출력 예시:                                                                          |
-| 2026-09-29 17:15:00 [INFO] enterprise_ops_agent: ADK 2.0 에이전트                   |
-| 'enterprise_ops_agent' 초기화 완료 (등록 도구 수: 0개)                               |
-| 에이전트 준비 완료: enterprise_ops_agent (사용 모델: gemini-3.8-flash)              |
-+-----------------------------------------------------------------------------------+
-```
-
 ---
 
 ## Task 3. agy 프롬프트 기반 사내 규정 RAG 도구 구현
@@ -596,20 +587,29 @@ print(json.dumps(list_hardware_assets_and_tickets('EMP-10294'), indent=2, ensure
 실행 중인 **Antigravity CLI (`agy`)** 터미널에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
 
 ```text
-/config/workspace/docs/SDD.md의 3절 '오케스트레이션 및 거버넌스 강령'을 반영하여 agent.py를 최종 완성해주세요.
+/config/workspace/docs/SDD.md의 3절 '오케스트레이션 및 거버넌스 강령'을 반영하여 agent.py의 Hub-and-Spoke 멀티 에이전트 시스템을 최종 완성해주세요.
 
 요구사항:
-1. tools/policy_rag.py의 search_company_policy 도구 등록
-2. tools/mcp_tools.py의 get_employee_leave_balance, submit_leave_request, list_hardware_assets_and_tickets, create_hardware_incident_ticket 4개 도구 등록 (총 5개 도구)
-3. SYSTEM_INSTRUCTION에 다음 4대 핵심 행동 수칙을 강력하게 반영:
-   - [규정 우선 원칙]: 시스템에 휴가 신청이나 티켓을 발행하기 전에 반드시 'search_company_policy'를 먼저 호출할 것.
-   - [근거 명시]: POL-HR-2026-004 또는 POL-IT-2026-009의 조항 번호와 사전 신청 기한, 승인 요건을 답변에 반드시 포함할 것.
-   - [단계별 검증]: 휴가 신청 시 잔여 일수 확인 후 상신, 장비 교체 시 36개월 경과 및 긴급 결함 여부 확인 후 티켓 발행.
+1. 전문 서브 에이전트 3종 정의:
+   - hr_policy_agent: tools/policy_rag.py의 search_company_policy 도구를 소유하여 규정(POL-HR-2026-004, POL-IT-2026-009) 선검증 전담
+   - workweek_agent: tools/mcp_tools.py의 get_workweek_mcp_toolset() 및 FastMCP JSON-RPC 도구로 연차 조회, 휴가 상신/취소 전담
+   - itsm_agent: tools/mcp_tools.py의 get_itsm_mcp_toolset() 및 FastMCP JSON-RPC 도구로 장비 조회, 결함 티켓 생성 전담
+2. 중앙 허브 root_agent (enterprise_ops_agent): sub_agents=[hr_policy_agent, workweek_agent, itsm_agent]로 구성
+3. HUB_INSTRUCTION에 다음 4대 핵심 거버넌스 행동 수칙을 강력하게 반영:
+   - [규정 우선 원칙]: 시스템에 휴가 신청이나 티켓을 발행하기 전에 반드시 'hr_policy_agent'를 먼저 호출하여 사전 적합성을 검증할 것.
+   - [근거 명시]: POL-HR-2026-004 또는 POL-IT-2026-009의 조항 번호와 사전 신청 기한, 승인 요건을 최종 답변에 반드시 포함할 것.
+   - [단계별 검증]: 규정에 부합할 때만 workweek_agent 또는 itsm_agent를 호출하여 SaaS 작업을 진행할 것.
    - [친절하고 명확한 한국어 톤].
-4. get_enterprise_agent() 함수로 완성된 에이전트 객체를 반환하도록 구성할 것.
+4. get_enterprise_agent() 및 build_agent() 함수로 완성된 Hub-and-Spoke 루트 에이전트 객체를 반환하도록 구성할 것.
 ```
 
 `agy`가 `agent.py` 업데이트를 제안하면 **Allow**를 선택합니다.
+
+터미널에서 자동 통합 검증 스크립트를 실행하여 5대 시나리오가 모두 통과하는지 즉시 확인할 수 있습니다:
+
+```bash
+python3 /config/workspace/enterprise_ops_agent/tests/test_scenarios.py
+```
 
 ---
 
