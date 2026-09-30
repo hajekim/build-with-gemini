@@ -295,89 +295,89 @@
               <div class="flex items-center justify-between">
                 <span class="text-xs font-bold text-slate-800 flex items-center gap-2">
                   <i class="fa-solid fa-diagram-project text-blue-600"></i>
-                  <span>엔터프라이즈 Hub-and-Spoke 멀티 에이전트 시스템 구성도</span>
+                  <span>엔터프라이즈 Orchestrator-Worker 멀티 에이전트 시스템 아키텍처</span>
                 </span>
-                <span class="text-[11px] font-mono text-slate-500 bg-slate-100 px-2 py-0.5 rounded">Google ADK 2.3.0 + FastMCP + Vertex AI Search</span>
+                <span class="text-[11px] font-mono text-slate-500 bg-slate-100 px-2 py-0.5 rounded">AgentPatterns.ai Standard &bull; Centralized Orchestration</span>
               </div>
-              <img src="lab1/images/agent_architecture.png" alt="에이전트 아키텍처" class="w-full rounded-xl border border-slate-200 shadow-sm">
+              <img src="lab1/images/agent_architecture.png" alt="Orchestrator-Worker 에이전트 아키텍처" class="w-full rounded-xl border border-slate-200 shadow-sm">
             </div>
 
-            <!-- 150 Attendees Multi-Agent Breakdown (Hub + 3 Spokes) -->
+            <!-- 150 Attendees Multi-Agent Breakdown (Lead Orchestrator + 3 Workers) -->
             <div class="space-y-3">
               <div class="flex items-center justify-between">
                 <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
                   <i class="fa-solid fa-sitemap text-indigo-600"></i>
-                  <span>멀티 에이전트 역할 분담 및 토폴로지 상세 (150명 참석자 이해 가이드)</span>
+                  <span>멀티 에이전트 역할 분담 및 토폴로지 상세 (Orchestrator-Worker 패턴)</span>
                 </h3>
-                <span class="text-[11px] text-indigo-600 font-semibold bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">Role-Specialized Architecture</span>
+                <span class="text-[11px] text-indigo-600 font-semibold bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">Centralized Orchestration</span>
               </div>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                <!-- Root Orchestrator -->
+                <!-- Lead Orchestrator -->
                 <div class="card-studio p-4 border-slate-300 bg-gradient-to-br from-slate-50 to-blue-50/30 space-y-2">
                   <div class="flex items-center justify-between">
                     <span class="font-bold text-slate-900 flex items-center gap-1.5 text-xs">
                       <span class="w-2 h-2 rounded-full bg-blue-600"></span>
-                      <span>Root Orchestrator (enterprise_ops_agent)</span>
+                      <span>Central Orchestrator (enterprise_ops_agent)</span>
                     </span>
-                    <span class="text-[10px] font-mono bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-bold">Hub</span>
+                    <span class="text-[10px] font-mono bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-bold">Lead Agent</span>
                   </div>
                   <p class="text-slate-600 text-[11px] leading-relaxed">
-                    임직원의 자연어 요청(복합 업무, 규정 문의, 근태 신청, 장비 교체 등)을 분석하여 최적의 전문 서브 에이전트에게 작업을 분배(Delegation)하고, 취합된 결과를 비즈니스 룰에 맞게 종합하여 최종 답변을 반환합니다.
+                    임직원의 자연어 요청(복합 업무, 규정 문의, 근태 신청, 장비 교체 등)을 분석하여 최적의 전문 워커에게 작업을 분배(Delegation)하고, 취합된 결과를 비즈니스 룰에 맞게 종합하여 최종 답변을 반환합니다.
                   </p>
                   <div class="text-[10px] text-slate-500 bg-white/80 p-2 rounded border border-slate-200 font-mono">
-                    <strong class="text-slate-700">모델:</strong> gemini-3.8-flash &bull; <strong class="text-slate-700">관리 Spokes:</strong> hr_policy_agent, workweek_agent, itsm_agent
+                    <strong class="text-slate-700">모델:</strong> gemini-3.8-flash (global) &bull; <strong class="text-slate-700">관리 Workers:</strong> hr_policy_agent, workweek_agent, itsm_agent
                   </div>
                 </div>
 
-                <!-- Spoke 1: hr_policy_agent -->
+                <!-- Worker 1: hr_policy_agent -->
                 <div class="card-studio p-4 border-amber-200 bg-gradient-to-br from-amber-50/40 to-white space-y-2">
                   <div class="flex items-center justify-between">
                     <span class="font-bold text-amber-900 flex items-center gap-1.5 text-xs">
                       <span class="w-2 h-2 rounded-full bg-amber-500"></span>
                       <span>사내 규정 선검증 전문가 (hr_policy_agent)</span>
                     </span>
-                    <span class="text-[10px] font-mono bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold">Spoke 1</span>
+                    <span class="text-[10px] font-mono bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold">Worker 1</span>
                   </div>
                   <p class="text-slate-600 text-[11px] leading-relaxed">
                     복무 규정(POL-HR-2026-004) 및 IT 장비 지침(POL-IT-2026-009)을 검색하여 '3일 초과 연속 연차 최소 7영업일 전 신청', '노트북 교체 주기 36개월' 등 시스템 조작 전 필수 규정 부합 여부를 검증하고 근거 조항을 제공합니다.
                   </p>
                   <div class="text-[10px] text-slate-500 bg-white/80 p-2 rounded border border-amber-100 font-mono">
-                    <strong class="text-slate-700">도구:</strong> search_company_policy (Vertex AI Search / GCS PDF Hybrid RAG)
+                    <strong class="text-slate-700">도구 스키마 격리:</strong> search_company_policy (Vertex AI Search / GCS PDF Hybrid RAG)
                   </div>
                 </div>
 
-                <!-- Spoke 2: workweek_agent -->
+                <!-- Worker 2: workweek_agent -->
                 <div class="card-studio p-4 border-emerald-200 bg-gradient-to-br from-emerald-50/40 to-white space-y-2">
                   <div class="flex items-center justify-between">
                     <span class="font-bold text-emerald-900 flex items-center gap-1.5 text-xs">
                       <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                      <span>인사 근태 SaaS 연동 전문가 (workweek_agent)</span>
+                      <span>인사 근태 SaaS 전담 워커 (workweek_agent)</span>
                     </span>
-                    <span class="text-[10px] font-mono bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold">Spoke 2</span>
+                    <span class="text-[10px] font-mono bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold">Worker 2</span>
                   </div>
                   <p class="text-slate-600 text-[11px] leading-relaxed">
                     Google ADK McpToolset을 통해 표준 FastMCP 프로토콜(/work-week/mcp)로 Korean Mock SaaS 인사 시스템과 실시간 연동되어 잔여 연차 조회, 휴가 상신, 부서원 근태 현황 조회를 전담합니다.
                   </p>
                   <div class="text-[10px] text-slate-500 bg-white/80 p-2 rounded border border-emerald-100 font-mono">
-                    <strong class="text-slate-700">프로토콜:</strong> FastMCP Streamable HTTP JSON-RPC tools/call (7개 도구 자동 바인딩)
+                    <strong class="text-slate-700">도구 스키마 격리:</strong> FastMCP Streamable HTTP JSON-RPC tools/call (WorkWeek 전용)
                   </div>
                 </div>
 
-                <!-- Spoke 3: itsm_agent -->
+                <!-- Worker 3: itsm_agent -->
                 <div class="card-studio p-4 border-purple-200 bg-gradient-to-br from-purple-50/40 to-white space-y-2">
                   <div class="flex items-center justify-between">
                     <span class="font-bold text-purple-900 flex items-center gap-1.5 text-xs">
                       <span class="w-2 h-2 rounded-full bg-purple-500"></span>
-                      <span>전산 지원 ITSM 연동 전문가 (itsm_agent)</span>
+                      <span>전산 지원 ITSM 전담 워커 (itsm_agent)</span>
                     </span>
-                    <span class="text-[10px] font-mono bg-purple-100 text-purple-800 px-1.5 py-0.5 rounded font-bold">Spoke 3</span>
+                    <span class="text-[10px] font-mono bg-purple-100 text-purple-800 px-1.5 py-0.5 rounded font-bold">Worker 3</span>
                   </div>
                   <p class="text-slate-600 text-[11px] leading-relaxed">
-                    Google ADK McpToolset을 통해 표준 FastMCP 프로토콜(/service-immediately/mcp)로 ServiceImmediately IT 서비스데스크와 연동되어 사원별 지급 장비 스펙 조회, 장애 티켓 발권, 신규 기종 교체를 처리합니다.
+                    Google ADK McpToolset을 통해 표준 FastMCP 프로토콜(/service-immediately/mcp)로 ServiceImmediately IT 서비스 데스크와 연동되어 사원별 지급 장비 스펙 조회, 장애 티켓 발권, 신규 기종 교체를 처리합니다.
                   </p>
                   <div class="text-[10px] text-slate-500 bg-white/80 p-2 rounded border border-purple-100 font-mono">
-                    <strong class="text-slate-700">프로토콜:</strong> FastMCP Streamable HTTP JSON-RPC tools/call (4개 도구 자동 바인딩)
+                    <strong class="text-slate-700">도구 스키마 격리:</strong> FastMCP Streamable HTTP JSON-RPC tools/call (ITSM 전용)
                   </div>
                 </div>
               </div>
