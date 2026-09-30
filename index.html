@@ -867,6 +867,113 @@ cd enterprise-ops-agent</code></pre>
                   </p>
                   <pre class="p-3 bg-[#090d16] rounded-lg font-mono text-[13px] text-emerald-300"><code>cd ~/enterprise-ops-agent && agents-cli install</code></pre>
                 </div>
+
+                <!-- Step 1-C: Official Google ADK Skills Injection -->
+                <div class="bg-gradient-to-r from-emerald-50/70 via-teal-50/50 to-white border border-emerald-200 rounded-2xl p-5 space-y-4 shadow-xs">
+                  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-emerald-100 pb-3">
+                    <div class="space-y-0.5">
+                      <div class="flex items-center gap-2">
+                        <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-0.5 rounded-full font-mono uppercase tracking-wider">Official Google Repository</span>
+                        <span class="text-xs bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded font-mono">ADK 2.3.0 Ecosystem</span>
+                      </div>
+                      <h4 class="font-bold text-slate-900 text-base flex items-center gap-2 mt-1">
+                        <i class="fa-solid fa-wand-magic-sparkles text-emerald-600"></i>
+                        <span>Google 공식 ADK 개발 스킬(Skills) 주입 및 agy 연동 가이드</span>
+                      </h4>
+                    </div>
+                    <a href="https://github.com/google/agents-cli/tree/main/skills" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 shrink-0">
+                      <i class="fa-brands fa-github text-sm"></i>
+                      <span>공식 skills 저장소 열기</span>
+                      <i class="fa-solid fa-arrow-up-right-from-square text-xs opacity-75"></i>
+                    </a>
+                  </div>
+
+                  <!-- 1. What is this skill? -->
+                  <div class="space-y-1.5 text-sm text-slate-700 leading-relaxed font-normal">
+                    <p class="font-bold text-slate-900 flex items-center gap-1.5">
+                      <span class="w-5 h-5 rounded-md bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold">1</span>
+                      <span>Google 공인 ADK Skills란 무엇인가?</span>
+                    </p>
+                    <p>
+                      구글 Agent Platform 팀이 공식 오픈소스 저장소(<a href="https://github.com/google/agents-cli" target="_blank" class="text-blue-600 underline font-semibold">github.com/google/agents-cli</a>)에서 직접 배포하는 공식 AI 에이전트 지침서 모음입니다.
+                      LLM이 코드를 작성할 때 과거 구버전 문법(예: 단수형 instruction 대신 복수형 instructions 사용, 최신 App 래퍼 생략 등)을 혼동하지 않도록, ADK 2.3.0의 표준 파이썬 API 작성법, 멀티 에이전트 오케스트레이션 규칙, FastMCP 통신 규격을 정리해 둔 공인 레퍼런스입니다.
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 text-[13px]">
+                      <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs space-y-1">
+                        <strong class="text-emerald-800 font-bold block flex items-center gap-1">
+                          <i class="fa-solid fa-code text-emerald-600"></i> google-agents-cli-adk-code
+                        </strong>
+                        <span class="text-slate-600">Agent, App, 도구 위임, FastMCP JSON-RPC 클라이언트 등 핵심 파이썬 코드 패턴을 제공합니다.</span>
+                      </div>
+                      <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs space-y-1">
+                        <strong class="text-blue-800 font-bold block flex items-center gap-1">
+                          <i class="fa-solid fa-diagram-project text-blue-600"></i> google-agents-cli-workflow
+                        </strong>
+                        <span class="text-slate-600">스캐폴딩부터 배포까지 전체 개발 단계와 기존 코드를 훼손하지 않는 보존 규칙을 규정합니다.</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 2. One-Click Installation Command -->
+                  <div class="space-y-2 pt-1">
+                    <p class="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+                      <span class="w-5 h-5 rounded-md bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">2</span>
+                      <span>프로젝트 로컬(.agents/skills/) 설치 명령어 (CLI 원클릭)</span>
+                    </p>
+                    <p class="text-sm text-slate-600 leading-relaxed font-normal">
+                      git clone이나 Node.js/npx 설치 없이, 리눅스 표준 curl과 tar로 구글 공식 GitHub에서 프로젝트 폴더로 1초 만에 직접 주입합니다:
+                    </p>
+                    <div class="bg-[#090d16] border border-slate-800 rounded-xl overflow-hidden shadow-md">
+                      <div class="bg-[#131b2e] px-4 py-2 border-b border-slate-800 flex items-center justify-between">
+                        <span class="text-xs text-emerald-400 font-mono">bash terminal</span>
+                        <button class="px-2.5 py-1 rounded bg-slate-800 hover:bg-emerald-600 text-slate-300 hover:text-white font-semibold text-xs transition flex items-center gap-1" onclick="copyCode(this)">
+                          <i class="fa-regular fa-copy"></i> 복사
+                        </button>
+                      </div>
+                      <pre class="p-4 font-mono text-[13.5px] text-emerald-300 leading-relaxed"><code># Google 공식 GitHub 저장소에서 최신 ADK Skills를 프로젝트 로컬로 직접 추출
+cd ~/enterprise-ops-agent && \
+mkdir -p .agents/skills && \
+curl -fsSL https://github.com/google/agents-cli/archive/refs/heads/main.tar.gz | tar -xz -C .agents/skills --strip-components=2 "agents-cli-main/skills"</code></pre>
+                    </div>
+                  </div>
+
+                  <!-- 3. How to use & agy interaction -->
+                  <div class="space-y-2 pt-1 text-sm text-slate-700 leading-relaxed font-normal">
+                    <p class="font-bold text-slate-900 flex items-center gap-1.5">
+                      <span class="w-5 h-5 rounded-md bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold">3</span>
+                      <span>Antigravity CLI (agy)에서의 실제 동작 및 활용 방법</span>
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5 pt-1 text-xs">
+                      <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs space-y-1">
+                        <span class="font-bold text-slate-800 block text-sm flex items-center gap-1.5">
+                          <i class="fa-solid fa-list-check text-emerald-600"></i>
+                          <span>1) 스킬 인식 확인</span>
+                        </span>
+                        <p class="text-slate-600 text-sm leading-relaxed">
+                          터미널에서 <code>agy</code> 실행 후 대화창에 <code>/skills</code>를 입력하면 주입된 <code>google-agents-cli-adk-code</code> 등 7종의 공인 스킬 목록을 직접 확인할 수 있습니다.
+                        </p>
+                      </div>
+                      <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs space-y-1">
+                        <span class="font-bold text-slate-800 block text-sm flex items-center gap-1.5">
+                          <i class="fa-solid fa-brain text-blue-600"></i>
+                          <span>2) 자동 맥락 참조</span>
+                        </span>
+                        <p class="text-slate-600 text-sm leading-relaxed">
+                          참가자가 별도로 스킬을 부르지 않아도, "docs/SDD.md를 참고하여 에이전트를 작성해줘"라고 입력하면 agy가 질문 맥락을 읽고 해당 스킬의 ADK 2.3.0 최신 문법을 스스로 반영합니다.
+                        </p>
+                      </div>
+                      <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs space-y-1">
+                        <span class="font-bold text-slate-800 block text-sm flex items-center gap-1.5">
+                          <i class="fa-solid fa-code-commit text-purple-600"></i>
+                          <span>3) 팀 협업 자산화</span>
+                        </span>
+                        <p class="text-slate-600 text-sm leading-relaxed">
+                          <code>.agents/skills/</code> 폴더는 프로젝트 코드와 함께 Git으로 관리되므로, 팀의 다른 엔지니어가 동일 프로젝트를 열었을 때도 동일한 구글 코딩 규칙을 그대로 보장받습니다.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <!-- SDD & Policy Download Section -->
