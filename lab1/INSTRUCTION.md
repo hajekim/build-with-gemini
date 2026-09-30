@@ -227,9 +227,13 @@ sudo apt-get update -qq && sudo apt-get install -y -qq unzip
 pip install --break-system-packages --upgrade pip
 pip install --break-system-packages google-agents-cli "google-adk>=2.3.0" mcp httpx pydantic pyyaml uv
 
-# 3. 사용자 바이너리 경로 환경변수 등록
+# 3. 사용자 바이너리 경로 및 Vertex AI global 엔드포인트 환경변수 등록
 export PATH="$HOME/.local/bin:$PATH"
 echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+echo 'export GOOGLE_GENAI_USE_VERTEXAI=true' >> ~/.bashrc
+echo 'export GOOGLE_CLOUD_LOCATION=global' >> ~/.bashrc
+echo 'export GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project 2>/dev/null)' >> ~/.bashrc
+source ~/.bashrc
 ```
 
 설치된 버전을 확인합니다:
@@ -780,6 +784,7 @@ docs/SDD.md의 3절 '오케스트레이션 및 거버넌스 강령'을 반영하
    - [단계별 검증]: 규정에 부합할 때만 workweek_agent 또는 itsm_agent를 호출하여 SaaS 작업을 진행할 것.
    - [친절하고 명확한 한국어 톤].
 4. get_enterprise_agent() 및 build_agent() 함수로 완성된 Hub-and-Spoke 루트 에이전트 객체를 반환하고, 최상위에 root_agent = build_agent()와 app = App(root_agent=root_agent, name="app")을 선언할 것.
+5. 모든 Agent(root_agent 및 3개 sub_agent)의 model 파라미터는 반드시 'gemini-3.8-flash'로 명시적으로 지정할 것 (Vertex AI global 엔드포인트 연동).
 ```
 
 `agy`가 `app/agent.py` 업데이트를 제안하면 **Allow**를 선택합니다.
