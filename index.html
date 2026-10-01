@@ -634,7 +634,7 @@
             const ul = document.createElement("ul"); ul.className = "sub";
             subs.forEach(h => {
               const a = document.createElement("a");
-              a.href = `#${h.id}`; a.textContent = h.textContent.replace(/^\d+(\.\d+)*\s*/, "");
+              a.href = `#${h.id}`; a.textContent = h.textContent.replace(/^\d+(\.\d+)*\.?\s+/, "");  // "7.1 X" -> "X", keeps "1단계"
               a.addEventListener("click", e => { e.preventDefault(); scrollToId(h.id); closeMenu(); });
               const sli = document.createElement("li"); sli.append(a); ul.append(sli);
             });
