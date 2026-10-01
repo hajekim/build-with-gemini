@@ -36,12 +36,11 @@ build-with-gemini/
 │   ├── enterprise_ops_agent_completed.zip   # 실습 1 완성본
 │   ├── images/
 │   └── tests/eval/              # 평가 데이터셋 예시
-├── lab2/
-│   ├── INSTRUCTION.md           # 실습 2 가이드
-│   ├── enterprise_ops_agent_lab2_completed.zip   # 실습 2 완성본
-│   ├── registry/                # Agent Registry 도구 명세 (위험도 주석 포함)
-│   └── images/                  # Gemini Enterprise 설정과 테스트 화면
-└── enterprise_ops_agent/        # 초기 버전 자산. 현재 실습 문서에서는 참조하지 않음
+└── lab2/
+    ├── INSTRUCTION.md           # 실습 2 가이드
+    ├── enterprise_ops_agent_lab2_completed.zip   # 실습 2 완성본
+    ├── registry/                # Agent Registry 도구 명세 (위험도 주석 포함)
+    └── images/                  # Gemini Enterprise 설정과 테스트 화면
 ```
 
 ## 실습용 Mock SaaS
