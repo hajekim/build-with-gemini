@@ -113,6 +113,48 @@ Google Antigravity 2.0은 다음 구성 요소를 포함합니다:
 
 ---
 
+### Antigravity Agent Platform (Antigravity 2.0 GUI) 로그인
+
+Antigravity Agent Platform은 Antigravity 2.0의 데스크톱 앱입니다. 대화, 작업 기록, 예약 작업을 창 하나에서 관리합니다. 이 실습의 agy 프롬프트는 `enterprise-ops-agent` 폴더에서 실행한 CLI를 기준으로 작성했으므로, GUI는 같은 프로젝트로 로그인해 두고 Antigravity 2.0 화면을 살펴보는 용도로 사용합니다.
+
+> [!IMPORTANT]
+> 로그인할 때는 항상 **Use Google Cloud project instead**를 선택합니다. 앱이 실행 중인데 창이 뜨지 않으면 터미널에서 `sudo pkill -9 antigravity`를 실행한 뒤 다시 엽니다.
+
+1. 원격 화면 좌측 하단 **Application Launcher > Development > Antigravity**를 클릭합니다.
+![Application Launcher에서 Antigravity 실행](./images/agy2_01_launcher.png)
+
+2. Welcome to Antigravity 화면에서 **Use Google Cloud project instead**를 클릭합니다.
+![Use Google Cloud project instead 선택](./images/agy2_02_use_gcp_project.png)
+
+3. Welcome to Google Chrome 창이 나타나면 **OK**를 클릭합니다.
+![Chrome 시작 창](./images/agy2_03_chrome_welcome.png)
+
+4. Sign in to Chrome 화면에서 **Stay signed out**을 클릭합니다.
+![Stay signed out 선택](./images/agy2_04_chrome_stay_signed_out.png)
+
+5. Qwiklabs 자격증명 패널의 **Username**과 **Password**로 로그인합니다. Sign in to Chrome? 창이 나타나면 **Use Chrome without an account**를 클릭하고, 이어지는 확인 화면에서 **Sign in**을 클릭합니다.
+![Use Chrome without an account 선택](./images/agy2_05_chrome_without_account.png)
+![Google Antigravity 로그인 확인](./images/agy2_06_google_signin.png)
+
+6. Open Antigravity? 대화상자가 나타나면 **Cancel**을 클릭해 닫고 Chrome 창을 최소화합니다.
+![Open Antigravity 대화상자 닫기](./images/agy2_07_open_antigravity_cancel.png)
+
+7. Antigravity 창에서 본인의 **Google Cloud Project ID**를 입력하고 **Next**를 클릭합니다.
+![Google Cloud Project ID 입력](./images/agy2_08_project_id.png)
+
+8. 설정 마법사는 다음과 같이 진행하고 나머지는 기본값으로 둔 채 페이지마다 **Next**를 클릭합니다.
+
+| 페이지 | 설정 |
+|---|---|
+| Terms of Service & Data Use | **Next** 클릭 |
+| Select Antigravity Theme | 원하는 테마 선택 (System / Light / Dark) |
+| Build with Google | **Google Antigravity SDK** 선택 |
+
+9. **Finish**를 클릭합니다. 다음과 같은 화면이 보이면 준비가 끝난 것입니다.
+![Antigravity Agent Platform 준비 완료](./images/agy2_09_ready.png)
+
+---
+
 ### Antigravity CLI (`agy`) 실행 및 초기 설정
 
 Antigravity CLI는 가벼운 터미널 환경에서 여러 파일의 맥락을 파악하고 도구를 실행할 수 있는 대화형 개발 도구입니다. 다단계 추론, 다중 파일 편집, 도구 호출, 대화 히스토리 등 Antigravity의 핵심 에이전틱 역량을 터미널에서 직접 제공합니다.
