@@ -1,0 +1,15 @@
+# 로컬 미리보기용 인증 우회 페이지
+_auth.html
+
+# OS, 편집기
+.DS_Store
+.vscode/
+.idea/
+
+# Python, 로컬 실행 산출물
+__pycache__/
+*.pyc
+.venv/
+.env
+deployment_metadata.json
+*.log
