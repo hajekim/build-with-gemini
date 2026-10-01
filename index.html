@@ -447,6 +447,8 @@
   <div id="toast" role="status">copied ✓</div>
 
   <script>
+    // Ranges like "2~3분" use single tildes; GFM would pair two of them into strikethrough.
+    marked.use({ tokenizer: { del() {} } });
     // Lab tabs render lab*/INSTRUCTION.md, split into one panel per "## " heading.
     const LABS = {
       codelab: { src: "lab1/INSTRUCTION.md", name: "lab1", next: { tab: "codelab2", title: "실습 2 시작하기 · 평가, 배포, 거버넌스" } },

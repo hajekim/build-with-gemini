@@ -1203,16 +1203,18 @@ Gemini Enterprise 웹 앱이 열리고, 'Ask Cymbal IT/HR 운영 에이전트' �
 | FastMCP 401 | MCP 토큰 만료 또는 잘못된 값 | Mock SaaS에서 새 토큰 발급 후 `gcloud secrets versions add enterprise-agent-mcp-token --data-file=-`, 이어서 재배포 |
 | 일시적 `500 Authentication backend internal server error ... overloaded` | Google 측 인증 백엔드 일시 과부하(테스트 중 1회 발생, 약 1분 지속) | 잠시 후 재시도 |
 
-### 10.2 선택 과제: PSC로 MCP 서버를 내부 전용으로 전환
-지금 Mock SaaS는 공개 URL(`*.run.app`)이라 게이트웨이를 거치지 않고도 접근할 수 있습니다. 운영 환경에서는 사내 MCP 서버를 내부 전용으로 두고 게이트웨이만 접근하게 만듭니다. 구성 순서는 다음과 같습니다.
+### 10.2 사내망에 적용할 때: MCP 서버를 내부 전용으로 두기
+실습의 Mock SaaS는 공개 URL(`*.run.app`)이라 게이트웨이를 거치지 않고도 접근할 수 있습니다. Mock SaaS는 실습용 공용 서비스이고 소스는 제공하지 않습니다. 회사로 돌아가 사내 MCP 서버에 같은 구조를 적용할 때는, MCP 서버를 내부 전용으로 두고 에이전트가 게이트웨이를 거쳐서만 접근하게 만듭니다. 구성 순서는 다음과 같습니다.
 
 1. VPC와 서브넷, PSC network attachment를 만듭니다.
-2. Google API용 PSC 엔드포인트와 `run.app` 비공개 DNS 영역을 만듭니다.
-3. 게이트웨이를 `networkConfig.egress.networkAttachment`와 `dnsPeeringConfig`(도메인 `run.app.`)를 포함해 다시 만듭니다. 기존 게이트웨이에 네트워크 구성을 나중에 추가할 수 없습니다.
-4. 사내 MCP 서버를 Cloud Run `--ingress=internal`로 배포하고, 레지스트리 URL을 그 서버로 바꿉니다.
-5. 공개 인터넷에서 MCP URL이 403/404로 막히고, 에이전트에서는 게이트웨이를 거쳐 정상 호출되는지 확인합니다.
+2. Google API용 PSC 엔드포인트와 MCP 서버 도메인용 비공개 DNS 영역을 만듭니다. MCP 서버가 Cloud Run이면 `run.app` 영역을 만듭니다.
+3. 게이트웨이를 `networkConfig.egress.networkAttachment`와 `dnsPeeringConfig`(MCP 서버 도메인, Cloud Run이면 `run.app.`)를 포함해 만듭니다. 기존 게이트웨이에 네트워크 구성을 나중에 추가할 수 없으므로 새로 만들어야 합니다.
+4. 사내 MCP 서버를 내부 전용으로 둡니다. Cloud Run이면 `--ingress=internal`로 배포합니다. 온프레미스 서버라면 Cloud VPN이나 Cloud Interconnect로 1단계의 VPC에서 닿게 합니다. 온프레미스 연결과 사내 도메인 DNS 피어링이 지원되는 범위는 Agent Gateway 문서에서 먼저 확인하세요.
+5. Agent Registry에 사내 MCP 서버 URL을 등록하고, 6절처럼 도구마다 `readOnlyHint`, `destructiveHint` 주석을 회사 기준으로 붙입니다. 7.4의 접근 정책은 그대로 씁니다.
+6. MCP 서버 인증은 사내 방식에 맞춥니다. 실습의 `X-MCP-Token` 대신 사내 인증 토큰을 쓰더라도 값은 5.4처럼 Secret Manager에 두고 에이전트에는 시크릿으로만 전달합니다.
+7. 공개 인터넷에서는 MCP URL이 막히고, 에이전트에서는 게이트웨이를 거쳐 정상 호출되는지 확인합니다.
 
-이 과제는 실습 시간에 포함되지 않습니다. 공용 Mock SaaS는 내부 전용으로 바꿀 수 없으므로, 본인 프로젝트에 Mock SaaS를 따로 배포해 진행합니다.
+이 내용은 실습 시간에 포함되지 않으며, 실습 환경에서는 진행하지 않습니다.
 
 ### 10.3 리소스 정리
 
