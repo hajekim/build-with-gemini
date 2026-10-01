@@ -135,7 +135,7 @@ gcloud services enable \
 |:---|:---|:---|
 | 프로젝트 Owner 권한 | 아래 명령에서 `roles/owner`가 출력되는지 확인합니다. 출력이 없으면 강사에게 요청합니다. IAM 바인딩, 게이트웨이 생성에 필요합니다. | 5.4, 5.5, 7.x |
 | 조직 정책 `iam.managed.disableAccessPolicyBinding` | 7.3의 `describe` 명령으로 확인합니다. `enforce: true`인데 조직 정책 관리자 권한이 없으면 미리 강사에게 해제를 요청합니다. | 7.3 |
-| Gemini Enterprise 앱과 라이선스 | 새 프로젝트에는 앱이 없습니다. 2.5 절차대로 앱을 만들고 본인 계정에 라이선스를 할당합니다. | 2.5, 9.2 |
+| Gemini Enterprise 앱과 라이선스 | 새 프로젝트에는 앱이 없습니다. 2.5 절차대로 앱을 만들고, ID 설정(Set up identity)과 본인 계정 라이선스 할당까지 마칩니다. | 2.5, 9.2 |
 
 ```bash
 gcloud config get-value project   # 실습 프로젝트가 맞는지 확인
@@ -147,15 +147,47 @@ gcloud projects get-iam-policy $(gcloud config get-value project 2>/dev/null) \
 ```
 
 ### 2.5 Gemini Enterprise 앱 준비
-Step 6(9절)에서 에이전트를 등록할 Gemini Enterprise 앱을 미리 만듭니다. 이미 앱이 있고 본인 계정에 라이선스가 할당되어 있다면 건너뜁니다. 아래 메뉴 이름은 콘솔 버전에 따라 다를 수 있습니다.
+Step 6(9절)에서 에이전트를 등록할 Gemini Enterprise 앱을 미리 만듭니다. 앱을 만든 직후에는 ID 공급자 설정(Set up identity)을 꼭 해야 웹 앱에서 로그인하고 에이전트를 쓸 수 있습니다. 이미 앱이 있고 ID 설정과 라이선스 할당까지 끝났다면 맨 아래 확인 명령만 실행합니다.
 
+#### 1) 앱 만들기
 1. 원격 Chrome에서 Google Cloud 콘솔을 열고 실습 프로젝트가 선택되어 있는지 확인합니다.
-2. 콘솔 상단 검색창에 `Gemini Enterprise`를 입력하고 검색 결과에서 Gemini Enterprise 페이지로 이동합니다.
+2. 콘솔 상단 검색창에 `Gemini Enterprise`를 입력해 Gemini Enterprise 페이지로 이동합니다.
 3. 앱 만들기를 선택합니다. 라이선스가 없는 프로젝트라면 이 과정에서 무료 체험을 시작합니다.
-4. 앱 이름(예: `cymbal-ops`)과 위치를 지정하고 앱을 만듭니다.
+4. 앱 이름(예: `cymbal-ops`)과 위치를 지정하고 앱을 만듭니다. 위치는 `global`로 두면 됩니다.
 5. 사용자 및 라이선스 할당 화면에서 본인 계정에 라이선스를 할당합니다.
-6. 앱의 웹 URL을 복사해 둡니다. 9.5에서 이 URL을 원격 Chrome에서 열어 에이전트와 대화합니다.
 
+앱을 만들면 Apps 목록에 나타납니다. 아래 화면은 위치가 `global`인 앱 하나가 만들어진 상태입니다.
+
+![Gemini Enterprise Apps 목록](images/ge_setup_01_apps.png)
+
+#### 2) ID 공급자 설정 (새 앱이면 필수)
+앱 이름을 눌러 들어가면 Dashboard가 열립니다. 상단의 무료 체험 안내 아래에 카드 세 개가 보입니다.
+
+![Gemini Enterprise 앱 Dashboard](images/ge_setup_02_dashboard.png)
+
+- Preview Gemini Enterprise before customizing: 설정 전에 공개 웹 검색과 Deep Research 같은 Google 제공 에이전트를 먼저 써 보는 미리보기입니다.
+- Get full access - Set up your workforce identity: 사용자를 어떤 ID로 인증할지 정하는 단계입니다. 실습에서는 이 카드의 Set up identity를 누릅니다.
+- Set IAM permissions: 앱을 쓸 사용자나 그룹에 Discovery Engine User 역할을 주는 곳입니다. 실습은 프로젝트 Owner 계정 하나로 진행하므로 따로 할 일은 없습니다. 다른 사람과 함께 쓰려면 Grant access로 역할을 부여합니다.
+
+Set up identity를 누르면 Choose identity 화면이 나옵니다. Use Google Identity를 선택한 채로 Confirm Workforce Identity를 누릅니다.
+
+![Choose identity 화면](images/ge_setup_03_identity.png)
+
+이 설정이 필요한 이유와 선택지는 다음과 같습니다.
+
+- Gemini Enterprise는 설정된 ID 공급자로 사용자를 인증하고, 그 ID를 기준으로 데이터 소스 접근 권한을 적용합니다. 그래서 ID 공급자를 정하지 않으면 웹 앱을 정식으로 쓸 수 없습니다.
+- Use Google Identity는 사용자가 Google 계정으로 로그인하는 방식입니다. Google이 권장하는 방식이고, Google Workspace 데이터 소스를 연결하려면 이 방식이어야 합니다. 실습 계정도 Google 계정이므로 이것을 고릅니다.
+- Use a third-party identity provider는 Entra ID, Okta 같은 외부 IdP를 Workforce Identity Federation으로 연결하는 방식입니다. 미리 만든 workforce pool ID와 provider ID를 입력해야 합니다. 속성 매핑에서 `google.subject`는 소문자 이메일로 맞춰야 하는데, 라이선스 할당이 대소문자를 구분하기 때문입니다. 외부 IdP를 쓰는 조직도 Google Identity와 연동해 쓸 수 있고, 새로 구성한다면 Google Identity 쪽을 권장합니다.
+- 나중에 ID 공급자를 바꾸면 사용자의 기존 대화 기록이 사라집니다. 고객 환경에 적용할 때는 처음에 정해 두는 편이 좋습니다.
+
+자세한 내용은 공식 문서 [Configure your identity provider](https://cloud.google.com/gemini/enterprise/docs/configure-identity-provider)를 참고하세요.
+
+#### 3) 웹 앱 URL 복사
+확인을 누르면 "Authentication configurations have been updated successfully" 알림과 함께 "Your Gemini Enterprise webapp is ready" 화면이 나옵니다. Copy URL로 웹 앱 주소(`https://vertexaisearch.cloud.google.com/home/cid/...`)를 복사해 둡니다. 9.5에서 이 주소로 에이전트와 대화합니다. 오른쪽 위 Go to Gemini Enterprise 링크로 바로 열어도 됩니다.
+
+![웹 앱 준비 완료 화면](images/ge_setup_04_webapp_ready.png)
+
+#### 4) 터미널에서 확인
 터미널 창에서 앱이 보이는지 확인합니다.
 
 ```bash
@@ -1094,29 +1126,51 @@ google-agents-cli-publish 스킬 지침을 바탕으로, Agent Runtime에 배포
 - 등록된 agent 리소스 이름을 출력하고, GE 채팅 화면에서 에이전트를 찾는 방법을 안내해줘.
 ```
 
-### 9.4 Gemini Enterprise 화면 예시
-아래는 참고용 화면입니다(이전 Cloud Run 배포본으로 촬영했으며 대화 흐름은 같습니다).
+### 9.4 등록 확인과 Preview로 에이전트 열기
+등록이 끝나면 콘솔에서 에이전트를 확인하고, Preview로 열어 대화해 봅니다.
 
-#### 1) 에이전트 콘솔에서 Active 상태 확인
-![Gemini Enterprise 콘솔 에이전트 등록](images/ge_01_agent_console.png)
+#### 1) Agents 목록에서 등록 확인
+Google Cloud 콘솔의 Gemini Enterprise 페이지에서 2.5에서 만든 앱을 누르고 Agents 페이지로 이동합니다. Agents table에 'Cymbal IT/HR 운영 에이전트'가 Agent type `Agent Engine`, Agent state `Enabled`로 보이면 등록된 것입니다. Core Assistant와 Deep Research는 앱에 기본으로 들어 있는 에이전트입니다.
 
-#### 2) 임직원 채팅 화면 진입
-![Gemini Enterprise 채팅 진입](images/ge_02_chat_entry.png)
+![Agents table](images/ge_test_01_agents.png)
 
-#### 3) 복무 규정(POL-HR-2026-004) RAG 인용
+에이전트 이름을 누르면 상세 화면이 열리고, Agent Runtime reasoning engine 항목에서 5.7에서 배포한 엔진(`.../reasoningEngines/<엔진 ID>`)과 연결된 것을 확인할 수 있습니다.
+
+![에이전트 상세](images/ge_test_02_agent_detail.png)
+
+> [!NOTE]
+> 상단의 "This agent is not integrated with Agent Registry and Gateway policies will not be applied" 안내는 Gemini Enterprise 쪽에서 Agent Registry 연동을 따로 하지 않았다는 뜻입니다. 7절에서 연결한 게이트웨이는 엔진에서 나가는 MCP 호출에 걸려 있으므로, 실제 차단 여부는 9.5 체크리스트 4번으로 직접 확인합니다.
+
+#### 2) Preview로 열기
+Agents table 오른쪽 끝의 Actions 메뉴(⋮)를 열고 Preview를 누릅니다. 에이전트 이름만 눌러서는 상세 화면만 열리고 대화는 할 수 없습니다.
+
+![Actions 메뉴의 Preview](images/ge_test_03_preview_menu.png)
+
+Gemini Enterprise 웹 앱이 열리고, 'Ask Cymbal IT/HR 운영 에이전트' 입력창이 있는 에이전트 화면이 나옵니다. 이 입력창에 보내는 질문은 GE 기본 모델이 아니라 이 에이전트가 처리합니다.
+
+![에이전트 화면](images/ge_test_04_agent_home.png)
+
+#### 3) 대화 예시
+"내 IT 티켓이 몇개 있어?"라고 물으면 에이전트가 먼저 사번을 묻습니다.
+
+![질문과 사번 요청](images/ge_test_05_ask.png)
+
+`EMP-10294`라고 답하면 ServiceImmediately에서 티켓을 조회해 INC-88210, INC-88211 두 건을 보여 줍니다. 티켓 번호와 건수는 본인의 Mock SaaS 데이터에 따라 다릅니다.
+
+![티켓 조회 결과](images/ge_test_06_answer.png)
+
+아래는 다른 질문의 응답 예시입니다(이전 Cloud Run 배포본으로 촬영했으며 대화 흐름은 같습니다).
+
 ![Gemini Enterprise 사내 규정 RAG 검증](images/ge_05_policy_rag_grounding.png)
 
-#### 4) WorkWeek 연차 조회
 ![Gemini Enterprise WorkWeek 연차 조회](images/ge_06_leave_balance_check.png)
 
-#### 5) ServiceImmediately IT 티켓 처리
 ![Gemini Enterprise IT 티켓 처리](images/ge_04_it_ticket_list.png)
 
-#### 6) 다중 턴 대화
 ![Gemini Enterprise 다중 턴 대화 검증](images/ge_03_defect_repeat_troubleshoot.png)
 
 ### 9.5 임직원 실시간 테스트 체크리스트 (직접 수행)
-2.5에서 복사한 앱 웹 URL을 원격 Chrome에서 열고, 에이전트 목록에서 'Cymbal IT/HR 운영 에이전트'를 선택합니다(9.4의 2번 화면 참고. 메뉴 이름은 콘솔 버전에 따라 다를 수 있습니다). 그다음 아래 질문을 순서대로, 같은 대화창에서 보냅니다.
+9.4의 Preview로 에이전트 화면을 열고, 아래 질문을 순서대로 같은 대화창에서 보냅니다. 2.5에서 복사한 웹 앱 URL로 들어갔다면 에이전트 목록에서 'Cymbal IT/HR 운영 에이전트'를 골라야 합니다.
 
 > [!WARNING]
 > 에이전트를 선택하지 않고 GE 기본 채팅창에 질문하면 GE 자체 모델이 답합니다. 이 경우 "3일 이상은 5영업일 전 신청", "잔여 연차 8.5일"처럼 규정과 데이터에 없는 값을 답할 수 있습니다. 답변에 `POL-HR-2026-004` 같은 문서번호가 없거나 숫자가 Mock SaaS 화면과 다르면 에이전트가 호출되지 않은 것입니다.
@@ -1162,7 +1216,7 @@ google-agents-cli-publish 스킬 지침을 바탕으로, Agent Runtime에 배포
 
 ### 10.3 리소스 정리
 
-먼저 콘솔에서 GE 등록을 삭제합니다. Google Cloud 콘솔 검색창에 `Gemini Enterprise`를 입력해 이동한 뒤, 2.5에서 만든 앱의 에이전트 목록에서 'Cymbal IT/HR 운영 에이전트'를 삭제합니다(메뉴 이름은 콘솔 버전에 따라 다를 수 있습니다). 앱이 더 필요 없으면 앱도 삭제합니다.
+먼저 콘솔에서 GE 등록을 삭제합니다. Google Cloud 콘솔 검색창에 `Gemini Enterprise`를 입력해 이동한 뒤, 2.5에서 만든 앱의 Agents table에서 'Cymbal IT/HR 운영 에이전트' 행의 Actions 메뉴(⋮)를 열고 Delete를 누릅니다(9.4의 Preview 메뉴와 같은 위치). 앱이 더 필요 없으면 앱도 삭제합니다.
 
 ```bash
 source ~/lab2/env.sh
