@@ -226,13 +226,7 @@ agy
 /model
 ```
 
-> [!NOTE]
-> 실습 환경에는 Gemini 3.8 Flash 모델에 프로비저닝된 처리량이 적용되어 있어 빠른 응답 속도를 제공합니다.
-
 ![Antigravity CLI 초기 화면](./images/agy_terminal_session.png)
-
-> [!NOTE]
-> 실습 환경에는 Gemini 3.8 Flash 모델에 프로비저닝된 처리량이 적용되어 있어 빠른 응답 속도를 제공합니다.
 
 ---
 
