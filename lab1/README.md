@@ -924,7 +924,7 @@ agents-cli run "안녕하세요, 이민우입니다 (EMP-10294). 다음 주 4일
 1. **사내 규정 검증 (RAG)**: `search_company_policy(query='배터리 부풀림 장애 교체 및 엔지니어 스펙 기준', category='IT')` 호출  
    -> **POL-IT-2026-009 제 2 조**(엔지니어링/데이터 직군은 MacBook Pro M3 Max 64GB 대상) 및 **제 4 조**(배터리 부풀림 등 결함은 내구연한과 상관없이 긴급 교체 대상이며 4시간 내 1차 점검 및 임시 대여 장비 당일 선지급) 확인.
 2. **장비 이력 조회 (FastMCP)**: `list_hardware_assets_and_tickets(employee_id='EMP-10294')` 호출  
-   -> 기존 장비가 38개월 경과하여 제 3 조에 따른 정기 교체 주기(36개월)도 이미 충족했음을 확인.
+   -> 기존 티켓(진행 중인 교체 요청)과 중복되는지 확인. 사용 개월 수 데이터는 없으므로 교체 근거는 제 4 조 배터리 결함.
 3. **긴급 티켓 발행 (FastMCP)**: `create_hardware_incident_ticket` 호출.
 
 ![시나리오 2 실행 결과](./images/scenario_hardware_result.png)

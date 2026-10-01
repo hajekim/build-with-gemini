@@ -119,7 +119,14 @@ Employee EMP-10294 (이민우) Leave Balances:
 ```
 
 > [!TIP]
-> MCP 엔드포인트는 연결을 맺는 `initialize` 요청이 먼저 와야 합니다. `curl`로 `tools/list`만 바로 보내면 `Bad Request: Missing session ID`가 납니다. 위처럼 MCP 클라이언트를 쓰면 이 절차를 알아서 처리합니다.
+> MCP 엔드포인트는 연결 상태를 서버에 보관하지 않습니다(stateless). 요청마다 독립적으로 처리하므로 `curl`로 도구를 바로 호출할 수도 있습니다.
+>
+> ```bash
+> curl -s https://korean-mock-saas-dri5akvbzq-du.a.run.app/work-week/mcp \
+>   -H "X-MCP-Token: ${MCP_TOKEN:?}" -H 'Content-Type: application/json' \
+>   -H 'Accept: application/json, text/event-stream' \
+>   -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_employee_balances","arguments":{"employee_id":"EMP-10294"}}}'
+> ```
 
 ---
 
@@ -128,8 +135,8 @@ Employee EMP-10294 (이민우) Leave Balances:
 | 항목 | 값 |
 |:---|:---|
 | 기본 URL | `https://korean-mock-saas-dri5akvbzq-du.a.run.app` |
-| WorkWeek MCP | `/work-week/mcp` (Streamable HTTP) |
-| ServiceImmediately MCP | `/service-immediately/mcp` (Streamable HTTP) |
+| WorkWeek MCP | `/work-week/mcp` (Streamable HTTP, stateless) |
+| ServiceImmediately MCP | `/service-immediately/mcp` (Streamable HTTP, stateless) |
 | SSE 방식(참고) | `/work-week/sse/sse`, `/service-immediately/sse/sse` |
 | 인증 헤더 | `X-MCP-Token: mcp_...` 또는 `Authorization: Bearer mcp_...` |
 | 토큰 유효 기간 | 발급 후 7일 |
@@ -312,5 +319,4 @@ curl -s -X POST https://korean-mock-saas-dri5akvbzq-du.a.run.app/api/tenant/rese
 | HTTP 401 `Unauthorized. Invalid, expired, or revoked token.` | 토큰이 없거나, 잘렸거나, 7일이 지남 | 포털에서 토큰을 다시 발급해 `~/lab.env`의 값을 바꿈 |
 | HTTP 429 `요청 한도(분당 120회)를 초과했습니다` | 에이전트가 같은 도구를 반복 호출 | 1분 기다린 뒤 다시 실행. 계속되면 에이전트 지침에서 반복 호출 원인을 찾음 |
 | 에이전트는 신청했다는데 포털에 안 보임 | 토큰을 발급한 브라우저와 지금 보는 브라우저가 다름 | 토큰을 발급한 브라우저 창에서 확인하거나, 지금 브라우저에서 토큰을 새로 발급해 교체 |
-| `Bad Request: Missing session ID` | `curl`로 MCP 엔드포인트를 직접 호출 | 시작하기 4번처럼 MCP 클라이언트로 호출 |
 | 실습 2에서 취소 요청에 에이전트가 "서버 내부 오류"라고 답함 | Step 4 이후 게이트웨이가 파괴적 도구를 403으로 막은 결과 | 정상 동작. 게이트웨이 로그에서 거부 기록을 확인 |

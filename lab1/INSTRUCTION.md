@@ -611,7 +611,7 @@ enterprise-ops-agent/
 | `enterprise_ops_agent` (오케스트레이터) | 사용자 질의의 의도를 분류해 서브 에이전트에 위임하고 최종 응답을 정리합니다. |
 | `hr_policy_agent` | `search_company_policy` 도구는 이 에이전트에만 붙입니다. 사내 복무 규정(POL-HR)과 IT 지침(POL-IT)을 검색해 조항과 조건을 확인합니다. |
 | `workweek_agent` | WorkWeek MCP 도구 7종으로 연차/병가 조회, 휴가 신청, 휴가 취소를 맡습니다. |
-| `itsm_agent` | ServiceImmediately MCP 도구 4종으로 지급 장비 이력 조회, 인시던트 티켓 생성, 댓글 작성을 맡습니다. |
+| `itsm_agent` | ServiceImmediately MCP 도구 4종으로 인시던트 티켓 조회, 생성, 댓글 작성을 맡습니다. |
 
 ---
 

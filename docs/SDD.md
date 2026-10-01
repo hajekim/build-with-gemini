@@ -131,7 +131,7 @@ Google ADK `McpToolset`을 통해 7종의 도구가 자동 바인딩됩니다:
 
 #### 2. ServiceImmediately ITMS FastMCP 서버 도구 (`/service-immediately/mcp`)
 Google ADK `McpToolset`을 통해 4종의 도구가 자동 바인딩됩니다:
-1. `list_tickets(employee_id: str)`: 임직원 지급 장비 이력(AST-MBP-2022-819, 38개월 실사용) 및 인시던트 티켓 목록 조회
+1. `list_tickets(employee_id: str)`: 임직원의 인시던트 티켓 목록 조회 (진행 중인 교체 요청 확인용. 지급 장비 이력이나 사용 개월 수는 제공하지 않음)
 2. `create_ticket(requested_by: str, category: str, short_description: str, priority: str, assignment_group: str)`: 장애 접수 및 M3 Max 랩톱 교체 티켓 발행
 3. `add_ticket_comment(ticket_id: str, author: str, comment: str)`: 티켓 타임라인 댓글 추가
 4. `update_ticket_status(ticket_id: str, status: str, resolution_notes: str)`: 티켓 처리 상태 변경
@@ -181,7 +181,7 @@ FastMCP 서버와 통신할 때는 반드시 다음 HTTP 헤더 및 세션 핸�
      2. [인사 위임]: `workweek_agent`에게 위임하여 잔여 연차 확인 후 `request_time_off` 실행
    - **장비 교체/장애 워크플로**:
      1. [규정 위임]: `hr_policy_agent`에게 위임하여 직군별 기종(M3 Max 64GB) 및 교체 주기(36개월), 배터리 스웰링 결함 기준 확인
-     2. [전산 위임]: `itsm_agent`에게 위임하여 장비 실사용 개월 수(38개월) 확인 후 `create_ticket` 실행
+     2. [전산 위임]: `itsm_agent`에게 위임하여 기존 티켓(진행 중인 교체 요청) 확인 후 `create_ticket` 실행
 4. **자연스러운 한국어 소통**:
    - 전문적이고 정중한 한국어 톤을 유지합니다.
 
@@ -295,6 +295,6 @@ FastMCP 서버와 통신할 때는 반드시 다음 HTTP 헤더 및 세션 핸�
 - **사용자 질의**: "현재 제가 사용 중인 업무용 랩톱 배터리가 심하게 부풀어 올라서(스웰링) 정상적인 업무가 불가능합니다. 제가 데이터/엔지니어링 직군인데, M3 Max 64GB 랩톱으로 교체 지원이 가능한지 사내 IT 지원 규정을 확인해 주세요. 제 현재 장비 지급 이력을 확인하고 ServiceImmediately 시스템에 긴급 교체 인시던트 티켓을 발행해 주세요."
 - **에이전트 기대 동작**:
   1. `search_company_policy` 호출 -> POL-IT-2026-009 제 2 조(엔지니어링 M3 Max 64GB 대상) 및 제 4 조(배터리 결함은 내구연한 무관 긴급 교체, 4시간 진단 SLA) 인출
-  2. `list_hardware_assets_and_tickets` 호출 -> 실사용 38개월 확인(제 3 조 정기 교체 연한 36개월 충족)
+  2. `list_hardware_assets_and_tickets` 호출 -> 기존 티켓 확인(진행 중인 교체 요청 INC-88210 등과 중복 여부). 사용 개월 수 데이터가 없으므로 교체 근거는 제 4 조 배터리 결함
   3. `create_hardware_incident_ticket` 호출 -> ServiceImmediately 티켓 발행
   4. 답변 시 임시 대여 장비 당일 수령 안내 및 티켓 번호 제공
