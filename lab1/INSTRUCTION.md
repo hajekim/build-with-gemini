@@ -1145,7 +1145,7 @@ EOF
 > [!IMPORTANT]
 > 실습 2 Step 1에서 이 4개 데이터셋으로 `agents-cli eval run`을 실행합니다. LLM 판정 지표 3종(`multi_turn_task_success`, `multi_turn_tool_use_quality`, `hallucination`)에 결정론적 지표 3종(`tool_call_accuracy`, `policy_first_order`, `rag_citation`)을 더해 Tier별 베이스라인을 측정하고, 실패 케이스를 고쳐 가며 점수를 올립니다(힐클라이밍).
 
-여기까지 마쳤다면 실습 2를 시작할 수 있습니다. 먼저 아래 "실습 1 완성본과 실습 2 준비" 절의 A를 실행해 실습 2 준비 파일을 받으세요. Task 6은 시간이 남을 때만 진행합니다.
+여기까지 마쳤다면 실습 2를 시작할 수 있습니다. Task 6은 시간이 남을 때만 진행합니다.
 
 ---
 
@@ -1321,20 +1321,9 @@ curl -s -X POST http://localhost:8080/ \
 
 ## 실습 1 완성본과 실습 2 준비
 
-### A. Lab 1을 직접 완료한 경우: 실습 2 준비 파일 받기
+Lab 1을 직접 끝냈다면 이 절은 건너뛰고 본인 프로젝트(`~/enterprise-ops-agent`)로 실습 2를 진행합니다. 실습 2에서 새로 필요한 파일(평가 설정, Model Armor 가드)은 실습 2의 해당 단계에서 받습니다.
 
-실습 2의 평가 설정(`tests/eval/eval_config.yaml`)과 Model Armor 가드(`app/tools/model_armor.py`)는 Lab 1 본문에서 만들지 않으므로 완성본에서 가져옵니다. Task 5 2단계에서 받은 zip을 그대로 씁니다.
-
-```bash
-cd ~/enterprise-ops-agent
-[ -f /tmp/enterprise_ops_agent_completed.zip ] || curl -fsSL https://raw.githubusercontent.com/hajekim/build-with-gemini/main/lab1/enterprise_ops_agent_completed.zip -o /tmp/enterprise_ops_agent_completed.zip
-unzip -o /tmp/enterprise_ops_agent_completed.zip enterprise-ops-agent/tests/eval/eval_config.yaml enterprise-ops-agent/app/tools/model_armor.py -d ~
-```
-
-> [!NOTE]
-> Model Armor 가드를 에이전트에 연결하는 코드(`app/agent.py`의 `before_model_callback=armor_guard`)는 완성본에만 들어 있습니다. 실습 2를 완성본 코드 기준으로 진행하려면 아래 B로 프로젝트 전체를 완성본으로 맞추세요.
-
-### B. 완성본 전체로 맞추기
+### 완성본 받기
 
 Lab 1을 끝내지 못했거나 완성본 기준으로 실습 2를 진행하려면 완성본을 받습니다.
 
