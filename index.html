@@ -141,18 +141,24 @@
       border-bottom: 1px solid var(--line-soft);
     }
     .topbar::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--google-stripe); opacity: .9; }
-    .brand { display: flex; align-items: center; gap: 9px; font: 700 15px var(--mono); color: var(--text-hi); white-space: nowrap; }
+    .brand { display: flex; align-items: center; gap: 9px; font: 800 16px var(--sans); letter-spacing: -0.01em; color: var(--text-hi); white-space: nowrap; border-radius: 8px; }
+    .brand:hover { text-decoration: none; opacity: .85; }
     .brand .logo { width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; font-size: 14px; color: #fff; background: var(--gem); }
-    .brand small { font-weight: 400; color: var(--text-faint); }
-    .tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+    .brand small { font: 400 13px var(--mono); color: var(--text-faint); }
+    /* Browser-style tabs: they sit on the topbar's bottom edge; the active one merges into the page. */
+    .tabs { display: flex; align-self: stretch; align-items: flex-end; gap: 4px; padding-top: 9px; overflow-x: auto; scrollbar-width: none; }
     .tab {
-      display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px;
-      background: none; border: 1px solid transparent; cursor: pointer;
-      font: 500 14px var(--mono); color: var(--text-faint); white-space: nowrap;
+      position: relative; display: flex; align-items: center; gap: 7px; height: 100%; padding: 0 14px; margin-bottom: -1px;
+      border-radius: 10px 10px 0 0; background: var(--surface); border: 1px solid var(--line-soft); border-bottom: 0;
+      cursor: pointer; font: 500 14px var(--mono); color: var(--text-dim); white-space: nowrap;
       transition: color .15s, background .15s, border-color .15s;
     }
-    .tab:hover { color: var(--text); background: var(--surface); }
-    .tab[aria-selected="true"] { color: var(--text-hi); background: var(--bg-2); border-color: var(--line); box-shadow: var(--shadow); }
+    .tab::before { content: "▤"; font-size: 13px; color: var(--text-faint); }
+    .tab[data-tab="saas"]::before { content: "◎"; }
+    .tab:hover { color: var(--text-hi); background: var(--surface-2); border-color: var(--line); }
+    .tab[aria-selected="true"] { z-index: 1; color: var(--text-hi); background: var(--bg-2); border-color: var(--line); box-shadow: 0 -6px 16px -10px rgb(16 24 40 / .25); }
+    .tab[aria-selected="true"]::before { color: var(--blue); }
+    .tab[aria-selected="true"] { background-image: linear-gradient(var(--bg-2), var(--bg-2)), var(--gem); background-origin: border-box; background-clip: padding-box, border-box; border-top: 3px solid transparent; }
     .tab[aria-selected="true"] .idx { color: var(--blue); }
     .tab[aria-selected="true"]::after { content: "*"; color: var(--g-red); margin-left: -2px; }
     .tab .desc { font: 13px var(--sans); color: var(--text-faint); margin-left: 4px; }
@@ -301,6 +307,7 @@
     .pager .next { text-align: right; align-items: flex-end; }
     .pager small { font: 500 12.5px var(--mono); color: var(--text-faint); }
     .pager .next small { color: var(--blue); }
+    .pager .handoff { border-color: var(--g-blue); background-image: linear-gradient(var(--bg-2), var(--bg-2)), var(--gem); background-origin: border-box; background-clip: padding-box, border-box; border: 2px solid transparent; }
 
     /* saas tab */
     .saas { max-width: 1120px; margin: 0 auto; }
@@ -402,7 +409,7 @@
   <div id="app" class="hidden">
     <header class="topbar">
       <button class="chip" id="menu-btn" aria-label="목차 열기">☰</button>
-      <div class="brand"><span class="logo">✦</span>bwg<small>/track3</small></div>
+      <a class="brand" id="home-btn" href="?tab=codelab&amp;step=0" title="처음으로"><span class="logo">✦</span>Build with <span class="gem-text">Gemini</span><small>/track3</small></a>
       <nav class="tabs" role="tablist">
         <button class="tab" role="tab" data-tab="codelab"><span class="idx">1:</span>lab1.md<span class="desc">에이전트 개발 &amp; SaaS 연동</span></button>
         <button class="tab" role="tab" data-tab="codelab2"><span class="idx">2:</span>lab2.md<span class="desc">배포 &amp; 거버넌스 &amp; GE</span></button>
@@ -482,7 +489,7 @@
   <script>
     // Lab tabs render lab*/INSTRUCTION.md, split into one panel per "## " heading.
     const LABS = {
-      codelab: { src: "lab1/INSTRUCTION.md", name: "lab1" },
+      codelab: { src: "lab1/INSTRUCTION.md", name: "lab1", next: { tab: "codelab2", title: "실습 2 시작하기 · 평가, 배포, 거버넌스" } },
       codelab2: { src: "lab2/INSTRUCTION.md", name: "lab2" },
       sdd: { src: "docs/SDD.md", name: "sdd" },
     };
@@ -665,11 +672,14 @@
       const pager = document.createElement("nav");
       pager.className = "pager";
       const prev = steps[step - 1], next = steps[step + 1];
+      const nextLab = !next && LABS[tab].next;  // last step of lab1 hands off to lab2
       pager.innerHTML =
         `<button class="prev" ${prev ? "" : "disabled"}><small>← prev · ${prev ? pad(step - 1) : "--"}</small>${prev ? esc(splitTitle(prev.title)[1]) : "처음입니다"}</button>` +
-        `<button class="next" ${next ? "" : "disabled"}><small>next · ${next ? pad(step + 1) : "--"} →</small>${next ? esc(splitTitle(next.title)[1]) : "마지막 단계입니다"}</button>`;
+        (nextLab
+          ? `<button class="next handoff"><small>next · ${LABS[nextLab.tab].name} →</small>${nextLab.title}</button>`
+          : `<button class="next" ${next ? "" : "disabled"}><small>next · ${next ? pad(step + 1) : "--"} →</small>${next ? esc(splitTitle(next.title)[1]) : "마지막 단계입니다"}</button>`);
       pager.querySelector(".prev").addEventListener("click", () => go(step - 1));
-      pager.querySelector(".next").addEventListener("click", () => go(step + 1));
+      pager.querySelector(".next").addEventListener("click", () => nextLab ? switchTab(nextLab.tab, 0) : go(step + 1));
       doc.append(crumb, md, pager);
       // meta chips sit right under the step title
       const h = md.querySelector("h1, h2");
@@ -784,6 +794,7 @@
     $("#modal").addEventListener("click", () => $("#modal").classList.add("hidden"));
     document.querySelectorAll(".saas-card img").forEach(img => img.addEventListener("click", () => openModal(img.src, img.alt)));
     document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => switchTab(b.dataset.tab)));
+    $("#home-btn").addEventListener("click", e => { e.preventDefault(); switchTab("codelab", 0); });
     const closeMenu = () => document.body.classList.remove("menu-open");
     $("#menu-btn").addEventListener("click", () => document.body.classList.toggle("menu-open"));
     document.addEventListener("keydown", e => {
