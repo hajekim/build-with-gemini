@@ -678,8 +678,8 @@ SDD 2.2절에 따라 사내 복무 규정(POL-HR-2026-004)과 IT 하드웨어 �
 
 규정 원문은 아래에서 내려받을 수 있습니다.
 
-- [사내 복무 규정 (POL-HR-2026-004) PDF 다운로드](../docs/policies/leave_policy_2026.pdf)
-- [사내 IT 자산 운용 지침 (POL-IT-2026-009) PDF 다운로드](../docs/policies/it_hardware_guidelines.pdf)
+- [사내 복무 규정 (POL-HR-2026-004) PDF](../docs/policies/leave_policy_2026.pdf)
+- [사내 IT 자산 운용 지침 (POL-IT-2026-009) PDF](../docs/policies/it_hardware_guidelines.pdf)
 
 #### 1. 사내 복무 규정 (POL-HR-2026-004) 주요 조항
 - 연차 발생 기준: 1개월 개근 시 1.25일 발생 (연간 기본 15일 부여).
@@ -1341,9 +1341,7 @@ Lab 1을 직접 끝냈다면 이 절은 건너뛰고 본인 프로젝트(`~/ente
 
 Lab 1을 끝내지 못했거나 완성본 기준으로 실습 2를 진행하려면 완성본을 받습니다.
 
-브라우저에서 받기: [enterprise_ops_agent_completed.zip 다운로드](./enterprise_ops_agent_completed.zip)
-
-VM 터미널에서 받기: 아래 명령으로 완성본을 받고 압축을 풉니다. 덮어쓰기 전에 기존 폴더 이름을 `enterprise-ops-agent.mine`으로 바꿉니다.
+터미널 창에서 아래 명령을 실행하면 완성본을 받아 압축을 풉니다. 기존 폴더는 덮어쓰지 않도록 먼저 `enterprise-ops-agent.mine`으로 이름을 바꿔 둡니다. 압축 파일만 따로 받아 두려면 [enterprise_ops_agent_completed.zip](./enterprise_ops_agent_completed.zip) 링크를 누르면 됩니다.
 
 ```bash
 # 1. 홈 디렉터리로 이동하고 기존 작업 폴더 백업
