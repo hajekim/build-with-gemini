@@ -1,7 +1,7 @@
 # Build with Gemini 핸즈온 Track 3 | Architect: AI 엔지니어링 (개발자)
 
 ### [실습 Part 1] ADK 멀티 에이전트 구현과 A2A 인터페이스 로컬 검증
-Antigravity CLI(agy)로 ADK(Agent Development Kit) 멀티 에이전트를 단계별로 만들고, Gemini Enterprise 등록에 쓸 A2A 인터페이스를 로컬에서 확인합니다.
+Antigravity 2.0(데스크톱 앱 또는 CLI `agy`)으로 ADK(Agent Development Kit) 멀티 에이전트를 단계별로 만들고, Gemini Enterprise 등록에 쓸 A2A 인터페이스를 로컬에서 확인합니다.
 
 ### [실습 Part 2] 에이전트 신뢰성 확보를 위한 Evaluation 및 Governance (연계)
 Lab 1에서 만든 에이전트를 정량 평가하고 Agent Runtime에 배포한 뒤, Agent Registry, Agent Gateway, Model Armor로 통제하고 Gemini Enterprise에 등록합니다.
@@ -18,8 +18,8 @@ Lab 1에서 만든 에이전트를 정량 평가하고 Agent Runtime에 배포�
 
 | Task | 내용 | 시간 |
 |:---|:---|:---:|
-| 시작 준비 | 콘솔 로그인, 원격 세션 접속, Antigravity GUI와 agy 인증, API 활성화 | 10분 |
-| Task 1 | agy 개발 환경 설정, 프로젝트 생성, SDD 다운로드, 규정 검색 앱 인덱싱 시작 | 17분 |
+| 시작 준비 | 콘솔 로그인, 원격 세션 접속, API 활성화, Antigravity 2.0 앱 또는 agy CLI 인증 | 10분 |
+| Task 1 | 개발 환경 설정, 프로젝트 생성, SDD 다운로드, 규정 검색 앱 인덱싱 시작 | 17분 |
 | Task 2 | ADK Orchestrator-Worker 멀티 에이전트 뼈대 | 10분 |
 | Task 3 | Vertex AI Search + GCS PDF 하이브리드 Policy RAG (Task 1에서 시작한 인덱싱 결과 사용) | 13분 |
 | Task 4 | ADK McpToolset으로 Mock SaaS MCP 서버 연동 | 15분 |
@@ -34,9 +34,9 @@ Lab 1에서 만든 에이전트를 정량 평가하고 Agent Runtime에 배포�
 
 더 큰 문제는 사내 규정이 PDF 문서로 흩어져 있다는 점입니다. 예를 들어 3일을 초과하는 연차는 업무 공백을 막기 위해 최소 7영업일 전에 상신해야 하고, 개발자용 고성능 노트북은 실사용 36개월이 지나야 정기 교체 대상이 됩니다. 직원들이 이런 세부 규정을 일일이 확인하지 않고 신청하면 승인이 지연되거나 불필요한 반려가 반복됩니다.
 
-이 실습에서는 Antigravity CLI(`agy`), ADK(`google-adk`), MCP, 사내 규정 RAG로 휴가 신청과 장비 교체를 처리하는 에이전트를 만듭니다.
+이 실습에서는 Antigravity 2.0(데스크톱 앱 또는 CLI `agy`), ADK(`google-adk`), MCP, 사내 규정 RAG로 휴가 신청과 장비 교체를 처리하는 에이전트를 만듭니다.
 
-코드는 직접 붙여넣지 않습니다. 워크스페이스의 설계서(SDD)를 agy에 읽힌 뒤 자연어 프롬프트로 코드를 생성하게 합니다(스펙 기반 개발).
+코드는 직접 붙여넣지 않습니다. 워크스페이스의 설계서(SDD)를 Antigravity에 읽힌 뒤 자연어 프롬프트로 코드를 생성하게 합니다(스펙 기반 개발).
 
 ![엔터프라이즈 에이전트 아키텍처](./images/agent_architecture.png)
 
@@ -46,9 +46,9 @@ Lab 1에서 만든 에이전트를 정량 평가하고 Agent Runtime에 배포�
 
 이 실습을 마치면 다음 작업을 직접 수행할 수 있습니다.
 
-1. `agy` CLI를 실행하고 Google Cloud 프로젝트 인증을 마친 뒤, 모델을 `gemini-3.8-flash`로 설정합니다.
-2. `docs/SDD.md`를 agy에 읽혀 아키텍처와 도구 명세를 컨텍스트로 넣습니다.
-3. agy로 `config.yaml`과 ADK 멀티 에이전트 뼈대 코드를 생성합니다.
+1. Antigravity 2.0 앱 또는 `agy` CLI에서 Google Cloud 프로젝트 인증을 마치고 모델을 `gemini-3.8-flash`로 설정합니다.
+2. `docs/SDD.md`를 Antigravity에 읽혀 아키텍처와 도구 명세를 컨텍스트로 넣습니다.
+3. Antigravity로 `config.yaml`과 ADK 멀티 에이전트 뼈대 코드를 생성합니다.
 4. SDD 2.2절과 Cloud Storage(`gs://oreobox/policy/`) 규정 문서를 바탕으로 조항 번호와 근거를 반환하는 검색 도구(`app/tools/policy_rag.py`)를 만듭니다.
 5. Mock SaaS 플랫폼(`https://korean-mock-saas-dri5akvbzq-du.a.run.app/`)의 MCP 서버에 개인 토큰으로 연결하는 도구(`app/tools/mcp_tools.py`)를 만듭니다.
 6. 규정 검증 우선 규칙을 적용해 에이전트를 완성하고, `agents-cli run`으로 연차 신청과 노트북 교체 요청을 실행한 뒤 웹 화면에서 결과를 확인합니다. 실습 2에서 쓸 4-Tier 평가 데이터셋도 만듭니다.
@@ -87,7 +87,7 @@ Lab 1에서 만든 에이전트를 정량 평가하고 Agent Runtime에 배포�
 
 이 실습은 미리 구성된 개발자 가상 머신(VM)과 Cloud Run 프록시 서비스를 제공합니다. 로컬에 아무것도 설치하지 않고 브라우저로 개발 환경에 접속합니다.
 
-Antigravity 2.0에는 데스크톱 앱(Agent Platform), 터미널용 CLI(`agy`), SDK가 있습니다. 이 실습은 주로 CLI를 씁니다.
+Antigravity 2.0에는 데스크톱 앱(Agent Platform), 터미널용 CLI(`agy`), SDK가 있습니다. 이 실습은 앱과 CLI 중 하나를 골라 진행합니다.
 
 #### 원격 브라우저 세션 열기
 
@@ -111,12 +111,53 @@ Antigravity 2.0에는 데스크톱 앱(Agent Platform), 터미널용 CLI(`agy`),
 
 ---
 
-### Antigravity 2.0 GUI 로그인
+### 터미널 열기와 API 활성화
 
-Antigravity Agent Platform은 Antigravity 2.0의 데스크톱 앱입니다. 대화, 작업 기록, 예약 작업을 창 하나에서 관리합니다. 이 실습의 agy 프롬프트는 `enterprise-ops-agent` 폴더에서 실행한 CLI를 기준으로 작성했으므로, GUI는 같은 프로젝트로 로그인해 두고 Antigravity 2.0 화면을 살펴보는 용도로 사용합니다.
+1. 원격 화면 좌측 하단 **Application Launcher > System > Konsole**을 클릭하여 터미널을 실행합니다.
+![Konsole 터미널 실행](./images/05_konsole_terminal_access.png)
+
+> [!NOTE]
+> Konsole 터미널을 열 때 `Warning: Could not find '', starting '/bin/bash' instead. Please check your profile settings.` 경고가 표시되어도 무시해도 됩니다.
+
+2. Lab 1과 Lab 2에서 쓰는 API를 미리 켭니다. VM의 gcloud는 실습 계정과 프로젝트로 미리 설정되어 있습니다. `gcloud config list`로 account와 project를 확인할 수 있습니다.
+
+```bash
+gcloud services enable \
+  aiplatform.googleapis.com \
+  agentregistry.googleapis.com \
+  networkservices.googleapis.com \
+  serviceextensions.googleapis.com \
+  networksecurity.googleapis.com \
+  modelarmor.googleapis.com \
+  discoveryengine.googleapis.com \
+  secretmanager.googleapis.com
+```
+
+1~2분 걸리며 `Operation ... finished successfully.`가 나오면 완료입니다.
+
+3. RAG 도구와 `agents-cli run`은 ADC(Application Default Credentials, 애플리케이션 기본 사용자 인증 정보)로 Google Cloud API를 호출합니다. 다음 명령에서 `ADC OK`가 출력되면 ADC가 준비된 것입니다.
+
+```bash
+gcloud auth application-default print-access-token > /dev/null && echo "ADC OK"
+```
+
+오류가 나면 `gcloud auth application-default login`을 실행하고 실습 계정(Qwiklabs **Username**)으로 로그인합니다.
+
+---
+
+### Antigravity 2.0 사용 방식 선택
+
+이 실습의 프롬프트는 Antigravity 2.0 데스크톱 앱과 CLI(`agy`) 어느 쪽에서도 같은 내용으로 입력합니다. 아래 (가)와 (나) 중 편한 쪽 하나를 골라 진행합니다. 둘 다 설정해도 됩니다.
+
+| 방식 | 특징 |
+|:---|:---|
+| (가) Antigravity 2.0 앱 | 데스크톱 앱(Agent Platform)입니다. 대화, 작업 기록, 예약 작업을 창 하나에서 관리합니다. |
+| (나) agy CLI | Konsole 터미널에서 실행하는 코딩 에이전트입니다. 여러 파일을 읽고 고치며 명령을 실행합니다. |
+
+#### (가) Antigravity 2.0 앱 로그인
 
 > [!IMPORTANT]
-> 로그인할 때는 항상 **Use Google Cloud project instead**를 선택합니다. 앱이 실행 중인데 창이 뜨지 않으면 터미널에서 `sudo pkill -9 antigravity`를 실행한 뒤 다시 엽니다. (터미널은 **Application Launcher > System > Konsole**에서 엽니다.)
+> 로그인할 때는 항상 **Use Google Cloud project instead**를 선택합니다. 앱이 실행 중인데 창이 뜨지 않으면 터미널에서 `sudo pkill -9 antigravity`를 실행한 뒤 다시 엽니다.
 
 1. 원격 화면 좌측 하단 **Application Launcher > Development > Antigravity**를 클릭합니다.
 ![Application Launcher에서 Antigravity 실행](./images/agy2_01_launcher.png)
@@ -151,44 +192,20 @@ Antigravity Agent Platform은 Antigravity 2.0의 데스크톱 앱입니다. 대�
 9. **Finish**를 클릭합니다. 다음과 같은 화면이 보이면 준비가 끝난 것입니다.
 ![Antigravity Agent Platform 준비 완료](./images/agy2_09_ready.png)
 
----
+앱에서 모델을 고르는 메뉴가 보이면 `gemini-3.8-flash`를 선택합니다(메뉴 이름은 앱 버전에 따라 다를 수 있음). 앱 창은 그대로 두고, Task 1 5단계에서 프로젝트 폴더를 엽니다.
 
-### Antigravity CLI (`agy`) 실행 및 초기 설정
+#### (나) agy CLI 초기 설정
 
-agy는 터미널에서 여러 파일을 읽고 고치며 명령을 실행하는 코딩 에이전트입니다.
-
-1. 원격 화면 좌측 하단 **Application Launcher > System > Konsole**을 클릭하여 터미널을 실행합니다.
-![Konsole 터미널 실행](./images/05_konsole_terminal_access.png)
-
-> [!NOTE]
-> Konsole 터미널을 열 때 `Warning: Could not find '', starting '/bin/bash' instead. Please check your profile settings.` 경고가 표시되어도 무시해도 됩니다.
-
-2. Lab 1과 Lab 2에서 쓰는 API를 미리 켭니다. VM의 gcloud는 실습 계정과 프로젝트로 미리 설정되어 있습니다. `gcloud config list`로 account와 project를 확인할 수 있습니다.
-
-```bash
-gcloud services enable \
-  aiplatform.googleapis.com \
-  agentregistry.googleapis.com \
-  networkservices.googleapis.com \
-  serviceextensions.googleapis.com \
-  networksecurity.googleapis.com \
-  modelarmor.googleapis.com \
-  discoveryengine.googleapis.com \
-  secretmanager.googleapis.com
-```
-
-1~2분 걸리며 `Operation ... finished successfully.`가 나오면 완료입니다.
-
-3. 터미널에 다음 명령어를 입력해 Antigravity CLI를 실행합니다.
+1. 터미널에 다음 명령어를 입력해 Antigravity CLI를 실행합니다.
 
 ```bash
 agy
 ```
 
-4. 로그인 방식 선택 창이 나타나면 **Use a Google Cloud project**를 선택합니다.
+2. 로그인 방식 선택 창이 나타나면 **Use a Google Cloud project**를 선택합니다.
 ![Google Cloud Project 로그인 선택](./images/06_agy_signin_option.png)
 
-5. Chrome 브라우저에서 인증 절차를 완료합니다. 터미널에 표시된 인증 URL을 복사해 새 Chrome 탭에서 열어도 됩니다.
+3. Chrome 브라우저에서 인증 절차를 완료합니다. 터미널에 표시된 인증 URL을 복사해 새 Chrome 탭에서 열어도 됩니다.
    - Welcome to Google Chrome 알림이 나타나면 **OK**를 클릭합니다.
    - Chrome 초기 로그인 창이 나타나면 **Stay signed out** 또는 **Use Chrome without an account**를 클릭합니다.
    - Google 로그인 화면에서 Qwiklabs 자격증명 패널의 **Username**과 **Password**를 입력합니다.
@@ -196,21 +213,21 @@ agy
    - 터미널로 돌아와 인증 코드를 붙여넣고 **ENTER**를 누른 뒤, 본인의 **Google Cloud Project ID**를 선택합니다.
 ![인증 코드 입력 및 프로젝트 선택](./images/07_agy_auth_code.png)
 
-6. Google Cloud Location은 **global**을 선택합니다.
+4. Google Cloud Location은 **global**을 선택합니다.
 
-7. 선호하는 색상 테마를 선택하고 **Next**를 클릭합니다.
+5. 선호하는 색상 테마를 선택하고 **Next**를 클릭합니다.
 ![색상 테마 선택](./images/08_agy_color_scheme.png)
 
-8. 서비스 이용약관과 데이터 사용 정책에 동의합니다.
+6. 서비스 이용약관과 데이터 사용 정책에 동의합니다.
 ![서비스 약관 동의](./images/09_agy_terms_of_service.png)
 
-9. *"Do you trust the contents of this project?"* 알림이 뜨면 **Yes, I trust this folder**를 선택하고 **ENTER**를 누릅니다.
+7. *"Do you trust the contents of this project?"* 알림이 뜨면 **Yes, I trust this folder**를 선택하고 **ENTER**를 누릅니다.
 ![폴더 신뢰 권한 승인](./images/10_agy_folder_trust_permission.png)
 
 설정이 완료되면 터미널 화면이 다음과 같이 준비됩니다.
 ![Antigravity CLI 환경 준비 완료](./images/11_agy_environment_setup.png)
 
-10. 설정을 다시 확인하거나 바꾸려면 `agy` 프롬프트에서 다음 명령어를 입력합니다.
+8. 설정을 다시 확인하거나 바꾸려면 `agy` 프롬프트에서 다음 명령어를 입력합니다.
 
 ```prompt
 /config
@@ -219,7 +236,7 @@ agy
 색상 테마를 확인하고 원하는 테마를 확정합니다.
 ![색상 테마 확인](./images/12_agy_select_color_scheme.png)
 
-11. 사용할 모델을 확인하고 목록에서 `gemini-3.8-flash`를 선택합니다.
+9. 사용할 모델을 확인하고 목록에서 `gemini-3.8-flash`를 선택합니다.
 
 ```prompt
 /model
@@ -227,7 +244,7 @@ agy
 
 ![모델 선택 화면](./images/agy_terminal_session.png)
 
-설정이 끝나면 `/exit`로 agy를 종료합니다. 작업용 agy는 Task 1 5단계에서 프로젝트 폴더로 이동한 뒤 다시 실행합니다.
+CLI 초기 설정이 끝났으면 `/exit`로 agy를 종료합니다. 작업용 agy는 Task 1 5단계에서 프로젝트 폴더로 이동한 뒤 다시 실행합니다.
 
 ---
 
@@ -248,13 +265,13 @@ Cymbal Group 한국 지사는 사내 업무 효율화를 위해 AI 기반 통합
 
 SDD는 AI 에이전트를 개발할 때 시스템 구조, 입출력 스키마, 호출 제약, 도구 명세를 미리 정해 둔 문서입니다. 코드와 프롬프트는 이 문서를 기준으로 합니다.
 
-프롬프트만으로 코딩을 지시하면 모델이 API 경로나 함수 인자를 추측해 틀리게 만들 수 있습니다. 그래서 SDD를 agy에 먼저 읽힌 뒤 코드를 생성하게 합니다.
+프롬프트만으로 코딩을 지시하면 모델이 API 경로나 함수 인자를 추측해 틀리게 만들 수 있습니다. 그래서 SDD를 에이전트에 먼저 읽힌 뒤 코드를 생성하게 합니다.
 
 | SDD 절 | 내용 |
 |:---|:---|
-| 1절 시스템 개요 | 에이전트 목표(휴가 신청 자동화, 하드웨어 교체 접수), 모델(Gemini 3.8 Flash, Temperature 0.1), RAG 신뢰도 임계값(0.80), 사번 기본값(EMP-10294) |
-| 2절 도구 및 인터페이스 규격 | 규정 검색 RAG 도구(`tools/policy_rag.py`)와 인사/전산 SaaS 연동 MCP 도구(`tools/mcp_tools.py`)의 함수 시그니처와 HTTP 엔드포인트 |
-| 3절 오케스트레이션 및 거버넌스 규칙 | 규정 검증 우선 원칙, 위험 작업 사전 승인, 멀티턴 대화 상태 추적 |
+| 1절 시스템 개요 및 목표 | 에이전트 목표(휴가 신청 자동화, 하드웨어 교체 접수), 모델(Gemini 3.8 Flash, Temperature 0.1), RAG 신뢰도 임계값(0.80), 사번 기본값(EMP-10294) |
+| 2절 아키텍처 및 도구 명세 | 규정 검색 RAG 도구(`tools/policy_rag.py`)와 인사/전산 SaaS 연동 MCP 도구(`tools/mcp_tools.py`)의 함수 시그니처와 HTTP 엔드포인트 |
+| 3절 오케스트레이션 및 거버넌스 강령 | 규정 검증 우선 원칙, 위험 작업 사전 승인, 멀티턴 대화 상태 추적 |
 
 SDD의 `tools/`는 프로젝트의 `app/tools/`를 가리킵니다.
 
@@ -262,11 +279,13 @@ SDD의 `tools/`는 프로젝트의 `app/tools/`를 가리킵니다.
 
 ## Task 1. 개발 환경 설정, agents-cli 프로젝트 스캐폴딩 및 SDD 다운로드
 
-Python 패키지를 설치하고 `agents-cli`로 프로젝트를 만든 뒤, SDD와 규정 PDF를 내려받아 agy에 읽힙니다.
+Python 패키지를 설치하고 `agents-cli`로 프로젝트를 만든 뒤, SDD와 규정 PDF를 내려받아 에이전트에 읽힙니다.
 
 ### 1단계: 필수 라이브러리 및 런타임 툴 설치
 
-터미널 새 탭(**Ctrl+Shift+T**)을 열고 시스템 도구와 ADK CLI를 설치합니다. 실습용 VM이라 PEP 668 제한을 무시하고 사용자 영역(`~/.local`)에 설치하기 위해 `--break-system-packages`를 붙입니다. 설치된 CLI가 인식되도록 `PATH`도 등록합니다.
+시작 준비에서 연 Konsole 터미널(이하 터미널 창)에서 시스템 도구와 ADK CLI를 설치합니다. 설치에는 몇 분 걸릴 수 있습니다. 실습용 VM이라 PEP 668 제한을 무시하고 사용자 영역(`~/.local`)에 설치하기 위해 `--break-system-packages`를 붙입니다.
+
+`PATH`와 Vertex AI 환경 변수는 `~/lab.env` 파일에 저장합니다. 터미널, agy CLI, Antigravity 앱이 모두 같은 값을 읽을 수 있게 하기 위해서입니다. `~/.bashrc`에는 이 파일을 읽는 한 줄만 추가하므로, 이후 새로 여는 Konsole 탭에는 값이 자동으로 적용됩니다.
 
 ```bash
 # 1. 압축 해제 유틸리티와 JSON 처리 도구 설치
@@ -276,14 +295,21 @@ sudo apt-get update -qq && sudo apt-get install -y -qq unzip jq
 pip install --break-system-packages --upgrade pip
 pip install --break-system-packages google-agents-cli "google-adk>=2.3.0" mcp httpx pydantic pyyaml uv
 
-# 3. 사용자 바이너리 경로 및 Vertex AI global 엔드포인트 환경변수 등록
-export PATH="$HOME/.local/bin:$PATH"
-echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
-echo 'export GOOGLE_GENAI_USE_VERTEXAI=true' >> ~/.bashrc
-echo 'export GOOGLE_CLOUD_LOCATION=global' >> ~/.bashrc
-echo 'export GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project 2>/dev/null)' >> ~/.bashrc
-source ~/.bashrc
+# 3. 사용자 바이너리 경로와 Vertex AI global 엔드포인트 환경 변수를 ~/lab.env에 저장
+#    (GOOGLE_CLOUD_PROJECT는 지금 시점의 프로젝트 ID 값으로 저장됩니다)
+cat > ~/lab.env <<EOF
+export PATH="\$HOME/.local/bin:\$PATH"
+export GOOGLE_GENAI_USE_VERTEXAI=true
+export GOOGLE_CLOUD_LOCATION=global
+export GOOGLE_CLOUD_PROJECT="$(gcloud config get-value project 2>/dev/null)"
+EOF
+
+# 4. 새 Konsole 탭에서도 ~/lab.env를 읽도록 ~/.bashrc에 한 번만 등록하고, 현재 셸에 적용
+grep -q lab.env ~/.bashrc || echo '[ -f ~/lab.env ] && . ~/lab.env' >> ~/.bashrc
+source ~/lab.env
 ```
+
+`cat ~/lab.env`로 `GOOGLE_CLOUD_PROJECT`에 본인 프로젝트 ID가 들어갔는지 확인할 수 있습니다. 이 블록은 `~/lab.env`를 새로 씁니다. Task 4 이후에 다시 실행했다면 Task 4 1단계의 토큰 저장 명령도 다시 실행합니다.
 
 설치된 버전을 확인합니다.
 
@@ -365,6 +391,8 @@ cd enterprise-ops-agent
 +-----------------------------------------------------------------------------------+
 ```
 
+출력 끝의 Get Started 안내는 지금 실행하지 않습니다. `agents-cli install`은 4단계에서 실행합니다.
+
 ---
 
 ### 3단계: SDD와 사내 규정 PDF 다운로드
@@ -436,29 +464,32 @@ agents-cli install
 
 ---
 
-### 5단계: agy 실행과 세션 관리 (디렉터리 위치, 종료, CLI 실행, agy --continue 복귀)
+### 5단계: 에이전트 창과 터미널 창 준비
 
-#### 1. 프로젝트 폴더로 이동한 뒤 agy 실행
-agy는 실행한 위치의 디렉터리를 프로젝트 워크스페이스로 인식합니다. 그래서 `enterprise-ops-agent` 폴더에서 실행해야 `docs/SDD.md`와 `app/`을 읽을 수 있습니다.
+이후 실습은 창 두 개로 진행합니다.
 
-```bash
-cd ~/enterprise-ops-agent
-agy
-```
+- 에이전트 창: 프롬프트를 입력하는 곳입니다. 문서의 `prompt` 코드 블록은 여기에 입력합니다.
+- 터미널 창: 명령을 실행하는 Konsole 탭입니다. 문서의 `bash` 코드 블록은 여기서 실행합니다.
 
-새 폴더라서 폴더 신뢰 확인이 다시 나오면 **Yes, I trust this folder**를 선택합니다.
+에이전트는 열어 둔 프로젝트 폴더를 워크스페이스로 인식합니다. `~/enterprise-ops-agent` 폴더를 열어야 `docs/SDD.md`와 `app/`을 읽을 수 있습니다.
 
-#### 2. agy와 bash 오가기
-개발 중에는 단위 테스트나 `agents-cli` 명령을 터미널에서 직접 실행해야 할 때가 있습니다.
-1. agy 일시 종료: 대화창에서 `Ctrl+D` (두 번) 또는 `/exit`를 입력하여 bash 프롬프트로 나옵니다.
-2. 터미널 작업: 단위 테스트(`uv run python3 tests/test_scenarios.py`)나 스모크 테스트(`agents-cli run ...`)를 실행합니다.
-3. 기존 agy 세션 복귀: `agy --continue` (또는 `agy -c`)를 입력하면 이전 대화를 이어서 진행합니다. (`agy`만 입력하면 새 대화가 시작됩니다.)
+| 사용 방식 | 프로젝트 폴더 열기 | 에이전트 창 | 터미널 창 |
+|:---|:---|:---|:---|
+| (가) Antigravity 2.0 앱 | 왼쪽 사이드바의 **Projects**에서 `~/enterprise-ops-agent` 폴더를 추가하거나 선택합니다. (메뉴 이름은 앱 버전에 따라 다를 수 있음) | 앱의 대화 입력창 | 지금까지 쓴 Konsole 탭 |
+| (나) agy CLI | Konsole 탭 1에서 `cd ~/enterprise-ops-agent && agy`를 실행합니다. | 탭 1의 agy | Konsole 새 탭(**Ctrl+Shift+T**)인 탭 2 |
 
-> [!TIP]
-> 탭 1에 agy를 띄워 두고 Konsole 새 탭(**Ctrl+Shift+T**)인 탭 2에서 bash 명령을 실행해도 됩니다.
+새 대화와 이어서 하기:
+- 앱: 사이드바의 **New Conversation**으로 새 대화를 시작하고, 대화 목록에서 이전 대화를 골라 이어서 진행합니다. (메뉴 이름은 앱 버전에 따라 다를 수 있음)
+- CLI: `agy`는 새 대화를 시작하고, `agy --continue`(또는 `agy -c`)는 직전 대화를 이어서 진행합니다.
 
-#### 3. agy에 프로젝트 컨텍스트 읽히기
-실행 중인 `agy` 대화창에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
+폴더 신뢰 확인이 나오면 **Yes, I trust this folder**를 선택합니다.
+
+> [!NOTE]
+> Antigravity 앱은 Konsole에서 `export`한 값을 이어받지 않습니다. 그래서 에이전트에게 명령 실행을 맡기는 프롬프트에는 `source ~/lab.env`를 먼저 실행하라는 줄이 들어 있습니다. 터미널 창은 1단계에서 등록한 `~/.bashrc` 설정으로 값을 자동으로 읽습니다.
+
+#### 프로젝트 컨텍스트 읽히기
+
+에이전트 창에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
 
 ```prompt
 당신은 Cymbal Group Korea의 엔터프라이즈 AI 에이전트 개발자입니다.
@@ -466,9 +497,11 @@ docs/SDD.md 파일의 내용을 꼼꼼히 읽고, 전체 시스템 아키텍처�
 그리고 현재 프로젝트 디렉터리의 컨텍스트를 요약한 context_summary.md 파일을 docs/ 디렉터리에 생성하세요.
 ```
 
-`agy`가 파일 생성을 제안하면 **Allow**를 선택합니다. 생성이 완료되면 터미널에서 요약 파일을 확인합니다.
+
+에이전트가 파일 생성을 제안하면 **Allow**를 선택합니다. 생성이 완료되면 터미널 창에서 요약 파일을 확인합니다.
 
 ```bash
+cd ~/enterprise-ops-agent
 cat docs/context_summary.md
 ```
 
@@ -476,44 +509,59 @@ cat docs/context_summary.md
 
 ---
 
-### 6단계: Vertex AI Search로 사내 규정 검색 앱 만들기 (터미널)
+### 6단계: Vertex AI Search로 사내 규정 검색 앱 만들기 (터미널 창)
 
 Task 3의 규정 RAG 도구가 호출할 Vertex AI Search 검색 앱을 지금 만들어 둡니다. 데이터스토어와 검색 앱 생성 요청은 바로 접수되지만, PDF 가져오기(인덱싱)는 PDF 2건 기준으로 보통 4~11분 걸립니다. 지금 시작해 두면 Task 2를 진행하는 동안 끝나므로 Task 3에서 기다릴 필요가 없습니다.
 
+Vertex AI Search는 `global`/`us`/`eu` 멀티리전만 지원하므로 검색 앱은 `global`에 만들고, 원본 PDF 버킷은 서울(`asia-northeast3`)에 둡니다. 아래 네 블록은 같은 터미널 창에서 순서대로 실행합니다. ② 이후 블록은 ①에서 만든 변수를 씁니다.
+
 > [!TIP]
-> agy 대화창이 열려 있다면 Konsole 새 탭(**Ctrl+Shift+T**)에서 실행하세요. Vertex AI Search는 `global`/`us`/`eu` 멀티리전만 지원하므로 검색 앱은 `global`에 만들고, 원본 PDF 버킷은 서울(`asia-northeast3`)에 둡니다.
+> 응답에 `ALREADY_EXISTS`(또는 `409`)가 보이면 이미 만들어진 것이므로 무시하고 다음 블록으로 넘어갑니다. 그 밖의 `error`가 보이면 30초 뒤 그 블록만 다시 실행합니다.
+
+① 변수, 서비스 에이전트, 버킷
 
 ```bash
 PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
 DE="https://discoveryengine.googleapis.com/v1/projects/${PROJECT_ID}/locations/global/collections/default_collection"
 AUTH=(-H "Authorization: Bearer $(gcloud auth print-access-token)" -H "X-Goog-User-Project: ${PROJECT_ID}" -H "Content-Type: application/json")
 
-# 0. Vertex AI Search 서비스 에이전트 생성 (새 프로젝트에는 없어서 GCS 가져오기가 403으로 실패합니다)
+# Vertex AI Search 서비스 에이전트 생성 (새 프로젝트에는 없어서 GCS 가져오기가 403으로 실패합니다)
 gcloud beta services identity create --service=discoveryengine.googleapis.com
 
-# 1. 규정 PDF를 내 프로젝트 버킷(서울)으로 복사
+# 규정 PDF를 내 프로젝트 버킷(서울)으로 복사
 gcloud storage buckets create gs://${PROJECT_ID}-policy-docs --location=asia-northeast3
 gcloud storage cp gs://oreobox/policy/*.pdf gs://${PROJECT_ID}-policy-docs/policy/
+```
 
-# 2. 비정형 문서용 데이터스토어 생성
+서비스 에이전트 이메일(`service-...@gcp-sa-discoveryengine.iam.gserviceaccount.com`)과 PDF 2건 복사 결과가 출력되면 됩니다.
+
+② 비정형 문서용 데이터스토어 생성
+
+```bash
 curl -s -X POST "${AUTH[@]}" "${DE}/dataStores?dataStoreId=company-policy-ds" \
   -d '{"displayName":"company-policy-ds","industryVertical":"GENERIC","solutionTypes":["SOLUTION_TYPE_SEARCH"],"contentConfig":"CONTENT_REQUIRED"}'
+```
 
-# 3. GCS PDF 가져오기 (비동기, 4~11분 소요. 결과를 기다리지 않고 Task 2로 진행)
+③ GCS PDF 가져오기 (비동기, 4~11분 소요. 결과를 기다리지 않고 다음으로 진행)
+
+```bash
 curl -s -X POST "${AUTH[@]}" "${DE}/dataStores/company-policy-ds/branches/0/documents:import" \
   -d "{\"gcsSource\":{\"inputUris\":[\"gs://${PROJECT_ID}-policy-docs/policy/*.pdf\"],\"dataSchema\":\"content\"},\"reconciliationMode\":\"INCREMENTAL\"}"
+```
 
-# 4. Enterprise 검색 앱 생성 (발췌 세그먼트 반환에 필요)
+④ Enterprise 검색 앱 생성 (발췌 세그먼트 반환에 필요)
+
+```bash
 curl -s -X POST "${AUTH[@]}" "${DE}/engines?engineId=company-policy-app" \
   -d '{"displayName":"company-policy-app","solutionType":"SOLUTION_TYPE_SEARCH","industryVertical":"GENERIC","dataStoreIds":["company-policy-ds"],"searchEngineConfig":{"searchTier":"SEARCH_TIER_ENTERPRISE","searchAddOns":["SEARCH_ADD_ON_LLM"]}}'
 ```
 
-curl 응답 JSON에 `error`가 보이면 30초 뒤 같은 명령을 다시 실행하세요. 다시 실행할 때 버킷 생성이 `409` already exists로 실패하는 것은 무시해도 됩니다.
+②, ③, ④는 각각 `"name": ".../operations/..."` 형태의 JSON을 돌려주면 요청이 접수된 것입니다.
 
 ---
 
 
-## Task 2. agy로 ADK 2.0 멀티 에이전트 구조 만들기
+## Task 2. Antigravity로 ADK 2.0 멀티 에이전트 구조 만들기
 
 `agents-cli create`가 만든 단일 에이전트(`app/agent.py`)를 SDD에 따라 오케스트레이터 1개와 워커 3개 구조로 바꿉니다.
 
@@ -526,12 +574,12 @@ curl 응답 JSON에 `error`가 보이면 30초 뒤 같은 명령을 다시 실�
 
 ```mermaid
 flowchart TD
-    User["임직원 (사용자)"] --> Orch["Central Orchestrator (Lead Agent)\n(enterprise_ops_agent)\ngemini-3.8-flash"]
+    User["임직원 (사용자)"] --> Orch["Central Orchestrator (Lead Agent)<br/>(enterprise_ops_agent)<br/>gemini-3.8-flash"]
 
     subgraph Specialist_Workers ["도메인별 전문 워커 계층 (Google ADK)"]
-        Orch -->|"1. 규정 확인 위임"| W1["Worker 1: hr_policy_agent\n(사내 복무/IT 규정 RAG 전문가)"]
-        Orch -->|"2. 연차/근태 위임"| W2["Worker 2: workweek_agent\n(WorkWeek HRMS 연동 전담)"]
-        Orch -->|"3. 전산지원 위임"| W3["Worker 3: itsm_agent\n(ServiceImmediately ITSM 전담)"]
+        Orch -->|"1. 규정 확인 위임"| W1["Worker 1: hr_policy_agent<br/>(사내 복무/IT 규정 RAG 전문가)"]
+        Orch -->|"2. 연차/근태 위임"| W2["Worker 2: workweek_agent<br/>(WorkWeek HRMS 연동 전담)"]
+        Orch -->|"3. 전산지원 위임"| W3["Worker 3: itsm_agent<br/>(ServiceImmediately ITSM 전담)"]
     end
 ```
 
@@ -569,10 +617,10 @@ enterprise-ops-agent/
 
 ### 1단계: 설정 파일 생성 및 멀티 에이전트 뼈대 리팩토링 지시
 
-실행 중인 `agy` 대화창에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
+에이전트 창에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
 
 ```prompt
-docs/SDD.md의 2.1절 멀티 에이전트 구조와 1절 설정 규격을 참고하여, 우리가 방금 생성한 기본 뼈대를 Cymbal Group Korea의 Orchestrator-Worker 멀티 에이전트 시스템으로 전면 개편해주세요:
+docs/SDD.md의 2.1절 '논리 아키텍처 및 데이터 흐름'과 1절 '시스템 개요 및 목표'를 참고하여, 우리가 방금 생성한 기본 뼈대를 Cymbal Group Korea의 Orchestrator-Worker 멀티 에이전트 시스템으로 전면 개편해주세요:
 
 1. config.yaml 생성:
    - agent 이름: enterprise_ops_agent, architecture: Orchestrator-Worker Multi-Agent System (MAS)
@@ -597,16 +645,13 @@ docs/SDD.md의 2.1절 멀티 에이전트 구조와 1절 설정 규격을 참고
      * 파일 끝에 if __name__ == "__main__": 블록을 두고 root_agent 이름과 서브 에이전트 이름 목록을 출력할 것
 ```
 
-`agy`가 파일 수정을 제안하면 변경 사항을 확인한 뒤 **Allow**를 선택합니다.
+에이전트가 파일 수정을 제안하면 변경 사항을 확인한 뒤 **Allow**를 선택합니다.
 
 ---
 
 ### 2단계: 생성된 멀티 에이전트 뼈대 검증
 
-> [!TIP]
-> `agy` 대화창에서 **Ctrl+D** (두 번) 또는 **/exit**로 bash 프롬프트로 나옵니다. 탭을 나눠 쓰고 있다면 bash 탭으로 전환합니다.
-
-터미널에서 멀티 에이전트 구성을 실행해 확인합니다.
+터미널 창에서 멀티 에이전트 구성을 실행해 확인합니다.
 
 ```bash
 cd ~/enterprise-ops-agent
@@ -625,9 +670,9 @@ uv run python3 -m app.agent
 
 ---
 
-## Task 3. agy 프롬프트 기반 사내 규정 RAG 도구 구현
+## Task 3. 프롬프트 기반 사내 규정 RAG 도구 구현
 
-SDD 2.2절에 따라 사내 복무 규정(POL-HR-2026-004)과 IT 하드웨어 지침(POL-IT-2026-009)을 검색하는 RAG 도구(`app/tools/policy_rag.py`)를 agy로 만듭니다.
+SDD 2.2절에 따라 사내 복무 규정(POL-HR-2026-004)과 IT 하드웨어 지침(POL-IT-2026-009)을 검색하는 RAG 도구(`app/tools/policy_rag.py`)를 에이전트로 만듭니다.
 
 ### 사내 규정 원본 문서와 주요 조항
 
@@ -651,7 +696,7 @@ SDD 2.2절에 따라 사내 복무 규정(POL-HR-2026-004)과 IT 하드웨어 �
 
 ---
 
-### 0단계: 검색 앱 인덱싱 완료 확인 (터미널)
+### 0단계: 검색 앱 인덱싱 완료 확인 (터미널 창)
 
 Task 1의 6단계에서 시작한 PDF 가져오기가 끝났는지 확인합니다. 문서 수가 `2`이면 완료입니다.
 
@@ -668,13 +713,7 @@ curl -s "${AUTH[@]}" "${DE}/dataStores/company-policy-ds/branches/0/documents" |
 
 ### 1단계: RAG 도구 구현 지시
 
-> [!TIP]
-> 아래 명령으로 기존 `agy` 세션에 다시 들어갑니다. 탭을 나눠 쓰고 있다면 agy 탭으로 전환합니다.
-> ```bash
-> cd ~/enterprise-ops-agent && agy --continue
-> ```
-
-실행 중인 `agy` 대화창에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
+에이전트 창에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
 
 ```prompt
 docs/SDD.md의 2.2절 '사내 규정 RAG 도구 명세'와 '하이브리드 Policy RAG 아키텍처'를 엄격히 준수하여 app/tools/policy_rag.py 파일을 구현해주세요.
@@ -687,20 +726,19 @@ docs/SDD.md의 2.2절 '사내 규정 RAG 도구 명세'와 '하이브리드 Poli
    PDF 파일명으로 문서번호를 매핑: leave_policy_2026.pdf -> POL-HR-2026-004(HR), it_hardware_guidelines.pdf -> POL-IT-2026-009(IT)
 3. 2차 폴백: Vertex AI Search 호출 예외 또는 결과 0건이면 SDD의 Ground Truth 조항을 로컬 인덱스로 키워드 검색할 것.
 4. category('HR'/'IT')로 결과를 필터링하고, 반환 딕셔너리에 status, source('vertex_ai_search' 또는 'local_fallback'), match_count, matches(doc_id, title, content)를 포함할 것.
+   키 이름은 정확히 이대로 쓸 것(성공 시 status='SUCCESS'). Task 5 통합 테스트와 실습 2 평가 지표가 이 이름을 읽음.
    결과가 없으면 status='NO_MATCH'와 추측 금지 안내 메시지를 반환할 것.
 5. 작성이 완료되면 `uv run python3 -m app.tools.policy_rag`로 자체 검증(assert)을 실행해 결과를 보여주세요.
+   명령을 실행하기 전에 `source ~/lab.env`를 먼저 실행할 것.
 ```
 
-`agy`가 파일 작성을 제안하면 **Allow**를 선택합니다.
+에이전트가 파일 작성을 제안하면 **Allow**를 선택합니다.
 
 ---
 
 ### 2단계: RAG 도구 독립 실행 테스트
 
-> [!TIP]
-> `agy` 대화창에서 **Ctrl+D** (두 번) 또는 **/exit**로 bash 프롬프트로 나옵니다. 탭을 나눠 쓰고 있다면 bash 탭으로 전환합니다.
-
-터미널에서 RAG 도구를 직접 호출해 원하는 조항이 검색되는지 확인합니다.
+터미널 창에서 RAG 도구를 직접 호출해 원하는 조항이 검색되는지 확인합니다.
 
 ```bash
 uv run python3 -c "
@@ -738,16 +776,16 @@ print(json.dumps(r2, indent=2, ensure_ascii=False))
 +-----------------------------------------------------------------------------------+
 ```
 
-`status`가 `SUCCESS`이고 `matches`에 `POL-HR-2026-004`(테스트 1), `POL-IT-2026-009`(테스트 2)가 있으면 성공입니다. 필드 순서와 이름은 생성된 코드에 따라 다를 수 있습니다.
+`status`가 `SUCCESS`이고 `matches`에 `POL-HR-2026-004`(테스트 1), `POL-IT-2026-009`(테스트 2)가 있으면 성공입니다. 필드 순서는 달라도 되지만 `status`, `source`, `match_count`, `matches[].doc_id`, `matches[].title`, `matches[].content` 이름은 정확히 같아야 합니다. Task 5 통합 테스트와 실습 2 `rag_citation` 지표가 이 이름을 읽습니다. 이름이 다르면 에이전트 창에서 위 이름으로 고쳐 달라고 요청합니다.
 
 > [!NOTE]
-> `source`가 `local_fallback`으로 나오면 Task 1 6단계의 PDF 가져오기가 아직 끝나지 않은 것입니다. 가져오기는 길면 11분 정도 걸립니다. 폴백으로도 실습은 계속할 수 있으며, 가져오기가 끝난 뒤 다시 실행하면 `vertex_ai_search`로 바뀝니다. 진행 상태는 0단계의 `PROJECT_ID`, `DE`, `AUTH` 세 줄을 실행한 셸에서 `curl -s "${AUTH[@]}" "${DE}/dataStores/company-policy-ds/branches/0/documents" | grep -c '"name"'`(2이면 완료)로 확인합니다.
+> `source`가 `local_fallback`으로 나오면 Task 1 6단계의 PDF 가져오기가 아직 끝나지 않은 것입니다. 가져오기는 길면 11분 정도 걸립니다. 폴백으로도 실습은 계속할 수 있으며, 가져오기가 끝난 뒤 다시 실행하면 `vertex_ai_search`로 바뀝니다. 진행 상태는 0단계의 `PROJECT_ID`, `DE`, `AUTH` 세 줄을 실행한 셸에서 `curl -s "${AUTH[@]}" "${DE}/dataStores/company-policy-ds/branches/0/documents" | grep -c '"name"'`(2이면 완료)로 확인합니다. 문서 수가 `2`인데도 계속 `local_fallback`이면 ADC 권한 문제일 수 있으므로 `gcloud auth application-default login`을 실행하고 실습 계정으로 로그인한 뒤 다시 확인합니다.
 
 ---
 
-## Task 4. agy 프롬프트 기반 MCP SaaS 연동 도구 구현
+## Task 4. 프롬프트 기반 MCP SaaS 연동 도구 구현
 
-Mock SaaS(`https://korean-mock-saas-dri5akvbzq-du.a.run.app/`)의 MCP 서버를 호출하는 도구(`app/tools/mcp_tools.py`)를 agy로 만듭니다.
+Mock SaaS(`https://korean-mock-saas-dri5akvbzq-du.a.run.app/`)의 MCP 서버를 호출하는 도구(`app/tools/mcp_tools.py`)를 에이전트로 만듭니다.
 
 ### FastMCP와 한국형 Mock SaaS 명세
 
@@ -771,7 +809,7 @@ FastMCP는 MCP(Model Context Protocol) 서버를 만드는 Python 프레임워�
 
 ### 1단계: Mock SaaS 웹 화면 접속 및 개인 토큰 발급
 
-1. 웹 브라우저에서 아래 Mock SaaS 주소로 접속합니다.  
+1. 원격 세션 안의 Chrome에서 아래 Mock SaaS 주소로 접속합니다. 시작 준비의 로그인 과정에서 열린 Chrome 창을 써도 됩니다. 원격 세션 안에서 열어야 토큰을 같은 화면의 터미널 창에 바로 붙여넣을 수 있습니다.  
    `https://korean-mock-saas-dri5akvbzq-du.a.run.app/`
 2. 화면 오른쪽 상단의 **MCP 토큰 발급** 버튼을 클릭합니다.
 3. 팝업 창에 나타난 고유 토큰(예: `mcp_eyJp...`)을 복사합니다.
@@ -781,29 +819,25 @@ FastMCP는 MCP(Model Context Protocol) 서버를 만드는 Python 프레임워�
 > [!IMPORTANT]
 > 실습이 끝날 때까지 토큰을 발급한 같은 브라우저 창에서 Mock SaaS 화면을 확인하세요. 내 데이터 공간(테넌트)은 이 브라우저에 저장된 세션 ID로 정해집니다. 시크릿 창, 다른 브라우저, 브라우저 데이터 삭제 후에는 빈 테넌트가 새로 열려 에이전트가 처리한 결과가 화면에 보이지 않습니다.
 
-터미널에서 복사한 토큰을 환경변수로 등록합니다.
+터미널 창에서 복사한 토큰을 `~/lab.env`에 저장하고 현재 셸에 적용합니다.
 
 ```bash
-export MCP_TOKEN="mcp_여러분의토큰값"
+echo "export MCP_TOKEN=mcp_여러분의토큰값" >> ~/lab.env && source ~/lab.env
 ```
 
 > [!NOTE]
-> agy가 실행 중이면 `/exit`로 종료한 뒤, 토큰을 export한 같은 셸에서 `cd ~/enterprise-ops-agent && agy --continue`로 다시 시작해야 agy가 실행하는 테스트에 토큰이 전달됩니다. 새 터미널 탭에서는 토큰이 상속되지 않으므로 같은 `export` 명령을 다시 실행해야 합니다. 토큰이 없으면 도구가 `MCP_TOKEN 환경 변수가 없습니다` 오류로 즉시 중단됩니다. 자동 발급을 두지 않는 이유는 토큰이 곧 개인 데이터 공간(테넌트)이기 때문입니다. 자동 발급 토큰은 여러 실습생이 같은 테넌트를 공유하게 되고, 웹 화면과도 데이터가 달라집니다.
+> - 새로 여는 Konsole 탭은 `~/.bashrc`를 통해 `~/lab.env`를 읽으므로 토큰을 다시 입력하지 않아도 됩니다. 이미 열려 있던 탭에서는 `source ~/lab.env`를 실행합니다.
+> - 에이전트 창은 셸 변수를 이어받지 않을 수 있습니다. 그래서 명령 실행을 맡기는 프롬프트에 `source ~/lab.env` 줄을 넣었습니다.
+> - 토큰이 곧 개인 데이터 공간(테넌트)이므로 자동 발급하지 않습니다. 토큰이 없으면 도구가 `MCP_TOKEN 환경 변수가 없습니다` 오류로 즉시 중단됩니다.
 
 ---
 
 ### 2단계: ADK McpToolset으로 MCP 도구 연결
 
-> [!TIP]
-> 환경변수 등록 후 아래 명령으로 기존 `agy` 세션에 다시 들어갑니다. 탭을 나눠 쓰고 있다면 agy 탭으로 전환합니다.
-> ```bash
-> cd ~/enterprise-ops-agent && agy --continue
-> ```
-
-실행 중인 `agy` 대화창에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
+에이전트 창에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
 
 ```prompt
-docs/SDD.md의 2.3절 'FastMCP SaaS 연동 도구 명세'를 바탕으로 app/tools/mcp_tools.py 파일을 구현해주세요.
+docs/SDD.md의 2.3절 'Google ADK FastMCP SaaS 연동 도구 명세'를 바탕으로 app/tools/mcp_tools.py 파일을 구현해주세요.
 
 요구사항:
 1. Google ADK의 McpToolset과 StreamableHTTPConnectionParams를 사용하여 WorkWeek(/work-week/mcp) 및 ServiceImmediately(/service-immediately/mcp) 연결 도구 세트 생성 함수 구현:
@@ -826,7 +860,7 @@ docs/SDD.md의 2.3절 'FastMCP SaaS 연동 도구 명세'를 바탕으로 app/to
    - McpToolset에는 header_provider로 X-MCP-Token을 넣어, import 시점이 아닌 호출 시점에 토큰을 읽을 것
 ```
 
-`agy`가 파일 작성을 제안하면 **Allow**를 선택합니다.
+에이전트가 파일 작성을 제안하면 **Allow**를 선택합니다.
 
 래퍼 함수 6개는 터미널 단위 테스트와 Task 5 통합 테스트용입니다. 에이전트에는 Task 5에서 McpToolset만 연결합니다.
 
@@ -834,10 +868,7 @@ docs/SDD.md의 2.3절 'FastMCP SaaS 연동 도구 명세'를 바탕으로 app/to
 
 ### 3단계: SaaS 연동 도구 단위 테스트
 
-> [!TIP]
-> `agy` 대화창에서 **Ctrl+D** (두 번) 또는 **/exit**로 bash 프롬프트로 나옵니다. 탭을 나눠 쓰고 있다면 bash 탭으로 전환합니다.
-
-터미널에서 실제 서버와 통신하는지 테스트합니다.
+터미널 창에서 실제 서버와 통신하는지 테스트합니다.
 
 ```bash
 uv run python3 -c "
@@ -866,7 +897,7 @@ print(json.dumps(list_hardware_assets_and_tickets('EMP-10294'), indent=2, ensure
 +-----------------------------------------------------------------------------------+
 ```
 
-잔여 연차 숫자와 티켓 목록(INC-...)이 보이면 성공입니다. 필드 이름은 생성된 코드에 따라 다를 수 있습니다. `MCP_TOKEN` 오류가 나면 1단계 export를 다시 실행하고, 401이 나면 토큰을 다시 발급하세요.
+잔여 연차 숫자와 티켓 목록(INC-...)이 보이면 성공입니다. 필드 이름은 생성된 코드에 따라 다를 수 있습니다. `MCP_TOKEN` 오류가 나면 1단계의 저장 명령을 확인하고 `source ~/lab.env`를 실행하고, 401이 나면 토큰을 다시 발급하세요.
 
 ---
 
@@ -876,13 +907,7 @@ SDD 3절 규칙을 반영해 `app/agent.py`를 완성하고, 통합 테스트와
 
 ### 1단계: 최종 에이전트 완성 지시
 
-> [!TIP]
-> 아래 명령으로 기존 `agy` 세션에 다시 들어갑니다. 탭을 나눠 쓰고 있다면 agy 탭으로 전환합니다.
-> ```bash
-> cd ~/enterprise-ops-agent && agy --continue
-> ```
-
-실행 중인 `agy` 대화창에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
+에이전트 창에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
 
 ```prompt
 docs/SDD.md의 3절 '오케스트레이션 및 거버넌스 강령'을 반영하여 app/agent.py의 Orchestrator-Worker 멀티 에이전트 시스템을 최종 완성해주세요.
@@ -902,14 +927,11 @@ docs/SDD.md의 3절 '오케스트레이션 및 거버넌스 강령'을 반영하
 5. 모든 Agent(root_agent 및 3개 sub_agent)의 model 파라미터는 반드시 'gemini-3.8-flash'로 명시적으로 지정할 것 (Vertex AI global 엔드포인트 연동).
 ```
 
-`agy`가 `app/agent.py` 업데이트를 제안하면 **Allow**를 선택합니다.
+에이전트가 `app/agent.py` 업데이트를 제안하면 **Allow**를 선택합니다.
 
 ---
 
 ### 2단계: 통합 테스트 스크립트 가져오기
-
-> [!TIP]
-> `agy` 대화창에서 **Ctrl+D** (두 번) 또는 **/exit**로 bash 프롬프트로 나옵니다. 탭을 나눠 쓰고 있다면 bash 탭으로 전환합니다.
 
 통합 테스트 스크립트(`tests/test_scenarios.py`)는 완성본 zip에서 가져옵니다. 이 스크립트는 Task 4에서 만든 래퍼 함수 이름을 그대로 import합니다.
 
@@ -925,7 +947,7 @@ unzip -j -o /tmp/enterprise_ops_agent_completed.zip enterprise-ops-agent/tests/t
 
 ### 3단계: 통합 테스트 실행 (시나리오 5개)
 
-터미널에서 통합 테스트를 실행하여 5개 항목이 모두 PASS인지 확인합니다.
+터미널 창에서 통합 테스트를 실행하여 5개 항목이 모두 PASS인지 확인합니다.
 
 ```bash
 cd ~/enterprise-ops-agent
@@ -940,7 +962,7 @@ uv run python3 tests/test_scenarios.py
 | =====================================================================             |
 | [1/5] Orchestrator-Worker 멀티 에이전트 토폴로지 검증...                               |
 |       - 등록된 전문 서브 에이전트: ['hr_policy_agent', 'workweek_agent', 'itsm_agent']     |
-|       -> [PASS] 토폴로지 검증 완료 (Lead: 1, Workers: 3)                             |
+|       -> [PASS] 토폴로지 검증 완료 (Hub: 1, Spokes: 3)                              |
 |                                                                                   |
 | [2/5] Policy RAG: 4일 연속 연차 규정(POL-HR-2026-004) 검색 검증...                    |
 |       - 매칭 문서: POL-HR-2026-004 (제 3 조 (연차 발생 및 부여))                     |
@@ -976,11 +998,9 @@ uv run python3 tests/test_scenarios.py
 `agents-cli run`은 임시 로컬 서버를 띄워 질의 하나를 실행하고, 끝나면 서버를 내립니다.
 
 ```bash
-export GOOGLE_GENAI_USE_VERTEXAI=true
-export GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project)
-export GOOGLE_CLOUD_LOCATION=global
+source ~/lab.env
 cd ~/enterprise-ops-agent
-: "${MCP_TOKEN:?실습 1 Task 4에서 발급한 MCP_TOKEN을 먼저 export 하세요}"
+: "${MCP_TOKEN:?실습 1 Task 4 1단계에서 MCP_TOKEN을 ~/lab.env에 저장하고 source ~/lab.env를 실행하세요}"
 
 agents-cli run "안녕하세요, 이민우입니다 (EMP-10294). 3주 뒤 4일 동안 연속으로 연차를 사용하고 싶습니다. 사내 규정상 신청 기한에 문제가 없는지 확인해 주세요."
 ```
@@ -1015,13 +1035,20 @@ agents-cli run "안녕하세요, 이민우입니다 (EMP-10294). 3주 뒤 4일 �
 
 ### 5단계: 시나리오 1 - 4일 연속 연차 신청과 신청 기한 확인
 
-임직원 이민우(EMP-10294)가 3주 뒤 월요일부터 목요일까지 4일간 연속 연차를 쓰겠다고 요청하는 상황입니다. 7영업일 전 상신 규정을 충족하는 날짜입니다.
+임직원 이민우(EMP-10294)가 약 3주 뒤 월요일부터 목요일까지 4일간 연속 연차를 쓰겠다고 요청하는 상황입니다. 7영업일 전 상신 규정을 충족하는 날짜입니다.
 
-4단계와 같은 bash 셸에서 실행합니다.
+에이전트가 날짜를 되묻지 않도록 실제 날짜를 계산해 질의에 넣고, 끝에 "확인 절차 없이 바로 진행해 주세요."를 붙입니다. 터미널 창에서 4단계에 이어 실행합니다.
 
 ```bash
-agents-cli run "안녕하세요, 이민우입니다 (EMP-10294). 3주 뒤 월요일부터 목요일까지 4일 동안 연속으로 연차를 사용하고 싶습니다. 사내 규정상 신청 기한에 문제가 없는지 확인해 주시고, 제 잔여 연차를 조회한 뒤 WorkWeek 시스템에 휴가 신청을 상신해 주세요."
+START=$(date -d "next monday +14 days" +%F)   # 약 3주 뒤 월요일
+END=$(date -d "$START +3 days" +%F)           # 같은 주 목요일
+echo "$START ~ $END"
+
+agents-cli run "안녕하세요, 이민우입니다 (EMP-10294). ${START}(월)부터 ${END}(목)까지 4일 동안 연속으로 연차를 사용하고 싶습니다. 사내 규정상 신청 기한에 문제가 없는지 확인해 주시고, 제 잔여 연차를 조회한 뒤 WorkWeek 시스템에 휴가 신청을 상신해 주세요. 확인 절차 없이 바로 진행해 주세요."
 ```
+
+> [!TIP]
+> 에이전트가 "상신할까요?"처럼 질문으로 답을 끝내면 WorkWeek에는 아무것도 기록되지 않습니다. 기본 `agents-cli run`은 실행이 끝나면 로컬 서버와 함께 세션도 사라지므로 앞선 대화가 이어지지 않습니다. 같은 명령의 질의 끝에 답을 붙여(예: `... 확인 절차 없이 바로 진행해 주세요. 네, 진행해 주세요.`) 다시 실행합니다.
 
 #### 기대하는 도구 호출 순서
 
@@ -1037,16 +1064,16 @@ agents-cli run "안녕하세요, 이민우입니다 (EMP-10294). 3주 뒤 월요
 
 엔지니어가 노트북 배터리 부풀음으로 긴급 교체를 요청하는 상황입니다.
 
-같은 bash 셸에서 실행합니다.
+터미널 창에서 실행합니다. 에이전트가 질문으로 끝나면 5단계 TIP과 같이 답을 붙여 다시 실행합니다.
 
 ```bash
-agents-cli run "현재 제가 사용 중인 업무용 랩톱 배터리가 심하게 부풀어 올라서(스웰링) 정상적인 업무가 불가능합니다. 제가 데이터/엔지니어링 직군인데, M3 Max 64GB 랩톱으로 교체 지원이 가능한지 사내 IT 지원 규정을 확인해 주세요. 제 현재 장비 지급 이력을 확인하고 ServiceImmediately 시스템에 긴급 교체 인시던트 티켓을 발행해 주세요."
+agents-cli run "현재 제가 사용 중인 업무용 랩톱 배터리가 심하게 부풀어 올라서(스웰링) 정상적인 업무가 불가능합니다. 제가 데이터/엔지니어링 직군인데, M3 Max 64GB 랩톱으로 교체 지원이 가능한지 사내 IT 지원 규정을 확인해 주세요. 제 현재 장비 지급 이력을 확인하고 ServiceImmediately 시스템에 긴급 교체 인시던트 티켓을 발행해 주세요. 확인 절차 없이 바로 진행해 주세요."
 ```
 
 #### 기대하는 도구 호출 순서
 
 1. `hr_policy_agent`의 `search_company_policy` (category `IT`): POL-IT-2026-009 제 2 조(엔지니어링/데이터 직군은 MacBook Pro M3 Max 64GB 대상)와 제 4 조(배터리 부풀림 등 결함은 내구연한과 상관없이 긴급 교체 대상이며 4시간 내 1차 점검 및 임시 대여 장비 당일 선지급)를 확인합니다.
-2. `itsm_agent`의 `list_tickets`: 기존 장비가 38개월 경과하여 제 3 조의 정기 교체 주기(36개월)도 충족했음을 확인합니다.
+2. `itsm_agent`의 `list_tickets`: 기존 티켓을 조회해 중복 접수 여부를 확인합니다. Mock SaaS에는 장비 사용 개월 수 데이터가 없으므로 교체 근거는 제 4 조 배터리 결함 긴급 교체입니다.
 3. `itsm_agent`의 `create_ticket`: 긴급 교체 티켓을 발행합니다.
 
 ![시나리오 2 실행 결과](./images/scenario_hardware_result.png)
@@ -1055,7 +1082,7 @@ agents-cli run "현재 제가 사용 중인 업무용 랩톱 배터리가 심하
 
 ### 7단계: Mock SaaS 화면에서 결과 확인
 
-1. 웹 브라우저에서 열어둔 Korean Enterprise Mock SaaS 플랫폼 탭으로 이동합니다.  
+1. Task 4 1단계에서 토큰을 발급한 원격 세션 안 Chrome의 Korean Enterprise Mock SaaS 플랫폼 탭으로 이동합니다.  
    `https://korean-mock-saas-dri5akvbzq-du.a.run.app/`
 2. **WorkWeek** 탭을 클릭합니다.
    - 에이전트가 신청한 연차 내역이 **휴가 신청 내역** 목록에 `승인 대기` 상태로 등록되어 있는지 확인합니다.
@@ -1070,7 +1097,7 @@ agents-cli run "현재 제가 사용 중인 업무용 랩톱 배터리가 심하
 
 ### 8단계: 4-Tier Golden Evalset 평가 데이터셋 생성
 
-실습 2에서 `agents-cli eval`로 정량 평가를 하려면 먼저 "무엇을 정답으로 볼지"를 정한 골든 데이터셋이 있어야 합니다. agy로 난이도별 데이터셋 4개를 만들고, 각 케이스에 호출해야 하는 도구(`expected_tools`)와 호출하면 안 되는 도구(`forbidden_tools`)를 적습니다. 이 두 필드는 실습 2의 결정론적 지표(같은 트레이스면 항상 같은 점수를 내는 코드 기반 채점) `tool_call_accuracy`가 채점 기준으로 사용합니다.
+실습 2에서 `agents-cli eval`로 정량 평가를 하려면 먼저 "무엇을 정답으로 볼지"를 정한 골든 데이터셋이 있어야 합니다. 에이전트로 난이도별 데이터셋 4개를 만들고, 각 케이스에 호출해야 하는 도구(`expected_tools`)와 호출하면 안 되는 도구(`forbidden_tools`)를 적습니다. 이 두 필드는 실습 2의 결정론적 지표(같은 트레이스면 항상 같은 점수를 내는 코드 기반 채점) `tool_call_accuracy`가 채점 기준으로 사용합니다.
 
 | Tier | 파일 | 검증 목적 | 케이스 수 |
 |:---|:---|:---|:---:|
@@ -1079,13 +1106,7 @@ agents-cli run "현재 제가 사용 중인 업무용 랩톱 배터리가 심하
 | T3 규정 선검증 트랜잭션 | `tier3-policy-first-transaction.json` | 규정 확인 후 연차 상신/티켓 생성까지 완수하는가 | 3 |
 | T4 적대/엣지 | `tier4-adversarial-edge.json` | 인젝션, 범위 밖 질문, 규정 위반 요청에서 위험 도구를 호출하지 않는가 | 4 |
 
-> [!TIP]
-> 아래 명령으로 기존 `agy` 세션에 다시 들어갑니다. 탭을 나눠 쓰고 있다면 agy 탭으로 전환합니다.
-> ```bash
-> cd ~/enterprise-ops-agent && agy --continue
-> ```
-
-실행 중인 `agy` 대화창에 다음 프롬프트를 입력합니다.
+에이전트 창에 다음 프롬프트를 입력합니다.
 
 ```prompt
 실습 2의 agents-cli eval 정량 평가에 사용할 4-Tier Golden Evalset을 tests/eval/datasets/ 아래에 생성해줘.
@@ -1111,7 +1132,7 @@ expected_tools(반드시 호출할 도구 목록), forbidden_tools(호출하면 
 - 날짜가 필요한 요청은 7영업일 이상 미래 날짜를 쓸 것
 ```
 
-`agy`가 만든 데이터셋이 스키마와 도구 이름 규칙을 지켰는지 bash 셸에서 검증합니다.
+에이전트가 만든 데이터셋이 스키마와 도구 이름 규칙을 지켰는지 터미널 창에서 검증합니다.
 
 ```bash
 cd ~/enterprise-ops-agent
@@ -1159,15 +1180,12 @@ EOF
 
 ---
 
-### 1단계: agy로 A2A Agent Manifest 생성
+### 1단계: A2A Agent Manifest 생성
 
-> [!TIP]
-> agy를 종료한 상태라면 `cd ~/enterprise-ops-agent && agy --continue`로 다시 들어갑니다.
-
-실행 중인 `agy` 대화창에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
+에이전트 창에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
 
 ```prompt
-docs/SDD.md의 3.1절 'Gemini Enterprise (GE) 배포용 A2A 규격'을 바탕으로, 우리 에이전트가 사내 Gemini Enterprise 또는 Agent Engine에 등록될 수 있도록 'agent_manifest.json' 파일을 생성해 주세요.
+docs/SDD.md의 3.1절 '실습 1 & 실습 2 라이프사이클 경계 및 핸드오프'에 있는 agent_manifest.json 산출물 규격을 바탕으로, 우리 에이전트가 사내 Gemini Enterprise 또는 Agent Engine에 등록될 수 있도록 'agent_manifest.json' 파일을 생성해 주세요.
 
 요구사항:
 - schema_version: "1.0.0"
@@ -1180,7 +1198,7 @@ docs/SDD.md의 3.1절 'Gemini Enterprise (GE) 배포용 A2A 규격'을 바탕으
 - input_schema 및 output_schema를 SDD 규격대로 완전하게 정의
 ```
 
-`agy`가 `agent_manifest.json` 생성을 제안하면 **Allow**를 선택합니다.
+에이전트가 `agent_manifest.json` 생성을 제안하면 **Allow**를 선택합니다.
 
 ---
 
@@ -1188,7 +1206,7 @@ docs/SDD.md의 3.1절 'Gemini Enterprise (GE) 배포용 A2A 규격'을 바탕으
 
 Gemini Enterprise가 A2A JSON-RPC로 호출할 수 있도록 ADK Runner를 감싼 FastAPI 서버 `a2a_server.py`를 만듭니다. 매니페스트의 chat 엔드포인트(`/api/a2a/chat`)도 같은 JSON-RPC 처리로 연결합니다.
 
-`agy` 대화창에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
+에이전트 창에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
 
 ```prompt
 우리가 완성한 agent.py의 root_agent와 Google ADK Runner를 결합하여, Gemini Enterprise A2A v0.3 JSON-RPC를 지원하는 FastAPI 서버 'a2a_server.py'를 작성해 주세요.
@@ -1225,14 +1243,11 @@ Gemini Enterprise가 A2A JSON-RPC로 호출할 수 있도록 ADK Runner를 감�
 5. uvicorn을 통해 포트 8080에서 실행 가능하도록 main 블록 구성.
 ```
 
-`agy`가 `a2a_server.py` 생성을 제안하면 **Allow**를 선택합니다.
+에이전트가 `a2a_server.py` 생성을 제안하면 **Allow**를 선택합니다.
 
 ---
 
 ### 3단계: 로컬에서 에이전트 웹 앱 실행 및 확인
-
-> [!TIP]
-> `agy` 대화창에서 **Ctrl+D** (두 번) 또는 **/exit**로 bash 프롬프트로 나옵니다. 탭을 나눠 쓰고 있다면 bash 탭으로 전환합니다.
 
 Gemini Enterprise에 배포하기 전에 로컬에서 웹 앱을 띄워 에이전트와 대화해 봅니다.
 
@@ -1240,7 +1255,8 @@ Gemini Enterprise에 배포하기 전에 로컬에서 웹 앱을 띄워 에이�
 8080 포트를 쓰는 프로세스를 정리하고, 터미널을 계속 쓰기 위해 `a2a_server.py`를 백그라운드(`&`)로 실행합니다. 서버 로그는 `/tmp/a2a.log`에 남깁니다.
 
 ```bash
-: "${MCP_TOKEN:?실습 1 Task 4에서 발급한 MCP_TOKEN을 먼저 export 하세요}"
+source ~/lab.env
+: "${MCP_TOKEN:?실습 1 Task 4 1단계에서 MCP_TOKEN을 ~/lab.env에 저장하고 source ~/lab.env를 실행하세요}"
 # 1. 기존 점유 포트(8080) 정리 및 로컬 A2A 서버 백그라운드(&) 실행
 fuser -k 8080/tcp 2>/dev/null || true
 cd ~/enterprise-ops-agent
@@ -1250,7 +1266,7 @@ uv run python3 a2a_server.py > /tmp/a2a.log 2>&1 &
 for i in $(seq 10); do curl -sf http://localhost:8080/healthz && break; sleep 2; done
 ```
 
-healthz 응답(`{"status":"ok",...}`)이 출력되면 서버가 실행된 것입니다. 아무것도 나오지 않으면 `tail /tmp/a2a.log`로 오류를 확인하세요. 백그라운드로 띄웠으므로 같은 터미널에서 다음 curl을 실행할 수 있습니다.
+healthz 응답(`{"status":"ok",...}`)이 출력되면 서버가 실행된 것입니다. 아무것도 나오지 않으면 `tail /tmp/a2a.log`로 오류를 확인하세요. 백그라운드로 띄웠으므로 같은 터미널 창에서 다음 curl을 실행할 수 있습니다. 확인이 모두 끝나면 `fuser -k 8080/tcp`로 서버를 종료합니다.
 
 2. 로컬 테스트 콘솔 접속:
 원격 세션 안의 브라우저에서 `http://localhost:8080`에 접속합니다.
@@ -1260,7 +1276,7 @@ healthz 응답(`{"status":"ok",...}`)이 출력되면 서버가 실행된 것입
 화면 상단에는 에이전트 상태(Active)와 연결된 모델(Gemini 3.8 Flash)이 표시되고, 하단에는 추천 질문 칩이 있습니다. 칩을 클릭하거나 직접 질문을 입력하면 에이전트가 규정 검색과 Mock SaaS 도구를 호출해 답합니다.
 
 3. A2A JSON-RPC 형식 curl 확인:
-같은 터미널에서 실제 GE가 보내는 JSON-RPC 2.0 형식으로도 질의할 수 있습니다.
+같은 터미널 창에서 실제 GE가 보내는 JSON-RPC 2.0 형식으로도 질의할 수 있습니다.
 
 ```bash
 curl -s -X POST http://localhost:8080/ \
@@ -1303,13 +1319,11 @@ curl -s -X POST http://localhost:8080/ \
 건수와 티켓 목록은 본인 테넌트 데이터에 따라 다릅니다. `result.parts[0].text`에 티켓 번호가 들어 있고 ServiceImmediately 화면과 같으면 도구 호출이 제대로 된 것입니다.
 
 4. 선택: ADK 개발 UI (agents-cli playground)  
-   이벤트, 세션 상태, 트레이스를 화면에서 보려면 Vertex AI 환경 변수를 설정하고 `agents-cli playground`를 실행합니다.
+   이벤트, 세션 상태, 트레이스를 화면에서 보려면 `agents-cli playground`를 실행합니다. 종료할 때는 그 터미널 창에서 **Ctrl+C**를 누릅니다.
 
    ```bash
-   # Vertex AI 환경 변수 설정 후 공식 플레이그라운드 기동
-   export GOOGLE_GENAI_USE_VERTEXAI=true
-   export GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project)
-   export GOOGLE_CLOUD_LOCATION=global
+   # Vertex AI 환경 변수 적용 후 공식 플레이그라운드 기동
+   source ~/lab.env
    cd ~/enterprise-ops-agent
    agents-cli playground --port 8085
    ```
@@ -1343,17 +1357,20 @@ unzip -o enterprise_ops_agent_completed.zip
 # 3. 프로젝트 디렉터리 이동 및 가상 환경 동기화
 cd enterprise-ops-agent
 agents-cli install
-: "${MCP_TOKEN:?실습 1 Task 4에서 발급한 MCP_TOKEN을 먼저 export 하세요}"
+source ~/lab.env
+: "${MCP_TOKEN:?실습 1 Task 4 1단계에서 MCP_TOKEN을 ~/lab.env에 저장하고 source ~/lab.env를 실행하세요}"
 uv run python3 tests/test_scenarios.py
 ```
 
 압축 해제 후 `enterprise-ops-agent` 디렉터리에 `app/`, `docs/`, `tests/eval/`, `agents-cli-manifest.yaml`이 있는지 확인합니다.
 
+폴더 경로가 같으므로 앱의 프로젝트 설정은 그대로 써도 됩니다. CLI 사용자는 탭 1에서 `cd ~/enterprise-ops-agent && agy`로 agy를 새로 시작합니다. 기존 셸은 이름이 바뀐 `enterprise-ops-agent.mine` 폴더에 머물러 있기 때문입니다.
+
 ---
 
 ## 마무리
 
-Lab 1에서는 SDD를 기준으로 agy에 코드를 생성하게 해서 ADK 멀티 에이전트를 만들었습니다.
+Lab 1에서는 SDD를 기준으로 Antigravity에 코드를 생성하게 해서 ADK 멀티 에이전트를 만들었습니다.
 
 ### 정리
 

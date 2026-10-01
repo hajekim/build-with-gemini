@@ -309,17 +309,6 @@
     .pager .next small { color: var(--blue); }
     .pager .handoff { border-color: var(--g-blue); background-image: linear-gradient(var(--bg-2), var(--bg-2)), var(--gem); background-origin: border-box; background-clip: padding-box, border-box; border: 2px solid transparent; }
 
-    /* saas tab */
-    .saas { max-width: 1120px; margin: 0 auto; }
-    .saas-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; margin-top: 26px; }
-    .saas-card { background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
-    .saas-card .win-bar { justify-content: space-between; }
-    .saas-card .win-bar .title { flex: none; margin: 0; }
-    .saas-card dl { margin: 0; padding: 18px 20px 6px; display: grid; grid-template-columns: max-content 1fr; gap: 8px 14px; font-size: 15.5px; }
-    .saas-card dt { font: 500 13.5px/1.9 var(--mono); color: var(--text-faint); }
-    .saas-card dd { margin: 0; }
-    .saas-card dd code { font: 500 13.5px var(--mono); color: var(--ink-code); }
-    .saas-card img { width: calc(100% - 40px); margin: 12px 20px 20px; border-radius: 8px; border: 1px solid var(--line); cursor: zoom-in; display: block; }
 
     /* statusline (vim) */
     .status {
@@ -414,7 +403,7 @@
         <button class="tab" role="tab" data-tab="codelab"><span class="idx">1:</span>lab1.md<span class="desc">에이전트 개발 &amp; SaaS 연동</span></button>
         <button class="tab" role="tab" data-tab="codelab2"><span class="idx">2:</span>lab2.md<span class="desc">배포 &amp; 거버넌스 &amp; GE</span></button>
         <button class="tab" role="tab" data-tab="sdd"><span class="idx">3:</span>sdd.md<span class="desc">설계서</span></button>
-        <button class="tab" role="tab" data-tab="saas"><span class="idx">4:</span>mock-saas.spec</button>
+        <button class="tab" role="tab" data-tab="saas"><span class="idx">4:</span>mock-saas.md<span class="desc">SaaS 스펙</span></button>
       </nav>
       <div class="top-actions">
         <button class="chip search-chip" id="search-btn" aria-label="단계 검색"><span>⌕ <span class="label">단계 검색…</span></span><kbd>/</kbd></button>
@@ -436,35 +425,6 @@
       </main>
     </div>
 
-    <main class="main hidden" id="saas-view">
-      <section class="saas">
-        <div class="crumb">mock-saas<span class="sep">›</span><b>spec</b></div>
-        <div class="md">
-          <h2>Korean Mock SaaS 및 FastMCP 스펙</h2>
-          <p>실습에서 에이전트가 통신하는 실제 Cloud Run Mock SaaS 서비스 정보입니다.</p>
-        </div>
-        <div class="saas-grid">
-          <div class="saas-card">
-            <div class="win-bar"><span class="title"><span class="dots"><i></i><i></i><i></i></span>&nbsp; WorkWeek HRMS 포털</span><span>FastMCP</span></div>
-            <dl>
-              <dt>기본 사번</dt><dd>EMP-10294 (이민우 수석 아키텍트)</dd>
-              <dt>조회</dt><dd><code>GET /work-week/api/employees/{id}/timeoff</code></dd>
-              <dt>신청</dt><dd><code>POST /work-week/api/employees/{id}/timeoff</code></dd>
-            </dl>
-            <img src="lab1/images/mock_saas_workweek.png" alt="WorkWeek 포털">
-          </div>
-          <div class="saas-card">
-            <div class="win-bar"><span class="title"><span class="dots"><i></i><i></i><i></i></span>&nbsp; ServiceImmediately ITMS 포털</span><span>FastMCP</span></div>
-            <dl>
-              <dt>기본 자산</dt><dd>AST-MBP-2022-819 (M1 Max / 38개월 실사용)</dd>
-              <dt>티켓 조회</dt><dd><code>GET /service-immediately/api/tickets</code></dd>
-              <dt>티켓 발행</dt><dd><code>POST /service-immediately/api/tickets</code></dd>
-            </dl>
-            <img src="lab1/images/mock_saas_serviceimmediately.png" alt="ServiceImmediately 포털">
-          </div>
-        </div>
-      </section>
-    </main>
 
     <footer class="status" aria-hidden="true">
       <span class="mode seg" id="st-mode">STEP</span>
@@ -492,11 +452,12 @@
       codelab: { src: "lab1/INSTRUCTION.md", name: "lab1", next: { tab: "codelab2", title: "실습 2 시작하기 · 평가, 배포, 거버넌스" } },
       codelab2: { src: "lab2/INSTRUCTION.md", name: "lab2" },
       sdd: { src: "docs/SDD.md", name: "sdd" },
+      saas: { src: "docs/MOCK_SAAS.md", name: "mock-saas" },
     };
     const PASSPHRASES = ["", "gemini", "gemini2026", "cjoy", "1234"];
     const CODE_KIND = {
-      bash: { lang: "bash", hint: "터미널에서 실행" },
-      prompt: { lang: "agy", hint: "agy에 붙여넣기" },
+      bash: { lang: "bash", hint: "터미널 창에서 실행" },
+      prompt: { lang: "agy", hint: "에이전트 창(앱 또는 CLI)에 붙여넣기" },
       text: { lang: "output", hint: "" },
       json: { lang: "json", hint: "" },
     };
@@ -647,10 +608,8 @@
     }
 
     function renderStatus() {
-      const isLab = tab in LABS;
-      $("#st-mode").textContent = isLab ? "STEP" : "SPEC";
-      $("#st-file").textContent = isLab ? LABS[tab].src : "mock-saas.spec";
-      $("#st-pos").textContent = isLab ? `${pad(step)}/${pad(docs[tab].steps.length - 1)}` : "--/--";
+      $("#st-file").textContent = LABS[tab].src;
+      $("#st-pos").textContent = `${pad(step)}/${pad(docs[tab].steps.length - 1)}`;
     }
 
     function renderStep() {
@@ -727,13 +686,11 @@
     });
 
     async function switchTab(t, wantedStep, hash) {
-      tab = t in LABS || t === "saas" ? t : "codelab";
+      tab = t in LABS ? t : "codelab";
       document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", b.dataset.tab === tab));
       const isLab = tab in LABS;
       $("#lab-layout").classList.toggle("hidden", !isLab);
-      $("#saas-view").classList.toggle("hidden", isLab);
       $("#menu-btn").classList.toggle("hidden", !isLab);
-      if (!isLab) { renderStatus(); syncUrl(); window.scrollTo({ top: 0 }); return; }
       $("#doc").innerHTML = `<div class="loading">$ cat ${LABS[tab].src}<span class="cursor"></span></div>`;
       try { await loadDoc(tab); }
       catch (err) { $("#doc").innerHTML = `<div class="loading">✗ ${esc(String(err.message))}</div>`; return; }
@@ -792,7 +749,6 @@
       m.classList.remove("hidden");
     }
     $("#modal").addEventListener("click", () => $("#modal").classList.add("hidden"));
-    document.querySelectorAll(".saas-card img").forEach(img => img.addEventListener("click", () => openModal(img.src, img.alt)));
     document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => switchTab(b.dataset.tab)));
     $("#home-btn").addEventListener("click", e => { e.preventDefault(); switchTab("codelab", 0); });
     const closeMenu = () => document.body.classList.remove("menu-open");
