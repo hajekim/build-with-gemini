@@ -641,7 +641,7 @@ gcloud agent-registry services create core-gapi-services --location=${REGION} --
 
 # 3. 감사: 에이전트(자동 등록)와 MCP 서버 확인
 gcloud agent-registry agents list --location=${REGION} --format="value(displayName)"
-# 기대 결과: 5.7에서 배포한 에이전트가 1줄 이상 표시됨
+# 기대 결과: 5.7에서 배포한 에이전트 이름(기본값 enterprise-ops-agent)이 보임. 프로젝트에 다른 에이전트가 있으면 함께 표시됨
 gcloud agent-registry mcp-servers list --location=${REGION} --format="value(displayName)"
 # 기대 결과: WorkWeek HCM MCP Server, ServiceImmediately ITSM MCP Server
 
@@ -877,7 +877,12 @@ gcloud beta network-security authz-policies import enterprise-ops-agw-authz-iap 
 # 2~3분 소요. 완료 후 30초 정도 기다린 뒤 검증
 ```
 
-신청과 취소를 같은 세션에서 보내야 에이전트가 방금 만든 신청 번호로 취소를 시도합니다. 첫 번째 응답을 저장한 `s1.txt`에는 `session-id` 뒤에 숫자가 오는 줄(예: `session-id 1234567890`)이 있고, 그 숫자를 `SID`로 씁니다:
+신청과 취소를 같은 세션에서 보내야 에이전트가 방금 만든 신청 번호로 취소를 시도합니다. 첫 번째 응답을 저장한 `s1.txt` 끝에는 다음과 같은 두 줄이 있고, 이 숫자를 `SID`로 씁니다:
+
+```text
+Session: 8911662139647721472
+  Resume with: agents-cli run "<message>" --session-id 8911662139647721472
+```
 
 ```bash
 source ~/lab2/env.sh
