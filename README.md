@@ -1,67 +1,53 @@
-# Build with Gemini: AI Advanced 핸즈온 워크숍
+# Build with Gemini Track 3: AI 엔지니어링 핸즈온
 
-본 저장소는 **Build with Gemini** 이벤트의 실습 참가자(150명)를 위한 공식 핸즈온 가이드 및 에셋 저장소입니다.
+Build with Gemini 행사 Track 3 실습 가이드와 자산을 모아 둔 저장소입니다.
 
-**Google Antigravity 2.0**(`agy`)과 **Google Agent Development Kit 2.0**(`google-adk`), **Model Context Protocol(FastMCP)**, **사내 규정 RAG**를 결합하여 실제 엔터프라이즈 환경에서 동작하는 멀티 툴 AI 에이전트를 구축합니다.
+참가자는 Antigravity 2.0(데스크톱 앱 또는 agy CLI)에게 설계서(SDD)를 바탕으로 프롬프트를 주며, ADK 멀티 에이전트를 만듭니다. 이 에이전트는 사내 규정 RAG와 Mock SaaS MCP 도구를 씁니다. 실습 2에서는 이 에이전트를 평가하고 보안 설정을 더해 Agent Runtime에 배포한 뒤 Gemini Enterprise에 등록합니다.
 
----
+## 가이드 웹사이트
 
-## 🌐 공식 핸즈온 가이드 웹사이트 (Cloud Run)
+- [build.geap.dev](https://build.geap.dev/) (GitHub Pages)
+- [Cloud Run 미러](https://build-with-gemini-guide-dri5akvbzq-du.a.run.app/)
 
-실습생들은 브라우저에서 아래 Cloud Run 전용 웹사이트를 열어 Qwiklabs 환경 접속부터 단계별 가이드, 원클릭 프롬프트 복사 기능을 활용할 수 있습니다.
+웹사이트에서 실습 1, 실습 2, 설계서(SDD), Mock SaaS 명세를 탭으로 볼 수 있습니다. 코드 블록마다 실행 위치가 표시됩니다. `bash` 블록은 터미널 창에서 실행하고, `prompt` 블록은 에이전트 창(Antigravity 앱 또는 agy CLI)에 붙여 넣습니다.
 
-🚀 **[공식 핸즈온 가이드 웹사이트 열기 (Google Cloud Run)](https://build-with-gemini-guide-dri5akvbzq-du.a.run.app/)**  
-*(도메인 주소: [build.geap.dev](https://build.geap.dev/))*
+## 실습 구성
 
----
+| 실습 | 내용 | 시간 |
+|:---|:---|:---|
+| [실습 1](lab1/INSTRUCTION.md) | 개발 환경과 agents-cli 프로젝트 준비, ADK Orchestrator-Worker 구조, Vertex AI Search 기반 규정 RAG, Mock SaaS MCP 연동, 시나리오 테스트와 4-Tier evalset. 선택 과제로 A2A 로컬 검증 | 90분 (선택 과제 +15분) |
+| [실습 2](lab2/INSTRUCTION.md) | agents-cli eval 평가와 개선, Secret Manager와 Agent Identity로 Agent Runtime 배포, Agent Registry 등록, Agent Gateway 접근 정책으로 위험 도구 차단, Model Armor, Gemini Enterprise 등록과 Preview 테스트 | 약 100~110분 |
 
-## ⚡ 빠른 시작 (Quick Start)
+실습 1을 끝내지 못했어도 완성본을 받아 실습 2를 진행할 수 있습니다(실습 2의 2.2절).
 
-실습 가상 머신(VM) 또는 터미널 환경에서 아래 명령어를 실행하여 실습 에셋을 즉시 워크스페이스에 복제합니다:
-
-```bash
-git clone https://github.com/hajekim/build-with-gemini.git
-cd build-with-gemini
-```
-
----
-
-## 📂 저장소 구조 (Repository Structure)
+## 저장소 구조
 
 ```
 build-with-gemini/
-├── README.md                      # 워크숍 개요 및 웹사이트 안내
-├── index.html                     # 웹 기반 인터랙티브 실습 가이드 (GitHub Pages)
+├── index.html                   # 가이드 웹사이트 (마크다운 문서를 탭과 단계로 렌더링)
+├── CNAME                        # GitHub Pages 도메인 (build.geap.dev)
 ├── docs/
-│   ├── SDD.md                     # 소프트웨어 설계서 (아키텍처, RAG 규격, FastMCP API 명세)
-│   └── policies/                  # 사내 규정 원본 PDF 문서
-│       ├── leave_policy_2026.pdf           # 사내 복무 규정: 연차 및 병가 운영 지침 (POL-HR-2026-004)
-│       └── it_hardware_guidelines.pdf     # 사내 IT 자산 운용 지침: PC 및 하드웨어 지원 (POL-IT-2026-009)
-└── lab1/
-    ├── README.md                  # 실습 1 상세 가이드 (INSTRUCTION)
-    └── images/                    # 실습 설명용 고해상도 스크린샷 에셋
-        ├── agent_architecture.png          # ADK 2.0 엔터프라이즈 에이전트 구성도
-        ├── agy_terminal_session.png        # Antigravity CLI (agy) 실행 화면
-        ├── mock_saas_workweek.png          # WorkWeek HRMS 웹 대시보드
-        ├── mock_saas_mcp_modal.png         # 개인 MCP 토큰 발급 팝업
-        ├── mock_saas_serviceimmediately.png # ServiceImmediately ITMS 대시보드
-        ├── scenario_leave_result.png       # 시나리오 1: 4일 연속 연차 검증 결과
-        └── scenario_hardware_result.png    # 시나리오 2: 긴급 노트북 교체 검증 결과
+│   ├── SDD.md                   # 에이전트 설계서
+│   ├── MOCK_SAAS.md             # Mock SaaS 웹 포털과 MCP 도구 명세
+│   └── policies/                # 규정 PDF (POL-HR-2026-004 연차, POL-IT-2026-009 IT 자산)
+├── lab1/
+│   ├── INSTRUCTION.md           # 실습 1 가이드
+│   ├── README.md                # 실습 1 개요
+│   ├── enterprise_ops_agent_completed.zip   # 실습 1 완성본
+│   ├── images/
+│   └── tests/eval/              # 평가 데이터셋 예시
+├── lab2/
+│   ├── INSTRUCTION.md           # 실습 2 가이드
+│   ├── enterprise_ops_agent_lab2_completed.zip   # 실습 2 완성본
+│   ├── registry/                # Agent Registry 도구 명세 (위험도 주석 포함)
+│   └── images/                  # Gemini Enterprise 설정과 테스트 화면
+└── enterprise_ops_agent/        # 초기 버전 자산. 현재 실습 문서에서는 참조하지 않음
 ```
 
----
+## 실습용 Mock SaaS
 
-## 🧭 실습 커리큘럼 (Curriculum)
+인사 시스템 WorkWeek와 IT 서비스 관리 시스템 ServiceImmediately를 흉내 낸 서비스입니다. 웹 포털에서 개인 MCP 토큰을 발급받아 씁니다. 자세한 도구 목록과 데이터는 [docs/MOCK_SAAS.md](docs/MOCK_SAAS.md)에 있습니다.
 
-| 실습 | 제목 | 주요 실습 내용 | 가이드 링크 |
-|:---|:---|:---|:---|
-| **실습 1** | Antigravity 2.0 및 ADK 2.0 기반 엔터프라이즈 멀티 툴 AI 에이전트 구축 | `docs/SDD.md` 기반 프롬프트 주도 개발, `agents-cli` 설정, ADK 2.0 에이전트 뼈대 생성, 사내 규정 PDF RAG 도구 연동, Korean Mock SaaS FastMCP 연동 및 오케스트레이션 검증 | [실습 1 가이드](./lab1/README.md) |
-| **실습 2** | (예정) 엔터프라이즈 보안 강화 및 Gemini Enterprise A2A 배포 | Model Garden 보안 가드레일, Agent Gateway 연동, Zero-Trust 보안 및 Gemini Enterprise 배포용 A2A(Agent-to-Agent) 구성 | 추후 공개 예정 |
-
----
-
-## 🔗 실습용 외부 서비스
-
-- **한국형 Mock SaaS 웹 포털**: https://korean-mock-saas-dri5akvbzq-du.a.run.app/
-- **WorkWeek HRMS FastMCP 엔드포인트**: `https://korean-mock-saas-dri5akvbzq-du.a.run.app/work-week/mcp`
-- **ServiceImmediately ITMS FastMCP 엔드포인트**: `https://korean-mock-saas-dri5akvbzq-du.a.run.app/service-immediately/mcp`
+- 웹 포털: https://korean-mock-saas-dri5akvbzq-du.a.run.app/
+- WorkWeek MCP: `https://korean-mock-saas-dri5akvbzq-du.a.run.app/work-week/mcp`
+- ServiceImmediately MCP: `https://korean-mock-saas-dri5akvbzq-du.a.run.app/service-immediately/mcp`
