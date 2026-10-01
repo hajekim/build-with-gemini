@@ -1,0 +1,178 @@
+{
+ "tools": [
+  {
+   "name": "get_employee_balances",
+   "description": "Fetch current vacation and sick leave balances for a specific WorkWeek employee.",
+   "inputSchema": {
+    "properties": {
+     "employee_id": {
+      "title": "Employee Id",
+      "type": "string"
+     }
+    },
+    "required": [
+     "employee_id"
+    ],
+    "title": "get_employee_balancesArguments",
+    "type": "object"
+   },
+   "annotations": {
+    "readOnlyHint": true,
+    "destructiveHint": false
+   }
+  },
+  {
+   "name": "request_time_off",
+   "description": "Submit a request for time off.\nleave_type must be either 'Vacation' or 'Sick'.\ndays is the number of work days requested.\n",
+   "inputSchema": {
+    "properties": {
+     "employee_id": {
+      "title": "Employee Id",
+      "type": "string"
+     },
+     "start_date": {
+      "title": "Start Date",
+      "type": "string"
+     },
+     "end_date": {
+      "title": "End Date",
+      "type": "string"
+     },
+     "leave_type": {
+      "title": "Leave Type",
+      "type": "string"
+     },
+     "days": {
+      "title": "Days",
+      "type": "number"
+     }
+    },
+    "required": [
+     "employee_id",
+     "start_date",
+     "end_date",
+     "leave_type",
+     "days"
+    ],
+    "title": "request_time_offArguments",
+    "type": "object"
+   },
+   "annotations": {
+    "readOnlyHint": false,
+    "destructiveHint": false
+   }
+  },
+  {
+   "name": "update_personal_info",
+   "description": "Update personal contact details (home address and phone number) for a WorkWeek employee profile.",
+   "inputSchema": {
+    "properties": {
+     "employee_id": {
+      "title": "Employee Id",
+      "type": "string"
+     },
+     "address": {
+      "title": "Address",
+      "type": "string"
+     },
+     "phone": {
+      "title": "Phone",
+      "type": "string"
+     }
+    },
+    "required": [
+     "employee_id",
+     "address",
+     "phone"
+    ],
+    "title": "update_personal_infoArguments",
+    "type": "object"
+   },
+   "annotations": {
+    "readOnlyHint": false,
+    "destructiveHint": true
+   }
+  },
+  {
+   "name": "get_personal_info",
+   "description": "Fetch current personal contact details (home address and phone number) for a specific WorkWeek employee.",
+   "inputSchema": {
+    "properties": {
+     "employee_id": {
+      "title": "Employee Id",
+      "type": "string"
+     }
+    },
+    "required": [
+     "employee_id"
+    ],
+    "title": "get_personal_infoArguments",
+    "type": "object"
+   },
+   "annotations": {
+    "readOnlyHint": true,
+    "destructiveHint": false
+   }
+  },
+  {
+   "name": "get_leave_requests",
+   "description": "Get the history of all requested time off (leave requests) for a WorkWeek employee.",
+   "inputSchema": {
+    "properties": {
+     "employee_id": {
+      "title": "Employee Id",
+      "type": "string"
+     }
+    },
+    "required": [
+     "employee_id"
+    ],
+    "title": "get_leave_requestsArguments",
+    "type": "object"
+   },
+   "annotations": {
+    "readOnlyHint": true,
+    "destructiveHint": false
+   }
+  },
+  {
+   "name": "cancel_leave_request",
+   "description": "Cancel a pending/approved leave request and refund the days back to the employee's balance.",
+   "inputSchema": {
+    "properties": {
+     "employee_id": {
+      "title": "Employee Id",
+      "type": "string"
+     },
+     "request_id": {
+      "title": "Request Id",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "employee_id",
+     "request_id"
+    ],
+    "title": "cancel_leave_requestArguments",
+    "type": "object"
+   },
+   "annotations": {
+    "readOnlyHint": false,
+    "destructiveHint": true
+   }
+  },
+  {
+   "name": "get_current_employee_id",
+   "description": "Get the employee ID of the authenticated user session.",
+   "inputSchema": {
+    "properties": {},
+    "title": "get_current_employee_idArguments",
+    "type": "object"
+   },
+   "annotations": {
+    "readOnlyHint": true,
+    "destructiveHint": false
+   }
+  }
+ ]
+}

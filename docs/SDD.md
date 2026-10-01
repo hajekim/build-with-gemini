@@ -116,7 +116,7 @@ def search_company_policy(query: str, category: str = "ALL") -> dict:
 - FastMCP 서버 베이스 URL: `https://korean-mock-saas-dri5akvbzq-du.a.run.app`
 - 프로토콜: **Streamable HTTP 기반 JSON-RPC 2.0** (`initialize`, `tools/list`, `tools/call`)
 - 세션 어피니티 보장: Cloud Run 인스턴스 간 세션 ID 유지를 위해 `_get_persistent_client`로 `GAESA` 쿠키 및 `Mcp-Session-Id`를 영속화
-- 인증 및 무중단 토큰 발급: 환경 변수에 `MCP_TOKEN`이 없을 경우 `/api/mcp-tokens` API로부터 참가자 세션 토큰을 자동 발급 (`_auto_obtain_mcp_token`)
+- 인증: 참가자가 Mock SaaS 웹 화면에서 발급한 개인 토큰을 환경 변수 `MCP_TOKEN`으로만 읽습니다 (`_get_mcp_token`). 토큰이 곧 테넌트이므로 자동 발급은 하지 않으며, 값이 없으면 `RuntimeError`로 즉시 중단합니다. `McpToolset`은 `header_provider`로 호출 시점에 토큰을 주입합니다.
 - Google ADK 클라이언트: `google.adk.tools.mcp_tool.McpToolset` + `StreamableHTTPConnectionParams`
 
 #### 1. WorkWeek HRMS FastMCP 서버 도구 (`/work-week/mcp`)
@@ -152,8 +152,8 @@ FastMCP 서버와 통신할 때는 반드시 다음 HTTP 헤더 및 세션 핸�
   - `Accept: application/json, text/event-stream` (누락 시 406 Not Acceptable 반환)
   - `X-MCP-Token: {token}` (누락 시 401 Unauthorized 반환)
   - `MCP-Protocol-Version: 2025-06-18`
-- **토큰 자동 발급 API (`POST /api/mcp-tokens`)**:
-  - 환경 변수 `MCP_TOKEN`이 없을 경우, JSON 본문 `{"token_name": "workshop-agent"}`과 헤더 `{"Content-Type": "application/json", "X-Session-ID": "sess_..."}`를 실어 호출한 뒤 응답 JSON의 `data["raw_token"]`을 추출하여 사용.
+- **토큰 발급 (`POST /api/mcp-tokens`)**:
+  - 웹 화면의 MCP 토큰 발급 버튼이 브라우저 세션 ID(`X-Session-ID`)로 호출합니다. 발급된 토큰에는 해당 세션의 테넌트 ID가 서명되어 들어가므로 에이전트와 웹 화면이 같은 데이터를 봅니다. 에이전트 코드는 이 API를 호출하지 않습니다.
 - **초기화 및 세션 어피니티 핸드셰이크 (`method: initialize`)**:
   - 엔드포인트당 최초 1회 `method: "initialize"`를 호출하여 응답 헤더의 `mcp-session-id`를 추출하고, 이후 모든 `tools/call` 요청 헤더에 `Mcp-Session-Id: {session_id}`를 포함하여 전송.
   - Cloud Run의 분산 부하 분산을 방지하기 위해 단일 영속 `httpx.Client`를 사용하여 세션 쿠키(`GAESA`)를 지속 유지.

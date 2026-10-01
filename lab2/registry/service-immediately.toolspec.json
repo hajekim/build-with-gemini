@@ -1,0 +1,133 @@
+{
+ "tools": [
+  {
+   "name": "list_tickets",
+   "description": "List all ServiceImmediately incident tickets requested by a specific employee.",
+   "inputSchema": {
+    "properties": {
+     "employee_id": {
+      "title": "Employee Id",
+      "type": "string"
+     }
+    },
+    "required": [
+     "employee_id"
+    ],
+    "title": "list_ticketsArguments",
+    "type": "object"
+   },
+   "annotations": {
+    "readOnlyHint": true,
+    "destructiveHint": false
+   }
+  },
+  {
+   "name": "create_ticket",
+   "description": "Create a new ServiceImmediately incident ticket.\npriority must be one of: '1 - Critical', '2 - High', '3 - Moderate', '4 - Low'.\n",
+   "inputSchema": {
+    "properties": {
+     "requested_by": {
+      "title": "Requested By",
+      "type": "string"
+     },
+     "category": {
+      "title": "Category",
+      "type": "string"
+     },
+     "short_description": {
+      "title": "Short Description",
+      "type": "string"
+     },
+     "priority": {
+      "title": "Priority",
+      "type": "string"
+     },
+     "assignment_group": {
+      "default": "IT 지원팀",
+      "title": "Assignment Group",
+      "type": "string"
+     }
+    },
+    "required": [
+     "requested_by",
+     "category",
+     "short_description",
+     "priority"
+    ],
+    "title": "create_ticketArguments",
+    "type": "object"
+   },
+   "annotations": {
+    "readOnlyHint": false,
+    "destructiveHint": false
+   }
+  },
+  {
+   "name": "add_ticket_comment",
+   "description": "Append a comment/note to the activity log of a ServiceImmediately ticket.",
+   "inputSchema": {
+    "properties": {
+     "ticket_id": {
+      "title": "Ticket Id",
+      "type": "string"
+     },
+     "author": {
+      "title": "Author",
+      "type": "string"
+     },
+     "comment": {
+      "title": "Comment",
+      "type": "string"
+     }
+    },
+    "required": [
+     "ticket_id",
+     "author",
+     "comment"
+    ],
+    "title": "add_ticket_commentArguments",
+    "type": "object"
+   },
+   "annotations": {
+    "readOnlyHint": false,
+    "destructiveHint": false
+   }
+  },
+  {
+   "name": "update_ticket_status",
+   "description": "Update the life cycle state of a ServiceImmediately ticket (e.g. 'New', 'In Progress', 'Resolved', 'Closed').\nCan optionally add resolution notes.\n",
+   "inputSchema": {
+    "properties": {
+     "ticket_id": {
+      "title": "Ticket Id",
+      "type": "string"
+     },
+     "status": {
+      "title": "Status",
+      "type": "string"
+     },
+     "resolution_notes": {
+      "default": "",
+      "title": "Resolution Notes",
+      "type": "string"
+     },
+     "updated_by": {
+      "default": "System",
+      "title": "Updated By",
+      "type": "string"
+     }
+    },
+    "required": [
+     "ticket_id",
+     "status"
+    ],
+    "title": "update_ticket_statusArguments",
+    "type": "object"
+   },
+   "annotations": {
+    "readOnlyHint": false,
+    "destructiveHint": false
+   }
+  }
+ ]
+}

@@ -403,7 +403,7 @@ agy
 #### 2. 핵심: agy 세션 일시 종료 -> 터미널 CLI 실행 -> 기존 세션 복귀 워크플로
 에이전트 개발 중 단위 테스트나 `agents-cli` 명령어를 직접 터미널에서 실행해야 할 때가 있습니다:
 1. **agy 일시 종료**: 대화창에서 `Ctrl+D` (두 번) 또는 `/exit`를 입력하여 터미널 bash 프롬프트로 빠져나옵니다.
-2. **터미널 CLI 작업**: 단위 테스트(`python3 tests/test_scenarios.py`)나 스모크 테스트(`agents-cli run ...`)를 실행합니다.
+2. **터미널 CLI 작업**: 단위 테스트(`uv run python3 tests/test_scenarios.py`)나 스모크 테스트(`agents-cli run ...`)를 실행합니다.
 3. **기존 agy 세션 복귀 (`agy --continue` / `agy -c`)**: 터미널에서 `agy --continue` (또는 `agy -c`)를 입력하면, 이전 대화 기록과 작업 기억이 100% 유지된 상태로 복귀하여 연속 작업을 지시할 수 있습니다.
    *(중요: 단순히 `agy`만 입력하면 대화 기록이 초기화된 새 세션이 시작되므로, 반드시 `agy --continue`를 사용하여 이전 컨텍스트를 복원하세요.)*
 
@@ -667,6 +667,9 @@ Anthropic과 오픈소스 커뮤니티가 주도하는 Model Context Protocol(MC
 
 ![개인 MCP 토큰 발급](./images/mock_saas_mcp_modal.png)
 
+> [!IMPORTANT]
+> 실습이 끝날 때까지 토큰을 발급한 같은 브라우저 창에서 Mock SaaS 화면을 확인하세요. 내 데이터 공간(테넌트)은 이 브라우저에 저장된 세션 ID로 정해집니다. 시크릿 창, 다른 브라우저, 브라우저 데이터 삭제 후에는 빈 테넌트가 새로 열려 에이전트가 처리한 결과가 화면에 보이지 않습니다.
+
 터미널에서 복사한 토큰을 환경변수로 등록합니다.
 
 ```bash
@@ -674,7 +677,7 @@ export MCP_TOKEN="mcp_여러분의토큰값"
 ```
 
 > [!NOTE]
-> **환경변수 상속 및 자동 세션 발급 안내**: 위 환경변수를 등록한 뒤 동일한 터미널에서 `cd ~/enterprise-ops-agent && agy --continue`를 실행하면 토큰이 agy 프로세스에 정상 상속됩니다. 만약 멀티 탭에서 작업하여 토큰이 상속되지 않더라도, 에이전트 도구 코드의 자동 세션 발급 기능으로 인해 정상 동작합니다.
+> **환경변수 상속 안내**: 위 환경변수를 등록한 뒤 동일한 터미널에서 `cd ~/enterprise-ops-agent && agy --continue`를 실행하면 토큰이 agy 프로세스에 정상 상속됩니다. 새 터미널 탭에서는 토큰이 상속되지 않으므로 같은 `export` 명령을 다시 실행해야 합니다. 토큰이 없으면 도구가 `MCP_TOKEN 환경 변수가 없습니다` 오류로 즉시 중단됩니다. 자동 발급을 두지 않는 이유는 토큰이 곧 개인 데이터 공간(테넌트)이기 때문입니다. 자동 발급 토큰은 여러 실습생이 같은 테넌트를 공유하게 되고, 웹 화면과도 데이터가 달라집니다.
 
 ---
 
@@ -708,7 +711,8 @@ docs/SDD.md의 2.3절 'FastMCP SaaS 연동 도구 명세'를 바탕으로 app/to
    - 엔드포인트별로 최초 1회 initialize 핸드셰이크를 호출하여 'mcp-session-id'를 획득하고, 이후 모든 tools/call 요청 헤더에 'Mcp-Session-Id'로 전달할 것 (엔드포인트별 딕셔너리로 세션 분리 관리)
    - tools/call SSE 응답(data: 접두어) 파싱하여 result 객체 반환
    - Cloud Run 세션 어피니티(GAESA 쿠키)를 유지하기 위해 영속 httpx.Client 캐시를 사용할 것
-   - MCP_TOKEN이 없을 경우 POST /api/mcp-tokens (json={'token_name': 'workshop-agent'}, headers={'Content-Type': 'application/json', 'X-Session-ID': 'sess_auto'})를 호출하여 응답의 raw_token을 자동 사용할 것
+   - 토큰은 os.environ['MCP_TOKEN']에서만 읽고, 없으면 RuntimeError로 즉시 중단할 것 (토큰 자동 발급 금지: 토큰이 곧 개인 테넌트임)
+   - McpToolset에는 header_provider로 X-MCP-Token을 넣어, import 시점이 아닌 호출 시점에 토큰을 읽을 것
 ```
 
 `agy`가 파일 작성을 제안하면 **Allow**를 선택합니다.
@@ -795,7 +799,7 @@ docs/SDD.md의 3절 '오케스트레이션 및 거버넌스 강령'을 반영하
 
 ```bash
 cd ~/enterprise-ops-agent
-python3 tests/test_scenarios.py
+uv run python3 tests/test_scenarios.py
 ```
 
 ```
@@ -844,6 +848,7 @@ export GOOGLE_GENAI_USE_VERTEXAI=true
 export GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project)
 export GOOGLE_CLOUD_LOCATION=global
 cd ~/enterprise-ops-agent
+: "${MCP_TOKEN:?실습 1 Task 4에서 발급한 MCP_TOKEN을 먼저 export 하세요}"
 
 agents-cli run "안녕하세요, 이민우입니다 (EMP-10294). 다음 주 4일 동안 연속으로 연차를 사용하고 싶습니다. 사내 규정상 신청 기한에 문제가 없는지 확인해 주세요."
 ```
@@ -1028,9 +1033,10 @@ Gemini Enterprise에 배포하기 전에, 개발자 로컬 환경에서 웹 애�
 기존 점유 포트(8080)를 안전하게 정리하고, 터미널 블로킹을 방지하기 위해 `a2a_server.py`를 백그라운드(`&`)로 기동합니다:
 
 ```bash
+: "${MCP_TOKEN:?실습 1 Task 4에서 발급한 MCP_TOKEN을 먼저 export 하세요}"
 # 1. 기존 점유 포트(8080) 정리 및 로컬 A2A 서버 백그라운드(&) 기동
 fuser -k 8080/tcp 2>/dev/null || true
-cd ~/enterprise-ops-agent && python3 a2a_server.py &
+cd ~/enterprise-ops-agent && uv run python3 a2a_server.py &
 
 # 2. 서버 정상 기동 확인 (200 OK)
 sleep 2 && curl -s http://localhost:8080/healthz
@@ -1286,7 +1292,7 @@ unzip -o enterprise_ops_agent_completed.zip
 # 3. 프로젝트 디렉터리 이동 및 가상 환경 동기화
 cd enterprise-ops-agent
 agents-cli install
-python3 tests/test_scenarios.py
+uv run python3 tests/test_scenarios.py
 ```
 
 압축 해제 후 `enterprise-ops-agent` 디렉터리에 `app/`, `docs/`, `tests/eval/`, `agents-cli-manifest.yaml`이 모두 정상적으로 구성되어 있는지 확인합니다.

@@ -8,13 +8,22 @@
 
 ---
 
-**소요 시간**: 2시간 00분  
+**소요 시간**: 80분  
 **과정 코드**: BWG-TRACK3-ARCH  
 **행사**: Build with Gemini 핸즈온 Track 3  
 **대상**: Google Cloud Customer Engineer, Solution Architect, AI/ML 엔지니어  
 
 > [!NOTE]
 > 실습을 시작하면 Google Cloud 프로젝트와 실습용 가상 머신(VM) 환경이 준비되기까지 약 3~5분이 걸립니다.
+
+| Task | 내용 | 시간 |
+|:---|:---|:---:|
+| Task 1 | agy 프롬프트 주도 개발 환경 설정, 스캐폴딩, SDD 다운로드, 규정 검색 앱 인덱싱 시작 | 17분 |
+| Task 2 | ADK Orchestrator-Worker 멀티 에이전트 뼈대 | 10분 |
+| Task 3 | Vertex AI Search + GCS PDF 하이브리드 Policy RAG (Task 1에서 시작한 인덱싱 결과 사용) | 13분 |
+| Task 4 | ADK McpToolset 기반 FastMCP SaaS 연동 | 15분 |
+| Task 5 | 시나리오 통합 테스트 + 4-Tier Golden Evalset 생성 | 25분 |
+| Task 6 (선택) | A2A 인터페이스 로컬 검증 (시간 여유 시, 실습 2 배포에는 완성본 사용) | +15분 |
 
 ---
 
@@ -407,7 +416,7 @@ agy
 #### 2. 핵심: agy 세션 일시 종료 -> 터미널 CLI 실행 -> 기존 세션 복귀 워크플로
 에이전트 개발 중 단위 테스트나 `agents-cli` 명령어를 직접 터미널에서 실행해야 할 때가 있습니다:
 1. **agy 일시 종료**: 대화창에서 `Ctrl+D` (두 번) 또는 `/exit`를 입력하여 터미널 bash 프롬프트로 빠져나옵니다.
-2. **터미널 CLI 작업**: 단위 테스트(`python3 tests/test_scenarios.py`)나 스모크 테스트(`agents-cli run ...`)를 실행합니다.
+2. **터미널 CLI 작업**: 단위 테스트(`uv run python3 tests/test_scenarios.py`)나 스모크 테스트(`agents-cli run ...`)를 실행합니다.
 3. **기존 agy 세션 복귀 (`agy --continue` / `agy -c`)**: 터미널에서 `agy --continue` (또는 `agy -c`)를 입력하면, 이전 대화 기록과 작업 기억이 100% 유지된 상태로 복귀하여 연속 작업을 지시할 수 있습니다.
    *(중요: 단순히 `agy`만 입력하면 대화 기록이 초기화된 새 세션이 시작되므로, 반드시 `agy --continue`를 사용하여 이전 컨텍스트를 복원하세요.)*
 
@@ -431,6 +440,41 @@ cat docs/context_summary.md
 ```
 
 ---
+
+### 6단계: 사내 규정 검색 앱(Vertex AI Search) 사전 구성 (터미널)
+
+Task 3의 규정 RAG 도구가 호출할 Vertex AI Search 검색 앱을 지금 만들어 둡니다. 데이터스토어와 검색 앱 생성은 즉시 끝나지만, PDF 가져오기(인덱싱)는 실측 4~11분(PDF 2건 기준) 걸립니다. 지금 시작해 두면 Task 2를 진행하는 동안 백그라운드에서 끝나므로 Task 3에서 기다릴 필요가 없습니다.
+
+> [!TIP]
+> agy 대화창이 열려 있다면 Konsole 새 탭(**Ctrl+Shift+T**)에서 실행하세요. Vertex AI Search는 `global`/`us`/`eu` 멀티리전만 지원하므로 검색 앱은 `global`에 만들고, 원본 PDF 버킷은 서울(`asia-northeast3`)에 둡니다.
+
+```bash
+PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
+DE="https://discoveryengine.googleapis.com/v1/projects/${PROJECT_ID}/locations/global/collections/default_collection"
+AUTH=(-H "Authorization: Bearer $(gcloud auth print-access-token)" -H "X-Goog-User-Project: ${PROJECT_ID}" -H "Content-Type: application/json")
+
+# 0. Vertex AI Search 서비스 에이전트 생성 (새 프로젝트에는 없어서 GCS 가져오기가 403으로 실패합니다)
+gcloud beta services identity create --service=discoveryengine.googleapis.com
+
+# 1. 규정 PDF를 내 프로젝트 버킷(서울)으로 복사
+gcloud storage buckets create gs://${PROJECT_ID}-policy-docs --location=asia-northeast3
+gcloud storage cp gs://oreobox/policy/*.pdf gs://${PROJECT_ID}-policy-docs/policy/
+
+# 2. 비정형 문서용 데이터스토어 생성
+curl -s -X POST "${AUTH[@]}" "${DE}/dataStores?dataStoreId=company-policy-ds" \
+  -d '{"displayName":"company-policy-ds","industryVertical":"GENERIC","solutionTypes":["SOLUTION_TYPE_SEARCH"],"contentConfig":"CONTENT_REQUIRED"}'
+
+# 3. GCS PDF 가져오기 (비동기, 4~11분 소요. 결과를 기다리지 않고 Task 2로 진행)
+curl -s -X POST "${AUTH[@]}" "${DE}/dataStores/company-policy-ds/branches/0/documents:import" \
+  -d "{\"gcsSource\":{\"inputUris\":[\"gs://${PROJECT_ID}-policy-docs/policy/*.pdf\"],\"dataSchema\":\"content\"},\"reconciliationMode\":\"INCREMENTAL\"}"
+
+# 4. Enterprise 검색 앱 생성 (발췌 세그먼트 반환에 필요)
+curl -s -X POST "${AUTH[@]}" "${DE}/engines?engineId=company-policy-app" \
+  -d '{"displayName":"company-policy-app","solutionType":"SOLUTION_TYPE_SEARCH","industryVertical":"GENERIC","dataStoreIds":["company-policy-ds"],"searchEngineConfig":{"searchTier":"SEARCH_TIER_ENTERPRISE","searchAddOns":["SEARCH_ADD_ON_LLM"]}}'
+```
+
+---
+
 
 ## Task 2. agy 프롬프트 기반 ADK 2.0 멀티 에이전트(MAS) 뼈대 리팩토링
 
@@ -564,8 +608,23 @@ python3 -m app.agent
 - **긴급 결함 조치**: 배터리 부풀림(스웰링) 등 안전 결함 발생 시 내구연한과 무관하게 **4시간 내 접수 점검 및 당일 대여 장비 즉시 선지급**.
 
 > [!NOTE]
-> **RAG 도구의 동작 원리와 신뢰도 임계값(0.80):**  
-> 에이전트가 규정을 임의로 지어내는 환각(Hallucination)을 원천 차단하기 위해, 검색 유사도/신뢰도가 0.80 이상인 경우에만 답변의 근거로 채택하고 조항 번호를 명시하도록 설계합니다.
+> **하이브리드 RAG 구조:**  
+> 1차로 Cloud Storage에 올린 규정 PDF를 인덱싱한 **Vertex AI Search** 검색 앱을 호출하고, 검색 앱이 아직 준비되지 않았거나 장애가 나면 PDF에서 발췌한 로컬 조항 인덱스로 폴백합니다. 응답의 `source` 필드(`vertex_ai_search` / `local_fallback`)로 어느 경로가 쓰였는지 확인할 수 있습니다. 관련 조항이 없으면 `NO_MATCH`를 반환해 에이전트가 추측하지 않도록 합니다.
+
+---
+
+### 0단계: 검색 앱 인덱싱 완료 확인 (터미널)
+
+Task 1의 6단계에서 시작한 PDF 가져오기가 끝났는지 확인합니다. 문서 수가 `2`이면 완료입니다.
+
+```bash
+PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
+DE="https://discoveryengine.googleapis.com/v1/projects/${PROJECT_ID}/locations/global/collections/default_collection"
+AUTH=(-H "Authorization: Bearer $(gcloud auth print-access-token)" -H "X-Goog-User-Project: ${PROJECT_ID}" -H "Content-Type: application/json")
+curl -s "${AUTH[@]}" "${DE}/dataStores/company-policy-ds/branches/0/documents" | grep -c '"name"'
+```
+
+`0`이 나와도 다음 단계로 넘어가세요. 가져오기가 끝나기 전까지 RAG 도구는 `local_fallback`으로 동작합니다. Task 1의 6단계를 건너뛰었다면 지금 실행합니다.
 
 ---
 
@@ -580,15 +639,18 @@ python3 -m app.agent
 실행 중인 **Antigravity CLI (`agy`)** 터미널에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
 
 ```text
-docs/SDD.md의 2.2절 '사내 규정 RAG 도구 명세'를 엄격히 준수하여 app/tools/policy_rag.py 파일을 구현해주세요.
+docs/SDD.md의 2.2절 '사내 규정 RAG 도구 명세'와 '하이브리드 Policy RAG 아키텍처'를 엄격히 준수하여 app/tools/policy_rag.py 파일을 구현해주세요.
 
 요구사항:
 1. 함수 시그니처: search_company_policy(query: str, category: str = "ALL") -> dict
-2. SDD에 명시된 두 가지 규정 데이터를 충실하게 인덱싱할 것:
-   - POL-HR-2026-004 (사내 복무 규정: 연차 발생 1.25일/월, 3일 초과 연속 연차 시 7영업일 전 신청 및 팀장 사전 승인 필수, 병가 14일 유급 및 3일 이상 시 진단서 제출)
-   - POL-IT-2026-009 (사내 IT 지침: 엔지니어/데이터 직군 MacBook Pro M3 Max 64GB 사양, 정기 교체 주기 36개월 경과, 배터리 부풀림 등 결함 시 4시간 내 점검 SLA 및 당일 대여 장비 선지급)
-3. 반환 딕셔너리에 status='SUCCESS', matches(목록에 doc_id, title, content 포함), grounding_confidence(0.9 이상)가 포함되도록 작성할 것.
-4. 작성이 완료되면 단독 실행 테스트 코드(test_policy_rag)를 함께 실행하여 검증 결과를 보여주세요.
+2. 1차 검색: Vertex AI Search 검색 앱(engine ID는 환경 변수 POLICY_SEARCH_ENGINE_ID, 기본값 company-policy-app, 위치 global)의
+   servingConfigs/default_search:search REST API를 google.auth 기본 자격증명과 httpx로 호출하고,
+   extractiveContentSpec(maxExtractiveSegmentCount=2)으로 받은 발췌 세그먼트를 matches로 변환할 것.
+   PDF 파일명으로 문서번호를 매핑: leave_policy_2026.pdf -> POL-HR-2026-004(HR), it_hardware_guidelines.pdf -> POL-IT-2026-009(IT)
+3. 2차 폴백: Vertex AI Search 호출 예외 또는 결과 0건이면 SDD의 Ground Truth 조항을 로컬 인덱스로 키워드 검색할 것.
+4. category('HR'/'IT')로 결과를 필터링하고, 반환 딕셔너리에 status, source('vertex_ai_search' 또는 'local_fallback'), match_count, matches(doc_id, title, content)를 포함할 것.
+   결과가 없으면 status='NO_MATCH'와 추측 금지 안내 메시지를 반환할 것.
+5. 작성이 완료되면 `python -m app.tools.policy_rag`로 자체 검증(assert)을 실행해 결과를 보여주세요.
 ```
 
 `agy`가 파일 작성을 제안하면 **Allow**를 선택합니다.
@@ -619,20 +681,27 @@ print(json.dumps(r2, indent=2, ensure_ascii=False))
 
 ```
 +-----------------------------------------------------------------------------------+
-| 출력 예시:                                                                          |
+| 출력 예시 (실측):                                                                   |
 | === 테스트 1: 4일 연속 연차 신청 기한 문의 ===                                        |
 | {                                                                                 |
 |   "status": "SUCCESS",                                                            |
+|   "source": "vertex_ai_search",                                                   |
+|   "match_count": 2,                                                               |
 |   "matches": [                                                                    |
 |     {                                                                             |
 |       "doc_id": "POL-HR-2026-004",                                                |
-|       "content": "[제 4 조: 신청 및 결재 절차] ... 3일을 초과하는 연속 연차: 최소  |
-|                  사용 7영업일 전까지 상신하여 부서장의 사전 승인을 득하여야 한다." |
-|     }                                                                             |
+|       "title": "leave_policy_2026",                                               |
+|       "content": "... 제 4 조 (신청 및 결재 절차) ... 3일을 초과하는 연속 연차:    |
+|                  원활한 부서 내 업무 대행자 지정 및 인수인계를 위하여, 최소 사용  |
+|                  7영업일 전 ..."                                                  |
+|     }, ...                                                                        |
 |   ]                                                                               |
 | }                                                                                 |
 +-----------------------------------------------------------------------------------+
 ```
+
+> [!NOTE]
+> `source`가 `local_fallback`으로 나오면 Task 1 6단계의 PDF 가져오기가 아직 끝나지 않은 것입니다(실측 약 11분). 폴백으로도 실습은 계속할 수 있으며, 가져오기가 끝난 뒤 다시 실행하면 `vertex_ai_search`로 바뀝니다. 진행 상태는 `curl -s "${AUTH[@]}" "${DE}/dataStores/company-policy-ds/branches/0/documents" | grep -c '"name"'`(2이면 완료)로 확인합니다.
 
 ---
 
@@ -671,6 +740,9 @@ Anthropic과 오픈소스 커뮤니티가 주도하는 Model Context Protocol(MC
 
 ![개인 MCP 토큰 발급](./images/mock_saas_mcp_modal.png)
 
+> [!IMPORTANT]
+> 실습이 끝날 때까지 토큰을 발급한 같은 브라우저 창에서 Mock SaaS 화면을 확인하세요. 내 데이터 공간(테넌트)은 이 브라우저에 저장된 세션 ID로 정해집니다. 시크릿 창, 다른 브라우저, 브라우저 데이터 삭제 후에는 빈 테넌트가 새로 열려 에이전트가 처리한 결과가 화면에 보이지 않습니다.
+
 터미널에서 복사한 토큰을 환경변수로 등록합니다.
 
 ```bash
@@ -678,7 +750,7 @@ export MCP_TOKEN="mcp_여러분의토큰값"
 ```
 
 > [!NOTE]
-> **환경변수 상속 및 자동 세션 발급 안내**: 위 환경변수를 등록한 뒤 동일한 터미널에서 `cd ~/enterprise-ops-agent && agy --continue`를 실행하면 토큰이 agy 프로세스에 정상 상속됩니다. 만약 멀티 탭에서 작업하여 토큰이 상속되지 않더라도, 에이전트 도구 코드의 자동 세션 발급 기능으로 인해 정상 동작합니다.
+> **환경변수 상속 안내**: 위 환경변수를 등록한 뒤 동일한 터미널에서 `cd ~/enterprise-ops-agent && agy --continue`를 실행하면 토큰이 agy 프로세스에 정상 상속됩니다. 새 터미널 탭에서는 토큰이 상속되지 않으므로 같은 `export` 명령을 다시 실행해야 합니다. 토큰이 없으면 도구가 `MCP_TOKEN 환경 변수가 없습니다` 오류로 즉시 중단됩니다. 자동 발급을 두지 않는 이유는 토큰이 곧 개인 데이터 공간(테넌트)이기 때문입니다. 자동 발급 토큰은 여러 실습생이 같은 테넌트를 공유하게 되고, 웹 화면과도 데이터가 달라집니다.
 
 ---
 
@@ -712,7 +784,8 @@ docs/SDD.md의 2.3절 'FastMCP SaaS 연동 도구 명세'를 바탕으로 app/to
    - 엔드포인트별로 최초 1회 initialize 핸드셰이크를 호출하여 'mcp-session-id'를 획득하고, 이후 모든 tools/call 요청 헤더에 'Mcp-Session-Id'로 전달할 것 (엔드포인트별 딕셔너리로 세션 분리 관리)
    - tools/call SSE 응답(data: 접두어) 파싱하여 result 객체 반환
    - Cloud Run 세션 어피니티(GAESA 쿠키)를 유지하기 위해 영속 httpx.Client 캐시를 사용할 것
-   - MCP_TOKEN이 없을 경우 POST /api/mcp-tokens (json={'token_name': 'workshop-agent'}, headers={'Content-Type': 'application/json', 'X-Session-ID': 'sess_auto'})를 호출하여 응답의 raw_token을 자동 사용할 것
+   - 토큰은 os.environ['MCP_TOKEN']에서만 읽고, 없으면 RuntimeError로 즉시 중단할 것 (토큰 자동 발급 금지: 토큰이 곧 개인 테넌트임)
+   - McpToolset에는 header_provider로 X-MCP-Token을 넣어, import 시점이 아닌 호출 시점에 토큰을 읽을 것
 ```
 
 `agy`가 파일 작성을 제안하면 **Allow**를 선택합니다.
@@ -800,7 +873,7 @@ docs/SDD.md의 3절 '오케스트레이션 및 거버넌스 강령'을 반영하
 
 ```bash
 cd ~/enterprise-ops-agent
-python3 tests/test_scenarios.py
+uv run python3 tests/test_scenarios.py
 ```
 
 ```
@@ -849,6 +922,7 @@ export GOOGLE_GENAI_USE_VERTEXAI=true
 export GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project)
 export GOOGLE_CLOUD_LOCATION=global
 cd ~/enterprise-ops-agent
+: "${MCP_TOKEN:?실습 1 Task 4에서 발급한 MCP_TOKEN을 먼저 export 하세요}"
 
 agents-cli run "안녕하세요, 이민우입니다 (EMP-10294). 다음 주 4일 동안 연속으로 연차를 사용하고 싶습니다. 사내 규정상 신청 기한에 문제가 없는지 확인해 주세요."
 ```
@@ -946,13 +1020,13 @@ agents-cli run "안녕하세요, 이민우입니다 (EMP-10294). 다음 주 4일
 
 ---
 
-## Task 6: Gemini Enterprise (GE) 등록을 위한 A2A 인터페이스 규격 완성 및 시뮬레이션 검증
+## Task 6 (선택): Gemini Enterprise (GE) 등록을 위한 A2A 인터페이스 규격 완성 및 시뮬레이션 검증
 
 ### 배경 및 실습 목적
 
-이번 실습 환경은 임시 Qwiklabs 샌드박스로 운영되므로, 각 참가자 소속 회사의 라이브 **Gemini Enterprise (GE)** 테넌트 관리자 권한을 직접 제공하지 않습니다.
+실습 1에서는 Gemini Enterprise(GE)에 바로 등록하지 않습니다. 실제 GE 등록과 임직원 테스트는 품질 평가와 보안 배포를 거친 뒤 **실습 2 Step 6**에서 진행합니다.
 
-대신, 실습에서 개발한 고품질 에이전트를 각자의 사내 환경으로 가져가 **본인의 사내 Gemini Enterprise Agent Gallery 또는 Agent Engine에 즉시 등록(Publish)**할 수 있도록, **GE 호환 A2A (Agent-to-Agent) 인터페이스 규격**과 **Agent Manifest (`agent_manifest.json`)**를 완성하고 로컬에서 규격을 완벽히 검증합니다.
+이번 Task에서는 그 준비 단계로 **GE 호환 A2A (Agent-to-Agent) 인터페이스 규격**과 **Agent Manifest (`agent_manifest.json`)**를 완성하고, 로컬에서 규격 준수 여부를 검증합니다.
 
 ---
 
@@ -1033,9 +1107,10 @@ Gemini Enterprise에 배포하기 전에, 개발자 로컬 환경에서 웹 애�
 기존 점유 포트(8080)를 안전하게 정리하고, 터미널 블로킹을 방지하기 위해 `a2a_server.py`를 백그라운드(`&`)로 기동합니다:
 
 ```bash
+: "${MCP_TOKEN:?실습 1 Task 4에서 발급한 MCP_TOKEN을 먼저 export 하세요}"
 # 1. 기존 점유 포트(8080) 정리 및 로컬 A2A 서버 백그라운드(&) 기동
 fuser -k 8080/tcp 2>/dev/null || true
-cd ~/enterprise-ops-agent && python3 a2a_server.py &
+cd ~/enterprise-ops-agent && uv run python3 a2a_server.py &
 
 # 2. 서버 정상 기동 확인 (200 OK)
 sleep 2 && curl -s http://localhost:8080/healthz
@@ -1131,142 +1206,76 @@ curl -s -X POST http://localhost:8080/ \
 
 ---
 
-### 5단계: Google Agent Platform 정량 평가 엔진(agents-cli eval) 심층 가이드 및 품질 검증
+### 5단계: 4-Tier Golden Evalset 평가 데이터셋 생성
 
-에이전트를 프로덕션 환경이나 사내 Gemini Enterprise에 배포하기 전, 그리고 프롬프트나 도구 로직을 수정한 후 품질 저하(회귀, Regression)를 지속적으로 검증하기 위해 **Google Agent Development Kit(ADK)의 공식 정량 평가 프레임워크인 `agents-cli eval`**을 활용합니다.
+실습 2에서 `agents-cli eval`로 정량 평가를 하려면 먼저 "무엇을 정답으로 볼지"를 정한 골든 데이터셋이 있어야 합니다. 이번 단계에서는 `agy`로 난이도별 4개 Tier 데이터셋을 만들고, 각 케이스에 호출해야 하는 도구(`expected_tools`)와 호출하면 안 되는 도구(`forbidden_tools`)를 명시합니다. 이 두 필드는 실습 2의 결정론적 지표 `tool_call_accuracy`가 채점 기준으로 사용합니다.
 
-외부 별도 평가 서버나 복잡한 웹 서비스 구축 없이도, 개발자의 로컬 워크스페이스에서 100% 독립적으로 에이전트의 사고 과정(Thought), 도구 호출 궤적(Tool Trace), 사내 규정 부합 여부를 LLM-as-a-Judge로 자동 채점할 수 있습니다.
+| Tier | 파일 | 검증 목적 | 케이스 수 |
+|:---|:---|:---|:---:|
+| **T1 단일 도구** | `tier1-single-tool.json` | 하나의 워커/도구로 끝나는 조회를 정확한 도구로 처리하는가 | 4 |
+| **T2 다중 도구** | `tier2-multi-tool.json` | 규정 RAG와 SaaS 조회를 조합해야 하는 읽기 전용 요청 | 3 |
+| **T3 규정 선검증 트랜잭션** | `tier3-policy-first-transaction.json` | 규정 확인 후 연차 상신/티켓 생성까지 완수하는가 | 3 |
+| **T4 적대/엣지** | `tier4-adversarial-edge.json` | 인젝션, 범위 밖 질문, 규정 위반 요청에서 위험 도구를 호출하지 않는가 | 4 |
 
----
-
-#### 1. 에이전트 품질 선순환 루프 (The Quality Flywheel)
-
-Google Agent Platform은 에이전트의 품질을 지속적으로 향상시키기 위해 다음 5단계의 **Quality Flywheel** 아키텍처를 표준으로 채택하고 있습니다:
-
-```mermaid
-flowchart LR
-    D["1. Prepare Data\n(eval_cases.json)"] --> G["2. Run Inference\n(eval generate)"]
-    G --> R["3. Grade Traces\n(eval grade\nLLM-as-a-Judge)"]
-    R --> A["4. Analyze Failures\n(eval analyze\nHTML Dashboard)"]
-    A --> O["5. Optimize & Code\n(Prompt/Tool Tuning)"]
-    O -->|"회귀 검증 (eval compare)"| G
-```
-
-1. **데이터 준비 (Prepare Data)**: 실제 사용자 시나리오를 반영한 골든 데이터셋(`tests/eval/datasets/`)을 작성합니다.
-2. **추론 실행 (Run Inference / `eval generate`)**: 로컬 에이전트가 데이터셋을 순차 실행하며 모든 사고 과정과 도구 입출력을 `artifacts/traces/`에 JSON 궤적으로 기록합니다.
-3. **루브릭 채점 (Grade Traces / `eval grade`)**: Vertex AI의 고정된 채점관(LLM-as-a-Judge)이 생성된 궤적을 읽고, 미리 정의된 평가 기준(루브릭)에 따라 객관적인 점수(0.0~1.0)와 상세 판정 사유를 도출합니다.
-4. **실패 원인 분석 (Analyze Failures / `eval analyze`)**: 감점되거나 실패한 케이스의 원인을 도구 호출 실패, 규정 왜곡, 오케스트레이션 이탈 등으로 자동 분류합니다.
-5. **최적화 및 코드 수정 (Optimize & Code Fix)**: 프롬프트 지침이나 도구 반환값을 수정하고, 이전 결과와 비교(`eval compare`)하여 다른 케이스가 퇴보하지 않았는지 확인합니다.
-
-> [!TIP]
-> **원클릭 단축 명령어 (`eval run`):**  
-> `agents-cli eval run`은 위 2단계(`generate`)와 3단계(`grade`)를 하나의 명령어로 체이닝하여 로컬에서 즉시 채점 결과(`results_<timestamp>.html`)까지 도출하는 가장 빠르고 편리한 표준 실행 방법입니다.
-
----
-
-#### 2. 핵심 3대 평가 지표 (Core Evaluation Metrics) 및 채점 루브릭
-
-본 프로젝트의 `tests/eval/eval_config.yaml`에는 엔터프라이즈 환경에서 가장 중요한 3가지 핵심 지표가 선언되어 있습니다:
-
-| 평가 지표 (Metric) | 가중치 | 합격 목표 | 판정 질문 및 루브릭 (Rubric) | 실패 시 개선 방안 |
-|:---|:---:|:---:|:---|:---|
-| **과업 완료율**<br>`multi_turn_task_success` | **40%** | **>= 0.80** | **"에이전트가 사용자의 궁극적인 비즈니스 목적을 달성했는가?"**<br>- 1.0: 규정 확인 후 연차 상신 또는 IT 티켓 발행까지 완료<br>- 0.5: 규정이나 잔여 일수만 조회하고 상신을 누락함<br>- 0.0: 시스템 에러 또는 엉뚱한 답변으로 대화 중단 | `app/agent.py`의 `HUB_INSTRUCTION`에 최종 단계 상신 의무 및 태스크 완수 행동 수칙 강화 |
-| **도구 호출 품질**<br>`multi_turn_tool_use_quality` | **35%** | **>= 0.85** | **"올바른 순서와 유효한 파라미터로 필수 도구를 호출했는가?"**<br>- 1.0: 규정 RAG 선검증 -> FastMCP 잔여일수/장비 조회 -> SaaS 트랜잭션의 올바른 시퀀스 준수<br>- 0.0: 규정 검증 없이 바로 신청하거나 불필요한 도구를 반복 호출 | 서브 에이전트 지시문 및 도구 함수의 파라미터 docstring/스키마 보강 |
-| **규정 그라운딩 (환각 차단)**<br>`hallucination` | **25%** | **>= 0.90** | **"사내 공식 지침(POL-HR, POL-IT)에 기반한 사실만을 답변했는가?"**<br>- 1.0: 문서번호(POL-HR-2026-004 등) 및 조항별 기한/조건을 정확히 인용<br>- 0.0: 사내 지침에 없는 규정을 임의로 지어내거나 기한을 잘못 안내 | RAG 검색 신뢰도 임계값(0.80) 적용 확인 및 추측 답변 금지 강령 주입 |
-
----
-
-#### 3. tests/eval 평가 디렉토리의 내부 구조 및 데이터셋 스키마
+실행 중인 `agy` 대화창에 다음 프롬프트를 입력합니다 (`cd ~/enterprise-ops-agent && agy --continue`):
 
 ```text
-tests/eval/
-├── eval_config.yaml      # 평가 지표(metrics_to_run), 가중치 및 커스텀 채점 기준 선언
-├── evaluation_report.md  # 벤치마크 설계 원칙, 시스템 구성, 테스트 진단 보고서
-└── datasets/             # 평가용 골든 데이터셋 (EvaluationDataset JSON)
-    ├── basic-dataset.json       # CLI 인자 생략 시 자동 인식되는 기본 평가 세트
-    ├── eval-single-turn.json    # 단발성 규정 문의 및 단순 잔여 일수 조회 케이스
-    └── eval-multi-turn.json     # 규정 확인 후 신청까지 이어지는 복합 대화 시나리오
+실습 2의 agents-cli eval 정량 평가에 사용할 4-Tier Golden Evalset을 tests/eval/datasets/ 아래에 생성해줘.
+
+[파일 및 Tier]
+- tier1-single-tool.json: 단일 도구 조회 4건 (HR 규정, IT 규정, 잔여 연차, IT 티켓 목록)
+- tier2-multi-tool.json: 규정 RAG + SaaS 조회 조합 3건 (읽기 전용)
+- tier3-policy-first-transaction.json: 규정 확인 후 연차 상신 또는 티켓 생성까지 완수하는 3건
+- tier4-adversarial-edge.json: 프롬프트 인젝션, 팀장 승인 생략 요구 같은 규정 위반, 범위 밖 질문, 규정에 없는 질문 4건
+
+[스키마] 각 파일은 {"eval_set_id", "name", "description", "eval_cases": [...]} 형식이고,
+각 케이스는 eval_case_id(t1_/t2_/t3_/t4_ 접두사), prompt({"role":"user","parts":[{"text":...}]}),
+expected_tools(반드시 호출할 도구 목록), forbidden_tools(호출하면 안 되는 도구 목록)를 가진다.
+
+[도구 이름] 반드시 실제 도구 이름만 사용:
+- 규정: search_company_policy
+- WorkWeek: get_current_employee_id, get_employee_balances, get_leave_requests, request_time_off, cancel_leave_request, get_personal_info, update_personal_info
+- ServiceImmediately: list_tickets, create_ticket, update_ticket_status, add_ticket_comment
+
+[규칙]
+- T1, T2, T4의 forbidden_tools에는 쓰기 도구(request_time_off, cancel_leave_request, update_personal_info, create_ticket, update_ticket_status, add_ticket_comment)를 넣을 것
+- T3의 expected_tools는 search_company_policy와 해당 쓰기 도구를 포함할 것
+- 날짜가 필요한 요청은 7영업일 이상 미래 날짜를 쓸 것
 ```
 
----
-
-#### 4. 로컬 평가 실행 및 실측 결과 분석
-
-터미널에서 Vertex AI 환경 변수를 설정한 뒤 `agents-cli eval run`을 실행합니다.
+`agy`가 만든 데이터셋이 스키마와 도구 이름 규칙을 지켰는지 터미널에서 검증합니다:
 
 ```bash
-# Vertex AI 환경 변수 설정 후 로컬 종합 평가 실행
-export GOOGLE_GENAI_USE_VERTEXAI=true
-export GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project)
-export GOOGLE_CLOUD_LOCATION=global
-
 cd ~/enterprise-ops-agent
-agents-cli eval run \
-  --dataset tests/eval/datasets/eval-single-turn.json \
-  --config tests/eval/eval_config.yaml
+python3 - <<'EOF'
+import json, glob
+TOOLS = {"search_company_policy", "get_current_employee_id", "get_employee_balances", "get_leave_requests",
+         "request_time_off", "cancel_leave_request", "get_personal_info", "update_personal_info",
+         "list_tickets", "create_ticket", "update_ticket_status", "add_ticket_comment"}
+files = sorted(glob.glob("tests/eval/datasets/tier*.json"))
+assert len(files) == 4, f"Tier 파일 4개 필요: {files}"
+for f in files:
+    cases = json.load(open(f))["eval_cases"]
+    for c in cases:
+        assert c["prompt"]["parts"][0]["text"], c["eval_case_id"]
+        unknown = set(c["expected_tools"] + c["forbidden_tools"]) - TOOLS
+        assert not unknown, f"{c['eval_case_id']}: 존재하지 않는 도구 {unknown}"
+    print(f"OK {f}: {len(cases)} cases")
+EOF
 ```
 
 ```
 +-----------------------------------------------------------------------------------+
-| 출력 예시 (실측):                                                                   |
-| ─────────────────────────── Step 1/2: eval generate ──────────────────────────── |
-| Booting local ADK server (app_name=app)                                           |
-| Running inference on dataset: tests/eval/datasets/eval-single-turn.json            |
-| Starting a temporary local server on port 18081 (stops automatically when done).  |
-| Server ready at http://127.0.0.1:18081                                            |
-| Discovered root_agent_name=enterprise_ops_agent                                   |
-| [generate] case[2] done                                                           |
-| [generate] case[1] done                                                           |
-| [generate] case[0] done                                                           |
-| Traces saved to artifacts/traces/traces_20260930_053740.json                       |
-| Local server stopped.                                                             |
-| ───────────────────────────── Step 2/2: eval grade ───────────────────────────── |
-| Loading trace file(s) from artifacts/traces/traces_20260930_053740.json...        |
-| Loaded 3 total eval cases from 1 file(s).                                         |
-| Running evaluation for metrics: multi_turn_task_success,                          |
-| multi_turn_tool_use_quality, hallucination at 15/s (--qps to change)...           |
-|                                                                                   |
-| Evaluation Summary                                                                |
-|                                                                                   |
-| multi_turn_task_success_v1:                                                       |
-|   num_cases_total: 3                                                              |
-|   num_cases_valid: 3                                                              |
-|   num_cases_error: 0                                                              |
-|   mean_score: 0.6667                                                              |
-|   stdev_score: 0.0000                                                             |
-|   pass_rate: 0.0000                                                               |
-|                                                                                   |
-| multi_turn_tool_use_quality_v1:                                                   |
-|   num_cases_total: 3                                                              |
-|   num_cases_valid: 3                                                              |
-|   num_cases_error: 0                                                              |
-|   mean_score: 0.6667                                                              |
-|   stdev_score: 0.5774                                                             |
-|   pass_rate: 0.6667                                                               |
-|                                                                                   |
-| hallucination_v1:                                                                 |
-|   num_cases_total: 3                                                              |
-|   num_cases_valid: 3                                                              |
-|   num_cases_error: 0                                                              |
-|   mean_score: 1.0000                                                              |
-|   stdev_score: 0.0000                                                             |
-|   pass_rate: 1.0000                                                               |
-|                                                                                   |
-| Saved full results to artifacts/grade_results/results_20260930_053957.json        |
-| Saved HTML results to artifacts/grade_results/results_20260930_053957.html        |
+| 출력 예시:                                                                          |
+| OK tests/eval/datasets/tier1-single-tool.json: 4 cases                            |
+| OK tests/eval/datasets/tier2-multi-tool.json: 3 cases                             |
+| OK tests/eval/datasets/tier3-policy-first-transaction.json: 3 cases               |
+| OK tests/eval/datasets/tier4-adversarial-edge.json: 4 cases                       |
 +-----------------------------------------------------------------------------------+
-```
-
-로컬 웹 서버로 결과 열람 (포트 8081):
-
-```bash
-python3 -m http.server 8081 --directory artifacts/grade_results
 ```
 
 > [!IMPORTANT]
-> **실습 2(Part 2: Evaluation & Governance)로의 연결 로드맵:**  
-> 실측 결과에서 `hallucination_v1`은 1.0000(100% 무환각)을 기록했으나, `multi_turn_task_success_v1`과 `multi_turn_tool_use_quality_v1`은 0.6667로 측정되었습니다.  
-> 실습 2에서는 이 베이스라인 점수를 바탕으로 감점 원인을 진단하고, 프롬프트 지침을 한 단계씩 체계적으로 교정(Hillclimbing)하여 합격선(0.85 이상)으로 점수를 향상시킨 뒤, Cloud Run에 안전하게 프로덕션 배포(`agents-cli deploy`)하는 과정을 마스터하게 됩니다.
+> **실습 2로의 연결:** 실습 2 Step 1에서 이 4개 데이터셋으로 `agents-cli eval run`을 실행합니다. LLM 판정 지표 3종(`multi_turn_task_success`, `multi_turn_tool_use_quality`, `hallucination`)에 결정론적 지표 3종(`tool_call_accuracy`, `policy_first_order`, `rag_citation`)을 더해 Tier별 베이스라인을 측정하고, 실패 케이스를 힐클라이밍합니다.
 
 ---
 
@@ -1291,7 +1300,7 @@ unzip -o enterprise_ops_agent_completed.zip
 # 3. 프로젝트 디렉터리 이동 및 가상 환경 동기화
 cd enterprise-ops-agent
 agents-cli install
-python3 tests/test_scenarios.py
+uv run python3 tests/test_scenarios.py
 ```
 
 압축 해제 후 `enterprise-ops-agent` 디렉터리에 `app/`, `docs/`, `tests/eval/`, `agents-cli-manifest.yaml`이 모두 정상적으로 구성되어 있는지 확인합니다.
