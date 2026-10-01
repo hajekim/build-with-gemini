@@ -191,12 +191,12 @@ agy
 
 워크스페이스 내 `docs/SDD.md` 파일에 소프트웨어 설계 명세서가 사전에 준비되어 있습니다.
 
-| 구분 | 파일 및 리소스 경로 | 세부 설명 | 링크 / 전용 뷰어 |
+| 구분 | 파일 및 리소스 경로 | 세부 설명 | 링크 |
 |:---|:---|:---|:---|
-| **소프트웨어 설계서** | `docs/SDD.md` | 시스템 구조, RAG 데이터 규격, FastMCP API 명세, 오케스트레이션 강령 | [📥 다운로드](../docs/SDD.md) &bull; [📖 전용 뷰어](../sdd_viewer.html) |
-| **사내 복무 규정 PDF** | `gs://oreobox/policy/leave_policy_2026.pdf` | 문서번호 POL-HR-2026-004 (연차 및 병가 운영 지침) | [📥 다운로드](../docs/policies/leave_policy_2026.pdf) &bull; [📖 열람실](../policy_viewer.html) |
-| **IT 자산 지침 PDF** | `gs://oreobox/policy/it_hardware_guidelines.pdf` | 문서번호 POL-IT-2026-009 (PC 및 하드웨어 지원 규정) | [📥 다운로드](../docs/policies/it_hardware_guidelines.pdf) &bull; [📖 열람실](../policy_viewer.html) |
-| **한국형 Mock SaaS 웹 포털** | `https://korean-mock-saas-dri5akvbzq-du.a.run.app/` | 인사관리(WorkWeek) 및 IT서비스(ServiceImmediately) 통합 포털 | [🔗 SaaS 포털 열기](https://korean-mock-saas-dri5akvbzq-du.a.run.app/) |
+| **소프트웨어 설계서** | `docs/SDD.md` | 시스템 구조, RAG 데이터 규격, FastMCP API 명세, 오케스트레이션 강령 | [📖 보기](../index.html?tab=sdd) |
+| **사내 복무 규정 PDF** | `gs://oreobox/policy/leave_policy_2026.pdf` | 문서번호 POL-HR-2026-004 (연차 및 병가 운영 지침) | [📄 PDF](../docs/policies/leave_policy_2026.pdf) |
+| **IT 자산 지침 PDF** | `gs://oreobox/policy/it_hardware_guidelines.pdf` | 문서번호 POL-IT-2026-009 (PC 및 하드웨어 지원 규정) | [📄 PDF](../docs/policies/it_hardware_guidelines.pdf) |
+| **한국형 Mock SaaS 웹 포털** | `https://korean-mock-saas-dri5akvbzq-du.a.run.app/` | 인사관리(WorkWeek) 및 IT서비스(ServiceImmediately) 통합 포털 | [🔗 포털 열기](https://korean-mock-saas-dri5akvbzq-du.a.run.app/) |
 
 ### 소프트웨어 설계서(SDD)의 목적과 스펙 기반 개발(Spec-Driven Development)
 
@@ -326,10 +326,10 @@ cd enterprise-ops-agent
 프로젝트 디렉터리(`~/enterprise-ops-agent/`) 내부의 `docs/` 폴더에 사내 소프트웨어 설계서와 규정 PDF 원본 문서를 다운로드합니다.
 
 > [!NOTE]
-> **소프트웨어 설계서 및 사내 규정 전용 뷰어 열람 안내**  
-> 실습 중 설계서나 사내 복무/IT 지침 원문을 편리하게 참조하실 수 있도록, 방해 요소 없이 문서에만 집중할 수 있는 **독립형 전용 뷰어 페이지**를 새 탭으로 제공합니다:
-> - [소프트웨어 설계서 (SDD.md) 전용 뷰어 열기 (새 탭)](../sdd_viewer.html)
-> - [사내 규정 PDF (POL-HR/IT) 원본 열람실 열기 (새 탭)](../policy_viewer.html)
+> 실습 중에 설계서나 규정 원문을 확인하려면 아래 링크를 사용하세요. 모두 새 탭에서 열립니다.
+> - [소프트웨어 설계서 (SDD.md)](../index.html?tab=sdd): 이 사이트의 `sdd.md` 탭
+> - [연차 및 병가 운영 지침 (POL-HR-2026-004) PDF](../docs/policies/leave_policy_2026.pdf)
+> - [PC 및 하드웨어 지원 규정 (POL-IT-2026-009) PDF](../docs/policies/it_hardware_guidelines.pdf)
 
 #### 옵션 A: Google Cloud Storage(GCS) 직접 다운로드 (기본 권장)
 실습 콘솔 계정 인증이 적용된 터미널에서 `gsutil` 명령어로 단 한 번에 다운로드합니다:

@@ -46,11 +46,11 @@
 이 실습을 마치면 다음 작업을 직접 수행할 수 있습니다.
 
 1. **Google Antigravity 2.0 환경 구성**: `agy` CLI를 실행하고 Google Cloud 프로젝트 인증을 마친 뒤, 고속 추론 모델(`Gemini 3.8 Flash`)을 설정합니다.
-2. **소프트웨어 설계서(SDD) 기반 컨텍스트 그라운딩**: `docs/SDD.md` 문서를 `agy`에 주입하여 전체 아키텍처와 도구 명세를 인식시킵니다.
+2. **SDD 기반 컨텍스트 그라운딩**: `docs/SDD.md` 문서를 `agy`에 주입하여 전체 아키텍처와 도구 명세를 인식시킵니다.
 3. **agy 프롬프트 기반 ADK 2.0 뼈대 생성**: `agy`에게 지시하여 `config.yaml`과 ADK 2.0 기본 에이전트 코드를 생성하도록 합니다.
 4. **agy 프롬프트 기반 사내 규정 RAG 도구 구현**: SDD 2.1절과 Cloud Storage(`gs://oreobox/policy/`) 규정 문서를 바탕으로 조항 번호와 근거를 정확히 찾아주는 시맨틱 검색 도구(`tools/policy_rag.py`)를 개발합니다.
 5. **agy 프롬프트 기반 FastMCP SaaS 연동 도구 구현**: 한국형 Mock SaaS 플랫폼(`https://korean-mock-saas-dri5akvbzq-du.a.run.app/`)에 개인별 토큰으로 연결되는 FastMCP 도구(`tools/mcp_tools.py`)를 개발합니다.
-6. **오케스트레이션 프롬프트 완성 및 복수 턴 시나리오 검증**: 규정 검증 우선(Policy-First) 규칙을 적용한 최종 에이전트를 완성하고, `agy` 대화창에서 실제 연차 신청 및 고성능 노트북 교체 요청을 테스트한 뒤 웹 화면에서 실시간 반영 결과를 확인합니다.
+6. **오케스트레이션 프롬프트 완성 및 복수 턴 시나리오 검증**: 규정 검증 우선 규칙을 적용한 최종 에이전트를 완성하고, `agy` 대화창에서 실제 연차 신청 및 고성능 노트북 교체 요청을 테스트한 뒤 웹 화면에서 실시간 반영 결과를 확인합니다.
 7. **Gemini Enterprise (GE) 배포용 A2A 인터페이스 규격 패키징**: 사내 본인 테넌트의 Gemini Enterprise에 에이전트를 원클릭 등록할 수 있도록 Agent-to-Agent(A2A) 매니페스트(`agent_manifest.json`)를 생성하고, 로컬 A2A 시뮬레이터를 통해 프로토콜 규격 준수 여부를 검증합니다.
 
 ---
@@ -61,7 +61,7 @@
 
 - 실습 시간은 제한되어 있으며 일시 중지할 수 없습니다. **Start Lab** 버튼을 누르면 타이머가 동작합니다.
 - 이 실습은 실제 Google Cloud 환경에서 진행됩니다. 실습 시작 시 제공되는 임시 계정을 사용해 로그인합니다.
-- 브라우저는 **Google Chrome 시크릿 창(Incognito Window)**을 권장합니다. 개인 구글 계정과 세션이 섞여 불필요한 과금이 발생하는 것을 방지할 수 있습니다.
+- 브라우저는 **Google Chrome 시크릿 창**을 권장합니다. 개인 구글 계정과 세션이 섞여 불필요한 과금이 발생하는 것을 방지할 수 있습니다.
 
 > [!IMPORTANT]
 > 본인의 개인 Google Cloud 계정이나 프로젝트를 사용하지 마세요. 반드시 실습 화면 왼쪽 패널에 표시된 임시 자격증명을 사용해야 합니다.
@@ -82,7 +82,7 @@
 
 ---
 
-### 실습 전용 환경 접속 (Remote Browser Session)
+### 실습용 원격 브라우저 접속
 
 이 실습은 사전 구성된 개발자 가상 머신(VM)과 **Cloud Run 프록시** 서비스를 제공합니다. 로컬 컴퓨터에 별도의 프로그램을 깔지 않고도 웹 브라우저에서 Antigravity 개발 환경에 바로 접속할 수 있습니다.
 
@@ -102,7 +102,7 @@ Google Antigravity 2.0은 다음 구성 요소를 포함합니다:
 3. 서비스 목록에서 **remote-browser-vm1**을 클릭하여 서비스 세부정보 페이지를 엽니다. 상단의 **URL 링크**를 클릭하여 새 브라우저 탭에서 원격 세션을 엽니다.
 ![원격 브라우저 서비스 URL](./images/03_remote_browser_service_url.png)
 
-4. 브라우저에서 클립보드 권한 요청 팝업이 나타나면 **[허용(Allow)]**을 클릭합니다. 이를 통해 로컬 PC와 원격 세션 간 텍스트 복사/붙여넣기가 가능해집니다.
+4. 브라우저에서 클립보드 권한 요청 팝업이 나타나면 **[허용]**을 클릭합니다. 이를 통해 로컬 PC와 원격 세션 간 텍스트 복사/붙여넣기가 가능해집니다.
 ![클립보드 권한 허용](./images/04_clipboard_allow.png)
 
 > [!NOTE]
@@ -113,7 +113,7 @@ Google Antigravity 2.0은 다음 구성 요소를 포함합니다:
 
 ---
 
-### Antigravity Agent Platform (Antigravity 2.0 GUI) 로그인
+### Antigravity 2.0 GUI 로그인
 
 Antigravity Agent Platform은 Antigravity 2.0의 데스크톱 앱입니다. 대화, 작업 기록, 예약 작업을 창 하나에서 관리합니다. 이 실습의 agy 프롬프트는 `enterprise-ops-agent` 폴더에서 실행한 CLI를 기준으로 작성했으므로, GUI는 같은 프로젝트로 로그인해 두고 Antigravity 2.0 화면을 살펴보는 용도로 사용합니다.
 
@@ -193,16 +193,16 @@ agy
    - Welcome to Google Chrome 알림이 나타나면 **OK**를 클릭합니다.
    - Chrome 초기 로그인 창이 나타나면 **Stay signed out** 또는 **Use Chrome without an account**를 클릭합니다.
    - Google 로그인 화면에서 Qwiklabs 자격증명 패널의 **Username**과 **Password**를 입력합니다.
-   - 안내에 따라 접근 권한을 허용하고 생성된 인증 코드(Authorization Code)를 복사합니다.
+   - 안내에 따라 접근 권한을 허용하고 생성된 인증 코드를 복사합니다.
    - 터미널로 돌아와 인증 코드를 붙여넣고 **ENTER**를 누른 뒤, 본인의 **Google Cloud Project ID**를 선택합니다.
 ![인증 코드 입력 및 프로젝트 선택](./images/07_agy_auth_code.png)
 
-5. Google Cloud 위치(Location)는 **global**을 선택합니다.
+5. Google Cloud Location은 **global**을 선택합니다.
 
-6. 선호하는 색상 테마(Color Scheme)를 선택하고 **Next**를 클릭합니다.
+6. 선호하는 색상 테마를 선택하고 **Next**를 클릭합니다.
 ![색상 테마 선택](./images/08_agy_color_scheme.png)
 
-7. 서비스 이용약관 및 데이터 사용(Terms of Service & Data Use)에 동의합니다.
+7. 서비스 이용약관과 데이터 사용 정책에 동의합니다.
 ![서비스 약관 동의](./images/09_agy_terms_of_service.png)
 
 8. *"Do you trust the contents of this project?"* 알림이 뜨면 **Yes, I trust this folder**를 선택하고 **ENTER**를 누릅니다.
@@ -217,7 +217,7 @@ agy
 /config
 ```
 
-색상 테마(Color Scheme)를 확인하고 원하는 테마를 확정합니다.
+색상 테마를 확인하고 원하는 테마를 확정합니다.
 ![색상 테마 확인](./images/12_agy_select_color_scheme.png)
 
 10. 사용할 모델을 확인하고 `gemini-3.8-flash`로 지정합니다:
@@ -230,35 +230,35 @@ agy
 
 ---
 
-## 실습 시나리오 및 설계서 (SDD)
+## 실습 시나리오와 설계서
 
 **Cymbal Group 한국 지사**는 사내 업무 효율화를 위해 AI 기반 통합 운영 에이전트를 도입하려고 합니다.
 
 워크스페이스 내 `docs/SDD.md` 파일에 소프트웨어 설계 명세서가 사전에 준비되어 있습니다.
 
-| 구분 | 파일 및 리소스 경로 | 세부 설명 | 링크 / 전용 뷰어 |
+| 구분 | 파일 및 리소스 경로 | 세부 설명 | 링크 |
 |:---|:---|:---|:---|
-| **소프트웨어 설계서** | `docs/SDD.md` | 시스템 구조, RAG 데이터 규격, FastMCP API 명세, 오케스트레이션 강령 | [📥 다운로드](../docs/SDD.md) &bull; [📖 전용 뷰어](../sdd_viewer.html) |
-| **사내 복무 규정 PDF** | `gs://oreobox/policy/leave_policy_2026.pdf` | 문서번호 POL-HR-2026-004 (연차 및 병가 운영 지침) | [📥 다운로드](../docs/policies/leave_policy_2026.pdf) &bull; [📖 열람실](../policy_viewer.html) |
-| **IT 자산 지침 PDF** | `gs://oreobox/policy/it_hardware_guidelines.pdf` | 문서번호 POL-IT-2026-009 (PC 및 하드웨어 지원 규정) | [📥 다운로드](../docs/policies/it_hardware_guidelines.pdf) &bull; [📖 열람실](../policy_viewer.html) |
-| **한국형 Mock SaaS 웹 포털** | `https://korean-mock-saas-dri5akvbzq-du.a.run.app/` | 인사관리(WorkWeek) 및 IT서비스(ServiceImmediately) 통합 포털 | [🔗 SaaS 포털 열기](https://korean-mock-saas-dri5akvbzq-du.a.run.app/) |
+| **소프트웨어 설계서** | `docs/SDD.md` | 시스템 구조, RAG 데이터 규격, FastMCP API 명세, 오케스트레이션 강령 | [📖 보기](../index.html?tab=sdd) |
+| **사내 복무 규정 PDF** | `gs://oreobox/policy/leave_policy_2026.pdf` | 문서번호 POL-HR-2026-004 (연차 및 병가 운영 지침) | [📄 PDF](../docs/policies/leave_policy_2026.pdf) |
+| **IT 자산 지침 PDF** | `gs://oreobox/policy/it_hardware_guidelines.pdf` | 문서번호 POL-IT-2026-009 (PC 및 하드웨어 지원 규정) | [📄 PDF](../docs/policies/it_hardware_guidelines.pdf) |
+| **한국형 Mock SaaS 웹 포털** | `https://korean-mock-saas-dri5akvbzq-du.a.run.app/` | 인사관리(WorkWeek) 및 IT서비스(ServiceImmediately) 통합 포털 | [🔗 포털 열기](https://korean-mock-saas-dri5akvbzq-du.a.run.app/) |
 
-### 소프트웨어 설계서(SDD)의 목적과 스펙 기반 개발(Spec-Driven Development)
+### SDD의 역할과 스펙 기반 개발
 
-소프트웨어 설계서(SDD)는 AI 에이전트를 개발할 때 시스템 구조, 입출력 스키마, 호출 제약, 도구 명세를 사전에 정의하는 단일 진실 공급원(Single Source of Truth)입니다.
+SDD는 AI 에이전트를 개발할 때 시스템 구조, 입출력 스키마, 호출 제약, 도구 명세를 미리 정해 두는 기준 문서입니다.
 
 프롬프트만으로 코딩을 지시하면 언어 모델이 임의로 API 경로를 추측하거나 함수 인자를 잘못 생성하는 할루시네이션이 발생합니다. 본 실습에서는 SDD를 Antigravity CLI(`agy`)에 컨텍스트로 먼저 주입한 뒤 코드를 생성하게 하여, 실제 운영 규격에 오차 없이 부합하는 에이전트를 완성합니다.
 
-**설계서(SDD)의 핵심 구성:**
+**SDD 구성:**
 - **1절 시스템 개요**: 에이전트의 목표(휴가 신청 자동화, 하드웨어 교체 접수), 지원 모델(Gemini 3.8 Flash, Temperature 0.1), RAG 신뢰도 임계값(0.80), 사번 기본값(EMP-10294) 등 기본 환경 설정.
 - **2절 도구 및 인터페이스 규격**: Cloud Storage PDF 검색 RAG 도구(`tools/policy_rag.py`)와 인사/전산 SaaS 연동 FastMCP 도구(`tools/mcp_tools.py`)의 함수 시그니처 및 HTTP 엔드포인트 명세.
-- **3절 오케스트레이션 및 거버넌스 규칙**: 규정 검증 우선(Policy-First Grounding) 원칙, 위험 작업 사전 승인 강령, 복합 멀티턴 대화 상태 추적 지침.
+- **3절 오케스트레이션 및 거버넌스 규칙**: 규정 검증 우선 원칙, 위험 작업 사전 승인 강령, 복합 멀티턴 대화 상태 추적 지침.
 
 ---
 
 ## Task 1. 개발 환경 설정, agents-cli 프로젝트 스캐폴딩 및 SDD 다운로드
 
-이 단계에서는 필요한 파이썬 환경을 구성하고, Google ADK 공식 CLI(`agents-cli`)로 표준 에이전트 프로젝트 뼈대를 생성한 뒤, 사내 소프트웨어 설계서(SDD) 및 규정 문서를 다운로드하여 Antigravity CLI(`agy`)에 프로젝트 컨텍스트를 그라운딩합니다.
+이 단계에서는 필요한 파이썬 환경을 구성하고, Google ADK 공식 CLI(`agents-cli`)로 표준 에이전트 프로젝트 뼈대를 생성한 뒤, SDD와 사내 규정 문서를 다운로드하여 Antigravity CLI(`agy`)에 프로젝트 컨텍스트를 그라운딩합니다.
 
 ### 1단계: 필수 라이브러리 및 런타임 툴 설치
 
@@ -301,11 +301,11 @@ agents-cli --version
 Google Agent Platform의 공식 툴체인인 `agents-cli`를 사용하여 프로덕션 표준 에이전트 프로젝트를 초기화합니다.
 
 #### agents-cli 개요 및 5대 핵심 기능 그룹
-`agents-cli`는 단순한 코드 스캐폴딩 도구를 넘어, Google ADK(Agent Development Kit) 기반 에이전트의 전체 수명주기(Lifecycle)를 엔드-투-엔드로 표준화한 Google Cloud 공식 프레임워크입니다:
+`agents-cli`는 단순한 코드 스캐폴딩 도구를 넘어, Google ADK(Agent Development Kit) 기반 에이전트의 전체 수명주기를 엔드-투-엔드로 표준화한 Google Cloud 공식 프레임워크입니다:
 
 1. **프로젝트 스캐폴딩 및 의존성 관리 (`create`, `install`, `scaffold enhance`)**: 프로덕션 표준 디렉터리 구조를 생성하고, `pyproject.toml`에 선언된 170여 개 공식 패키지를 uv 기반 프로젝트 전용 가상 환경(`.venv`)에 고속 동기화합니다.
 2. **로컬 이너루프 검증 및 디버깅 (`run`, `playground`)**: `agents-cli run "질의"`로 터미널에서 즉시 스트리밍 추론을 검증하고, `agents-cli playground`로 ADK 공식 시각적 웹 대시보드(이벤트 타임라인, 도구 호출, 아티팩트 트리)를 실행합니다.
-3. **정량적 품질 평가 엔진 (`eval run`, `generate`, `grade`)**: 골든 데이터셋 기반으로 작업 완수율(Task Success Rate), 도구 선택 정확도(Tool Selection Accuracy), 환각 차단율(Faithfulness/Hallucination Check)을 LLM-as-a-Judge로 자동 채점합니다.
+3. **정량적 품질 평가 엔진 (`eval run`, `generate`, `grade`)**: 골든 데이터셋 기반으로 작업 완수율, 도구 선택 정확도, 환각 차단율을 LLM-as-a-Judge로 자동 채점합니다.
 4. **프로덕션 인프라 배포 (`deploy`)**: Cloud Run 또는 GKE 환경으로 컨테이너 빌드 및 서버리스 배포를 자동화합니다.
 5. **Gemini Enterprise 사내 갤러리 공개 (`publish gemini-enterprise`)**: 사내 테넌트의 Gemini Enterprise 또는 Agent Registry에 A2A(Agent-to-Agent) 규격으로 원클릭 등록합니다.
 
@@ -336,7 +336,7 @@ cd enterprise-ops-agent
 #### 명령어 플래그 상세 해설:
 - `--deployment-target cloud_run`: 프로덕션 배포 타겟을 Cloud Run으로 지정하여 공식 `Dockerfile`과 FastAPI 서빙 레이어를 자동 구성합니다.
 - `--session-type in_memory`: 개발 및 로컬 테스트 단계에 적합한 인메모리 세션 저장소를 사용합니다.
-- `--cicd-runner skip`: 로컬 이너루프(Inner-loop) 실습에 집중하기 위해 GitHub Actions 등의 CI/CD 파이프라인 파일 생성을 건너뜁니다.
+- `--cicd-runner skip`: 로컬 개발 실습에 집중하기 위해 GitHub Actions 등의 CI/CD 파이프라인 파일 생성을 건너뜁니다.
 - `--prototype` (`-p`): 인프라 리소스 생성 전 빠른 프로토타이핑 모드로 프로젝트를 초기화합니다.
 - `--yes` (`-y`): CLI 생성 시 나타나는 모든 대화형 확인 질문을 자동으로 승인합니다.
 - `--skip-checks` (`-s`): GCP 사전 네트워크 및 API 검증 단계를 건너뛰고 프로젝트 생성을 즉시 완료합니다.
@@ -370,17 +370,17 @@ cd enterprise-ops-agent
 
 ---
 
-### 3단계: 소프트웨어 설계서(SDD) 및 사내 규정 원본 다운로드
+### 3단계: SDD와 사내 규정 PDF 다운로드
 
 프로젝트 디렉터리(`~/enterprise-ops-agent/`) 내부의 `docs/` 폴더에 사내 소프트웨어 설계서와 규정 PDF 원본 문서를 다운로드합니다.
 
 > [!NOTE]
-> **소프트웨어 설계서 및 사내 규정 전용 뷰어 열람 안내**  
-> 실습 중 설계서나 사내 복무/IT 지침 원문을 편리하게 참조하실 수 있도록, 방해 요소 없이 문서에만 집중할 수 있는 **독립형 전용 뷰어 페이지**를 새 탭으로 제공합니다:
-> - [소프트웨어 설계서 (SDD.md) 전용 뷰어 열기 (새 탭)](../sdd_viewer.html)
-> - [사내 규정 PDF (POL-HR/IT) 원본 열람실 열기 (새 탭)](../policy_viewer.html)
+> 실습 중에 설계서나 규정 원문을 확인하려면 아래 링크를 사용하세요. 모두 새 탭에서 열립니다.
+> - [소프트웨어 설계서 SDD.md](../index.html?tab=sdd): 이 사이트의 `sdd.md` 탭
+> - [연차 및 병가 운영 지침 (POL-HR-2026-004) PDF](../docs/policies/leave_policy_2026.pdf)
+> - [PC 및 하드웨어 지원 규정 (POL-IT-2026-009) PDF](../docs/policies/it_hardware_guidelines.pdf)
 
-#### 옵션 A: Google Cloud Storage(GCS) 직접 다운로드 (기본 권장)
+#### 옵션 A: Cloud Storage에서 다운로드 (권장)
 실습 콘솔 계정 인증이 적용된 터미널에서 `gsutil` 명령어로 단 한 번에 다운로드합니다:
 
 ```bash
@@ -417,7 +417,7 @@ ls -lh docs/policies/
 
 ---
 
-### 4단계: 프로젝트 가상 환경 동기화 (agents-cli install)
+### 4단계: `agents-cli install`로 가상 환경 구성
 
 프로젝트 루트 디렉터리에서 `agents-cli install`을 실행하여 `pyproject.toml`에 명시된 의존성 패키지를 프로젝트 전용 가상 환경(`.venv`)에 동기화합니다:
 
@@ -477,7 +477,7 @@ cat docs/context_summary.md
 
 ---
 
-### 6단계: 사내 규정 검색 앱(Vertex AI Search) 사전 구성 (터미널)
+### 6단계: Vertex AI Search로 사내 규정 검색 앱 만들기 (터미널)
 
 Task 3의 규정 RAG 도구가 호출할 Vertex AI Search 검색 앱을 지금 만들어 둡니다. 데이터스토어와 검색 앱 생성은 즉시 끝나지만, PDF 가져오기(인덱싱)는 실측 4~11분(PDF 2건 기준) 걸립니다. 지금 시작해 두면 Task 2를 진행하는 동안 백그라운드에서 끝나므로 Task 3에서 기다릴 필요가 없습니다.
 
@@ -512,15 +512,15 @@ curl -s -X POST "${AUTH[@]}" "${DE}/engines?engineId=company-policy-app" \
 ---
 
 
-## Task 2. agy 프롬프트 기반 ADK 2.0 멀티 에이전트(MAS) 뼈대 리팩토링
+## Task 2. agy로 ADK 2.0 멀티 에이전트 구조 만들기
 
 이 단계에서는 `agents-cli create`로 생성된 기본 단일 에이전트 뼈대(`app/agent.py`)를, `docs/SDD.md`의 명세에 따라 사내 복무 및 IT 전산 업무를 분담하는 **Orchestrator-Worker 멀티 에이전트 시스템**으로 전환합니다.
 
 ---
 
-### agents-cli 프로젝트 표준 아키텍처 및 멀티 에이전트(MAS) 핵심 구성
+### agents-cli 프로젝트 구조와 멀티 에이전트 구성
 
-엔터프라이즈 환경에서는 하나의 거대한 단일(Monolithic) 에이전트에 모든 도구를 몰아넣을 경우, 프롬프트 오염(Prompt Pollution), 도구 환각, 보안 경계 모호화 문제가 발생합니다.
+엔터프라이즈 환경에서는 하나의 거대한 단일 에이전트에 모든 도구를 몰아넣을 경우, 프롬프트 오염, 도구 환각, 보안 경계 모호화 문제가 발생합니다.
 따라서 본 실습에서는 중앙 리드 오케스트레이터(`enterprise_ops_agent`)와 도메인별 3대 전문 워커로 분리된 **Orchestrator-Worker 패턴 (참고: [AgentPatterns.ai - Orchestrator-Worker Pattern](https://agentpatterns.ai/patterns/multi-agent/orchestrator-worker/))**을 채택합니다.
 
 ```mermaid
@@ -991,7 +991,7 @@ agents-cli run "안녕하세요, 이민우입니다 (EMP-10294). 다음 주 4일
 
 ---
 
-### 4단계: 실전 시나리오 1 - 4일 연속 연차 신청 및 사전 기한 점검 (agy 대화창)
+### 4단계: 시나리오 1 - 4일 연속 연차 신청과 신청 기한 확인 (agy 대화창)
 
 > [!TIP]
 > **기존 agy 세션 복귀 안내**: 실시간 복수 턴 대화 시뮬레이션을 진행하기 위해 터미널에서 아래 명령어로 `agy` 세션에 재접속합니다 (멀티 탭 사용 시 agy 탭으로 전환):
@@ -1046,7 +1046,7 @@ agents-cli run "안녕하세요, 이민우입니다 (EMP-10294). 다음 주 4일
 1. 웹 브라우저에서 열어둔 **Korean Enterprise Mock SaaS 플랫폼** 탭으로 이동합니다.  
    `https://korean-mock-saas-dri5akvbzq-du.a.run.app/`
 2. **WorkWeek** 탭을 클릭합니다.
-   - 에이전트가 신청한 연차 내역이 **휴가 신청 내역 (Leave Requests)** 목록에 `승인 대기` 상태로 등록되어 있는지 확인합니다.
+   - 에이전트가 신청한 연차 내역이 **휴가 신청 내역** 목록에 `승인 대기` 상태로 등록되어 있는지 확인합니다.
 3. **ServiceImmediately** 탭을 클릭합니다.
    - 방금 발행된 티켓 `INC-2026-08129`가 **인시던트 티켓 목록 (Incident Tickets)**에 `하드웨어`, 우선순위 `2 - 높음 (High)`, 상태 `접수`로 등록되어 있는지 확인합니다.
 
@@ -1056,7 +1056,7 @@ agents-cli run "안녕하세요, 이민우입니다 (EMP-10294). 다음 주 4일
 
 ---
 
-## Task 6 (선택): Gemini Enterprise (GE) 등록을 위한 A2A 인터페이스 규격 완성 및 시뮬레이션 검증
+## Task 6 (선택): Gemini Enterprise 등록용 A2A 인터페이스 만들고 로컬에서 확인하기
 
 ### 배경 및 실습 목적
 
@@ -1088,7 +1088,7 @@ docs/SDD.md의 3.1절 'Gemini Enterprise (GE) 배포용 A2A 규격'을 바탕으
 
 ---
 
-### 2단계: Google ADK Runner 기반 A2A 프로토콜 서비스 래퍼 (a2a_server.py) 생성
+### 2단계: ADK Runner로 A2A 서버(`a2a_server.py`) 만들기
 
 Gemini Enterprise가 A2A 프로토콜로 에이전트를 원격 호출할 때 표준 JSON-RPC 2.0 규격으로 실시간 자율 추론과 도구 호출을 수행하도록, `agent.py`의 ADK Runner를 서빙하는 FastAPI 래퍼 `a2a_server.py`를 생성합니다.
 
@@ -1207,7 +1207,7 @@ curl -s -X POST http://localhost:8080/ \
 에이전트가 고정된 답변이 아니라, 실제 ServiceImmediately 시스템에서 활성 티켓 8건을 실시간 조회하여 집계 결과를 지능적으로 생성하는 것을 확인했습니다.
 
 4. **심화 옵션: Google ADK 2.3.0 개발자 대시보드 (agents-cli playground)**:  
-   ADK의 공식 이벤트 타임라인, 세션 상태(State), 아티팩트 트리 및 트레이스를 GUI에서 심층 디버깅하려면 Vertex AI 환경 변수를 설정하고 `agents-cli playground`를 실행합니다:
+   ADK의 공식 이벤트 타임라인, 세션 상태, 아티팩트 트리 및 트레이스를 GUI에서 심층 디버깅하려면 Vertex AI 환경 변수를 설정하고 `agents-cli playground`를 실행합니다:
 
    ```bash
    # Vertex AI 환경 변수 설정 후 공식 플레이그라운드 기동
@@ -1228,13 +1228,13 @@ curl -s -X POST http://localhost:8080/ \
 
 ---
 
-### 4단계: 실습 2(Evaluation & Governance) 연계를 위한 프로덕션 핸드오프 준비
+### 4단계: 실습 2로 넘어가기 전 준비
 
 실습 1에서는 개발자 로컬 환경(VM)에서 Orchestrator-Worker 멀티 에이전트 시스템을 성공적으로 완성하고, 로컬 A2A 인터페이스를 통해 복합 시나리오 검증을 마쳤습니다.
 
-엔터프라이즈 환경에서는 보안 정책과 정량적 품질 검증 없이 Cloud Run이나 사내 Gemini Enterprise에 성급히 배포하지 않습니다. 개발된 멀티 에이전트는 **실습 2(Part 2)**에서 다음 거버넌스 파이프라인을 거쳐 안전하게 프로덕션 환경으로 승격(Promote)됩니다:
+엔터프라이즈 환경에서는 보안 정책과 정량적 품질 검증 없이 Cloud Run이나 사내 Gemini Enterprise에 성급히 배포하지 않습니다. 개발된 멀티 에이전트는 **실습 2**에서 다음 거버넌스 파이프라인을 거쳐 안전하게 프로덕션 환경으로 승격(Promote)됩니다:
 
-1. **품질 평가 (Evaluation)**: `agents-cli eval run`을 통해 3대 핵심 지표(과업 성공률, 도구 호출 정확도, 환각 차단율)를 자동 채점하고 진단 보고서(`artifacts/grade_results/results.html`) 생성.
+1. **품질 평가**: `agents-cli eval run`을 통해 3대 핵심 지표(과업 성공률, 도구 호출 정확도, 환각 차단율)를 자동 채점하고 진단 보고서(`artifacts/grade_results/results.html`) 생성.
 2. **시크릿 보호 배포**: `.env`에 평문 노출된 `MCP_TOKEN`을 GCP Secret Manager로 이관하고, Cloud Run / Agent Runtime에 안전한 보안 컨테이너로 프로덕션 배포 후 Gemini Enterprise 등록.
 3. **Agent Registry 등록**: 12개 전사 에이전트 카탈로그에 등록하고 고유 신원(SPIFFE ID) 및 도구 위험도 주석(`isReadOnly`, `isDestructive`) 부여.
 4. **Agent Gateway 중앙 통제**: 에이전트 코드 수정 없이 IAP 정책으로 위험 도구(`cancel_leave_request`, `update_personal_info`)를 전사 중앙 차단.
@@ -1315,7 +1315,7 @@ EOF
 
 ---
 
-## 📦 실습 1 최종 완성본 프로젝트 다운로드 (Lab 2 대비 체크포인트)
+## 📦 실습 1 완성본 다운로드
 
 실습 1 진행 중 시간 제약이나 환경 오류로 인해 전체 코드를 완성하지 못한 참가자분들도 실습 2를 원활하게 진행하실 수 있도록, 검증 완료된 전체 프로젝트 코드를 압축 패키지로 제공합니다.
 
@@ -1345,14 +1345,14 @@ uv run python3 tests/test_scenarios.py
 
 ## 마무리 및 핵심 요약
 
-수고하셨습니다! **Google Antigravity 2.0**과 **Google ADK 2.0**을 활용해 소프트웨어 설계서(SDD) 기반의 프롬프트 주도 개발로 엔터프라이즈 AI 운영 에이전트를 성공적으로 구축했습니다.
+수고하셨습니다! **Google Antigravity 2.0**과 **Google ADK 2.0**을 활용해 SDD 기반의 프롬프트 주도 개발로 엔터프라이즈 AI 운영 에이전트를 성공적으로 구축했습니다.
 
 ### 핵심 정리
 
-1. **설계서 기반 프롬프트 개발 (Spec-Driven Development)**: 수동 코드 복사 대신, 잘 정의된 SDD 문서를 에이전트에게 맥락으로 주입하여 고품질의 엔터프라이즈 코드를 주도적으로 생성했습니다.
-2. **규정 기반 그라운딩 (Policy Grounding)**: Cloud Storage의 공식 PDF 지침을 RAG로 연결하여 환각을 차단하고 사내 규정 준수를 자동화했습니다.
+1. **설계서 기반 개발**: 수동 코드 복사 대신, 잘 정의된 SDD 문서를 에이전트에게 맥락으로 주입하여 고품질의 엔터프라이즈 코드를 주도적으로 생성했습니다.
+2. **규정 기반 그라운딩**: Cloud Storage의 공식 PDF 지침을 RAG로 연결하여 환각을 차단하고 사내 규정 준수를 자동화했습니다.
 3. **FastMCP 표준 프로토콜**: Streamable HTTP 기반의 FastMCP를 이용해 인사 및 IT 시스템을 일관된 방식으로 에이전트에 붙였습니다.
-4. **다중 사용자 격리 (Multi-Tenant Isolation)**: 개별 토큰 기반 헤더 구조로 150명 이상의 실습생이 동시에 접속해도 각자의 샌드박스에서 안전하게 테스트할 수 있었습니다.
+4. **다중 사용자 격리**: 개별 토큰 기반 헤더 구조로 150명 이상의 실습생이 동시에 접속해도 각자의 샌드박스에서 안전하게 테스트할 수 있었습니다.
 
 **문서 최종 갱신일**: 2026년 9월 29일  
 **실습 환경 검증일**: 2026년 9월 29일  
