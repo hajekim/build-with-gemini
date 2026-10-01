@@ -137,7 +137,7 @@ agy
 ```
 
 실행 중인 agy 대화창에 다음 명령어를 입력합니다:
-```text
+```prompt
 /skills
 ```
 목록에 `google-agents-cli-eval`, `google-agents-cli-deploy`, `google-agents-cli-publish` 등이 등록되어 있는지 확인한 후 `ESC` 키를 눌러 대화창으로 복귀합니다.
@@ -213,7 +213,7 @@ python3 -m http.server 8081 --directory artifacts/grade_results &
 ### 4.6 agy를 통한 프롬프트 힐클라이밍 (Prompt Hillclimbing)
 터미널에서 `agy --continue`를 입력하여 세션에 복귀한 뒤, 평가 결과를 바탕으로 지침을 교정합니다:
 
-```text
+```prompt
 artifacts/grade_results/의 최신 results_*.json들을 분석해서 tool_call_accuracy와 rag_citation이 낮은 케이스의 원인을 진단해줘.
 explanation의 missing(호출하지 않은 도구)과 cited(인용 여부)를 근거로,
 app/agent.py의 HUB_INSTRUCTION과 각 서브 에이전트 instruction을 최소한으로 수정해줘.
@@ -377,7 +377,7 @@ EOF
 ### 5.7 agy 프롬프트로 Agent Runtime 배포
 agy 세션으로 복귀(`agy --continue`)하여 다음 프롬프트를 입력합니다:
 
-```text
+```prompt
 google-agents-cli-deploy 스킬 지침을 준수하여, 우리 에이전트를 Agent Runtime에 배포해줘.
 
 [조건]
@@ -448,7 +448,7 @@ Mock SaaS 서버는 도구 주석을 제공하지 않습니다. 위험도는 Saa
 ### 6.3 agy 프롬프트로 Agent Registry 등록
 agy 세션에 다음 프롬프트를 입력합니다:
 
-```text
+```prompt
 WorkWeek, ServiceImmediately MCP 서버와 에이전트가 호출하는 Google API 목적지를 Agent Registry(asia-northeast1)에 등록해줘.
 
 [조건]
@@ -558,7 +558,7 @@ gcloud org-policies set-policy ~/lab2/op.yaml --project=${PROJECT_ID}
 
 ### 7.4 agy 프롬프트로 게이트웨이 정책 구성 (DRY_RUN → ENFORCE)
 
-```text
+```prompt
 Step 2에서 만든 Agent Gateway(enterprise-ops-agw, asia-northeast1)에 에이전트를 연결하고, 위험 도구를 중앙에서 차단해줘.
 
 [조건]
@@ -735,7 +735,7 @@ Model Armor 호출(`modelarmor.asia-northeast1.rep.googleapis.com`)도 게이트
 
 ### 8.3 agy 프롬프트로 Model Armor 연동
 
-```text
+```prompt
 Model Armor 보안 템플릿을 만들고, app/tools/model_armor.py의 armor_guard를 Agent Runtime 배포본에서 활성화해줘.
 
 [조건]
@@ -809,7 +809,7 @@ agents-cli eval run --dataset tests/eval/datasets/tier4-adversarial-edge.json \
 
 ### 9.2 agy 프롬프트로 Gemini Enterprise 등록
 
-```text
+```prompt
 google-agents-cli-publish 스킬 지침을 바탕으로, Agent Runtime에 배포한 에이전트를 Gemini Enterprise에 등록해줘.
 
 [조건]

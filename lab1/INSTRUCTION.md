@@ -171,7 +171,7 @@ agy
 
 9. 환경 설정을 검증하려면 `agy` 프롬프트 상태에서 다음 명령어를 입력합니다:
 
-```text
+```prompt
 /config
 ```
 
@@ -180,7 +180,7 @@ agy
 
 10. 사용할 모델을 확인하고 `gemini-3.8-flash`로 지정합니다:
 
-```text
+```prompt
 /model
 ```
 
@@ -427,7 +427,7 @@ agy
 #### 3. agy를 통한 프로젝트 컨텍스트 그라운딩 프롬프트 입력
 실행 중인 `agy` 대화창에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다:
 
-```text
+```prompt
 당신은 Cymbal Group Korea의 엔터프라이즈 AI 에이전트 개발자입니다.
 docs/SDD.md 파일의 내용을 꼼꼼히 읽고, 전체 시스템 아키텍처와 도구 구성 요소를 파악하세요.
 그리고 현재 프로젝트 디렉터리의 컨텍스트를 요약한 context_summary.md 파일을 docs/ 디렉터리에 생성하세요.
@@ -535,7 +535,7 @@ enterprise-ops-agent/
 
 실행 중인 **Antigravity CLI (`agy`)** 터미널에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다:
 
-```text
+```prompt
 docs/SDD.md의 2.1절 멀티 에이전트 구조와 1절 설정 규격을 참고하여, 우리가 방금 생성한 기본 뼈대를 Cymbal Group Korea의 Orchestrator-Worker 멀티 에이전트 시스템으로 전면 개편해주세요:
 
 1. config.yaml 생성:
@@ -638,7 +638,7 @@ curl -s "${AUTH[@]}" "${DE}/dataStores/company-policy-ds/branches/0/documents" |
 
 실행 중인 **Antigravity CLI (`agy`)** 터미널에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
 
-```text
+```prompt
 docs/SDD.md의 2.2절 '사내 규정 RAG 도구 명세'와 '하이브리드 Policy RAG 아키텍처'를 엄격히 준수하여 app/tools/policy_rag.py 파일을 구현해주세요.
 
 요구사항:
@@ -764,7 +764,7 @@ export MCP_TOKEN="mcp_여러분의토큰값"
 
 실행 중인 **Antigravity CLI (`agy`)** 터미널에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
 
-```text
+```prompt
 docs/SDD.md의 2.3절 'FastMCP SaaS 연동 도구 명세'를 바탕으로 app/tools/mcp_tools.py 파일을 구현해주세요.
 
 요구사항:
@@ -842,7 +842,7 @@ print(json.dumps(list_hardware_assets_and_tickets('EMP-10294'), indent=2, ensure
 
 실행 중인 **Antigravity CLI (`agy`)** 터미널에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
 
-```text
+```prompt
 docs/SDD.md의 3절 '오케스트레이션 및 거버넌스 강령'을 반영하여 app/agent.py의 Orchestrator-Worker 멀티 에이전트 시스템을 최종 완성해주세요.
 
 요구사항:
@@ -967,7 +967,7 @@ agents-cli run "안녕하세요, 이민우입니다 (EMP-10294). 다음 주 4일
 
 실행 중인 **Antigravity CLI (`agy`)** 터미널에 아래 프롬프트를 입력하고 **ENTER**를 누릅니다.
 
-```text
+```prompt
 안녕하세요, 이민우입니다 (EMP-10294). 다음 주 월요일부터 목요일까지 4일 동안 연속으로 연차를 사용하고 싶습니다. 사내 규정상 신청 기한에 문제가 없는지 확인해 주시고, 제 잔여 연차를 조회한 뒤 WorkWeek 시스템에 휴가 신청을 상신해 주세요.
 ```
 
@@ -989,7 +989,7 @@ agents-cli run "안녕하세요, 이민우입니다 (EMP-10294). 다음 주 4일
 
 **Antigravity CLI (`agy`)** 터미널에 아래 프롬프트를 입력하고 **ENTER**를 누릅니다.
 
-```text
+```prompt
 현재 제가 사용 중인 업무용 랩톱 배터리가 심하게 부풀어 올라서(스웰링) 정상적인 업무가 불가능합니다. 제가 데이터/엔지니어링 직군인데, M3 Max 64GB 랩톱으로 교체 지원이 가능한지 사내 IT 지원 규정을 확인해 주세요. 제 현재 장비 지급 이력을 확인하고 ServiceImmediately 시스템에 긴급 교체 인시던트 티켓을 발행해 주세요.
 ```
 
@@ -1034,7 +1034,7 @@ agents-cli run "안녕하세요, 이민우입니다 (EMP-10294). 다음 주 4일
 
 실행 중인 **Antigravity CLI (`agy`)** 터미널에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
 
-```text
+```prompt
 docs/SDD.md의 3.1절 'Gemini Enterprise (GE) 배포용 A2A 규격'을 바탕으로, 우리 에이전트가 사내 Gemini Enterprise 또는 Agent Engine에 등록될 수 있도록 'agent_manifest.json' 파일을 생성해 주세요.
 
 요구사항:
@@ -1058,7 +1058,7 @@ Gemini Enterprise가 A2A 프로토콜로 에이전트를 원격 호출할 때 �
 
 **Antigravity CLI (`agy`)** 터미널에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
 
-```text
+```prompt
 우리가 완성한 agent.py의 root_agent와 Google ADK Runner를 결합하여, Gemini Enterprise A2A v0.3 JSON-RPC 표준 규격을 완벽하게 지원하는 FastAPI 서버 'a2a_server.py'를 작성해 주세요.
 
 요구사항:
@@ -1219,7 +1219,7 @@ curl -s -X POST http://localhost:8080/ \
 
 실행 중인 `agy` 대화창에 다음 프롬프트를 입력합니다 (`cd ~/enterprise-ops-agent && agy --continue`):
 
-```text
+```prompt
 실습 2의 agents-cli eval 정량 평가에 사용할 4-Tier Golden Evalset을 tests/eval/datasets/ 아래에 생성해줘.
 
 [파일 및 Tier]
