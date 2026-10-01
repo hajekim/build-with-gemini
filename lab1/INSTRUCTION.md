@@ -49,7 +49,7 @@ Lab 1에서 만든 에이전트를 정량 평가하고 Agent Runtime에 배포�
 1. Antigravity 2.0 앱 또는 `agy` CLI에서 Google Cloud 프로젝트 인증을 마치고 모델을 `gemini-3.8-flash`로 설정합니다.
 2. `docs/SDD.md`를 Antigravity에 읽혀 아키텍처와 도구 명세를 컨텍스트로 넣습니다.
 3. Antigravity로 `config.yaml`과 ADK 멀티 에이전트 뼈대 코드를 생성합니다.
-4. SDD 2.2절과 Cloud Storage(`gs://oreobox/policy/`) 규정 문서를 바탕으로 조항 번호와 근거를 반환하는 검색 도구(`app/tools/policy_rag.py`)를 만듭니다.
+4. SDD 2.2절과 내 프로젝트 Cloud Storage 버킷에 올린 규정 PDF를 바탕으로 조항 번호와 근거를 반환하는 검색 도구(`app/tools/policy_rag.py`)를 만듭니다.
 5. Mock SaaS 플랫폼(`https://korean-mock-saas-dri5akvbzq-du.a.run.app/`)의 MCP 서버에 개인 토큰으로 연결하는 도구(`app/tools/mcp_tools.py`)를 만듭니다.
 6. 규정 검증 우선 규칙을 적용해 에이전트를 완성하고, `agents-cli run`으로 연차 신청과 노트북 교체 요청을 실행한 뒤 웹 화면에서 결과를 확인합니다. 실습 2에서 쓸 4-Tier 평가 데이터셋도 만듭니다.
 7. (선택) A2A 매니페스트(`agent_manifest.json`)와 A2A 서버(`a2a_server.py`)를 만들고 로컬에서 curl로 응답 형식을 확인합니다.
@@ -257,8 +257,8 @@ Cymbal Group 한국 지사는 사내 업무 효율화를 위해 AI 기반 통합
 | 구분 | 파일 및 리소스 경로 | 세부 설명 | 링크 |
 |:---|:---|:---|:---|
 | 소프트웨어 설계서 | `docs/SDD.md` | 시스템 구조, RAG 데이터 규격, MCP 도구 명세, 오케스트레이션 규칙 | [보기](../index.html?tab=sdd) |
-| 사내 복무 규정 PDF | `gs://oreobox/policy/leave_policy_2026.pdf` | 문서번호 POL-HR-2026-004 (연차 및 병가 운영 지침) | [PDF](../docs/policies/leave_policy_2026.pdf) |
-| IT 자산 지침 PDF | `gs://oreobox/policy/it_hardware_guidelines.pdf` | 문서번호 POL-IT-2026-009 (PC 및 하드웨어 지원 규정) | [PDF](../docs/policies/it_hardware_guidelines.pdf) |
+| 사내 복무 규정 PDF | `docs/policies/leave_policy_2026.pdf` | 문서번호 POL-HR-2026-004 (연차 및 병가 운영 지침) | [PDF](../docs/policies/leave_policy_2026.pdf) |
+| IT 자산 지침 PDF | `docs/policies/it_hardware_guidelines.pdf` | 문서번호 POL-IT-2026-009 (PC 및 하드웨어 지원 규정) | [PDF](../docs/policies/it_hardware_guidelines.pdf) |
 | 한국형 Mock SaaS 웹 포털 | `https://korean-mock-saas-dri5akvbzq-du.a.run.app/` | 인사관리(WorkWeek) 및 IT서비스(ServiceImmediately) 통합 포털 | [포털 열기](https://korean-mock-saas-dri5akvbzq-du.a.run.app/) |
 
 ### SDD의 역할과 스펙 기반 개발
@@ -311,17 +311,10 @@ source ~/lab.env
 
 `cat ~/lab.env`로 `GOOGLE_CLOUD_PROJECT`에 본인 프로젝트 ID가 들어갔는지 확인할 수 있습니다. 이 블록은 `~/lab.env`를 새로 씁니다. Task 4 이후에 다시 실행했다면 Task 4 1단계의 토큰 저장 명령도 다시 실행합니다.
 
-설치된 버전을 확인합니다.
+설치를 확인합니다. `agents-cli, version ...` 형태로 버전 번호가 출력되면 설치된 것입니다.
 
 ```bash
 agents-cli --version
-```
-
-```
-+-----------------------------------------------------------------------------------+
-| 출력 예시:                                                                          |
-| agents-cli, version 1.7.0                                                         |
-+-----------------------------------------------------------------------------------+
 ```
 
 ---
@@ -375,7 +368,6 @@ cd enterprise-ops-agent
 ```
 +-----------------------------------------------------------------------------------+
 | 출력 예시:                                                                          |
-| Agents CLI v1.7.0                                                                 |
 | Info: --agent not specified. Defaulting to 'adk' in auto-approve mode.            |
 |                                                                                   |
 | ✅ Success! Your agent project is ready.                                          |
@@ -405,23 +397,15 @@ cd enterprise-ops-agent
 > - [연차 및 병가 운영 지침 (POL-HR-2026-004) PDF](../docs/policies/leave_policy_2026.pdf)
 > - [PC 및 하드웨어 지원 규정 (POL-IT-2026-009) PDF](../docs/policies/it_hardware_guidelines.pdf)
 
-#### 옵션 A: Cloud Storage에서 다운로드 (권장)
-실습 계정으로 인증된 터미널에서 `gsutil`로 내려받습니다.
+실습 저장소(GitHub)에서 내려받습니다. 이 사이트에서 보는 설계서와 같은 파일입니다.
 
 ```bash
+cd ~/enterprise-ops-agent
 mkdir -p docs/policies
-gsutil cp gs://oreobox/sdd/SDD.md docs/
-gsutil cp gs://oreobox/policy/*.pdf docs/policies/
-```
-
-#### 옵션 B: curl로 내려받기 (옵션 A가 실패할 때)
-GCS 접근에 제약이 있거나 로컬 환경인 경우 다음 명령어로 웹에서 내려받습니다.
-
-```bash
-mkdir -p docs/policies
-curl -fsSL https://build.geap.dev/docs/SDD.md -o docs/SDD.md
-curl -fsSL https://build.geap.dev/docs/policies/leave_policy_2026.pdf -o docs/policies/leave_policy_2026.pdf
-curl -fsSL https://build.geap.dev/docs/policies/it_hardware_guidelines.pdf -o docs/policies/it_hardware_guidelines.pdf
+RAW=https://raw.githubusercontent.com/hajekim/build-with-gemini/main/docs
+curl -fsSL ${RAW}/SDD.md -o docs/SDD.md
+curl -fsSL ${RAW}/policies/leave_policy_2026.pdf -o docs/policies/leave_policy_2026.pdf
+curl -fsSL ${RAW}/policies/it_hardware_guidelines.pdf -o docs/policies/it_hardware_guidelines.pdf
 ```
 
 다운로드된 파일 목록을 확인합니다.
@@ -525,15 +509,20 @@ PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
 DE="https://discoveryengine.googleapis.com/v1/projects/${PROJECT_ID}/locations/global/collections/default_collection"
 AUTH=(-H "Authorization: Bearer $(gcloud auth print-access-token)" -H "X-Goog-User-Project: ${PROJECT_ID}" -H "Content-Type: application/json")
 
-# Vertex AI Search 서비스 에이전트 생성 (새 프로젝트에는 없어서 GCS 가져오기가 403으로 실패합니다)
+# Vertex AI Search 서비스 에이전트 생성과 역할 부여
+# (새 프로젝트에는 서비스 에이전트가 없고, 만들어도 역할이 자동으로 붙지 않아 GCS 가져오기가 403으로 실패합니다)
+PROJECT_NUMBER=$(gcloud projects describe ${PROJECT_ID} --format="value(projectNumber)")
 gcloud beta services identity create --service=discoveryengine.googleapis.com
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+  --member="serviceAccount:service-${PROJECT_NUMBER}@gcp-sa-discoveryengine.iam.gserviceaccount.com" \
+  --role=roles/discoveryengine.serviceAgent --condition=None --quiet > /dev/null
 
-# 규정 PDF를 내 프로젝트 버킷(서울)으로 복사
+# 3단계에서 받은 규정 PDF를 내 프로젝트 버킷(서울)에 올림
 gcloud storage buckets create gs://${PROJECT_ID}-policy-docs --location=asia-northeast3
-gcloud storage cp gs://oreobox/policy/*.pdf gs://${PROJECT_ID}-policy-docs/policy/
+gcloud storage cp ~/enterprise-ops-agent/docs/policies/*.pdf gs://${PROJECT_ID}-policy-docs/policy/
 ```
 
-서비스 에이전트 이메일(`service-...@gcp-sa-discoveryengine.iam.gserviceaccount.com`)과 PDF 2건 복사 결과가 출력되면 됩니다.
+서비스 에이전트 이메일(`service-...@gcp-sa-discoveryengine.iam.gserviceaccount.com`)과 PDF 2건 복사 결과가 출력되면 됩니다. 역할 부여가 반영되기까지 1분 정도 걸릴 수 있습니다. ③의 가져오기 응답에 403 권한 오류가 나오면 1분 뒤 ③만 다시 실행합니다.
 
 ② 비정형 문서용 데이터스토어 생성
 
