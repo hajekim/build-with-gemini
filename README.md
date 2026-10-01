@@ -32,10 +32,8 @@ build-with-gemini/
 │   └── policies/                # 규정 PDF (POL-HR-2026-004 연차, POL-IT-2026-009 IT 자산)
 ├── lab1/
 │   ├── INSTRUCTION.md           # 실습 1 가이드
-│   ├── README.md                # 실습 1 개요
 │   ├── enterprise_ops_agent_completed.zip   # 실습 1 완성본
-│   ├── images/
-│   └── tests/eval/              # 평가 데이터셋 예시
+│   └── images/
 └── lab2/
     ├── INSTRUCTION.md           # 실습 2 가이드
     ├── enterprise_ops_agent_lab2_completed.zip   # 실습 2 완성본
