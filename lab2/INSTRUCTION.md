@@ -96,6 +96,7 @@ gcloud services enable \
 `git clone`이나 Node.js/npx 설치 없이, 리눅스 표준 curl과 tar로 구글 공식 GitHub에서 프로젝트 폴더로 1초 만에 직접 주입합니다:
 
 ```bash
+export PATH="$HOME/.local/bin:$PATH" && \
 cd ~/enterprise-ops-agent && \
 mkdir -p .agents/skills && \
 curl -fsSL https://github.com/google/agents-cli/archive/refs/heads/main.tar.gz | tar -xz -C .agents/skills --strip-components=2 "agents-cli-main/skills"
