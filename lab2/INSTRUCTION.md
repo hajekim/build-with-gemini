@@ -216,33 +216,46 @@ agy 세션으로 복귀(`agy --continue`)하여 다음 프롬프트를 입력합
 google-agents-cli-deploy 스킬 지침을 준수하여, 우리 에이전트를 Cloud Run 프로덕션 환경에 배포해줘.
 
 [조건]
-- 배포 대상: Cloud Run (서비스명: enterprise-ops-agent, 리전: us-central1)
+- 배포 도구: agents-cli deploy (--deployment-target=cloud_run)
+- 서비스명: enterprise-ops-agent
+- 리전: asia-northeast3 (서울)
 - 서비스 계정: enterprise-agent-sa@$(gcloud config get-value project).iam.gserviceaccount.com
 - 시크릿 연결: Secret Manager의 'enterprise-agent-mcp-token'을 MCP_TOKEN 환경 변수로 마운트
 - 환경 변수: GOOGLE_GENAI_USE_VERTEXAI=true, GOOGLE_CLOUD_LOCATION=global, GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project)
-- 인증 모드: 사내 테스트를 위해 --allow-unauthenticated 설정
 
 [완료 조건]
+- agents-cli deploy 명령어로 배포를 완료하고 서비스 URL을 출력해줘.
 - 배포 완료 후 발급된 HTTPS 서비스 URL을 APP_URL 환경 변수로 반영해줘 (A2A Agent Card 규격 준수 목적).
 - /health 엔드포인트를 호출하여 상태가 정상인지 확인해줘.
 ```
 
-### 5.4 배포 결과 검증 (터미널)
-배포가 완료되면 터미널에서 프로덕션 헬스체크와 A2A 규격 카드를 점검합니다:
+### 5.4 agents-cli deploy 직접 실행 및 배포 결과 검증 (터미널)
+터미널에서 agents-cli 명령어를 직접 실행하여 배포하고 헬스체크와 A2A 규격 카드를 점검할 수도 있습니다:
 
 ```bash
-SERVICE_URL=$(gcloud run services describe enterprise-ops-agent --region=us-central1 --format='value(status.url)')
+PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
 
-# 1. Cloud Run APP_URL 환경 변수 동기화 (A2A Agent Card의 HTTPS 주소 확정)
+# 1. agents-cli deploy 명령어로 Cloud Run 서울(asia-northeast3) 리전에 배포
+agents-cli deploy \
+  --deployment-target=cloud_run \
+  --project=${PROJECT_ID} \
+  --region=asia-northeast3 \
+  --service-name=enterprise-ops-agent \
+  --service-account=enterprise-agent-sa@${PROJECT_ID}.iam.gserviceaccount.com \
+  --secrets=MCP_TOKEN=enterprise-agent-mcp-token:latest \
+  --update-env-vars="GOOGLE_GENAI_USE_VERTEXAI=true,GOOGLE_CLOUD_LOCATION=global,GOOGLE_CLOUD_PROJECT=${PROJECT_ID}"
+
+# 2. Cloud Run APP_URL 환경 변수 동기화 (A2A Agent Card의 HTTPS 주소 확정)
+SERVICE_URL=$(gcloud run services describe enterprise-ops-agent --region=asia-northeast3 --format='value(status.url)')
 gcloud run services update enterprise-ops-agent \
   --update-env-vars APP_URL=${SERVICE_URL} \
-  --region=us-central1 --quiet
+  --region=asia-northeast3 --quiet
 
-# 2. 헬스체크 확인
+# 3. 헬스체크 확인
 curl -s "${SERVICE_URL}/health"
 # 기대 응답: {"status":"ok"}
 
-# 3. A2A Agent Card 확인
+# 4. A2A Agent Card 확인
 curl -s "${SERVICE_URL}/a2a/app/.well-known/agent-card.json" | jq .
 ```
 ---
@@ -268,7 +281,7 @@ agy 세션에 다음 프롬프트를 입력합니다:
 우리 배포된 Cloud Run 에이전트와 WorkWeek, ServiceImmediately FastMCP 서버를 Agent Registry에 등록해줘.
 
 [조건]
-- 리전: us-central1
+- 리전: asia-northeast3 (서울)
 - 에이전트 서비스 등록: enterprise-ops-agent (A2A Agent Card 연동)
 - MCP 서버 등록:
   1) WorkWeek HCM: /work-week/mcp (jsonrpc 바인딩)
@@ -284,16 +297,16 @@ agy 세션에 다음 프롬프트를 입력합니다:
 터미널에서 직접 실행하여 자산 카탈로그 등록 상태를 확인합니다:
 
 ```bash
-# 1. Cloud Run 에이전트 A2A 서비스 등록
-SERVICE_URL=$(gcloud run services describe enterprise-ops-agent --region=us-central1 --format='value(status.url)')
+# 1. Cloud Run 에이전트 A2A 서비스 등록 (서울 리전)
+SERVICE_URL=$(gcloud run services describe enterprise-ops-agent --region=asia-northeast3 --format='value(status.url)')
 gcloud agent-registry services create enterprise-ops-agent \
-  --location=us-central1 \
+  --location=asia-northeast3 \
   --display-name="Enterprise Ops Agent" \
   --description="Enterprise IT and HR Operations Agent" \
   --agent-spec-type=a2a-agent-card \
   --agent-spec-content="$(curl -s ${SERVICE_URL}/a2a/app/.well-known/agent-card.json)"
 
-# 2. WorkWeek FastMCP 도구 스펙 파일 작성 및 서비스 등록
+# 2. WorkWeek FastMCP 도구 스펙 파일 작성 및 서비스 등록 (서울 리전)
 cat << 'EOF' > workweek_toolspec.json
 {
   "tools": [
@@ -330,16 +343,16 @@ cat << 'EOF' > workweek_toolspec.json
 EOF
 
 gcloud agent-registry services create work-week \
-  --location=us-central1 \
+  --location=asia-northeast3 \
   --display-name="WorkWeek HCM MCP Server" \
   --description="WorkWeek Human Capital Management FastMCP Server" \
   --interfaces="url=https://workweek-internal.cymbal.com/mcp,protocolBinding=jsonrpc" \
   --mcp-server-spec-type=tool-spec \
   --mcp-server-spec-content="$(cat workweek_toolspec.json)"
 
-# 3. 등록된 에이전트 및 MCP 도구 자산 목록 확인
-gcloud agent-registry agents list --location=us-central1
-gcloud agent-registry mcp-servers list --location=us-central1
+# 3. 등록된 에이전트 및 MCP 도구 자산 목록 확인 (서울 리전)
+gcloud agent-registry agents list --location=asia-northeast3
+gcloud agent-registry mcp-servers list --location=asia-northeast3
 ```
 
 ---
@@ -473,7 +486,7 @@ google-agents-cli-publish 스킬 지침을 바탕으로, 우리가 완성한 프
 
 ```bash
 PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
-SERVICE_URL=$(gcloud run services describe enterprise-ops-agent --region=us-central1 --format='value(status.url)')
+SERVICE_URL=$(gcloud run services describe enterprise-ops-agent --region=asia-northeast3 --format='value(status.url)')
 
 # 1. 프로젝트 내 Gemini Enterprise 앱 ID 조회
 GE_APP_ID=$(agents-cli publish gemini-enterprise --list --project-id=${PROJECT_ID} 2>&1 | grep -o 'projects/[^"]*' | head -n 1)
@@ -534,8 +547,8 @@ WorkWeek FastMCP 서버와 실시간 통신하여 잔여 연차(12.0일)를 정�
 실습 완료 후 불필요한 과금을 방지하기 위해 생성된 리소스를 정리합니다:
 
 ```bash
-# Cloud Run 서비스 삭제
-gcloud run services delete enterprise-ops-agent --region=us-central1 --quiet
+# Cloud Run 서비스 삭제 (서울 리전)
+gcloud run services delete enterprise-ops-agent --region=asia-northeast3 --quiet
 
 # Secret Manager 시크릿 삭제
 gcloud secrets delete enterprise-agent-mcp-token --quiet
