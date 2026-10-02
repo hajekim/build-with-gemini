@@ -741,6 +741,8 @@ for s in json.load(sys.stdin):
 # 기대 결과: WorkWeek HCM MCP Server -> update_personal_info / cancel_leave_request
 ```
 
+이 블록을 다시 실행하면 서비스 3개의 `create`가 `ALREADY_EXISTS`로 실패합니다. 이전 실행에서 이미 등록된 것이므로 무시하고, 3번과 4번의 확인 결과만 봅니다.
+
 ---
 
 ## 7. Step 4: Agent Gateway 정책으로 위험 도구 차단
@@ -768,7 +770,7 @@ flowchart LR
 | authz 정책 (DENY) | 게이트웨이를 대상으로, MCP `tools/call`의 도구 이름이 `cancel_leave_request` 또는 `update_personal_info`이면 403으로 거부. 6절에서 `destructiveHint: true`로 표시한 두 도구 |
 
 > [!NOTE]
-> 에이전트 신원별로 규칙을 나누거나 레지스트리 주석(`destructiveHint`)을 직접 조건으로 쓰려면 IAP 승인 확장과 IAM 접근 정책을 함께 씁니다. IAM 접근 정책 바인딩은 조직 정책 `iam.managed.disableAccessPolicyBinding`이 꺼져 있어야 만들 수 있습니다. 실습 환경은 이 정책이 상위 조직에서 켜져 있고 프로젝트에서 해제할 수 없으므로, 실습에서는 게이트웨이 authz 정책으로 도구 이름을 거부합니다.
+> 에이전트 신원별로 규칙을 나누거나 레지스트리 주석(`destructiveHint`)을 직접 조건으로 쓰려면 IAP 승인 확장과 IAM 접근 정책을 함께 씁니다. IAM 접근 정책 바인딩은 조직 정책 `iam.managed.disableAccessPolicyBinding`이 꺼져 있어야 만들 수 있습니다. 실습 환경은 이 정책이 상위 조직에서 켜져 있고 프로젝트에서 해제할 수 없으므로(해제는 `orgpolicy.policies.create` 권한 거부, 바인딩 생성은 `FAILED_PRECONDITION ... CUSTOM_ORG_POLICY_VIOLATION`), 실습에서는 게이트웨이 authz 정책으로 도구 이름을 거부합니다.
 
 ### 7.3 에이전트를 게이트웨이에 연결 (터미널)
 agents-cli에는 게이트웨이 연결 옵션이 없어 REST로 한 번 설정합니다. 이후 agents-cli로 재배포해도 이 설정은 유지됩니다. 연결은 백그라운드에서 5~10분 걸리므로, 기다리는 동안 7.4를 진행합니다.
