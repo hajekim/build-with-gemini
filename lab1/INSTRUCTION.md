@@ -751,6 +751,21 @@ curl -s "${AUTH[@]}" "${DE}/dataStores/company-policy-ds/branches/0/documents" |
 
 `0`이 나와도 다음 단계로 넘어가세요. 가져오기가 끝나기 전까지 RAG 도구는 `local_fallback`으로 동작합니다. Task 1의 6단계를 건너뛰었다면 지금 실행합니다.
 
+콘솔에서도 같은 내용을 확인할 수 있습니다.
+
+1. 원격 Chrome의 Google Cloud 콘솔 상단 검색창에 `AI Applications`를 입력해 이동합니다.
+2. Apps 목록에서 `company-policy-app`(App type `Search`)과 연결된 데이터 스토어 `company-policy-ds`를 확인합니다. 실습 2에서 만드는 Gemini Enterprise 앱도 나중에 같은 목록에 나타납니다.
+
+![AI Applications Apps 목록](./images/vais_console_01_apps.png)
+
+3. Connected data stores 열의 `company-policy-ds`를 누릅니다. 가져오기가 진행 중이면 Documents 탭에 `Processing data...`가 보이고 Number of documents는 `-`입니다. Refresh를 눌러 다시 확인합니다.
+
+![인덱싱 진행 중](./images/vais_console_02_processing.png)
+
+4. 완료되면 Number of documents가 `2`가 되고, Documents 탭의 PDF 2건(`leave_policy_2026.pdf`, `it_hardware_guidelines.pdf`)의 Index Status가 `Indexed`로 바뀝니다.
+
+![인덱싱 완료](./images/vais_console_03_indexed.png)
+
 ---
 
 ### 1단계: RAG 도구 구현 지시
@@ -869,7 +884,7 @@ FastMCP는 MCP(Model Context Protocol) 서버를 만드는 Python 프레임워�
 ### 1단계: Mock SaaS 웹 화면 접속 및 개인 토큰 발급
 
 1. 원격 세션 안의 Chrome에서 아래 Mock SaaS 주소로 접속합니다. 시작 준비의 로그인 과정에서 열린 Chrome 창을 써도 됩니다. 원격 세션 안에서 열어야 토큰을 같은 화면의 터미널 창에 바로 붙여넣을 수 있습니다.  
-   `https://korean-mock-saas-dri5akvbzq-du.a.run.app/`
+   [https://korean-mock-saas-dri5akvbzq-du.a.run.app/](https://korean-mock-saas-dri5akvbzq-du.a.run.app/)
 2. 화면 오른쪽 상단의 **MCP 토큰 발급** 버튼을 클릭합니다.
 3. 팝업 창에 나타난 고유 토큰(예: `mcp_eyJp...`)을 복사합니다.
 
