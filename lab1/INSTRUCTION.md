@@ -1408,7 +1408,7 @@ uv run python3 a2a_server.py > /tmp/a2a.log 2>&1 &
 for i in $(seq 10); do curl -sf http://localhost:8080/healthz && break; sleep 2; done
 ```
 
-healthz 응답(`{"status":"ok",...}`)이 출력되면 서버가 실행된 것입니다. 아무것도 나오지 않으면 `tail /tmp/a2a.log`로 오류를 확인하세요. 백그라운드로 띄웠으므로 같은 터미널 창에서 다음 curl을 실행할 수 있습니다.
+healthz 응답(`{"status":"ok",...}`)이 출력되면 서버가 실행된 것입니다. 아무것도 나오지 않으면 `tail /tmp/a2a.log`로 오류를 확인하세요. 백그라운드로 띄웠으므로 같은 터미널 창에서 다음 curl을 실행할 수 있습니다. 이 블록을 다시 실행하면 `fuser`가 이전 서버를 종료하면서 PID 번호와 `Exit 137` 줄이 출력되는데, 정상입니다.
 
 2. 로컬 테스트 콘솔 접속:
 원격 세션 안의 브라우저에서 `http://localhost:8080`에 접속합니다.
