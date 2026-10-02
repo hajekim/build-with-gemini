@@ -3,7 +3,7 @@
 
 실습 1에서 만든 Orchestrator-Worker 멀티 에이전트(`enterprise_ops_agent`)를 Antigravity 2.0(`agy`) 환경에서 이어받아 `agents-cli eval`로 평가하고 개선합니다. 이어서 Secret Manager, Agent Identity, Agent Registry, Agent Gateway, Model Armor를 적용해 Agent Runtime에 배포하고 Gemini Enterprise(GE)에 등록합니다.
 
-소요 시간: 약 110~120분 (강사 요청 대기 시간은 포함하지 않습니다)
+소요 시간: 약 100~110분 (강사 요청 대기 시간은 포함하지 않습니다)
 
 | Step | 절 | 내용 | 시간 |
 |:---|:---:|:---|:---:|
