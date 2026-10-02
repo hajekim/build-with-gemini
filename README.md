@@ -7,7 +7,6 @@ Build with Gemini 행사 Track 3 실습 가이드와 자산을 모아 둔 저장
 ## 가이드 웹사이트
 
 - [build.geap.dev](https://build.geap.dev/) (GitHub Pages)
-- [Cloud Run 미러](https://build-with-gemini-guide-dri5akvbzq-du.a.run.app/)
 
 웹사이트에서 실습 1, 실습 2, 설계서(SDD), Mock SaaS 명세를 탭으로 볼 수 있습니다. 코드 블록마다 실행 위치가 표시됩니다. `bash` 블록은 터미널 창에서 실행하고, `prompt` 블록은 에이전트 창(Antigravity 앱 또는 agy CLI)에 붙여 넣습니다.
 
