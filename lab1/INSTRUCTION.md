@@ -486,11 +486,29 @@ uv가 Python 3.13을 직접 내려받아 `.venv`를 만듭니다. 패키지 목�
 
 | 사용 방식 | 프로젝트 폴더 열기 | 에이전트 창 | 터미널 창 |
 |:---|:---|:---|:---|
-| (가) Antigravity 2.0 앱 | 왼쪽 사이드바의 **Projects**에서 `~/enterprise-ops-agent` 폴더를 추가하거나 선택합니다. (메뉴 이름은 앱 버전에 따라 다를 수 있음) | 앱의 대화 입력창 | 지금까지 쓴 Konsole 탭 |
+| (가) Antigravity 2.0 앱 | 아래 "Antigravity 2.0 앱에서 프로젝트 폴더 연결" 순서를 따릅니다. | 앱의 대화 입력창 | 지금까지 쓴 Konsole 탭 |
 | (나) agy CLI | Konsole 탭 1에서 `cd ~/enterprise-ops-agent && agy`를 실행합니다. | 탭 1의 agy | Konsole 새 탭(**Ctrl+Shift+T**)인 탭 2 |
 
+#### Antigravity 2.0 앱에서 프로젝트 폴더 연결
+
+1. 왼쪽 사이드바의 **Projects** 오른쪽에 있는 폴더 추가 아이콘(+ 모양 폴더)을 클릭합니다.
+
+   ![Projects 옆 폴더 추가 아이콘](./images/agy2_project_01_sidebar.png)
+
+2. **Create Project** 대화상자에서 **Add Folder**를 클릭합니다.
+
+   ![Create Project 대화상자](./images/agy2_project_02_add_folder.png)
+
+3. **Open workspace** 창에서 `enterprise-ops-agent` 폴더를 선택하고 **Open**을 클릭합니다. 실습 환경의 홈 폴더는 `/config`입니다.
+
+   ![Open workspace에서 폴더 선택](./images/agy2_project_03_open_workspace.png)
+
+4. **Next**를 클릭합니다. 입력창 위에 `enterprise-ops-agent`가 표시되면 연결된 것입니다.
+
+   ![프로젝트 연결 완료](./images/agy2_project_04_ready.png)
+
 새 대화와 이어서 하기:
-- 앱: 사이드바의 **New Conversation**으로 새 대화를 시작하고, 대화 목록에서 이전 대화를 골라 이어서 진행합니다. (메뉴 이름은 앱 버전에 따라 다를 수 있음)
+- 앱: 사이드바의 **New Conversation**으로 새 대화를 시작합니다. 이전 대화는 **Conversation History** 또는 **Projects**의 `enterprise-ops-agent` 아래 대화 목록에서 골라 이어서 진행합니다.
 - CLI: `agy`는 새 대화를 시작하고, `agy --continue`(또는 `agy -c`)는 직전 대화를 이어서 진행합니다.
 
 폴더 신뢰 확인이 나오면 **Yes, I trust this folder**를 선택합니다.
@@ -928,18 +946,37 @@ print(json.dumps(list_hardware_assets_and_tickets('EMP-10294'), indent=2, ensure
 ```
 +-----------------------------------------------------------------------------------+
 | 출력 예시:                                                                          |
+| UserWarning: [EXPERIMENTAL] feature FeatureName.PLUGGABLE_AUTH is enabled.        |
 | === WorkWeek 잔여 연차 조회 ===                                                     |
 | {                                                                                 |
-|   "status": "SUCCESS",                                                            |
-|   "employee_id": "EMP-10294",                                                     |
-|   "name": "이민우",                                                               |
-|   "annual_leave_remaining": 12.0,                                                 |
-|   "sick_leave_remaining": 14.0                                                    |
+|   "content": [                                                                    |
+|     {                                                                             |
+|       "type": "text",                                                             |
+|       "text": "Employee EMP-10294 (이민우) Leave Balances:\n- Vacation (연차):       |
+|                12.0 days remaining (3.0/15.0 used)\n- Sick (병가): 14.0 days ..." |
+|     }                                                                             |
+|   ],                                                                              |
+|   "structuredContent": { "result": "Employee EMP-10294 (이민우) ..." },           |
+|   "isError": false                                                                |
+| }                                                                                 |
+|                                                                                   |
+| === ServiceImmediately 지급 장비 조회 ===                                           |
+| {                                                                                 |
+|   "content": [                                                                    |
+|     {                                                                             |
+|       "type": "text",                                                             |
+|       "text": "[\n  {\n    \"ticket_id\": \"INC-88210\", ...                       |
+|                \"short_description\": \"업무용 M3 Max 랩톱 교체 신청\", ...         |
+|                \"ticket_id\": \"INC-88211\", ..."                                   |
+|     }                                                                             |
+|   ],                                                                              |
+|   "structuredContent": { "result": "[ ... ]" },                                   |
+|   "isError": false                                                                |
 | }                                                                                 |
 +-----------------------------------------------------------------------------------+
 ```
 
-잔여 연차 숫자와 티켓 목록(INC-...)이 보이면 성공입니다. `Warning` 줄은 무시합니다. 필드 이름은 생성된 코드에 따라 다를 수 있습니다. `MCP_TOKEN` 오류가 나면 1단계의 저장 명령을 확인하고 `source ~/lab.env`를 실행하고, 401이 나면 토큰을 다시 발급하세요.
+MCP `tools/call`의 `result` 객체가 그대로 반환되므로 `content[].text` 안에 줄바꿈(`\n`)과 이스케이프된 따옴표가 섞여 보입니다. `isError`가 `false`이고, 잔여 연차 숫자(12.0)와 티켓 번호(INC-88210, INC-88211)가 보이면 성공입니다. 출력 형태는 생성된 코드에 따라 다를 수 있습니다. 맨 위의 `VIRTUAL_ENV` 경고와 `[EXPERIMENTAL] ... PLUGGABLE_AUTH` 경고는 무시합니다. `MCP_TOKEN` 오류가 나면 1단계의 저장 명령을 확인하고 `source ~/lab.env`를 실행하고, 401이 나면 토큰을 다시 발급하세요.
 
 ---
 
