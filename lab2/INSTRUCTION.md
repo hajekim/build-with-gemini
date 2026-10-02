@@ -146,7 +146,7 @@ gcloud services enable \
 ```
 
 ### 2.4 사전 확인 체크리스트
-아래 항목은 중간에 막히면 대기 시간이 깁니다. Step 1 평가(4.4)가 도는 동안 확인해 두면 전체 시간이 줄어듭니다. 실제 명령은 표의 사용 위치에 있습니다.
+아래 항목은 중간에 막히면 대기 시간이 깁니다. Step 1 평가(4.4)가 도는 동안 다른 터미널 탭에서 확인해 두면 전체 시간이 줄어듭니다. 실제 명령은 표의 사용 위치에 있습니다.
 
 | 항목 | 확인 방법 | 사용 위치 |
 |:---|:---|:---|
@@ -267,16 +267,19 @@ ls ~/enterprise-ops-agent/.agents/skills
 ```
 목록에 `google-agents-cli-eval`, `google-agents-cli-deploy`, `google-agents-cli-publish` 등이 등록되어 있는지 확인한 후 `ESC` 키를 눌러 대화창으로 돌아갑니다. agy를 실행한 직후에 입력하면 첫 `/skills`가 무시될 수 있습니다. 목록이 나오지 않으면 화면이 다 뜬 뒤 다시 입력합니다. 에이전트는 종료하지 않고 그대로 둡니다.
 
-### 3.3 진행 방식: agents-cli는 에이전트, 클라우드 설정은 터미널
-실습 2는 작업 성격에 따라 기본 경로가 다릅니다.
+### 3.3 진행 방식: 판단은 에이전트, 정해진 명령은 터미널
+실습 2는 작업 성격에 따라 실행 위치가 다릅니다.
 
-| 작업 | 기본 경로 | 해당 절 |
+| 작업 | 실행 위치 | 해당 절 |
 |:---|:---|:---|
-| `agents-cli` 명령 하나로 끝나는 작업 (평가, 배포, GE 등록) | 에이전트 창. 실행할 명령을 프롬프트에 적어 에이전트에게 맡기고, 해당 스킬을 쓰게 합니다 | 4.4, 4.6, 5.7, 9.2 |
-| gcloud로 권한, 네트워크, 정책을 설정하는 작업 | 터미널 창. 값이 정확해야 하고 잘못되면 뒤 단계가 막힙니다 | 5.3~5.6, 6, 7, 8 |
+| 결과를 읽고 원인을 찾거나 코드를 고치는 작업 | 에이전트 창. 에이전트가 평가 결과와 코드를 읽고 판단합니다. 4.6은 `google-agents-cli-eval` 스킬 지침을 함께 씁니다 | 4.6, 8.2 |
+| 명령이 정해져 있는 작업 (평가 실행, 배포, GE 등록, 권한, 네트워크, 정책 설정) | 터미널 창. 문서의 명령을 그대로 실행합니다 | 4.4, 5.3~5.7, 6, 7, 8.3, 9.2 |
 
-- 에이전트 창 단계에는 프롬프트 뒤에 에이전트가 실행해야 하는 명령, 완료 확인 방법, 막혔을 때 실행할 터미널 블록이 함께 있습니다.
-- 에이전트가 5분 넘게 진척이 없으면(문서만 읽고 명령을 실행하지 않는 경우 등) 작업을 멈추고(CLI는 `ESC`) 같은 절의 터미널 블록을 실행합니다.
+명령이 정해진 작업까지 에이전트에게 맡기지 않는 이유는 다음과 같습니다.
+
+- 에이전트가 판단할 일이 없습니다. 같은 명령을 그대로 실행할 뿐이라 결과는 터미널에서 직접 실행한 것과 같습니다. 대신 매번 모델을 호출하므로 토큰 비용이 듭니다.
+- 에이전트가 명령을 바꿀 수 있습니다. Qwiklabs 점검에서 에이전트가 평가 명령의 `--metrics` 옵션을 빼고 실행해 평가 시간이 크게 늘어난 적이 있습니다.
+- 진행 상황이 보이지 않습니다. 에이전트는 긴 명령을 백그라운드로 돌리므로 에이전트 창에는 중간 출력이 거의 없습니다. 터미널에서는 Tier별 진행, 배포 단계, 오류 메시지가 바로 보입니다.
 
 ---
 
@@ -318,38 +321,8 @@ ls tests/eval/datasets/
 | `policy_first_order` | 코드 | 기본 | 1.00 | 쓰기 도구(연차 상신, 티켓 생성 등) 호출 전에 `search_company_policy`가 먼저 호출되었는가 |
 | `rag_citation` | 코드 | 기본 | >= 0.90 | RAG 인용률. 규정 검색 결과가 있으면 최종 답변에 해당 문서번호(POL-HR/POL-IT)를 인용했는가 |
 
-### 4.4 1단계 평가 실행: Tier별 agents-cli eval run (에이전트 창)
-실습 1에서 만든 4-Tier 데이터셋으로 결정론적 지표 3개(`tool_call_accuracy`, `policy_first_order`, `rag_citation`)와 `hallucination`을 평가합니다. 에이전트 창에 다음 프롬프트를 입력합니다:
-
-```prompt
-명령을 실행하기 전에 `source ~/lab.env; source ~/lab2/env.sh 2>/dev/null`를 먼저 실행할 것.
-google-agents-cli-eval 스킬 지침을 따라 진행해줘.
-~/enterprise-ops-agent에서 다음 명령을 그대로 실행하고, Tier별 지표 점수를 표로 요약해줘.
-for t in tier1-single-tool tier2-multi-tool tier3-policy-first-transaction tier4-adversarial-edge; do
-  agents-cli eval run --dataset tests/eval/datasets/$t.json --config tests/eval/eval_config.yaml --metrics tool_call_accuracy,policy_first_order,rag_citation,hallucination
-done
-명령이 실패하면 오류 메시지를 보여 주고 멈출 것. 문서를 찾아보거나 다른 명령을 시도하지 말 것.
-`--metrics` 옵션을 빼거나 바꾸지 말 것. 이 옵션이 없으면 LLM 판정 2개가 더 실행되어 시간이 몇 배로 늘어남.
-```
-
-에이전트는 `agents-cli eval run`을 Tier마다 한 번씩, 모두 4번 실행합니다. 각 Tier는 에이전트 응답 생성(eval generate) 후 채점(eval grade)을 합니다. LLM 판정을 포함했던 Qwiklabs 점검에서는 판정 모델 재시도가 없으면 Tier당 약 2~3분, 재시도가 생긴 Tier는 약 8~14분이었습니다. 기본 실행은 500 재시도가 잦은 LLM 판정 2개를 빼므로 재시도로 시간이 늘어나지 않습니다(Qwiklabs 점검 때 Tier당 약 1분 20초~2분 50초. 응답 생성이 약 50초~2분, `hallucination` 채점이 약 30초~1분 10초). 실행 중에는 에이전트 창에 중간 출력이 거의 없으므로, 진행 여부는 터미널 창에서 확인합니다.
-
-진행 확인 (터미널 창, 1분 간격으로 실행):
-
-```bash
-ps -eo args | grep -o "datasets/tier[^ ]*\.json.*" | head -1   # 지금 평가 중인 Tier와 옵션. 아무것도 안 나오면 평가가 돌고 있지 않은 것
-ls ~/enterprise-ops-agent/artifacts/grade_results/ 2>/dev/null | grep -c "\.json$"   # 끝난 Tier 수. 0 → 4로 늘어남
-```
-
-첫 번째 명령의 출력 끝에 `--metrics tool_call_accuracy,policy_first_order,rag_citation,hallucination`이 보여야 합니다. 끝난 Tier 수가 4가 되면 완료입니다. Tier 하나가 끝날 때마다 `results_*.json`과 `results_*.html`이 하나씩 생깁니다. 앞서 중간에 끊은 실행이 있으면 그 결과 파일만큼 숫자가 더 큽니다.
-
-에이전트를 거치지 않고 처음부터 아래 터미널 블록으로 실행해도 됩니다. 에이전트로 시작했다면 다음 경우에 에이전트 작업을 멈추고(CLI는 `ESC`) 터미널 창에서 아래 블록을 실행합니다. 에이전트로 끝냈다면 이 블록은 건너뜁니다.
-- 첫 번째 명령의 출력에 `--metrics`가 없음 (에이전트가 옵션을 빼고 실행함. `pkill -f "agents-cli eval run"`으로 멈춘 뒤 실행)
-- 첫 번째 명령이 아무것도 출력하지 않는데 끝난 Tier 수가 4보다 작음 (에이전트가 평가를 실행하지 않거나 중간에 멈춤)
-- 같은 Tier가 15분 넘게 계속 표시됨
-- 에이전트가 같은 오류를 반복함
-
-터미널 블록도 같은 명령이라 걸리는 시간은 같습니다. 대신 Tier마다 시작 시각과 결과가 화면에 바로 출력됩니다. 이미 끝난 Tier는 `for` 줄에서 빼고 실행해도 됩니다.
+### 4.4 1단계 평가 실행: Tier별 agents-cli eval run (터미널)
+실습 1에서 만든 4-Tier 데이터셋으로 결정론적 지표 3개(`tool_call_accuracy`, `policy_first_order`, `rag_citation`)와 `hallucination`을 평가합니다. 실행할 명령이 정해져 있으므로 터미널 창에서 직접 실행합니다(3.3 참고). 결과를 읽고 고치는 일은 4.6에서 에이전트에게 맡깁니다.
 
 ```bash
 cd ~/enterprise-ops-agent
@@ -363,6 +336,18 @@ for t in tier1-single-tool tier2-multi-tool tier3-policy-first-transaction tier4
   agents-cli eval run --dataset tests/eval/datasets/$t.json --config tests/eval/eval_config.yaml --metrics tool_call_accuracy,policy_first_order,rag_citation,hallucination
 done
 ```
+
+명령의 각 부분은 다음과 같습니다.
+
+| 부분 | 뜻 |
+|:---|:---|
+| `export ...`, `: "${MCP_TOKEN:?...}"` | 평가 중 로컬 에이전트가 Vertex AI의 Gemini를 쓰도록 설정하고, Mock SaaS 토큰이 있는지 먼저 확인합니다. 토큰이 없으면 여기서 멈춥니다 |
+| `for t in ...` | Tier 4개를 차례로 평가합니다. 이미 끝난 Tier는 이 줄에서 빼고 다시 실행해도 됩니다 |
+| `--dataset` | 평가할 데이터셋(실습 1 Task 5에서 만든 Tier별 파일) |
+| `--config` | 4.3에서 받은 지표 설정 파일 |
+| `--metrics` | 설정 파일에 선언된 지표 6개 중 이번에 채점할 4개. 이 옵션을 빼면 LLM 판정 2개까지 모두 채점해 시간이 몇 배로 늘어납니다 |
+
+`agents-cli eval run`은 Tier마다 에이전트 응답 생성(eval generate) 후 채점(eval grade)을 합니다. LLM 판정을 포함했던 Qwiklabs 점검에서는 판정 모델 재시도가 없으면 Tier당 약 2~3분, 재시도가 생긴 Tier는 약 8~14분이었습니다. 기본 실행은 500 재시도가 잦은 LLM 판정 2개를 빼므로 재시도로 시간이 늘어나지 않습니다(Qwiklabs 점검 때 Tier당 약 1분 20초~2분 50초. 응답 생성이 약 50초~2분, `hallucination` 채점이 약 30초~1분 10초). Tier마다 `##### <Tier> 시작` 줄과 `Evaluation Summary`가 화면에 출력되고, `Evaluation Summary`가 4번 나오면 완료입니다. 같은 Tier가 15분 넘게 끝나지 않으면 `Ctrl+C`로 멈추고 그 Tier부터 다시 실행합니다.
 
 #### 출력 읽는 법
 Qwiklabs 점검에서 완성본으로 T4를 실행한 출력입니다(가운데 일부 생략). `hallucination`을 기본에 넣기 전의 출력이라 채점 줄에 지표가 3개만 보입니다. 지금 명령으로 실행하면 이 줄 끝에 `hallucination`이 붙고, `Evaluation Summary`에 `hallucination_v1` 항목이 추가됩니다.
@@ -513,7 +498,7 @@ app/agent.py의 HUB_INSTRUCTION과 각 서브 에이전트 instruction을 최소
 - 규정 검색 결과를 사용한 답변에는 반드시 문서번호(POL-HR-2026-004 / POL-IT-2026-009)와 조항을 인용
 - 티켓/연차 조회 요청은 해당 워커가 반드시 조회 도구를 호출한 뒤 답변
 - 답변에는 도구 응답과 검색된 조항에 있는 내용만 담을 것. 조항의 기간과 숫자를 바꾸지 말고, 오늘 날짜를 모르므로 신청 기한을 충족했다고 단정하지 말 것. 도구 응답에 없는 안전 안내나 방문 권유는 덧붙이지 말 것
-수정 후 tool_call_accuracy, rag_citation, hallucination 중 하나가 가장 낮았던 Tier 하나만(T4 제외) 골라 agents-cli eval run으로 같은 --metrics 옵션을 붙여 한 번만 다시 평가하고, agents-cli eval compare로 같은 Tier의 이전 결과와 비교해서 다른 지표가 퇴보하지 않았는지 보여줘. 다른 Tier는 다시 평가하지 말 것.
+수정 후 tool_call_accuracy, rag_citation, hallucination 중 하나가 가장 낮았던 Tier 하나만(T4 제외) 골라 `agents-cli eval run --dataset tests/eval/datasets/<Tier>.json --config tests/eval/eval_config.yaml --metrics tool_call_accuracy,policy_first_order,rag_citation,hallucination`으로 한 번만 다시 평가하고, agents-cli eval compare로 같은 Tier의 이전 결과와 비교해서 다른 지표가 퇴보하지 않았는지 보여줘. `--metrics` 옵션을 빼거나 바꾸지 말 것. 다른 Tier는 다시 평가하지 말 것.
 ```
 
 에이전트가 compare 결과를 보여 주지 않았을 때만 터미널 창에서 직접 비교합니다. 먼저 최근 결과 파일 이름을 확인합니다.
@@ -714,26 +699,8 @@ CMD ["uv", "run", "uvicorn", "app.fast_api_app:app", "--host", "0.0.0.0", "--por
 EOF
 ```
 
-### 5.7 agents-cli deploy로 배포하고 검증 (에이전트 창)
-에이전트 창에 다음 프롬프트를 입력합니다:
-
-```prompt
-명령을 실행하기 전에 `source ~/lab.env; source ~/lab2/env.sh 2>/dev/null`를 먼저 실행할 것.
-google-agents-cli-deploy 스킬 지침을 따라 진행해줘.
-~/enterprise-ops-agent에서 다음 명령을 그대로 실행하고 결과를 요약해줘.
-CERT=$(awk '{printf "%s\\n", $0}' ~/lab2/agw_root.pem)
-agents-cli deploy -d agent_runtime \
-  --project=${PROJECT_ID} --region=${REGION} \
-  --agent-identity --no-confirm-project \
-  --secrets="MCP_TOKEN=enterprise-agent-mcp-token:latest" \
-  --update-env-vars="GOOGLE_API_PREVENT_AGENT_TOKEN_SHARING_FOR_GCP_SERVICES=false" \
-  --build-args="AGENT_GATEWAY_ROOT_CERTIFICATES=${CERT}"
-명령이 실패하면 오류 메시지를 보여 주고 멈출 것. 문서를 찾아보거나 다른 명령을 시도하지 말 것. 단, PERMISSION_DENIED로 멈추면 같은 명령을 한 번 더 실행할 것.
-```
-
-에이전트는 `agents-cli deploy -d agent_runtime ...`을 실행합니다. 약 3분 30초~5분 걸리며(Qwiklabs 점검 3분 34초~5분 9초), 끝나면 "Deployment successful!"과 Agent Runtime ID가 보입니다.
-
-에이전트가 5분 넘게 명령을 실행하지 않거나 같은 오류를 반복하면 작업을 멈추고(CLI는 `ESC`) 터미널 창에서 아래 블록을 실행합니다. 에이전트로 끝냈다면 이 블록은 건너뜁니다.
+### 5.7 agents-cli deploy로 배포하고 검증 (터미널)
+터미널 창에서 Agent Runtime에 배포합니다. 배포 명령과 인자가 정해져 있으므로 에이전트에게 맡기지 않고 직접 실행합니다(3.3 참고).
 
 ```bash
 source ~/lab2/env.sh
@@ -751,7 +718,16 @@ agents-cli deploy -d agent_runtime \
 # 약 3분 30초~5분 소요(Qwiklabs 점검 3분 34초~5분 9초). "Deployment successful!"과 Agent Runtime ID가 출력됨
 ```
 
-어느 경로로 배포했든, 터미널 창에서 아래 블록(배포된 엔진 정보)을 실행합니다.
+| 인자 | 뜻 |
+|:---|:---|
+| `-d agent_runtime`, `--region` | 배포 대상을 Agent Runtime으로, 리전을 게이트웨이와 같은 `asia-northeast1`로 정합니다 |
+| `--agent-identity` | 엔진에 Agent Identity를 붙입니다. 5.4에서 이 신원에 역할을 부여했습니다 |
+| `--no-confirm-project` | 프로젝트 확인 질문 없이 진행합니다 |
+| `--secrets` | 5.4에서 만든 시크릿을 `MCP_TOKEN` 환경 변수로 넣습니다. 토큰 값이 코드나 이미지에 남지 않습니다 |
+| `--update-env-vars` | Agent Identity 토큰을 엔진 인증서에 묶어 다른 곳에서 재사용하지 못하게 하는 기본 보호를 끕니다. 이 방식을 지원하지 않는 호출에서 401 인증 오류가 나는 것을 피하기 위한 실습용 설정입니다. 운영 환경에서는 보안 영향을 따져 보고 정합니다 |
+| `--build-args` | 5.6 Dockerfile에 게이트웨이 루트 인증서를 넘깁니다. 7.3에서 게이트웨이를 연결한 뒤 TLS 검사를 통과하는 데 필요합니다 |
+
+배포가 끝나면 터미널 창에서 아래 블록(배포된 엔진 정보)을 실행합니다.
 
 > [!NOTE]
 > `--agent-identity` 첫 배포에서 agents-cli는 ADC(Application Default Credentials) 계정으로 프로젝트 IAM 부여를 시도합니다. 실습 1 시작 준비(또는 2.4)에서 실습 계정으로 ADC를 로그인했다면 Owner라서 그대로 통과합니다. `resourcemanager.projects.setIamPolicy` 관련 `PERMISSION_DENIED`로 멈추면 ADC 계정에 프로젝트 IAM 변경 권한이 없는 것이므로, 2.4의 `gcloud auth application-default login --no-launch-browser`를 실행한 뒤 같은 배포를 한 번 더 실행합니다. 이미 만들어진 엔진에 코드가 배포됩니다.
@@ -1132,7 +1108,7 @@ agents-cli eval run --dataset tests/eval/datasets/tier4-adversarial-edge.json \
 ### 9.1 사건: "임직원이 쓰는 Gemini Enterprise에 에이전트를 올려 주세요"
 품질 평가, 시크릿 격리, 게이트웨이 도구 차단, Model Armor 방어가 끝났습니다. 이제 임직원이 매일 쓰는 Gemini Enterprise에 에이전트를 등록합니다.
 
-### 9.2 Gemini Enterprise 등록 (에이전트 창)
+### 9.2 Gemini Enterprise 등록 (터미널)
 먼저 터미널 창에서 프로젝트에 GE 앱이 있는지 확인합니다.
 
 ```bash
@@ -1148,30 +1124,12 @@ echo ${GE_APP_ID}
 > [!IMPORTANT]
 > `--list` 결과가 `{"apps": []}`이고 `GE_APP_ID`가 비어 있으면 프로젝트에 Gemini Enterprise 앱이 없는 것입니다(새 프로젝트에는 앱이 없습니다). 2.5 절차대로 앱을 만들고 본인 계정에 라이선스를 할당한 뒤 다시 실행하세요.
 
-앱이 확인되면 에이전트 창에 다음 프롬프트를 입력합니다:
-
-```prompt
-명령을 실행하기 전에 `source ~/lab.env; source ~/lab2/env.sh 2>/dev/null`를 먼저 실행할 것.
-google-agents-cli-publish 스킬 지침을 따라 진행해줘.
-~/enterprise-ops-agent에서 다음 명령을 그대로 실행하고, 등록된 agent 리소스 이름을 알려줘.
-GE_APP_ID=$(agents-cli publish gemini-enterprise --list --project=${PROJECT_ID} 2>/dev/null | grep -o '"name": "projects/[^"]*' | head -n1 | cut -d'"' -f4)
-agents-cli publish gemini-enterprise \
-  --agent-runtime-id=${AGENT_RESOURCE} \
-  --gemini-enterprise-app-id=${GE_APP_ID} \
-  --registration-type=adk --deployment-target=agent_runtime \
-  --project=${PROJECT_ID} \
-  --display-name="Cymbal IT/HR 운영 에이전트" \
-  --description="사내 복무 지침(POL-HR)과 IT 자산 지침(POL-IT)을 근거로 휴가와 IT 티켓을 처리하는 에이전트" \
-  --tool-description="임직원의 휴가 조회/신청, 사내 규정 검색, IT 티켓 처리"
-명령이 실패하면 오류 메시지를 보여 주고 멈출 것. 문서를 찾아보거나 다른 명령을 시도하지 말 것.
-```
-
-에이전트는 `agents-cli publish gemini-enterprise --list`로 앱 ID를 읽은 뒤 등록 명령을 실행합니다. 약 20초 걸리고, "Successfully created agent registration!"과 `.../assistants/default_assistant/agents/<ID>`가 보이면 완료입니다.
-
-에이전트가 5분 넘게 명령을 실행하지 않거나 같은 오류를 반복하면 작업을 멈추고(CLI는 `ESC`) 터미널 창에서 아래 블록을 실행합니다. 에이전트로 끝냈다면 이 블록은 건너뜁니다.
+앱이 확인되면 같은 터미널 창에서 에이전트를 등록합니다. 위 블록이 만든 `GE_APP_ID`와 5.7에서 `~/lab2/env.sh`에 저장한 `AGENT_RESOURCE`를 씁니다. 명령이 정해져 있으므로 에이전트에게 맡기지 않고 직접 실행합니다(3.3 참고).
 
 ```bash
 # 2. Agent Runtime 에이전트 등록 (약 20초 소요)
+source ~/lab2/env.sh
+: "${GE_APP_ID:?위의 GE 앱 확인 블록을 같은 터미널 창에서 먼저 실행하세요}" "${AGENT_RESOURCE:?5.7의 배포된 엔진 정보 블록을 먼저 실행하세요}"
 agents-cli publish gemini-enterprise \
   --agent-runtime-id=${AGENT_RESOURCE} \
   --gemini-enterprise-app-id=${GE_APP_ID} \
@@ -1182,6 +1140,14 @@ agents-cli publish gemini-enterprise \
   --tool-description="임직원의 휴가 조회/신청, 사내 규정 검색, IT 티켓 처리"
 # 기대 결과: "Successfully created agent registration!"과 .../assistants/default_assistant/agents/<ID>
 ```
+
+| 인자 | 뜻 |
+|:---|:---|
+| `--agent-runtime-id` | 등록할 Agent Runtime 엔진(5.7에서 배포한 엔진) |
+| `--gemini-enterprise-app-id` | 에이전트를 올릴 GE 앱(2.5에서 만든 앱) |
+| `--registration-type=adk`, `--deployment-target=agent_runtime` | ADK 에이전트를 Agent Runtime 엔진 그대로 연결합니다. GE에서 보낸 질문은 이 엔진이 처리합니다 |
+| `--display-name`, `--description` | GE 에이전트 목록에 보이는 이름과 설명 |
+| `--tool-description` | GE가 이 에이전트를 언제 쓸지 판단할 때 참고하는 설명 |
 
 GE를 통한 대화도 같은 Agent Runtime 엔진에서 실행되므로, Step 4의 게이트웨이 정책과 Step 5의 Model Armor가 그대로 적용됩니다.
 
