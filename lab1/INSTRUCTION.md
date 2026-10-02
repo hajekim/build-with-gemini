@@ -157,7 +157,7 @@ gcloud services enable \
   secretmanager.googleapis.com
 ```
 
-1~2분 걸리며 `Operation ... finished successfully.`가 나오면 완료입니다.
+1분 미만 걸리며 `Operation ... finished successfully.`가 나오면 완료입니다.
 
 4. 다음 명령에서 `ADC OK`가 출력되면 ADC가 준비된 것입니다.
 
@@ -582,20 +582,16 @@ AUTH=(-H "Authorization: Bearer $(gcloud auth print-access-token)" -H "X-Goog-Us
 # (새 프로젝트에는 서비스 에이전트가 없고, 만들어도 역할이 자동으로 붙지 않아 GCS 가져오기가 403으로 실패합니다)
 PROJECT_NUMBER=$(gcloud projects describe ${PROJECT_ID} --format="value(projectNumber)")
 gcloud beta services identity create --service=discoveryengine.googleapis.com
-# 생성 직후에는 "does not exist"로 실패할 수 있어 성공할 때까지 10초 간격으로 최대 6번 시도
-for i in 1 2 3 4 5 6; do
-  gcloud projects add-iam-policy-binding ${PROJECT_ID} \
-    --member="serviceAccount:service-${PROJECT_NUMBER}@gcp-sa-discoveryengine.iam.gserviceaccount.com" \
-    --role=roles/discoveryengine.serviceAgent --condition=None --quiet > /dev/null && echo "역할 부여 완료" && break
-  sleep 10
-done
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+  --member="serviceAccount:service-${PROJECT_NUMBER}@gcp-sa-discoveryengine.iam.gserviceaccount.com" \
+  --role=roles/discoveryengine.serviceAgent --condition=None --quiet > /dev/null
 
 # 3단계에서 받은 규정 PDF를 내 프로젝트 버킷(서울)에 올림
 gcloud storage buckets create gs://${PROJECT_ID}-policy-docs --location=asia-northeast3
 gcloud storage cp ~/enterprise-ops-agent/docs/policies/*.pdf gs://${PROJECT_ID}-policy-docs/policy/
 ```
 
-서비스 에이전트 이메일(`service-...@gcp-sa-discoveryengine.iam.gserviceaccount.com`), `역할 부여 완료`, PDF 2건 복사 결과가 출력되면 됩니다. `역할 부여 완료`가 없으면 ①을 다시 실행합니다. 역할 부여가 반영되기까지 1분 정도 걸릴 수 있습니다. ③의 가져오기 응답에 403 권한 오류가 나오면 1분 뒤 ③만 다시 실행합니다.
+서비스 에이전트 이메일(`service-...@gcp-sa-discoveryengine.iam.gserviceaccount.com`)과 PDF 2건 복사 결과가 출력되면 됩니다. 역할 부여가 반영되기까지 1분 정도 걸릴 수 있습니다. ③의 가져오기 응답에 403 권한 오류가 나오면 1분 뒤 ③만 다시 실행합니다.
 
 ② 비정형 문서용 데이터스토어 생성
 
