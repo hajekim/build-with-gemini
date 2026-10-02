@@ -323,7 +323,7 @@ agents-cli --version
 `command not found`가 나오면 위 설치 블록의 출력에서 `ERROR`로 시작하는 줄을 찾아 원인을 확인합니다.
 
 > [!NOTE]
-> 이 실습의 명령 출력에는 `WARNING` 또는 `Warning`으로 시작하는 줄(NumPy, npx, 실험 기능 안내 등)이 섞여 나올 수 있습니다. 이런 줄은 무시하고, 각 단계에 적힌 성공 기준만 확인합니다.
+> 이 실습의 명령 출력에는 `WARNING` 또는 `Warning`으로 시작하는 줄(NumPy, npx, 실험 기능 안내 등)이 섞여 나올 수 있습니다. 실습 환경에서는 `uv run`마다 `warning: VIRTUAL_ENV=/lsiopy does not match the project environment path .venv and will be ignored`도 나옵니다. uv가 프로젝트의 `.venv`를 제대로 쓰고 있다는 안내입니다. 이런 줄은 무시하고, 각 단계에 적힌 성공 기준만 확인합니다.
 
 ---
 
@@ -553,7 +553,15 @@ curl -s -X POST "${AUTH[@]}" "${DE}/engines?engineId=company-policy-app" \
   -d '{"displayName":"company-policy-app","solutionType":"SOLUTION_TYPE_SEARCH","industryVertical":"GENERIC","dataStoreIds":["company-policy-ds"],"searchEngineConfig":{"searchTier":"SEARCH_TIER_ENTERPRISE","searchAddOns":["SEARCH_ADD_ON_LLM"]}}'
 ```
 
-②, ③, ④는 각각 `"name": ".../operations/..."` 형태의 JSON을 돌려주면 요청이 접수된 것입니다.
+응답에서 다음을 확인합니다. 데이터스토어와 검색 앱은 빈 상태로 바로 만들어지고, 시간이 걸리는 것은 PDF를 색인하는 ③입니다.
+
+| 요청 | 확인할 응답 | 의미 |
+|:---|:---|:---|
+| ② 데이터스토어 | `"done": true`와 `"name": ".../dataStores/company-policy-ds"` | 생성 완료 |
+| ③ PDF 가져오기 | `"name": ".../operations/import-documents-..."`만 있고 `done`이 없음 | 접수됨. 4~11분 뒤 완료되며, Task 3 0단계에서 확인 |
+| ④ 검색 앱 | `"done": true`와 `"name": ".../engines/company-policy-app"` | 생성 완료 |
+
+③을 두 번 실행해도 같은 PDF는 중복으로 들어가지 않습니다(`INCREMENTAL` 모드).
 
 ---
 
@@ -658,8 +666,8 @@ uv run python3 -m app.agent
 ```
 +-----------------------------------------------------------------------------------+
 | 출력 예시:                                                                          |
-| 멀티 에이전트 준비 완료: enterprise_ops_agent                                        |
-|  - 전문 서브 에이전트: ['hr_policy_agent', 'workweek_agent', 'itsm_agent']            |
+| Root Agent Name: enterprise_ops_agent                                             |
+| Sub-Agents (3): hr_policy_agent, workweek_agent, itsm_agent                       |
 +-----------------------------------------------------------------------------------+
 ```
 
