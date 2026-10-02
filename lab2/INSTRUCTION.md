@@ -852,7 +852,7 @@ curl -s -X POST https://korean-mock-saas-dri5akvbzq-du.a.run.app/api/tenant/rese
 
 ```text
 Session: 8911662139647721472
-  Resume with: agents-cli run "<message>" --session-id 8911662139647721472
+  Resume with: agents-cli run "<message>" --url "https://asia-northeast1-aiplatform.googleapis.com/v1/projects/.../reasoningEngines/..." --mode adk --session-id 8911662139647721472
 ```
 
 ```bash
