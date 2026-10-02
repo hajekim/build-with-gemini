@@ -317,16 +317,23 @@ done
 명령이 실패하면 오류 메시지를 보여 주고 멈출 것. 문서를 찾아보거나 다른 명령을 시도하지 말 것.
 ```
 
-에이전트는 `agents-cli eval run`을 Tier마다 한 번씩, 모두 4번 실행합니다. Tier당 2~4분 걸리며, 그동안 에이전트 창에 실행 중인 명령이 표시됩니다. 다른 명령을 실행하거나 문서를 계속 읽기만 하면 아래 터미널 블록으로 넘어갑니다.
+에이전트는 `agents-cli eval run`을 Tier마다 한 번씩, 모두 4번 실행합니다. Tier당 2~4분, 4개 합계 8~16분 걸립니다. 실행 중에는 에이전트 창에 중간 출력이 거의 없으므로, 진행 여부는 터미널 창에서 확인합니다.
 
-완료 확인 (터미널 창):
+진행 확인 (터미널 창, 2~3분 간격으로 실행):
 
 ```bash
-ls ~/enterprise-ops-agent/artifacts/grade_results/
-# 기대 결과: Tier마다 results_*.json과 results_*.html이 생성됨
+pgrep -af "eval run" | grep -o "datasets/[^ ]*" | head -1   # 지금 평가 중인 Tier. 아무것도 안 나오면 평가가 돌고 있지 않은 것
+ls ~/enterprise-ops-agent/artifacts/grade_results/ 2>/dev/null | grep -c "\.json$"   # 끝난 Tier 수. 0 → 4로 늘어남
 ```
 
-에이전트가 5분 넘게 명령을 실행하지 않거나 같은 오류를 반복하면 작업을 멈추고(CLI는 `ESC`) 터미널 창에서 아래 블록을 실행합니다. 에이전트로 끝냈다면 이 블록은 건너뜁니다.
+끝난 Tier 수가 4가 되면 완료입니다. Tier 하나가 끝날 때마다 `results_*.json`과 `results_*.html`이 하나씩 생깁니다. 앞서 중간에 끊은 실행이 있으면 그 결과 파일만큼 숫자가 더 큽니다.
+
+다음 경우에는 에이전트 작업을 멈추고(CLI는 `ESC`) 터미널 창에서 아래 블록을 실행합니다. 에이전트로 끝냈다면 이 블록은 건너뜁니다.
+- 첫 번째 명령이 아무것도 출력하지 않는데 끝난 Tier 수가 4보다 작음 (에이전트가 평가를 실행하지 않거나 중간에 멈춤)
+- 같은 Tier가 6분 넘게 계속 표시됨
+- 에이전트가 같은 오류를 반복함
+
+터미널 블록도 같은 명령이라 걸리는 시간은 같습니다(8~16분). 대신 Tier마다 시작 시각과 결과가 화면에 바로 출력됩니다. 이미 끝난 Tier는 `for` 줄에서 빼고 실행해도 됩니다.
 
 ```bash
 cd ~/enterprise-ops-agent
@@ -336,7 +343,7 @@ export GOOGLE_CLOUD_LOCATION=global
 : "${MCP_TOKEN:?실습 1 Task 4 1단계대로 MCP_TOKEN을 ~/lab.env에 저장하고 source ~/lab.env를 실행하세요}"
 
 for t in tier1-single-tool tier2-multi-tool tier3-policy-first-transaction tier4-adversarial-edge; do
-  echo "##### $t"
+  echo "##### $t 시작 $(date +%H:%M:%S) (Tier당 2~4분)"
   agents-cli eval run --dataset tests/eval/datasets/$t.json --config tests/eval/eval_config.yaml
 done
 ```
