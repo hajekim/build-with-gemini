@@ -511,7 +511,7 @@ uv가 Python 3.13을 직접 내려받아 `.venv`를 만듭니다. 패키지 목�
 - 앱: 사이드바의 **New Conversation**으로 새 대화를 시작합니다. 이전 대화는 **Conversation History** 또는 **Projects**의 `enterprise-ops-agent` 아래 대화 목록에서 골라 이어서 진행합니다.
 - CLI: `agy`는 새 대화를 시작하고, `agy --continue`(또는 `agy -c`)는 직전 대화를 이어서 진행합니다.
 
-agy CLI에서 폴더 신뢰 확인이 나오면 **Yes, I trust this folder**를 선택합니다. 앱에서는 이 확인이 나오지 않습니다.
+agy CLI에서 폴더 신뢰 확인이 나오면 **Yes, I trust this folder**를 선택합니다.
 
 > [!NOTE]
 > Antigravity 앱은 Konsole에서 `export`한 값을 이어받지 않습니다. 그래서 에이전트에게 명령 실행을 맡기는 프롬프트에는 `source ~/lab.env`를 먼저 실행하라는 줄이 들어 있습니다. 터미널 창은 1단계에서 등록한 `~/.bashrc` 설정으로 값을 자동으로 읽습니다.
@@ -1089,27 +1089,33 @@ agents-cli run "안녕하세요, 이민우입니다 (EMP-10294). 3주 뒤 4일 �
 +-----------------------------------------------------------------------------------+
 | 출력 예시:                                                                          |
 | Starting a temporary local server on port 18080 (stops automatically when done).  |
+| Starting a temporary local server on port 18080 (stops automatically when done).  |
 | [user]: 안녕하세요, 이민우입니다 (EMP-10294). 3주 뒤 4일 동안 연속으로 연차를 사용...    |
+|                                                                                   |
 | [enterprise_ops_agent]:                                                           |
 | [tool_call: transfer_to_agent({"agent_name": "hr_policy_agent"})]                 |
 | [tool_response: transfer_to_agent -> {"result": null}]                            |
 | [hr_policy_agent]:                                                                |
-| [tool_call: search_company_policy({"query": "연차 신청 기한", "category": "HR"})]  |
-| [tool_response: search_company_policy -> {"status": "SUCCESS", "match_count": 2...|
+| [tool_call: search_company_policy({"query": "\uc5f0\ucc28 \uc0ac\uc804 ...",       |
+|   "category": "HR"})]                                                             |
+| [tool_response: search_company_policy -> {"status": "SUCCESS",                    |
+|   "source": "vertex_ai_search", ..., "match_count": 1, ...}]이민우 님, 문의하신   |
+| **3주 뒤 4일 연속 연차 신청** 건에 대한 사내 복무 규정 검토 결과입니다.            |
 |                                                                                   |
-| 이민우님 (EMP-10294), 사내 복무 규정(POL-HR-2026-004)에 따른 연차 신청 기한입니다.  |
-| 사내 규정 제 4 조 (신청 및 결재 절차)에 따르면:                                      |
-| - 1일 이하: 사용 개시일 24시간 전 상신                                             |
-| - 3일 이하: 사용 개시일 3일 전 상신 및 부서장 접수                                  |
-| - 3일 초과 연속 연차 (4일 이상): 최소 사용 7영업일 전 상신 및 부서장 사전 승인 필수 |
+| ### 1. 규정 검토 결과: **신청 기한에 문제 없음 (적합)**                            |
 |                                                                                   |
-| 민우님께서 신청하시려는 연차는 4일 연속 연차이므로, 규정상 사용 개시일 최소 7영업일     |
-| 전에 상신을 완료하시고 승인을 받으셔야 합니다.                                      |
+| **사내 복무 규정(POL-HR-2026-004) 제4조(신청 및 결재 절차) 제2항**에 따르면:       |
+| * **3일을 초과하는 연속 연차**: ... **최소 사용 7영업일 전까지 상신**하여 소속     |
+|   본부장(또는 디렉터급 이상)의 사전 승인을 득하여야 합니다.                         |
+| ...                                                                               |
 |                                                                                   |
-| Session: 235c7eef-cd88-409d-a2ab-c492c6cadfef                                    |
+| Session: 40456518-14c5-4d59-8041-ab22ff715448                                    |
+|   One-off session — add --start-server to keep the local server ...              |
 | Local server stopped.                                                             |
 +-----------------------------------------------------------------------------------+
 ```
+
+도구 인자와 응답의 한글은 `\uc5f0` 같은 유니코드 이스케이프로 표시됩니다. 응답 본문은 Markdown 기호(`**`, `###`)가 그대로 보이고, 도구 응답 바로 뒤에 줄바꿈 없이 이어서 나올 수 있습니다. `hr_policy_agent`로 전달된 뒤 `search_company_policy`가 호출되고, 답변이 제4조의 7영업일 전 상신 규정을 근거로 들면 성공입니다.
 
 ---
 
