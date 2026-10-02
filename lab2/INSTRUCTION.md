@@ -995,7 +995,7 @@ agents-cli deploy -d agent_runtime --project=${PROJECT_ID} --region=${REGION} \
   --agent-identity --no-confirm-project \
   --update-env-vars="MODEL_ARMOR_TEMPLATE=projects/${PROJECT_ID}/locations/${ARMOR_LOCATION}/templates/hr-agent-armor-template" \
   --build-args="AGENT_GATEWAY_ROOT_CERTIFICATES=${CERT}"
-# 약 3분 50초 소요
+# 약 3분 50초 소요. 첫 줄의 "Ignoring reserved Agent Runtime env var GOOGLE_CLOUD_PROJECT" 경고는 정상
 
 # 4. 검증
 agents-cli run --url ${AGENT_URL} --mode adk \
