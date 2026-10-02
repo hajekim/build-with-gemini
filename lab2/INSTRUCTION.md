@@ -86,23 +86,27 @@ export PATH="$HOME/.local/bin:$PATH"
 cd ~/enterprise-ops-agent
 uv run python3 tests/test_scenarios.py
 ```
-5개 시나리오가 모두 `[PASS]`이면 2.3으로 넘어갑니다.
+5개 시나리오가 모두 `[PASS]`이면 2.2는 건너뛰고 2.3으로 넘어갑니다.
 
 ### 2.2 실습 1을 끝내지 못했다면: 완성본 받기
+
+> [!WARNING]
+> 2.1이 통과했다면 이 절은 실행하지 않습니다. 아래 블록은 기존 `~/enterprise-ops-agent` 폴더를 `~/enterprise-ops-agent.mine`으로 옮기고 그 자리에 완성본을 풉니다. 실수로 실행했다면 `rm -rf ~/enterprise-ops-agent && mv ~/enterprise-ops-agent.mine ~/enterprise-ops-agent`로 되돌립니다.
+
 새 VM이라면 실습 1의 시작 준비와 Task 1 1단계(패키지 설치)를 먼저 실행합니다. 그다음 실습 1 완성본을 내려받아 압축을 풀고 의존성을 설치합니다. 명령을 실행하기 전에 다음을 먼저 준비합니다.
 
 1. 환경 파일: 실습 1 Task 1 1단계와 Task 4 1단계(`MCP_TOKEN`)대로 `~/lab.env`를 만들어 `GOOGLE_*`, `PATH`, `MCP_TOKEN`을 저장합니다. 에이전트 창이 이 파일을 읽어 변수를 씁니다.
 2. 규정 검색 앱: 실습 1 Task 1의 6단계(Vertex AI Search 검색 앱 사전 구성)를 실행합니다. 이 단계를 건너뛰어도 RAG는 `local_fallback`으로 동작하지만, Vertex AI Search 경로는 검증되지 않습니다.
 3. MCP 토큰: 실습 1 Task 4의 1단계에서 Mock SaaS 웹 화면으로 개인 토큰을 발급합니다. 아래 시나리오 테스트와 Step 2의 Secret Manager 등록에 필요합니다.
 
-기존 `~/enterprise-ops-agent` 폴더가 있으면 덮어쓰기 전에 `enterprise-ops-agent.mine`으로 이름을 바꿔 둡니다(실습 1의 '실습 1 완성본과 실습 2 준비' 절과 같은 방식).
+기존 `~/enterprise-ops-agent` 폴더가 있으면 덮어쓰기 전에 `enterprise-ops-agent.mine`으로 이름을 바꿔 둡니다(실습 1의 '실습 1 완성본과 실습 2 준비' 절과 같은 방식). `~/enterprise-ops-agent.mine`이 이미 있으면 `Directory not empty` 오류로 블록 전체가 멈춥니다. 두 폴더 중 어느 쪽을 남길지 확인한 뒤 다시 실행합니다.
 
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
 command -v agents-cli >/dev/null || echo "agents-cli가 없습니다. 실습 1 Task 1 1단계를 먼저 실행하세요"
 : "${MCP_TOKEN:?실습 1 Task 4 1단계대로 MCP_TOKEN을 ~/lab.env에 저장하고 source ~/lab.env를 실행하세요}"
-cd ~
-[ -d ~/enterprise-ops-agent ] && mv ~/enterprise-ops-agent ~/enterprise-ops-agent.mine
+cd ~ && \
+{ [ ! -d ~/enterprise-ops-agent ] || mv -T ~/enterprise-ops-agent ~/enterprise-ops-agent.mine; } && \
 curl -fsSL https://raw.githubusercontent.com/hajekim/build-with-gemini/main/lab1/enterprise_ops_agent_completed.zip -o enterprise_ops_agent_completed.zip && \
 unzip -o enterprise_ops_agent_completed.zip && \
 cd enterprise-ops-agent && \
