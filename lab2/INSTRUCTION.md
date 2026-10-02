@@ -321,6 +321,7 @@ for t in tier1-single-tool tier2-multi-tool tier3-policy-first-transaction tier4
   agents-cli eval run --dataset tests/eval/datasets/$t.json --config tests/eval/eval_config.yaml --metrics tool_call_accuracy,policy_first_order,rag_citation
 done
 명령이 실패하면 오류 메시지를 보여 주고 멈출 것. 문서를 찾아보거나 다른 명령을 시도하지 말 것.
+`--metrics` 옵션을 빼거나 바꾸지 말 것. 이 옵션이 없으면 LLM 판정까지 실행되어 시간이 몇 배로 늘어남.
 ```
 
 에이전트는 `agents-cli eval run`을 Tier마다 한 번씩, 모두 4번 실행합니다. 각 Tier는 에이전트 응답 생성(eval generate) 후 채점(eval grade)을 합니다. LLM 판정을 포함했던 Qwiklabs 점검에서는 보통 Tier당 약 2분이었고, 판정 모델 재시도가 생긴 Tier는 약 10분이었습니다. 기본 실행은 LLM 판정을 하지 않으므로 훨씬 짧습니다(Qwiklabs 점검 때 T4 하나가 약 40초). 실행 중에는 에이전트 창에 중간 출력이 거의 없으므로, 진행 여부는 터미널 창에서 확인합니다.
@@ -328,13 +329,14 @@ done
 진행 확인 (터미널 창, 2~3분 간격으로 실행):
 
 ```bash
-pgrep -af "eval run" | grep -o "datasets/[^ ]*" | head -1   # 지금 평가 중인 Tier. 아무것도 안 나오면 평가가 돌고 있지 않은 것
+ps -eo args | grep -o "datasets/tier[^ ]*\.json.*" | head -1   # 지금 평가 중인 Tier와 옵션. 아무것도 안 나오면 평가가 돌고 있지 않은 것
 ls ~/enterprise-ops-agent/artifacts/grade_results/ 2>/dev/null | grep -c "\.json$"   # 끝난 Tier 수. 0 → 4로 늘어남
 ```
 
-끝난 Tier 수가 4가 되면 완료입니다. Tier 하나가 끝날 때마다 `results_*.json`과 `results_*.html`이 하나씩 생깁니다. 앞서 중간에 끊은 실행이 있으면 그 결과 파일만큼 숫자가 더 큽니다.
+첫 번째 명령의 출력 끝에 `--metrics tool_call_accuracy,policy_first_order,rag_citation`이 보여야 합니다. 끝난 Tier 수가 4가 되면 완료입니다. Tier 하나가 끝날 때마다 `results_*.json`과 `results_*.html`이 하나씩 생깁니다. 앞서 중간에 끊은 실행이 있으면 그 결과 파일만큼 숫자가 더 큽니다.
 
-다음 경우에는 에이전트 작업을 멈추고(CLI는 `ESC`) 터미널 창에서 아래 블록을 실행합니다. 에이전트로 끝냈다면 이 블록은 건너뜁니다.
+에이전트를 거치지 않고 처음부터 아래 터미널 블록으로 실행해도 됩니다. 에이전트로 시작했다면 다음 경우에 에이전트 작업을 멈추고(CLI는 `ESC`) 터미널 창에서 아래 블록을 실행합니다. 에이전트로 끝냈다면 이 블록은 건너뜁니다.
+- 첫 번째 명령의 출력에 `--metrics`가 없음 (에이전트가 옵션을 빼고 실행함. `pkill -f "agents-cli eval run"`으로 멈춘 뒤 실행)
 - 첫 번째 명령이 아무것도 출력하지 않는데 끝난 Tier 수가 4보다 작음 (에이전트가 평가를 실행하지 않거나 중간에 멈춤)
 - 같은 Tier가 15분 넘게 계속 표시됨
 - 에이전트가 같은 오류를 반복함
