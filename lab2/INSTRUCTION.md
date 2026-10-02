@@ -336,6 +336,7 @@ python3 -m http.server 8081 --directory artifacts/grade_results &
 
 ```prompt
 명령을 실행하기 전에 `source ~/lab.env; source ~/lab2/env.sh 2>/dev/null`를 먼저 실행할 것.
+google-agents-cli-eval 스킬 지침을 따라 진행해줘.
 artifacts/grade_results/의 최신 results_*.json들을 분석해서 tool_call_accuracy와 rag_citation이 낮은 케이스의 원인을 진단해줘.
 explanation의 missing(호출하지 않은 도구)과 cited(인용 여부)를 근거로,
 app/agent.py의 HUB_INSTRUCTION과 각 서브 에이전트 instruction을 최소한으로 수정해줘.
