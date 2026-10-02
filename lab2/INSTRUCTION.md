@@ -545,7 +545,8 @@ registries:
 EOF
 gcloud network-services agent-gateways import enterprise-ops-agw \
   --source=gw.yaml --location=${REGION} --project=${PROJECT_ID}
-# 2~3분 소요. 그동안 점만 찍히는 것이 정상. 아래 인증서 조회가 KeyError로 실패하면 import가 덜 끝난 것이므로 1분 뒤 인증서 조회(curl)부터 다시 실행
+# 2~3분 소요. 그동안 점만 찍히는 것이 정상. 끝나면 게이트웨이 정보(인증서 포함)가 YAML로 출력됨
+# 아래 인증서 조회가 KeyError로 실패하면 import가 덜 끝난 것이므로 1분 뒤 인증서 조회(curl)부터 다시 실행
 
 # 게이트웨이 루트 인증서를 PEM 파일로 저장
 curl -s -H "Authorization: Bearer $(gcloud auth print-access-token)" \
