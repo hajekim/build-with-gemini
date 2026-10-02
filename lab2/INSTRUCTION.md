@@ -149,7 +149,7 @@ gcloud services enable \
 
 | 항목 | 확인 방법 | 사용 위치 |
 |:---|:---|:---|
-| 터미널 계정 권한 | 아래 명령으로 확인합니다. Qwiklabs 터미널은 콘솔 로그인 계정이 아니라 서비스 계정(`antigravity-sa@...`)으로 실행됩니다. `roles/owner` 한 줄 또는 나머지 역할 4개가 모두 나오면 됩니다. 빠진 역할이 있으면 강사에게 요청합니다. | 5.4, 5.5, 6.x, 7.x |
+| 터미널 계정 권한 | 아래 명령으로 확인합니다. Qwiklabs 터미널은 콘솔 로그인 계정이 아니라 서비스 계정(`antigravity-sa@...`)으로 실행됩니다. `roles/owner` 한 줄 또는 나머지 역할 4개가 모두 나오면 됩니다. 빠진 역할이 있으면 아래 부여 블록을 실행합니다. | 5.4, 5.5, 6.x, 7.x |
 | Gemini Enterprise 앱과 라이선스 | 새 프로젝트에는 앱이 없습니다. 2.5 절차대로 앱을 만들고, ID 설정(Set up identity)과 본인 계정 라이선스 할당까지 마칩니다. | 2.5, 9.2 |
 
 ```bash
@@ -162,6 +162,20 @@ gcloud projects get-iam-policy $(gcloud config get-value project 2>/dev/null) \
   | grep -xE "roles/(owner|secretmanager\.admin|networkservices\.admin|agentregistry\.admin|networksecurity\.admin)"
 # 기대 결과: roles/owner, 또는 secretmanager.admin, networkservices.admin, agentregistry.admin, networksecurity.admin 4줄
 ```
+
+위 명령에서 역할이 빠져 있거나, 이후 단계에서 `Permission 'secretmanager.secrets.create' denied`처럼 `does not have permission` 권한 오류가 나면 터미널 계정에 역할 4개를 부여합니다. 이미 있는 역할을 다시 부여해도 문제없습니다.
+
+```bash
+PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
+SA=$(gcloud config get-value account 2>/dev/null)
+for r in secretmanager.admin networkservices.admin agentregistry.admin networksecurity.admin; do
+  gcloud projects add-iam-policy-binding ${PROJECT_ID} --member="serviceAccount:${SA}" \
+    --role=roles/$r --condition=None --quiet > /dev/null && echo "OK $r"
+done
+# 기대 결과: OK secretmanager.admin 등 4줄. 반영까지 1~2분 걸리므로 그 뒤 실패했던 명령을 다시 실행
+```
+
+`OK`가 나오지 않고 권한 오류가 나면 터미널 계정에 역할을 부여할 권한이 없는 것이므로 강사에게 요청합니다.
 
 ### 2.5 Gemini Enterprise 앱 준비
 Step 6(9절)에서 에이전트를 등록할 Gemini Enterprise 앱을 미리 만듭니다. 앱을 만든 직후에는 ID 공급자 설정(Set up identity)을 꼭 해야 웹 앱에서 로그인하고 에이전트를 쓸 수 있습니다. 이미 앱이 있고 ID 설정과 라이선스 할당까지 끝났다면 맨 아래 확인 명령만 실행합니다.
