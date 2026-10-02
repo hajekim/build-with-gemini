@@ -511,7 +511,7 @@ uv가 Python 3.13을 직접 내려받아 `.venv`를 만듭니다. 패키지 목�
 - 앱: 사이드바의 **New Conversation**으로 새 대화를 시작합니다. 이전 대화는 **Conversation History** 또는 **Projects**의 `enterprise-ops-agent` 아래 대화 목록에서 골라 이어서 진행합니다.
 - CLI: `agy`는 새 대화를 시작하고, `agy --continue`(또는 `agy -c`)는 직전 대화를 이어서 진행합니다.
 
-폴더 신뢰 확인이 나오면 **Yes, I trust this folder**를 선택합니다.
+agy CLI에서 폴더 신뢰 확인이 나오면 **Yes, I trust this folder**를 선택합니다. 앱에서는 이 확인이 나오지 않습니다.
 
 > [!NOTE]
 > Antigravity 앱은 Konsole에서 `export`한 값을 이어받지 않습니다. 그래서 에이전트에게 명령 실행을 맡기는 프롬프트에는 `source ~/lab.env`를 먼저 실행하라는 줄이 들어 있습니다. 터미널 창은 1단계에서 등록한 `~/.bashrc` 설정으로 값을 자동으로 읽습니다.
