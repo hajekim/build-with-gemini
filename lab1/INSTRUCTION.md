@@ -18,7 +18,7 @@ Lab 1에서 만든 에이전트를 정량 평가하고 Agent Runtime에 배포�
 
 | Task | 내용 | 시간 |
 |:---|:---|:---:|
-| 시작 준비 | 콘솔 로그인, 원격 세션 접속, API 활성화, Antigravity 2.0 앱 또는 agy CLI 인증 | 10분 |
+| 시작 준비 | 콘솔 로그인, 원격 세션 접속, 실습 계정 gcloud 로그인, API 활성화, Antigravity 2.0 앱 또는 agy CLI 인증 | 10분 |
 | Task 1 | 개발 환경 설정, 프로젝트 생성, SDD 다운로드, 규정 검색 앱 인덱싱 시작 | 17분 |
 | Task 2 | ADK Orchestrator-Worker 멀티 에이전트 뼈대 | 10분 |
 | Task 3 | Vertex AI Search + GCS PDF 하이브리드 Policy RAG (Task 1에서 시작한 인덱싱 결과 사용) | 13분 |
@@ -119,7 +119,31 @@ Antigravity 2.0에는 데스크톱 앱(Agent Platform), 터미널용 CLI(`agy`),
 > [!NOTE]
 > Konsole 터미널을 열 때 `Warning: Could not find '', starting '/bin/bash' instead. Please check your profile settings.` 경고가 표시되어도 무시해도 됩니다.
 
-2. Lab 1과 Lab 2에서 쓰는 API를 미리 켭니다. VM의 gcloud는 실습 계정과 프로젝트로 미리 설정되어 있습니다. `gcloud config list`로 account와 project를 확인할 수 있습니다.
+2. 실습 계정으로 gcloud에 로그인합니다. 터미널의 gcloud는 처음에 VM 서비스 계정(`antigravity-sa@...`)으로 설정되어 있습니다. 이 계정은 프로젝트 소유자(Owner)가 아니어서 Lab 2의 시크릿 생성, 배포, Gemini Enterprise 게시에서 권한 오류가 납니다. 프로젝트 설정은 그대로 유지됩니다.
+
+```bash
+gcloud auth login --no-launch-browser
+```
+
+- `You are running on a Google Compute Engine virtual machine. ... Do you want to continue (Y/n)?`가 나오면 `Y`를 입력하고 **ENTER**를 누릅니다.
+- 터미널에 표시된 URL을 복사해 원격 화면의 Chrome 새 탭에서 엽니다. Welcome to Google Chrome 알림은 **OK**, Chrome 초기 로그인 창은 **Stay signed out** 또는 **Use Chrome without an account**를 클릭합니다.
+- Qwiklabs 자격증명 패널의 **Username**과 **Password**로 로그인하고 접근을 허용한 뒤, 표시된 인증 코드를 복사해 터미널에 붙여넣고 **ENTER**를 누릅니다.
+- `You are now logged in as [student-...@qwiklabs.net].`가 나오면 완료입니다.
+
+이어서 같은 방법으로 ADC(Application Default Credentials, 애플리케이션 기본 사용자 인증 정보)도 실습 계정으로 로그인합니다. RAG 도구, `agents-cli run`, 배포가 ADC로 Google Cloud API를 호출합니다. 이번에도 `(Y/n)` 질문에 `Y`를 입력합니다.
+
+```bash
+gcloud auth application-default login --no-launch-browser
+```
+
+`Credentials saved to file: [...]`와 `Quota project "<Project ID>" was added to ADC ...`가 나오면 완료입니다. 다음 명령으로 계정과 프로젝트를 확인합니다. account가 Qwiklabs **Username**, project가 **Project ID**이면 됩니다.
+
+```bash
+gcloud config get-value account
+gcloud config get-value project
+```
+
+3. Lab 1과 Lab 2에서 쓰는 API를 미리 켭니다.
 
 ```bash
 gcloud services enable \
@@ -135,13 +159,13 @@ gcloud services enable \
 
 1~2분 걸리며 `Operation ... finished successfully.`가 나오면 완료입니다.
 
-3. RAG 도구와 `agents-cli run`은 ADC(Application Default Credentials, 애플리케이션 기본 사용자 인증 정보)로 Google Cloud API를 호출합니다. 다음 명령에서 `ADC OK`가 출력되면 ADC가 준비된 것입니다.
+4. 다음 명령에서 `ADC OK`가 출력되면 ADC가 준비된 것입니다.
 
 ```bash
 gcloud auth application-default print-access-token > /dev/null && echo "ADC OK"
 ```
 
-오류가 나면 `gcloud auth application-default login`을 실행하고 실습 계정(Qwiklabs **Username**)으로 로그인합니다.
+오류가 나면 2단계의 `gcloud auth application-default login --no-launch-browser`를 다시 실행하고 실습 계정(Qwiklabs **Username**)으로 로그인합니다.
 
 ---
 
@@ -192,7 +216,7 @@ gcloud auth application-default print-access-token > /dev/null && echo "ADC OK"
 9. **Finish**를 클릭합니다. 다음과 같은 화면이 보이면 준비가 끝난 것입니다.
 ![Antigravity Agent Platform 준비 완료](./images/agy2_09_ready.png)
 
-앱에서 모델을 고르는 메뉴가 보이면 Gemini 3.8 Flash 계열을 선택합니다(메뉴 이름은 앱 버전에 따라 다를 수 있음). 앱 창은 그대로 두고, Task 1 5단계에서 프로젝트 폴더를 엽니다.
+앱에서 모델을 고르는 메뉴가 보이면 Gemini 3.8 Flash 계열을 선택합니다(메뉴 이름은 앱 버전에 따라 다를 수 있음). 목록에 없으면 기본 Flash 모델을 그대로 둡니다. 앱 창은 그대로 두고, Task 1 5단계에서 프로젝트 폴더를 엽니다.
 
 #### (나) agy CLI 초기 설정
 
@@ -210,7 +234,7 @@ agy
    - Chrome 초기 로그인 창이 나타나면 **Stay signed out** 또는 **Use Chrome without an account**를 클릭합니다.
    - Google 로그인 화면에서 Qwiklabs 자격증명 패널의 **Username**과 **Password**를 입력합니다.
    - 안내에 따라 접근 권한을 허용하고 생성된 인증 코드를 복사합니다.
-   - 터미널로 돌아와 인증 코드를 붙여넣고 **ENTER**를 누른 뒤, 본인의 **Google Cloud Project ID**를 선택합니다.
+   - 터미널로 돌아와 인증 코드를 붙여넣고 **ENTER**를 누릅니다. `Enter Google Cloud Project ID:` 입력란이 나오면 본인의 **Google Cloud Project ID**를 입력하고 **ENTER**를 누릅니다.
 ![인증 코드 입력 및 프로젝트 선택](./images/07_agy_auth_code.png)
 
 4. Google Cloud Location은 **global**을 선택합니다.
@@ -236,7 +260,7 @@ agy
 색상 테마를 확인하고 원하는 테마를 확정합니다.
 ![색상 테마 확인](./images/12_agy_select_color_scheme.png)
 
-9. 사용할 모델을 확인합니다. 목록에서 Gemini 3.8 Flash 계열(예: `Gemini 3.8 Flash (High)`)을 선택합니다.
+9. 사용할 모델을 확인합니다. 목록에서 Gemini 3.8 Flash 계열(예: `Gemini 3.8 Flash (High)`)을 선택합니다. agy 버전에 따라 목록에 `Gemini 3.6 Flash`와 `Gemini 3.1 Pro`만 보일 수 있습니다. 이때는 기본값 `Gemini 3.6 Flash`를 그대로 씁니다. 실습 프롬프트는 이 모델로도 모두 동작합니다. 여기서 고르는 모델은 코딩 에이전트용이며, 실습에서 만드는 에이전트가 쓰는 모델(`gemini-3.8-flash`)과는 별개입니다.
 
 ```prompt
 /model
@@ -558,16 +582,20 @@ AUTH=(-H "Authorization: Bearer $(gcloud auth print-access-token)" -H "X-Goog-Us
 # (새 프로젝트에는 서비스 에이전트가 없고, 만들어도 역할이 자동으로 붙지 않아 GCS 가져오기가 403으로 실패합니다)
 PROJECT_NUMBER=$(gcloud projects describe ${PROJECT_ID} --format="value(projectNumber)")
 gcloud beta services identity create --service=discoveryengine.googleapis.com
-gcloud projects add-iam-policy-binding ${PROJECT_ID} \
-  --member="serviceAccount:service-${PROJECT_NUMBER}@gcp-sa-discoveryengine.iam.gserviceaccount.com" \
-  --role=roles/discoveryengine.serviceAgent --condition=None --quiet > /dev/null
+# 생성 직후에는 "does not exist"로 실패할 수 있어 성공할 때까지 10초 간격으로 최대 6번 시도
+for i in 1 2 3 4 5 6; do
+  gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+    --member="serviceAccount:service-${PROJECT_NUMBER}@gcp-sa-discoveryengine.iam.gserviceaccount.com" \
+    --role=roles/discoveryengine.serviceAgent --condition=None --quiet > /dev/null && echo "역할 부여 완료" && break
+  sleep 10
+done
 
 # 3단계에서 받은 규정 PDF를 내 프로젝트 버킷(서울)에 올림
 gcloud storage buckets create gs://${PROJECT_ID}-policy-docs --location=asia-northeast3
 gcloud storage cp ~/enterprise-ops-agent/docs/policies/*.pdf gs://${PROJECT_ID}-policy-docs/policy/
 ```
 
-서비스 에이전트 이메일(`service-...@gcp-sa-discoveryengine.iam.gserviceaccount.com`)과 PDF 2건 복사 결과가 출력되면 됩니다. 역할 부여가 반영되기까지 1분 정도 걸릴 수 있습니다. ③의 가져오기 응답에 403 권한 오류가 나오면 1분 뒤 ③만 다시 실행합니다.
+서비스 에이전트 이메일(`service-...@gcp-sa-discoveryengine.iam.gserviceaccount.com`), `역할 부여 완료`, PDF 2건 복사 결과가 출력되면 됩니다. `역할 부여 완료`가 없으면 ①을 다시 실행합니다. 역할 부여가 반영되기까지 1분 정도 걸릴 수 있습니다. ③의 가져오기 응답에 403 권한 오류가 나오면 1분 뒤 ③만 다시 실행합니다.
 
 ② 비정형 문서용 데이터스토어 생성
 
