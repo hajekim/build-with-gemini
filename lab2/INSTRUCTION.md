@@ -424,12 +424,12 @@ Tier마다 검사하는 내용은 다음과 같습니다. 각 케이스에는 �
 ```bash
 cd ~/enterprise-ops-agent
 grep -ohE "(called=|retrieved=|[a-z_]+ called before)[^\"]*" artifacts/grade_results/results_*.json | sort | uniq -c
-# 실패 예: called=[...] missing=['list_tickets'] forbidden_called=[]   ← 불러야 할 도구를 안 부름
+# 실패 예: called=['transfer_to_agent'] missing=['list_tickets'] forbidden_called=[]   ← 불러야 할 도구를 안 부름
 #          retrieved=['POL-HR-2026-004'] cited=[]                     ← 규정은 찾았지만 답변에 인용 안 함
 #          request_time_off called before policy check: [...]          ← 규정 확인 전에 쓰기 도구 호출
 ```
 
-명령어가 완료되면 `artifacts/grade_results/`에 Tier별 채점 결과 JSON과 시각 리포트(`results_*.html`)가 생성됩니다. 리포트는 4.5에서 웹으로 엽니다. 실습 1 완성본으로 진행하면 이미 개선된 코드이므로 Qwiklabs 점검처럼 결정론적 지표가 모두 1.00으로 나올 수 있습니다. 아래는 개선 전 코드의 베이스라인 예시입니다(모델 응답에 따라 달라질 수 있음). 앞의 세 열(LLM 판정)은 아래 선택 실행을 했을 때만 나옵니다:
+명령어가 완료되면 `artifacts/grade_results/`에 Tier별 채점 결과 JSON과 시각 리포트(`results_*.html`)가 생성됩니다. 리포트는 4.5에서 웹으로 엽니다. 실습 1 완성본으로 진행하면 이미 개선된 코드이므로 결정론적 지표가 대부분 1.00으로 나올 수 있습니다. Qwiklabs 점검에서 완성본은 T2~T4의 지표 3개가 모두 1.00이었고, T1만 티켓 목록 케이스에서 `list_tickets`를 부르지 않아 `tool_call_accuracy`가 0.75였습니다. 아래는 개선 전 코드의 베이스라인 예시입니다(모델 응답에 따라 달라질 수 있음). 앞의 세 열(LLM 판정)은 아래 선택 실행을 했을 때만 나옵니다:
 
 | Tier | task_success | tool_use_quality | hallucination | tool_call_accuracy | policy_first_order | rag_citation |
 |:---|:---:|:---:|:---:|:---:|:---:|:---:|
