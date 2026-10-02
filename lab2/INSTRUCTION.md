@@ -3,16 +3,16 @@
 
 실습 1에서 만든 Orchestrator-Worker 멀티 에이전트(`enterprise_ops_agent`)를 Antigravity 2.0(`agy`) 환경에서 이어받아 `agents-cli eval`로 평가하고 개선합니다. 이어서 Secret Manager, Agent Identity, Agent Registry, Agent Gateway, Model Armor를 적용해 Agent Runtime에 배포하고 Gemini Enterprise(GE)에 등록합니다.
 
-소요 시간: 약 100~110분 (강사 요청 대기 시간은 포함하지 않습니다)
+소요 시간: 약 110~120분 (강사 요청 대기 시간은 포함하지 않습니다)
 
 | Step | 절 | 내용 | 시간 |
 |:---|:---:|:---|:---:|
 | 준비 | 2 | 실습 1 결과물 확인, API 활성화, 사전 확인 체크리스트, Gemini Enterprise 앱 준비 | 10분 |
 | Step 0 | 3 | ADK 스킬 설치와 환경 준비 | 5분 |
 | Step 1 | 4 | agents-cli 4-Tier 정량 평가 (도구 호출 정확도, RAG 인용률) 및 힐클라이밍 | 25~30분 |
-| Step 2 | 5 | Secret Manager + Agent Identity 권한 + Agent Gateway 생성 + agents-cli Agent Runtime 배포 (대기 약 6분 포함) | 20분 |
+| Step 2 | 5 | Secret Manager + Agent Identity 권한 + Agent Gateway 생성 + agents-cli Agent Runtime 배포 (대기 약 10분 포함: 게이트웨이 생성 2~3분, 배포 6~7분) | 24분 |
 | Step 3 | 6 | Agent Registry 등록 (도구 위험도 주석, 허용 목적지) | 5분 |
-| Step 4 | 7 | Agent Gateway 접근 정책 DRY_RUN → ENFORCE, 403 차단 검증 (대기 약 7분 포함) | 17분 |
+| Step 4 | 7 | Agent Gateway 접근 정책 DRY_RUN → ENFORCE, 403 차단 검증 (대기 약 13분 포함: 엔진 연결 최대 10분, ENFORCE 적용 2~3분) | 23분 |
 | Step 5 | 8 | Model Armor 템플릿 및 런타임 가드 활성화 (재배포 약 4분 포함) | 10분 |
 | Step 6 | 9 | Gemini Enterprise 등록 및 임직원 실시간 테스트 체크리스트 | 10분 |
 
@@ -263,15 +263,17 @@ Google Agent Platform은 다음 5단계 평가 루프를 제공합니다:
 5. Optimize (Hillclimbing): 프롬프트 지침을 고치고, 다른 지표가 떨어지지 않았는지 다시 평가해 지표별 목표치(4.3 표)를 넘김
 
 ### 4.3 평가 지표: LLM 판정 3종 + 결정론적 3종
-평가 설정 파일 `tests/eval/eval_config.yaml`을 실습 1 완성본에서 받습니다. 완성본으로 시작했다면 이미 있으므로 이 명령은 아무것도 바꾸지 않습니다.
+평가 설정 파일 `tests/eval/eval_config.yaml`을 실습 1 완성본에서 받아 덮어씁니다. 스캐폴드가 만든 같은 이름의 기본 파일에는 지표가 하나뿐이라, 파일이 이미 있어도 이 명령을 실행해야 합니다.
 
 ```bash
 cd ~/enterprise-ops-agent
-[ -f tests/eval/eval_config.yaml ] || { curl -fsSL https://raw.githubusercontent.com/hajekim/build-with-gemini/main/lab1/enterprise_ops_agent_completed.zip -o /tmp/enterprise_ops_agent_completed.zip && unzip -j -o /tmp/enterprise_ops_agent_completed.zip enterprise-ops-agent/tests/eval/eval_config.yaml -d tests/eval/; }
-ls tests/eval/eval_config.yaml tests/eval/datasets/
+curl -fsSL https://raw.githubusercontent.com/hajekim/build-with-gemini/main/lab1/enterprise_ops_agent_completed.zip -o /tmp/enterprise_ops_agent_completed.zip
+unzip -j -o /tmp/enterprise_ops_agent_completed.zip enterprise-ops-agent/tests/eval/eval_config.yaml -d tests/eval/
+grep -c tool_call_accuracy tests/eval/eval_config.yaml
+ls tests/eval/datasets/
 ```
 
-`eval_config.yaml`과 실습 1 Task 5에서 만든 `tier1`~`tier4` 데이터셋 4개가 보이면 됩니다.
+`grep` 결과가 1 이상이고, 실습 1 Task 5에서 만든 `tier1`~`tier4` 데이터셋 4개가 보이면 됩니다. `grep` 결과가 0이면 다운로드나 압축 해제가 실패한 것이니 출력의 오류를 확인합니다.
 
 이 파일에는 Vertex AI 채점 모델이 판정하는 지표 3개와, 트레이스를 코드로 검사하는 지표 3개(`custom_metrics`)가 선언되어 있습니다. 결정론적 지표는 같은 트레이스에 대해 항상 같은 점수를 내므로 회귀 비교에 적합합니다.
 
@@ -338,10 +340,14 @@ done
 > [!NOTE]
 > LLM 판정 지표가 `PERMISSION_DENIED`로 실패하면 채점 모델 호출 권한 문제입니다. 결정론적 지표만으로 먼저 진행하려면 `--metrics tool_call_accuracy,policy_first_order,rag_citation`을 붙여 실행합니다.
 
+> [!WARNING]
+> T3 평가 케이스는 내 Mock SaaS 데이터 공간에 실제로 휴가를 신청하고 티켓을 만듭니다. 평가를 돌릴 때마다 EMP-10294의 연차 잔여가 줄어듭니다(점검 때 4.4와 4.6을 거치며 8.0일에서 1.0일로 줄었습니다). 7.7 검증 전에 잔여를 확인하는 단계가 있습니다.
+
 ### 4.5 평가 리포트 웹 열람 (포트 8081)
 터미널에서 내장 웹 서버를 띄워 채점 리포트를 브라우저로 확인합니다:
 
 ```bash
+cd ~/enterprise-ops-agent
 python3 -m http.server 8081 --directory artifacts/grade_results &
 ```
 원격 브라우저에서 `http://localhost:8081`에 접속해 케이스별 판정 사유를 확인합니다. 결정론적 지표의 사유에는 `called=[...] missing=[...]`, `retrieved=[...] cited=[...]`처럼 실제 호출된 도구와 인용 여부가 그대로 표시됩니다.
@@ -367,7 +373,7 @@ explanation의 missing(호출하지 않은 도구)과 cited(인용 여부)를 �
 app/agent.py의 HUB_INSTRUCTION과 각 서브 에이전트 instruction을 최소한으로 수정해줘.
 - 규정 검색 결과를 사용한 답변에는 반드시 문서번호(POL-HR-2026-004 / POL-IT-2026-009)와 조항을 인용
 - 티켓/연차 조회 요청은 해당 워커가 반드시 조회 도구를 호출한 뒤 답변
-수정 후 실패했던 Tier를 다시 평가하고, agents-cli eval compare로 이전 결과와 비교해서 다른 지표가 퇴보하지 않았는지 보여줘.
+수정 후 tool_call_accuracy나 rag_citation이 가장 낮았던 Tier 하나만(T4 제외) 골라 agents-cli eval run으로 한 번만 다시 평가하고, agents-cli eval compare로 같은 Tier의 이전 결과와 비교해서 다른 지표가 퇴보하지 않았는지 보여줘. 다른 Tier는 다시 평가하지 말 것.
 ```
 
 에이전트가 compare 결과를 보여 주지 않았을 때만 터미널 창에서 직접 비교합니다. 먼저 최근 결과 파일 이름을 확인합니다.
@@ -514,7 +520,7 @@ registries:
 EOF
 gcloud network-services agent-gateways import enterprise-ops-agw \
   --source=gw.yaml --location=${REGION} --project=${PROJECT_ID}
-# 약 2분 소요. 아래 인증서 조회가 KeyError로 실패하면 import가 덜 끝난 것이므로 1분 뒤 인증서 조회(curl)부터 다시 실행
+# 2~3분 소요. 그동안 점만 찍히는 것이 정상. 아래 인증서 조회가 KeyError로 실패하면 import가 덜 끝난 것이므로 1분 뒤 인증서 조회(curl)부터 다시 실행
 
 # 게이트웨이 루트 인증서를 PEM 파일로 저장
 curl -s -H "Authorization: Bearer $(gcloud auth print-access-token)" \
@@ -696,9 +702,10 @@ gcloud agent-registry services create core-gapi-services --location=${REGION} --
 
 # 3. 감사: 에이전트(자동 등록)와 MCP 서버 확인
 gcloud agent-registry agents list --location=${REGION} --format="value(displayName)"
-# 기대 결과: 5.7에서 배포한 에이전트 이름(기본값 enterprise-ops-agent)이 보임. 프로젝트에 다른 에이전트가 있으면 함께 표시됨
+# 기대 결과: 5.7에서 배포한 에이전트 이름(기본값 enterprise-ops-agent)이 보임. 이 문서에 없는 항목이 함께 보일 수 있음
 gcloud agent-registry mcp-servers list --location=${REGION} --format="value(displayName)"
 # 기대 결과: WorkWeek HCM MCP Server, ServiceImmediately ITSM MCP Server
+# 등록 직후에는 하나만 보일 수 있음. 1분 뒤 이 줄만 다시 실행
 
 # 4. 보안팀장 질문에 답하기: destructiveHint=true 도구 목록
 gcloud agent-registry mcp-servers list --location=${REGION} --format=json | python3 -c "
@@ -768,7 +775,7 @@ gcloud org-policies set-policy ~/lab2/op.yaml --project=${PROJECT_ID}
 > 제약 이름은 단수형 `disableAccessPolicyBinding`입니다. 복수형(`...Bindings`)으로 조회하면 `NOT_FOUND`가 나옵니다.
 
 ### 7.4 게이트웨이 정책 구성 커맨드 (터미널)
-authz 정책 적용(2~3분)과 엔진 연결(4분 30초~5분)은 서로 독립이므로 두 터미널에서 동시에 실행하면 대기 시간이 줄어듭니다.
+authz 정책 적용(2~3분)과 엔진 연결(5~10분)은 서로 독립이므로 두 터미널에서 동시에 실행하면 대기 시간이 줄어듭니다.
 
 ```bash
 source ~/lab2/env.sh
@@ -799,7 +806,7 @@ gcloud service-extensions authz-extensions import enterprise-ops-agw-iap-dryrun 
   --source=ext-dryrun.yaml --location=${REGION} --project=${PROJECT_ID}
 gcloud beta network-security authz-policies import enterprise-ops-agw-authz-iap \
   --source=authz.yaml --location=${REGION} --project=${PROJECT_ID}
-# 소요 시간: 확장 약 8초, authz 정책 2~3분
+# 소요 시간: 확장 약 8초, authz 정책 2~3분(그동안 점만 찍히는 것이 정상)
 
 # 2. IAM 접근 정책 (에이전트 신원 기준 ALLOW/DENY) + 프로젝트 바인딩
 : "${AGENT_PRINCIPAL:?source ~/lab2/env.sh를 먼저 실행하세요. 파일이 없으면 5.7의 엔진 정보 블록부터 실행합니다}"
@@ -836,7 +843,13 @@ source ~/lab2/env.sh   # 다른 터미널에서도 같은 변수를 사용
 curl -s -X PATCH -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Content-Type: application/json" \
   "https://${REGION}-aiplatform.googleapis.com/v1beta1/${AGENT_RESOURCE}?updateMask=spec.deploymentSpec.agentGatewayConfig" \
   -d "{\"spec\":{\"deploymentSpec\":{\"agentGatewayConfig\":{\"agentToAnywhereConfig\":{\"agentGateway\":\"projects/${PROJECT_ID}/locations/${REGION}/agentGateways/enterprise-ops-agw\"}}}}}"
-# 약 4분 30초 후 완료. 4~5분 기다린 뒤 아래 명령으로 확인 (None이 나오면 1분 뒤 다시 확인)
+# 기대 결과: operation 이름이 담긴 JSON. 연결은 백그라운드에서 5~10분 걸림
+```
+
+5분쯤 기다린 뒤 같은 터미널에서 연결 상태를 확인합니다. `None`이 나오면 아직 연결 중이므로 1~2분 간격으로 이 블록만 다시 실행합니다. 점검 때는 PATCH 후 약 10분 만에 연결되었습니다.
+
+```bash
+source ~/lab2/env.sh
 curl -s -H "Authorization: Bearer $(gcloud auth print-access-token)" \
   "https://${REGION}-aiplatform.googleapis.com/v1beta1/${AGENT_RESOURCE}" | python3 -c \
   "import json,sys; print(json.load(sys.stdin)['spec'].get('deploymentSpec',{}).get('agentGatewayConfig'))"
@@ -856,7 +869,7 @@ gcloud logging read 'resource.type="networkservices.googleapis.com/Gateway" AND 
 # 기대 결과: 200 ALLOWED tools/list, 200 ALLOWED tools/call get_employee_balances ...
 ```
 
-로그 결과가 비어 있으면 반영이 늦은 것이므로 1분 뒤 `gcloud logging read`만 다시 실행합니다.
+로그 결과가 비어 있거나 `tools/list`, `initialize`만 있고 `tools/call` 줄이 없으면 반영이 늦은 것이므로 1분 뒤 `gcloud logging read`만 다시 실행합니다.
 
 조회 결과가 정상으로 나오면 게이트웨이 경로(인증서, 레지스트리 허용 목적지)가 올바른 것입니다. 이상하면 10.1의 498, 인증서 항목을 확인합니다.
 
@@ -881,7 +894,15 @@ gcloud service-extensions authz-extensions import enterprise-ops-agw-iap-enforce
   --source=ext-enforce.yaml --location=${REGION} --project=${PROJECT_ID}
 gcloud beta network-security authz-policies import enterprise-ops-agw-authz-iap \
   --source=authz-enforce.yaml --location=${REGION} --project=${PROJECT_ID} --quiet
-# 2~3분 소요. 완료 후 30초 정도 기다린 뒤 검증
+# 2~3분 소요(그동안 점만 찍히는 것이 정상). 완료 후 30초 정도 기다린 뒤 검증
+```
+
+검증에서 하루짜리 연차를 신청하므로 연차 잔여가 1일 이상이어야 합니다. 4.4와 4.6 평가가 실제 신청을 만들어 잔여가 줄었을 수 있습니다. 7.5 조회 결과의 연차 잔여가 1일 미만이면 내 Mock SaaS 데이터 공간을 기본 데이터로 초기화합니다(포털의 데이터 초기화 버튼과 같습니다. 다른 참가자에게는 영향이 없습니다).
+
+```bash
+curl -s -X POST https://korean-mock-saas-dri5akvbzq-du.a.run.app/api/tenant/reset \
+  -H "X-MCP-Token: ${MCP_TOKEN:?실습 1 Task 4 1단계대로 MCP_TOKEN을 ~/lab.env에 저장하고 source ~/lab.env를 실행하세요}"
+# 기대 결과: {"status":"SUCCESS","message":"테넌트 'sess_...'의 실습 데이터가 초기화되었습니다."}
 ```
 
 신청과 취소를 같은 세션에서 보내야 에이전트가 방금 만든 신청 번호로 취소를 시도합니다. 첫 번째 응답을 저장한 `s1.txt` 끝에는 다음과 같은 두 줄이 있고, 이 숫자를 `SID`로 씁니다:
@@ -1085,6 +1106,9 @@ agents-cli publish gemini-enterprise \
 
 GE를 통한 대화도 같은 Agent Runtime 엔진에서 실행되므로, Step 4의 게이트웨이 정책과 Step 5의 Model Armor가 그대로 적용됩니다.
 
+> [!NOTE]
+> 등록이 `400 FAILED_PRECONDITION: The user cannot create an agent since an active Gemini Enterprise license is not available.`로 실패하면 본인 계정에 GE 라이선스가 할당되지 않은 것입니다. 2.5의 라이선스 할당 단계를 마친 뒤 등록 명령을 다시 실행합니다.
+
 ### 9.3 등록 확인과 Preview로 에이전트 열기
 등록이 끝나면 콘솔에서 에이전트를 확인하고, Preview로 열어 대화해 봅니다.
 
@@ -1186,11 +1210,10 @@ cd ~/enterprise-ops-agent
 curl -s -X DELETE -H "Authorization: Bearer $(gcloud auth print-access-token)" \
   "https://${REGION}-aiplatform.googleapis.com/v1beta1/${AGENT_RESOURCE}?force=true"
 
-# 게이트웨이 정책, 게이트웨이
+# 게이트웨이 정책 (게이트웨이 자체는 블록 맨 끝에서 삭제)
 gcloud beta network-security authz-policies delete enterprise-ops-agw-authz-iap --location=${REGION} --quiet
 gcloud service-extensions authz-extensions delete enterprise-ops-agw-iap-enforce --location=${REGION} --quiet
 gcloud service-extensions authz-extensions delete enterprise-ops-agw-iap-dryrun --location=${REGION} --quiet
-gcloud network-services agent-gateways delete enterprise-ops-agw --location=${REGION} --quiet
 
 # IAM 접근 정책
 gcloud iam policy-bindings delete ops-agent-egress-binding --project=${PROJECT_ID} --location=global --quiet
@@ -1217,7 +1240,16 @@ AUTH=(-H "Authorization: Bearer $(gcloud auth print-access-token)" -H "X-Goog-Us
 curl -s -X DELETE "${AUTH[@]}" "${DE}/engines/company-policy-app"
 curl -s -X DELETE "${AUTH[@]}" "${DE}/dataStores/company-policy-ds"   # 검색 앱 삭제가 끝나기 전이면 실패할 수 있음. 잠시 뒤 이 줄만 다시 실행
 gcloud storage rm -r gs://${PROJECT_ID}-policy-docs
+
+# Agent Gateway. 엔진을 지운 뒤 7~13분 동안은 FAILED_PRECONDITION(already being used by ...reasoningEngines/...)으로 실패하므로 1분 간격으로 최대 15번 시도
+for i in $(seq 15); do
+  gcloud network-services agent-gateways describe enterprise-ops-agw --location=${REGION} > /dev/null 2>&1 || break
+  gcloud network-services agent-gateways delete enterprise-ops-agw --location=${REGION} --quiet && break
+  echo "엔진 연결 정보가 아직 남아 있어 삭제되지 않았습니다. 1분 뒤 다시 시도 ($i/15)"; sleep 60
+done
 ```
+
+Discovery Engine이 문서 가져오기용으로 자동으로 만든 `gs://<프로젝트 번호>_..._import_content/` 버킷이 남을 수 있습니다. 비용은 거의 없고 프로젝트를 삭제하면 함께 지워지므로 그대로 두어도 됩니다.
 
 ### 10.4 실습 완성본 내려받기 (본인 환경에서 다시 구성)
 실습 1과 실습 2의 완성본을 압축 파일로 제공합니다. 프로젝트 ID, 토큰, 엔진 ID, 게이트웨이 인증서는 빠져 있고, 압축 안의 `README.md`에 본인 환경에서 바꿀 값과 실행 순서가 정리되어 있습니다.
