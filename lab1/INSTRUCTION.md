@@ -283,17 +283,20 @@ Python 패키지를 설치하고 `agents-cli`로 프로젝트를 만든 뒤, SDD
 
 ### 1단계: 필수 라이브러리 및 런타임 툴 설치
 
-시작 준비에서 연 Konsole 터미널(이하 터미널 창)에서 시스템 도구와 ADK CLI를 설치합니다. 설치에는 몇 분 걸릴 수 있습니다. 실습용 VM이라 PEP 668 제한을 무시하고 사용자 영역(`~/.local`)에 설치하기 위해 `--break-system-packages`를 붙입니다.
+시작 준비에서 연 Konsole 터미널(이하 터미널 창)에서 시스템 도구와 ADK CLI를 설치합니다. 설치에는 몇 분 걸릴 수 있습니다. 실습 환경에는 Python 가상 환경 `/opt/venv`가 미리 만들어져 있고 `PATH`에도 들어 있어, ADK CLI는 이 가상 환경에 설치합니다. `/opt/venv`는 root 소유라 `sudo`를 붙입니다.
 
 `PATH`와 Vertex AI 환경 변수는 `~/lab.env` 파일에 저장합니다. 터미널, agy CLI, Antigravity 앱이 모두 같은 값을 읽을 수 있게 하기 위해서입니다. `~/.bashrc`에는 이 파일을 읽는 한 줄만 추가하므로, 이후 새로 여는 Konsole 탭에는 값이 자동으로 적용됩니다.
 
 ```bash
 # 1. pip, git, 압축 해제 유틸리티, JSON 처리 도구 설치
+#    (실습 환경에서 apt-get이 PackageKit 오류를 내지 않도록 packagekit을 먼저 제거)
+sudo apt-get purge -y -qq packagekit
 sudo apt-get update -qq && sudo apt-get install -y -qq python3-pip git unzip jq
+type pip3 git unzip jq
 
-# 2. Google Agent Development Kit(ADK) CLI 및 필수 라이브러리 설치
-pip install --break-system-packages --upgrade pip
-pip install --break-system-packages google-agents-cli==1.8.0 "google-adk>=2.9.2,<=2.11.0" mcp httpx pydantic pyyaml uv
+# 2. 실습 환경의 Python 가상 환경(/opt/venv)에 ADK CLI와 필수 라이브러리 설치
+sudo /opt/venv/bin/pip install --upgrade pip
+sudo /opt/venv/bin/pip install google-agents-cli==1.8.0 "google-adk>=2.9.2,<=2.11.0" mcp httpx pydantic pyyaml uv
 
 # 3. 사용자 바이너리 경로와 Vertex AI global 엔드포인트 환경 변수를 ~/lab.env에 저장
 #    (GOOGLE_CLOUD_PROJECT는 지금 시점의 프로젝트 ID 값으로 저장됩니다)

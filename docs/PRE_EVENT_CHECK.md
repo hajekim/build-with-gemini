@@ -12,7 +12,7 @@
 
 ## 준비
 
-- 실습 환경과 같은 Debian 12 VM 1대 (gcloud 로그인, ADC 설정, 실습 1 시작 준비의 API 활성화 완료)
+- Qwiklabs 실습 환경 1개 (Ubuntu 26.04 GUI 컨테이너, Python 3.14 `/opt/venv`. gcloud 로그인, ADC 설정, 실습 1 시작 준비의 API 활성화 완료)
 - Mock SaaS 포털에서 발급한 MCP 토큰 1개
 
 ## 절차
