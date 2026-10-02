@@ -1004,6 +1004,7 @@ docs/SDD.md의 3절 '오케스트레이션 및 거버넌스 강령'을 반영하
    - [친절하고 명확한 한국어 톤].
 4. get_enterprise_agent() 및 build_agent() 함수로 완성된 Orchestrator-Worker 루트 에이전트 객체를 반환하고, 최상위에 root_agent = build_agent()와 app = App(root_agent=root_agent, name="app")을 선언할 것.
 5. 모든 Agent(root_agent 및 3개 sub_agent)의 model 파라미터는 반드시 'gemini-3.8-flash'로 명시적으로 지정할 것 (Vertex AI global 엔드포인트 연동).
+6. 서브 에이전트 3종의 instruction 끝에 "맡은 작업을 마치면 답변을 끝내지 말고 transfer_to_agent로 enterprise_ops_agent에 제어를 돌려주세요."를 넣을 것.
 ```
 
 에이전트가 `app/agent.py` 업데이트를 제안하면 **Allow**를 선택합니다.
@@ -1156,6 +1157,9 @@ agents-cli run "안녕하세요, 이민우입니다 (EMP-10294). ${START}(월)�
 agents-cli run "현재 제가 사용 중인 업무용 랩톱 배터리가 심하게 부풀어 올라서(스웰링) 정상적인 업무가 불가능합니다. 제가 데이터/엔지니어링 직군인데, M3 Max 64GB 랩톱으로 교체 지원이 가능한지 사내 IT 지원 규정을 확인해 주세요. 제 현재 장비 지급 이력을 확인하고 ServiceImmediately 시스템에 긴급 교체 인시던트 티켓을 발행해 주세요. 확인 절차 없이 바로 진행해 주세요."
 ```
 
+> [!TIP]
+> 답변이 "`itsm_agent`를 통해 이어 진행해 주세요"처럼 다른 에이전트로 넘기라는 말로 끝나고 `create_ticket` 호출이 없으면, `hr_policy_agent`가 `enterprise_ops_agent`로 제어를 돌려주지 않은 것입니다. 같은 명령을 다시 실행합니다. 계속 반복되면 에이전트 창에서 "app/agent.py의 서브 에이전트 3종 instruction에 '맡은 작업을 마치면 답변을 끝내지 말고 transfer_to_agent로 enterprise_ops_agent에 제어를 돌려주세요.'를 추가해 주세요."라고 요청한 뒤 다시 실행합니다.
+
 #### 기대하는 도구 호출 순서
 
 1. `hr_policy_agent`의 `search_company_policy` (category `IT`): POL-IT-2026-009 제 2 조(엔지니어링/데이터 직군은 MacBook Pro M3 Max 64GB 대상)와 제 4 조(배터리 부풀림 등 결함은 내구연한과 상관없이 긴급 교체 대상이며 4시간 내 1차 점검 및 임시 대여 장비 당일 선지급)를 확인합니다.
@@ -1171,7 +1175,7 @@ agents-cli run "현재 제가 사용 중인 업무용 랩톱 배터리가 심하
 1. Task 4 1단계에서 토큰을 발급한 원격 세션 안 Chrome의 Korean Enterprise Mock SaaS 플랫폼 탭으로 이동합니다.  
    `https://korean-mock-saas-dri5akvbzq-du.a.run.app/`
 2. **WorkWeek** 탭을 클릭합니다.
-   - 에이전트가 신청한 연차 내역이 **휴가 신청 내역** 목록에 `승인 대기` 상태로 등록되어 있는지 확인합니다.
+   - **신청 내역**에 에이전트가 신청한 기간(4.0일)이 추가되고, **연차 잔여 현황**이 `7.0 / 15.0 일`로 바뀌었는지 확인합니다. 아래의 `연차 3.0`일 행은 처음부터 들어 있는 데이터입니다.
 3. **ServiceImmediately** 탭을 클릭합니다.
    - 에이전트 답변에 나온 티켓 번호(실행마다 다름)가 **인시던트 티켓 목록 (Incident Tickets)**에 `하드웨어`, 상태 `접수`로 보이는지 확인합니다. 우선순위는 에이전트 판단에 따라 `1`(긴급) 또는 `2`(높음)로 기록됩니다.
 
@@ -1194,9 +1198,11 @@ cd ~/enterprise-ops-agent
 agents-cli playground --port 8085
 ```
 
-처음 실행하면 터미널에 `Enable telemetry? [Y/n]:` 질문이 나옵니다. 답하기 전까지 서버가 시작되지 않으므로 `n`을 입력하고 **ENTER**를 누릅니다. `Will be available at: http://127.0.0.1:8085/dev-ui/?app=app`과 `Uvicorn running on http://127.0.0.1:8085`가 출력되면 준비된 것입니다.
+처음 실행하면 터미널에 `Enable telemetry? [Y/n]:` 질문이 나옵니다. 답하기 전까지 서버가 시작되지 않으므로 **ENTER**를 눌러 넘어갑니다. `Will be available at: http://127.0.0.1:8085/dev-ui/?app=app`과 `Uvicorn running on http://127.0.0.1:8085`가 출력되면 준비된 것입니다.
 
-2. 원격 세션 안 Chrome에서 `http://localhost:8085/dev-ui/?app=app`을 엽니다. **Help Improve ADK!** 대화상자가 나타나면 **No Thanks**를 클릭합니다.
+2. 원격 세션 안 Chrome에서 `http://127.0.0.1:8085/dev-ui/?app=app`을 엽니다. **Help Improve ADK!** 대화상자가 나타나면 **No Thanks**를 클릭합니다. 다음과 같은 ADK 개발 UI 화면이 나타납니다.
+
+   ![ADK 개발 UI 첫 화면](./images/playground_initial.png)
 
 3. 화면 아래 **Type a message...** 입력창에 다음 질문을 붙여넣고 **ENTER**를 누릅니다.
 
