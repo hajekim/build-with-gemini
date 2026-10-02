@@ -1044,26 +1044,27 @@ uv run python3 tests/test_scenarios.py
 |       -> [PASS] 토폴로지 검증 완료 (Hub: 1, Spokes: 3)                              |
 |                                                                                   |
 | [2/5] Policy RAG: 4일 연속 연차 규정(POL-HR-2026-004) 검색 검증...                    |
-|       - 매칭 문서: POL-HR-2026-004 (제 3 조 (연차 발생 및 부여))                     |
+|       - 검색 경로: vertex_ai_search                                               |
+|       - 매칭 문서: POL-HR-2026-004 (사내 복무 규정 (POL-HR-2026-004))               |
 |       -> [PASS] 사내 복무 규정 제 4 조(7영업일 전 신청) 근거 인용 확인              |
 |                                                                                   |
 | [3/5] Policy RAG: 노트북 배터리 고장 및 교체 규정(POL-IT-2026-009) 검색 검증...          |
-|       - 매칭 문서: POL-IT-2026-009 (제 2 조 (전산 장비 지급 기준))                  |
+|       - 매칭 문서: POL-IT-2026-009 (사내 IT 자산 운용 지침 (POL-IT-2026-009))       |
 |       -> [PASS] IT 지원 지침 제 2 조(M3 Max 64GB) 및 제 4 조(긴급 교체) 확인        |
 |                                                                                   |
 | [4/5] FastMCP: WorkWeek 인사 시스템 실시간 연동 검증...                             |
 |       - WorkWeek 실시간 수신: Employee EMP-10294 (이민우) Leave Balances:          |
-| - Vacation (연차): 12.0...                                                         |
+| - Vacation (연차): 12...                                                           |
 |       -> [PASS] WorkWeek 잔여 연차 데이터 수신 확인                               |
 |                                                                                   |
 | [5/5] FastMCP: ServiceImmediately ITSM 시스템 실시간 연동 검증...                   |
 |       - ServiceImmediately 실시간 수신: [                                         |
 |   {                                                                               |
 |     "ticket_id": "INC-88210",                                                     |
-|     "requested_by": "EMP-10294", ...                                              |
+|     "requested_by": "EMP...                                                       |
 |       -> [PASS] ServiceImmediately 장비 및 인시던트 데이터 수신 확인               |
 | =====================================================================             |
-|    [SUCCESS] ALL 5 TEST SCENARIOS PASSED 100% IN 0.06s!                           |
+|    [SUCCESS] ALL 5 TEST SCENARIOS PASSED 100% IN 2.26s!                           |
 | =====================================================================             |
 +-----------------------------------------------------------------------------------+
 ```
