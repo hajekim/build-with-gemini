@@ -317,7 +317,7 @@ done
 명령이 실패하면 오류 메시지를 보여 주고 멈출 것. 문서를 찾아보거나 다른 명령을 시도하지 말 것.
 ```
 
-에이전트는 `agents-cli eval run`을 Tier마다 한 번씩, 모두 4번 실행합니다. Tier당 2~4분, 4개 합계 8~16분 걸립니다. 실행 중에는 에이전트 창에 중간 출력이 거의 없으므로, 진행 여부는 터미널 창에서 확인합니다.
+에이전트는 `agents-cli eval run`을 Tier마다 한 번씩, 모두 4번 실행합니다. 보통 Tier당 2~3분, 4개 합계 약 10분 걸립니다. LLM 판정 모델이 `500 INTERNAL`을 돌려주면 재시도 때문에 Tier 하나가 10분 넘게 걸릴 수 있습니다(Qwiklabs 점검 때 T1, T4가 각각 약 10분, 합계 약 25분). 실행 중에는 에이전트 창에 중간 출력이 거의 없으므로, 진행 여부는 터미널 창에서 확인합니다.
 
 진행 확인 (터미널 창, 2~3분 간격으로 실행):
 
@@ -330,10 +330,10 @@ ls ~/enterprise-ops-agent/artifacts/grade_results/ 2>/dev/null | grep -c "\.json
 
 다음 경우에는 에이전트 작업을 멈추고(CLI는 `ESC`) 터미널 창에서 아래 블록을 실행합니다. 에이전트로 끝냈다면 이 블록은 건너뜁니다.
 - 첫 번째 명령이 아무것도 출력하지 않는데 끝난 Tier 수가 4보다 작음 (에이전트가 평가를 실행하지 않거나 중간에 멈춤)
-- 같은 Tier가 6분 넘게 계속 표시됨
+- 같은 Tier가 15분 넘게 계속 표시됨
 - 에이전트가 같은 오류를 반복함
 
-터미널 블록도 같은 명령이라 걸리는 시간은 같습니다(8~16분). 대신 Tier마다 시작 시각과 결과가 화면에 바로 출력됩니다. 이미 끝난 Tier는 `for` 줄에서 빼고 실행해도 됩니다.
+터미널 블록도 같은 명령이라 걸리는 시간은 같습니다. 대신 Tier마다 시작 시각과 결과가 화면에 바로 출력됩니다. 이미 끝난 Tier는 `for` 줄에서 빼고 실행해도 됩니다.
 
 ```bash
 cd ~/enterprise-ops-agent
@@ -343,7 +343,7 @@ export GOOGLE_CLOUD_LOCATION=global
 : "${MCP_TOKEN:?실습 1 Task 4 1단계대로 MCP_TOKEN을 ~/lab.env에 저장하고 source ~/lab.env를 실행하세요}"
 
 for t in tier1-single-tool tier2-multi-tool tier3-policy-first-transaction tier4-adversarial-edge; do
-  echo "##### $t 시작 $(date +%H:%M:%S) (Tier당 2~4분)"
+  echo "##### $t 시작 $(date +%H:%M:%S) (보통 2~3분)"
   agents-cli eval run --dataset tests/eval/datasets/$t.json --config tests/eval/eval_config.yaml
 done
 ```
@@ -364,6 +364,12 @@ done
 
 > [!NOTE]
 > LLM 판정 지표가 `PERMISSION_DENIED`로 실패하면 채점 모델 호출 권한 문제입니다. 결정론적 지표만으로 먼저 진행하려면 `--metrics tool_call_accuracy,policy_first_order,rag_citation`을 붙여 실행합니다.
+>
+> 실행 중 나오는 다음 메시지는 오류가 아닙니다.
+> - `WARNING:root:Could not fetch /app-info (HTTPError: 500 ...)`: 모든 Tier에서 나오며 평가는 계속됩니다.
+> - `Retryable error (code=500) ... multi_turn_tool_use_quality_v1`: 판정 모델 일시 오류로 재시도 중입니다. 5회 모두 실패하면 해당 케이스만 `num_cases_error`로 집계되고 다음으로 넘어갑니다.
+>
+> 시간이 부족하면 위의 `--metrics` 옵션으로 결정론적 지표 3종만 실행합니다. LLM 판정을 하지 않으므로 판정 모델 재시도로 늘어나는 시간이 없습니다.
 
 > [!WARNING]
 > T3 평가 케이스는 내 Mock SaaS 데이터 공간에 실제로 휴가를 신청하고 티켓을 만듭니다. 평가를 돌릴 때마다 EMP-10294의 연차 잔여가 줄어듭니다(점검 때 4.4와 4.6을 거치며 8.0일에서 1.0일로 줄었습니다). 7.6 검증 전에 잔여를 확인하는 단계가 있습니다.
@@ -384,7 +390,7 @@ python3 -m http.server 8081 --directory artifacts/grade_results &
 
 | 작업 | 예상 시간 |
 |:---|:---:|
-| 4.4 베이스라인 평가 (4개 Tier) | 8~16분 |
+| 4.4 베이스라인 평가 (4개 Tier) | 10~25분 |
 | 4.5 리포트 확인 | 2~3분 |
 | 4.6 개선 1회 + 실패 Tier 1개 다시 평가 + 비교 | 5~8분 |
 
