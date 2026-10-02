@@ -417,7 +417,7 @@ cd ~/enterprise-ops-agent
 git init -q 2>/dev/null; git add -A && git -c user.name=lab -c user.email=lab@example.com commit -qm "lab1 baseline"   # 변경 전 상태 보존
 
 agents-cli scaffold enhance . -d agent_runtime --region asia-northeast1 -y -s
-rm -f uv.lock   # enhance로 의존성이 바뀌어 기존 lock 파일과 맞지 않음. 원격 빌드에서 다시 해석됨
+uv lock   # enhance로 바뀐 의존성을 lock 파일에 반영. 이미 고정된 google-adk 버전은 그대로 유지됨
 git status --short
 ```
 

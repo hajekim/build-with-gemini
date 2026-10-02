@@ -293,7 +293,7 @@ sudo apt-get update -qq && sudo apt-get install -y -qq python3-pip git unzip jq
 
 # 2. Google Agent Development Kit(ADK) CLI 및 필수 라이브러리 설치
 pip install --break-system-packages --upgrade pip
-pip install --break-system-packages google-agents-cli "google-adk>=2.3.0" mcp httpx pydantic pyyaml uv
+pip install --break-system-packages google-agents-cli==1.8.0 "google-adk>=2.9.2,<=2.11.0" mcp httpx pydantic pyyaml uv
 
 # 3. 사용자 바이너리 경로와 Vertex AI global 엔드포인트 환경 변수를 ~/lab.env에 저장
 #    (GOOGLE_CLOUD_PROJECT는 지금 시점의 프로젝트 ID 값으로 저장됩니다)
@@ -311,7 +311,7 @@ source ~/lab.env
 
 `cat ~/lab.env`로 `GOOGLE_CLOUD_PROJECT`에 본인 프로젝트 ID가 들어갔는지 확인할 수 있습니다. 이 블록은 `~/lab.env`를 새로 씁니다. Task 4 이후에 다시 실행했다면 Task 4 1단계의 토큰 저장 명령도 다시 실행합니다.
 
-설치를 확인합니다. `agents-cli, version ...` 형태로 버전 번호가 출력되면 설치된 것입니다.
+설치를 확인합니다. `agents-cli, version 1.8.0`이 출력되면 설치된 것입니다. 실습은 이 버전으로 검증했고, 이 버전이 만드는 프로젝트에는 `google-adk` 2.9.2가 고정되어 있습니다.
 
 ```bash
 agents-cli --version
