@@ -564,7 +564,7 @@ cat docs/context_summary.md
 
 ### 6단계: Vertex AI Search로 사내 규정 검색 앱 만들기 (터미널 창)
 
-Task 3의 규정 RAG 도구가 호출할 Vertex AI Search 검색 앱을 지금 만들어 둡니다. 데이터스토어와 검색 앱 생성 요청은 바로 접수되지만, PDF 가져오기(인덱싱)는 PDF 2건 기준으로 약 6~10분 걸립니다. 지금 시작해 두면 Task 3~5를 진행하는 동안 끝납니다. 끝나기 전에는 RAG 도구가 `local_fallback`으로 동작하므로 기다리지 않고 진행합니다.
+Task 3의 규정 RAG 도구가 호출할 Vertex AI Search 검색 앱을 지금 만들어 둡니다. 데이터스토어와 검색 앱 생성 요청은 바로 접수되지만, PDF 가져오기(인덱싱)는 PDF 2건 기준으로 약 4~10분 걸립니다. 지금 시작해 두면 Task 3~5를 진행하는 동안 끝납니다. 끝나기 전에는 RAG 도구가 `local_fallback`으로 동작하므로 기다리지 않고 진행합니다.
 
 Vertex AI Search는 `global`/`us`/`eu` 멀티리전만 지원하므로 검색 앱은 `global`에 만들고, 원본 PDF 버킷은 서울(`asia-northeast3`)에 둡니다. 아래 네 블록은 같은 터미널 창에서 순서대로 실행합니다. ② 이후 블록은 ①에서 만든 변수를 씁니다.
 
@@ -600,7 +600,7 @@ curl -s -X POST "${AUTH[@]}" "${DE}/dataStores?dataStoreId=company-policy-ds" \
   -d '{"displayName":"company-policy-ds","industryVertical":"GENERIC","solutionTypes":["SOLUTION_TYPE_SEARCH"],"contentConfig":"CONTENT_REQUIRED"}'
 ```
 
-③ GCS PDF 가져오기 (비동기, 약 6~10분 소요. 결과를 기다리지 않고 다음으로 진행)
+③ GCS PDF 가져오기 (비동기, 약 4~10분 소요. 결과를 기다리지 않고 다음으로 진행)
 
 ```bash
 curl -s -X POST "${AUTH[@]}" "${DE}/dataStores/company-policy-ds/branches/0/documents:import" \
@@ -619,7 +619,7 @@ curl -s -X POST "${AUTH[@]}" "${DE}/engines?engineId=company-policy-app" \
 | 요청 | 확인할 응답 | 의미 |
 |:---|:---|:---|
 | ② 데이터스토어 | `"done": true`와 `"name": ".../dataStores/company-policy-ds"` | 생성 완료 |
-| ③ PDF 가져오기 | `"name": ".../operations/import-documents-..."`만 있고 `done`이 없음 | 접수됨. 약 6~10분 뒤 완료되며, Task 3 0단계에서 확인 |
+| ③ PDF 가져오기 | `"name": ".../operations/import-documents-..."`만 있고 `done`이 없음 | 접수됨. 약 4~10분 뒤 완료되며, Task 3 0단계에서 확인 |
 | ④ 검색 앱 | `"done": true`와 `"name": ".../engines/company-policy-app"` | 생성 완료 |
 
 ③을 두 번 실행해도 같은 PDF는 중복으로 들어가지 않습니다(`INCREMENTAL` 모드).
@@ -877,7 +877,7 @@ print(json.dumps(r2, indent=2, ensure_ascii=False))
 `status`가 `SUCCESS`이고 `matches`에 `POL-HR-2026-004`(테스트 1), `POL-IT-2026-009`(테스트 2)가 있으면 성공입니다. 필드 순서는 달라도 되지만 `status`, `source`, `match_count`, `matches[].doc_id`, `matches[].title`, `matches[].content` 이름은 정확히 같아야 합니다. Task 5 통합 테스트와 실습 2 `rag_citation` 지표가 이 이름을 읽습니다. 이름이 다르면 에이전트 창에서 위 이름으로 고쳐 달라고 요청합니다.
 
 > [!NOTE]
-> `source`가 `local_fallback`으로 나오면 Task 1 6단계의 PDF 가져오기가 아직 끝나지 않은 것입니다. 가져오기는 약 6~10분 걸립니다. 폴백으로도 실습은 계속할 수 있으며, 가져오기가 끝난 뒤 다시 실행하면 `vertex_ai_search`로 바뀝니다. 진행 상태는 0단계의 `PROJECT_ID`, `DE`, `AUTH` 세 줄을 실행한 셸에서 `curl -s "${AUTH[@]}" "${DE}/dataStores/company-policy-ds/branches/0/documents" | grep -c '"name"'`(2이면 완료)로 확인합니다. 문서 수가 `2`인데도 계속 `local_fallback`이면 ADC 권한 문제일 수 있으므로 `gcloud auth application-default login --no-launch-browser`를 실행하고 실습 계정으로 로그인한 뒤 다시 확인합니다.
+> `source`가 `local_fallback`으로 나오면 Task 1 6단계의 PDF 가져오기가 아직 끝나지 않은 것입니다. 가져오기는 약 4~10분 걸립니다. 폴백으로도 실습은 계속할 수 있으며, 가져오기가 끝난 뒤 다시 실행하면 `vertex_ai_search`로 바뀝니다. 진행 상태는 0단계의 `PROJECT_ID`, `DE`, `AUTH` 세 줄을 실행한 셸에서 `curl -s "${AUTH[@]}" "${DE}/dataStores/company-policy-ds/branches/0/documents" | grep -c '"name"'`(2이면 완료)로 확인합니다. 문서 수가 `2`인데도 계속 `local_fallback`이면 ADC 권한 문제일 수 있으므로 `gcloud auth application-default login --no-launch-browser`를 실행하고 실습 계정으로 로그인한 뒤 다시 확인합니다.
 
 ---
 
@@ -1339,7 +1339,7 @@ EOF
 ```
 
 > [!IMPORTANT]
-> 실습 2 4절(Step 1)에서 이 4개 데이터셋으로 `agents-cli eval run`을 실행합니다. 기본 실행은 결정론적 지표 3종(`tool_call_accuracy`, `policy_first_order`, `rag_citation`)으로 Tier별 베이스라인을 측정하고, 실패 케이스를 고쳐 가며 점수를 올립니다. LLM 판정 지표 3종(`multi_turn_task_success`, `multi_turn_tool_use_quality`, `hallucination`)은 선택 과제입니다.
+> 실습 2 4절(Step 1)에서 이 4개 데이터셋으로 `agents-cli eval run`을 실행합니다. 기본 실행은 결정론적 지표 3종(`tool_call_accuracy`, `policy_first_order`, `rag_citation`)과 LLM 판정 `hallucination`으로 Tier별 베이스라인을 측정하고, 실패 케이스를 고쳐 가며 점수를 올립니다. 나머지 LLM 판정 지표 2종(`multi_turn_task_success`, `multi_turn_tool_use_quality`)은 선택 과제입니다.
 
 Task 3 0단계의 문서 수 확인 명령을 다시 실행해 `2`가 되었는지 확인합니다. 여기까지 마쳤다면 실습 2를 시작할 수 있습니다. Task 6은 시간이 남을 때만 진행합니다.
 
