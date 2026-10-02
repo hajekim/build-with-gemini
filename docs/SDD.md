@@ -200,7 +200,7 @@ FastMCP 서버와 통신할 때는 반드시 다음 HTTP 헤더 및 세션 핸�
   - `agents-cli eval run`을 통한 정량적 품질 평가 및 LLM-as-a-Judge 채점
   - Secret Manager 기반 MCP 토큰 보안 이관 및 Cloud Run / Agent Runtime 프로덕션 배포
   - Agent Registry 등록 및 Agent Identity (SPIFFE ID) 부여
-  - Agent Gateway (이그레스) + IAP 정책을 통한 무수정 도구 중앙 차단
+  - Agent Gateway (이그레스) + 게이트웨이 authz DENY 정책을 통한 무수정 도구 중앙 차단
   - Model Armor 실시간 페이로드 검사를 통한 간접 프롬프트 인젝션 및 카드번호 노출 방어
 
 - **산출물**: `agent_manifest.json` (A2A Manifest 규격)
