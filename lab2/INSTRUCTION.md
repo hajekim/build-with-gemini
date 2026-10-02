@@ -317,7 +317,7 @@ done
 명령이 실패하면 오류 메시지를 보여 주고 멈출 것. 문서를 찾아보거나 다른 명령을 시도하지 말 것.
 ```
 
-에이전트는 `agents-cli eval run`을 Tier마다 한 번씩, 모두 4번 실행합니다. 각 Tier는 에이전트 응답 생성(eval generate) 후 채점(eval grade)을 합니다. LLM 판정을 포함했던 Qwiklabs 점검에서는 보통 Tier당 약 2분이었고, 판정 모델 재시도가 생긴 Tier는 약 10분이었습니다. 기본 실행은 LLM 판정을 하지 않으므로 이보다 짧습니다. 실행 중에는 에이전트 창에 중간 출력이 거의 없으므로, 진행 여부는 터미널 창에서 확인합니다.
+에이전트는 `agents-cli eval run`을 Tier마다 한 번씩, 모두 4번 실행합니다. 각 Tier는 에이전트 응답 생성(eval generate) 후 채점(eval grade)을 합니다. LLM 판정을 포함했던 Qwiklabs 점검에서는 보통 Tier당 약 2분이었고, 판정 모델 재시도가 생긴 Tier는 약 10분이었습니다. 기본 실행은 LLM 판정을 하지 않으므로 훨씬 짧습니다(Qwiklabs 점검 때 T4 하나가 약 40초). 실행 중에는 에이전트 창에 중간 출력이 거의 없으므로, 진행 여부는 터미널 창에서 확인합니다.
 
 진행 확인 (터미널 창, 2~3분 간격으로 실행):
 
@@ -398,7 +398,7 @@ python3 -m http.server 8081 --directory artifacts/grade_results &
 
 | 작업 | 예상 시간 |
 |:---|:---:|
-| 4.4 베이스라인 평가 (4개 Tier, 결정론적 지표) | 10분 이내 |
+| 4.4 베이스라인 평가 (4개 Tier, 결정론적 지표) | 약 3~5분 |
 | 4.5 리포트 확인 | 2~3분 |
 | 4.6 개선 1회 + 실패 Tier 1개 다시 평가 + 비교 | 5~8분 |
 
@@ -1005,13 +1005,15 @@ agents-cli run --url ${AGENT_URL} --mode adk "3일 넘게 연속으로 연차를
 # 기대 결과: 7영업일 전 신청, 부서장(팀장급 이상) 사전 승인 (POL-HR-2026-004 제4조)
 ```
 
-선택(2~4분): 로컬에서 T4 데이터셋을 가드를 켠 상태로 다시 평가하면 Step 1과 비교할 수 있습니다. 변수가 비어 있으면 `source ~/lab.env; source ~/lab2/env.sh`를 먼저 실행합니다.
+선택(약 1분): 로컬에서 T4 데이터셋을 가드를 켠 상태로 다시 평가하면 Step 1과 비교할 수 있습니다. 변수가 비어 있으면 `source ~/lab.env; source ~/lab2/env.sh`를 먼저 실행합니다.
 
 ```bash
 export MODEL_ARMOR_TEMPLATE=projects/${PROJECT_ID}/locations/${ARMOR_LOCATION}/templates/hr-agent-armor-template
 agents-cli eval run --dataset tests/eval/datasets/tier4-adversarial-edge.json \
   --config tests/eval/eval_config.yaml --metrics tool_call_accuracy,policy_first_order,rag_citation
 ```
+
+점검 때 결과 예시입니다. 점수는 에이전트와 모델 응답에 따라 다릅니다.
 
 | T4 지표 | 가드 OFF (Step 1) | 가드 ON |
 |:---|:---:|:---:|
