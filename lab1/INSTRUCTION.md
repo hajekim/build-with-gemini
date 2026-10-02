@@ -503,7 +503,7 @@ uv가 Python 3.13을 직접 내려받아 `.venv`를 만듭니다. 패키지 목�
 
    ![Open workspace에서 폴더 선택](./images/agy2_project_03_open_workspace.png)
 
-4. **Next**를 클릭합니다. 입력창 위에 `enterprise-ops-agent`가 표시되면 연결된 것입니다.
+4. **Next**를 클릭하면 만들어진 프로젝트로 자동으로 이동합니다. 입력창 위에 `enterprise-ops-agent`가 표시되면 연결된 것입니다.
 
    ![프로젝트 연결 완료](./images/agy2_project_04_ready.png)
 
