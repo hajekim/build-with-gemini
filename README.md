@@ -15,7 +15,7 @@ Build with Gemini 행사 Track 3 실습 가이드와 자산을 모아 둔 저장
 | 실습 | 내용 | 시간 |
 |:---|:---|:---|
 | [실습 1](lab1/INSTRUCTION.md) | 개발 환경과 agents-cli 프로젝트 준비, ADK Orchestrator-Worker 구조, Vertex AI Search 기반 규정 RAG, Mock SaaS MCP 연동, 시나리오 테스트와 4-Tier evalset. 선택 과제로 A2A 로컬 검증 | 90분 (선택 과제 +15분) |
-| [실습 2](lab2/INSTRUCTION.md) | agents-cli eval 평가와 개선, Secret Manager와 Agent Identity로 Agent Runtime 배포, Agent Registry 등록, Agent Gateway 접근 정책으로 위험 도구 차단, Model Armor, Gemini Enterprise 등록과 Preview 테스트 | 약 110~120분 |
+| [실습 2](lab2/INSTRUCTION.md) | agents-cli eval 평가와 개선, Secret Manager와 Agent Identity로 Agent Runtime 배포, Agent Registry 등록, Agent Gateway 정책으로 위험 도구 차단, Model Armor, Gemini Enterprise 등록과 Preview 테스트 | 약 110~120분 |
 
 실습 1을 끝내지 못했어도 완성본을 받아 실습 2를 진행할 수 있습니다(실습 2의 2.2절).
 

@@ -12,7 +12,7 @@
 | Step 1 | 4 | agents-cli 4-Tier 정량 평가 (도구 호출 정확도, RAG 인용률) 및 힐클라이밍 | 25~30분 |
 | Step 2 | 5 | Secret Manager + Agent Identity 권한 + Agent Gateway 생성 + agents-cli Agent Runtime 배포 (대기 약 10분 포함: 게이트웨이 생성 2~3분, 배포 6~7분) | 24분 |
 | Step 3 | 6 | Agent Registry 등록 (도구 위험도 주석, 허용 목적지) | 5분 |
-| Step 4 | 7 | Agent Gateway 접근 정책 DRY_RUN → ENFORCE, 403 차단 검증 (대기 약 13분 포함: 엔진 연결 최대 10분, ENFORCE 적용 2~3분) | 23분 |
+| Step 4 | 7 | Agent Gateway 연결, 위험 도구 거부 정책, 403 차단 검증 (대기 약 13분 포함: 엔진 연결 최대 10분, 정책 적용 2~3분) | 23분 |
 | Step 5 | 8 | Model Armor 템플릿 및 런타임 가드 활성화 (재배포 약 4분 포함) | 10분 |
 | Step 6 | 9 | Gemini Enterprise 등록 및 임직원 실시간 테스트 체크리스트 | 10분 |
 
@@ -25,7 +25,7 @@
 4. [Step 1: agents-cli eval 기반 정량적 품질 평가 및 힐클라이밍](#4-step-1-agents-cli-eval-기반-정량적-품질-평가-및-힐클라이밍)
 5. [Step 2: Secret Manager와 Agent Identity로 Agent Runtime 배포](#5-step-2-secret-manager와-agent-identity로-agent-runtime-배포)
 6. [Step 3: Agent Registry 전사 자산 등록 (도구 위험도 주석)](#6-step-3-agent-registry-전사-자산-등록-도구-위험도-주석)
-7. [Step 4: Agent Gateway와 접근 정책으로 위험 도구 차단](#7-step-4-agent-gateway와-접근-정책으로-위험-도구-차단)
+7. [Step 4: Agent Gateway 정책으로 위험 도구 차단](#7-step-4-agent-gateway-정책으로-위험-도구-차단)
 8. [Step 5: Model Armor 실시간 페이로드 검사 (간접 인젝션 및 PII 방어)](#8-step-5-model-armor-실시간-페이로드-검사-간접-인젝션-및-pii-방어)
 9. [Step 6: Gemini Enterprise에 등록하고 직접 사용해 보기](#9-step-6-gemini-enterprise에-등록하고-직접-사용해-보기)
 10. [부록: 트러블슈팅, 선택 과제, 리소스 정리](#10-부록-트러블슈팅-선택-과제-리소스-정리)
@@ -42,7 +42,7 @@ flowchart LR
     P1["실습 1 산출물<br/>로컬 MAS 에이전트<br/>+ A2A 서버"] --> S1["1단계: Eval Flywheel<br/>agents-cli eval run<br/>LLM-as-a-Judge 채점"]
     S1 --> S2["2단계: 보안 프로덕션 배포<br/>Secret Manager 시크릿 격리<br/>+ Agent Runtime 배포 (도쿄)"]
     S2 --> S3["3단계: 전사 카탈로그화<br/>Agent Registry 등록<br/>+ 도구 위험도 주석"]
-    S3 --> S4["4단계: 중앙 관문 통제<br/>Agent Gateway (이그레스)<br/>+ IAM 접근 정책 403 차단"]
+    S3 --> S4["4단계: 중앙 관문 통제<br/>Agent Gateway (이그레스)<br/>+ 위험 도구 거부 정책 403 차단"]
     S4 --> S5["5단계: 실시간 위협 방어<br/>Model Armor 페이로드 검사<br/>인젝션 차단, PII 탐지 시 차단"]
     S5 --> S6["6단계: 사내 서비스 등록<br/>Gemini Enterprise 등록<br/>+ 임직원 실시간 대화"]
 ```
@@ -55,7 +55,7 @@ flowchart LR
 | Step 1 | 파일럿 검증 | HR팀장: "데모는 잘 되는데, 임직원 50명이 쓰면 엉뚱한 답을 하거나 규정을 위반하지 않을지 객관적으로 어떻게 입증하죠?" | agents-cli eval 기반 4-Tier 골든 데이터셋 정량 평가 및 LLM-as-a-Judge 채점, 프롬프트 힐클라이밍 |
 | Step 2 | 배포 준비 | 보안팀장: "개발자 노트북 .env 파일에 HR/IT 시스템 토큰이 평문으로 남아 있습니다. 시크릿 저장소로 옮기세요." | Secret Manager 시크릿 이관, Agent Identity 기반 최소 권한, Agent Runtime(도쿄) 배포 |
 | Step 3 | 전사 확산 | 보안팀장: "인사 시스템 데이터를 바꿀 수 있는 에이전트와 도구 목록을 내일까지 보안 감사 자료로 제출하세요." | Agent Registry 등록, 도구 명세 위험도 주석(`readOnlyHint`, `destructiveHint`) |
-| Step 4 | 보안 사고 | 직원: "'휴가 내역 정리해줘'라고 했더니 승인된 휴가가 취소됐어요. 모든 에이전트의 휴가 취소를 오늘 안에 막아 주세요." | Google 관리형 Agent Gateway(이그레스) + IAP 승인 확장 + IAM 접근 정책으로 에이전트 코드 수정 없이 위험 도구 403 차단 |
+| Step 4 | 보안 사고 | 직원: "'휴가 내역 정리해줘'라고 했더니 승인된 휴가가 취소됐어요. 모든 에이전트의 휴가 취소를 오늘 안에 막아 주세요." | Google 관리형 Agent Gateway(이그레스) + MCP 도구 이름 기준 거부 정책으로 에이전트 코드 수정 없이 위험 도구 403 차단 |
 | Step 5 | 레드팀 점검 | 레드팀: "IT 티켓 본문에 숨겨진 악의적 지시문(간접 인젝션)이 작동하고, 직원이 입력한 신용카드번호가 SaaS에 평문 저장되고 있습니다." | Model Armor 템플릿으로 사용자 입력과 도구 응답 검사 (프롬프트 인젝션 차단, PII 탐지 시 차단) |
 | Step 6 | 전사 공개 | 임직원: "보안 검증이 끝났으면 매일 쓰는 Gemini Enterprise 채팅 화면에서 쓸 수 있게 해 주세요." | `agents-cli publish gemini-enterprise`로 Agent Runtime 에이전트 등록 및 실시간 대화 검증 |
 
@@ -149,17 +149,18 @@ gcloud services enable \
 
 | 항목 | 확인 방법 | 사용 위치 |
 |:---|:---|:---|
-| 프로젝트 Owner 권한 | 아래 명령에서 `roles/owner`가 출력되는지 확인합니다. 출력이 없으면 강사에게 요청합니다. IAM 바인딩, 게이트웨이 생성에 필요합니다. | 5.4, 5.5, 7.x |
-| 조직 정책 `iam.managed.disableAccessPolicyBinding` | 7.3의 `describe` 명령으로 확인합니다. `enforce: true`인데 조직 정책 관리자 권한이 없으면 미리 강사에게 해제를 요청합니다. | 7.3 |
+| 터미널 계정 권한 | 아래 명령으로 확인합니다. Qwiklabs 터미널은 콘솔 로그인 계정이 아니라 서비스 계정(`antigravity-sa@...`)으로 실행됩니다. `roles/owner` 한 줄 또는 나머지 역할 4개가 모두 나오면 됩니다. 빠진 역할이 있으면 강사에게 요청합니다. | 5.4, 5.5, 6.x, 7.x |
 | Gemini Enterprise 앱과 라이선스 | 새 프로젝트에는 앱이 없습니다. 2.5 절차대로 앱을 만들고, ID 설정(Set up identity)과 본인 계정 라이선스 할당까지 마칩니다. | 2.5, 9.2 |
 
 ```bash
 gcloud config get-value project   # 실습 프로젝트가 맞는지 확인
+gcloud config get-value account   # 터미널 명령을 실행하는 계정
 gcloud projects get-iam-policy $(gcloud config get-value project 2>/dev/null) \
   --flatten="bindings[].members" \
-  --filter="bindings.role=roles/owner AND bindings.members=user:$(gcloud config get-value account 2>/dev/null)" \
-  --format="value(bindings.role)"
-# 기대 결과: roles/owner
+  --filter="bindings.members:$(gcloud config get-value account 2>/dev/null)" \
+  --format="value(bindings.role)" \
+  | grep -xE "roles/(owner|secretmanager\.admin|networkservices\.admin|agentregistry\.admin|networksecurity\.admin)"
+# 기대 결과: roles/owner, 또는 secretmanager.admin, networkservices.admin, agentregistry.admin, networksecurity.admin 4줄
 ```
 
 ### 2.5 Gemini Enterprise 앱 준비
@@ -208,8 +209,8 @@ Set up identity를 누르면 Choose identity 화면이 나옵니다. Use Google 
 
 ```bash
 agents-cli publish gemini-enterprise --list --project=$(gcloud config get-value project 2>/dev/null)
-# 기대 결과: {"apps": [{"display_name": "cymbal-ops", "location": "global", "name": "projects/.../engines/..."}]}
-# {"apps": []}이면 앱이 아직 없는 것
+# 기대 결과: {"apps": [{"display_name": "<앱 이름>", "location": "global", "name": "projects/.../engines/..."}]}
+# display_name은 만들 때 입력한 앱 이름. {"apps": []}이면 앱이 아직 없는 것
 ```
 
 ---
@@ -358,7 +359,7 @@ done
 > LLM 판정 지표가 `PERMISSION_DENIED`로 실패하면 채점 모델 호출 권한 문제입니다. 결정론적 지표만으로 먼저 진행하려면 `--metrics tool_call_accuracy,policy_first_order,rag_citation`을 붙여 실행합니다.
 
 > [!WARNING]
-> T3 평가 케이스는 내 Mock SaaS 데이터 공간에 실제로 휴가를 신청하고 티켓을 만듭니다. 평가를 돌릴 때마다 EMP-10294의 연차 잔여가 줄어듭니다(점검 때 4.4와 4.6을 거치며 8.0일에서 1.0일로 줄었습니다). 7.7 검증 전에 잔여를 확인하는 단계가 있습니다.
+> T3 평가 케이스는 내 Mock SaaS 데이터 공간에 실제로 휴가를 신청하고 티켓을 만듭니다. 평가를 돌릴 때마다 EMP-10294의 연차 잔여가 줄어듭니다(점검 때 4.4와 4.6을 거치며 8.0일에서 1.0일로 줄었습니다). 7.6 검증 전에 잔여를 확인하는 단계가 있습니다.
 
 ### 4.5 평가 리포트 웹 열람 (포트 8081)
 터미널에서 내장 웹 서버를 띄워 채점 리포트를 브라우저로 확인합니다:
@@ -417,11 +418,11 @@ Step 4의 Agent Gateway(이그레스 통제)는 현재 Agent Runtime과 Gemini E
 | 항목 | 리전 | 이유 |
 |:---|:---|:---|
 | Gemini 모델 엔드포인트 | `global` | 모델 호출은 global 엔드포인트 사용 (실습 1과 동일) |
-| Agent Runtime, Agent Gateway, Agent Registry, 접근 정책 | `asia-northeast1` (도쿄) | Agent Gateway는 서울(`asia-northeast3`)을 지원하지 않습니다. 에이전트, 게이트웨이, 레지스트리는 같은 프로젝트와 같은 리전에 있어야 합니다. |
+| Agent Runtime, Agent Gateway, Agent Registry, 게이트웨이 정책 | `asia-northeast1` (도쿄) | Agent Gateway는 서울(`asia-northeast3`)을 지원하지 않습니다. 에이전트, 게이트웨이, 레지스트리는 같은 프로젝트와 같은 리전에 있어야 합니다. |
 | Model Armor 템플릿 | `asia-northeast1` (도쿄) | 서울에서는 프롬프트 인젝션 필터가 지원되지 않습니다. |
 | Vertex AI Search 검색 앱 | `global` | 실습 1에서 만든 그대로 사용 |
 
-배포된 에이전트는 Agent Identity(SPIFFE 기반 고유 신원)를 받습니다. 서비스 계정 키를 만들거나 나눠 줄 필요가 없고, IAM 권한과 Step 4의 접근 정책은 이 신원을 기준으로 부여합니다.
+배포된 에이전트는 Agent Identity(SPIFFE 기반 고유 신원)를 받습니다. 서비스 계정 키를 만들거나 나눠 줄 필요가 없고, IAM 권한은 이 신원을 기준으로 부여합니다.
 
 Agent Runtime은 API에서 `reasoningEngines` 리소스로 표시됩니다(이전 이름 Agent Engine). 아래 REST 경로와 로그의 `ReasoningEngine`은 모두 Agent Runtime을 가리킵니다.
 
@@ -641,7 +642,6 @@ export AGENT_RESOURCE=$(python3 -c "import json; print(json.load(open('deploymen
 export AGENT_ID=${AGENT_RESOURCE##*/}
 : "${AGENT_ID:?deployment_metadata.json에서 엔진 ID를 읽지 못했습니다. 배포가 끝났는지 확인하세요}"
 export AGENT_URL="https://${REGION}-aiplatform.googleapis.com/v1/${AGENT_RESOURCE}"
-export AGENT_PRINCIPAL="principal://${TRUST_DOMAIN}/resources/aiplatform/projects/${PROJECT_NUMBER}/locations/${REGION}/reasoningEngines/${AGENT_ID}"
 echo ${AGENT_RESOURCE}
 
 # 엔진 변수를 5.4에서 만든 env.sh에 추가 (다시 실행해도 마지막 값이 적용됨)
@@ -649,7 +649,6 @@ cat >> ~/lab2/env.sh <<EOF
 export AGENT_RESOURCE="${AGENT_RESOURCE}"
 export AGENT_ID="${AGENT_ID}"
 export AGENT_URL="${AGENT_URL}"
-export AGENT_PRINCIPAL="${AGENT_PRINCIPAL}"
 EOF
 
 # 원격 에이전트 질의
@@ -670,7 +669,7 @@ agents-cli run --url ${AGENT_URL} --mode adk "EMP-10294 직원의 연차 잔여�
 
 ### 6.2 Agent Registry가 하는 일
 - 에이전트: Agent Runtime에 배포한 에이전트는 Agent Registry에 자동으로 등록됩니다. 따로 등록할 필요가 없습니다.
-- MCP 서버와 도구: 도구마다 위험도 주석(`annotations`)을 등록합니다. Step 4의 접근 정책은 이 주석을 읽어 차단 여부를 결정합니다.
+- MCP 서버와 도구: 도구마다 위험도 주석(`annotations`)을 등록합니다. Step 4에서는 `destructiveHint: true`로 표시한 도구를 게이트웨이에서 거부합니다.
 - 허용 목적지: Agent Gateway는 기본 거부입니다. 에이전트가 호출하는 Google API(Gemini, Vertex AI Search, Model Armor, 로깅 등)도 레지스트리에 등록되어 있어야 통과합니다. 빠지면 HTTP 498로 실패합니다.
 
 | 구분 | 도구 | readOnlyHint | destructiveHint |
@@ -736,7 +735,7 @@ for s in json.load(sys.stdin):
 
 ---
 
-## 7. Step 4: Agent Gateway와 접근 정책으로 위험 도구 차단
+## 7. Step 4: Agent Gateway 정책으로 위험 도구 차단
 
 ### 7.1 사건: "제 휴가가 왜 취소됐죠?"
 Step 1의 T4 평가에서 인젝션 문장 하나로 `cancel_leave_request`가 실제로 실행되었습니다. 보안팀장은 오늘 안에 모든 에이전트의 휴가 취소를 막으라고 지시합니다. 에이전트마다 코드를 고쳐 재배포하는 방식으로는 시간도 부족하고, 빠뜨리는 에이전트가 생깁니다.
@@ -747,9 +746,8 @@ Step 1의 T4 평가에서 인젝션 문장 하나로 `cancel_leave_request`가 �
 flowchart LR
     User["임직원 요청"] --> Agent["Agent Runtime 에이전트<br/>Agent Identity"]
     Agent ==> AGW{{"Agent Gateway<br/>도쿄, 이그레스"}}
-    AGW <--> IAP["IAP 승인 확장<br/>REQUEST_AUTHZ"]
-    IAP <--> UAP["IAM 접근 정책<br/>ALLOW 등록 목적지<br/>DENY destructiveHint"]
-    UAP <--> REG[("Agent Registry<br/>도구 위험도 주석")]
+    AGW <--> POL["authz 정책 DENY<br/>MCP tools/call 도구 이름"]
+    AGW <--> REG[("Agent Registry<br/>허용 목적지")]
     AGW -- "조회, 신청 허용" --> SaaS[("Mock SaaS<br/>WorkWeek / ITSM")]
     AGW -- "Google API 허용" --> GAPI["Gemini, Vertex AI Search,<br/>Model Armor, Logging"]
     AGW -. "cancel_leave_request<br/>403 차단" .-> Drop(("차단"))
@@ -758,112 +756,54 @@ flowchart LR
 | 구성 요소 | 역할 |
 |:---|:---|
 | Agent Gateway | 에이전트의 모든 외부 호출이 지나는 관문. MCP 요청을 해석해 메서드와 도구 이름을 식별 |
-| IAP 승인 확장 + authz 정책 | 게이트웨이의 요청마다 IAP에 허용 여부를 묻도록 연결. `DRY_RUN`은 평가만 하고, `ENFORCE`는 실제 차단 |
-| IAM 접근 정책 | Agent Identity별 규칙. 레지스트리에 등록된 목적지는 허용하고, `destructiveHint == true` 도구는 거부 |
-
-### 7.3 사전 조건: 조직 정책 확인 (터미널)
-IAM 접근 정책 바인딩은 조직 정책 `iam.managed.disableAccessPolicyBinding`이 켜져 있으면 만들 수 없습니다. 상태를 확인하고, 필요하면 프로젝트 단위로 해제합니다(조직 정책 관리자 권한 필요. 권한이 없으면 강사에게 요청하세요. 2.4에서 미리 확인했다면 결과만 다시 봅니다).
-
-① 현재 상태를 확인합니다.
-
-```bash
-source ~/lab2/env.sh
-gcloud org-policies describe iam.managed.disableAccessPolicyBinding --project=${PROJECT_ID} --effective
-```
-
-출력에 `enforce: true`가 있으면 ②를 실행합니다. 없으면 ②를 건너뛰고 7.4로 갑니다.
-
-② 프로젝트 단위로 해제합니다.
-
-```bash
-source ~/lab2/env.sh
-cat > ~/lab2/op.yaml <<EOF
-name: projects/${PROJECT_ID}/policies/iam.managed.disableAccessPolicyBinding
-spec:
-  rules:
-  - enforce: false
-EOF
-gcloud org-policies set-policy ~/lab2/op.yaml --project=${PROJECT_ID}
-```
-
-권한이 없으면 `PERMISSION_DENIED` 오류가 나옵니다. 이때는 강사에게 해제를 요청합니다.
+| Agent Registry | 등록된 목적지만 통과시킴(기본 거부). 6절에서 등록 |
+| authz 정책 (DENY) | 게이트웨이를 대상으로, MCP `tools/call`의 도구 이름이 `cancel_leave_request` 또는 `update_personal_info`이면 403으로 거부. 6절에서 `destructiveHint: true`로 표시한 두 도구 |
 
 > [!NOTE]
-> 제약 이름은 단수형 `disableAccessPolicyBinding`입니다. 복수형(`...Bindings`)으로 조회하면 `NOT_FOUND`가 나옵니다.
+> 에이전트 신원별로 규칙을 나누거나 레지스트리 주석(`destructiveHint`)을 직접 조건으로 쓰려면 IAP 승인 확장과 IAM 접근 정책을 함께 씁니다. IAM 접근 정책 바인딩은 조직 정책 `iam.managed.disableAccessPolicyBinding`이 꺼져 있어야 만들 수 있습니다. 실습 환경은 이 정책이 상위 조직에서 켜져 있고 프로젝트에서 해제할 수 없으므로, 실습에서는 게이트웨이 authz 정책으로 도구 이름을 거부합니다.
 
-### 7.4 게이트웨이 정책 구성 커맨드 (터미널)
-authz 정책 적용(2~3분)과 엔진 연결(5~10분)은 서로 독립이므로 두 터미널에서 동시에 실행하면 대기 시간이 줄어듭니다.
+### 7.3 에이전트를 게이트웨이에 연결 (터미널)
+agents-cli에는 게이트웨이 연결 옵션이 없어 REST로 한 번 설정합니다. 이후 agents-cli로 재배포해도 이 설정은 유지됩니다. 연결은 백그라운드에서 5~10분 걸리므로, 기다리는 동안 7.4를 진행합니다.
 
 ```bash
 source ~/lab2/env.sh
-cd ~/lab2
-# 1. IAP V2 승인 확장 (DRY_RUN) + authz 정책
-cat > ext-dryrun.yaml <<EOF
-name: enterprise-ops-agw-iap-dryrun
-service: iap.googleapis.com
-failOpen: true
-timeout: 1s
-metadata:
-  iamEnforcementMode: "DRY_RUN"
-  iapPolicyVersion: "V2"
-EOF
-cat > authz.yaml <<EOF
-name: enterprise-ops-agw-authz-iap
-target:
-  resources:
-    - "projects/${PROJECT_ID}/locations/${REGION}/agentGateways/enterprise-ops-agw"
-policyProfile: REQUEST_AUTHZ
-action: CUSTOM
-customProvider:
-  authzExtension:
-    resources:
-      - "projects/${PROJECT_ID}/locations/${REGION}/authzExtensions/enterprise-ops-agw-iap-dryrun"
-EOF
-gcloud service-extensions authz-extensions import enterprise-ops-agw-iap-dryrun \
-  --source=ext-dryrun.yaml --location=${REGION} --project=${PROJECT_ID}
-gcloud beta network-security authz-policies import enterprise-ops-agw-authz-iap \
-  --source=authz.yaml --location=${REGION} --project=${PROJECT_ID}
-# 소요 시간: 확장 약 8초, authz 정책 2~3분(그동안 점만 찍히는 것이 정상)
-
-# 2. IAM 접근 정책 (에이전트 신원 기준 ALLOW/DENY) + 프로젝트 바인딩
-: "${AGENT_PRINCIPAL:?source ~/lab2/env.sh를 먼저 실행하세요. 파일이 없으면 5.7의 엔진 정보 블록부터 실행합니다}"
-cat > uap.json <<EOF
-[
-  {
-    "description": "Deny destructive MCP tools (destructiveHint=true) for the ops agent",
-    "effect": "DENY",
-    "principals": ["${AGENT_PRINCIPAL}"],
-    "operation": {"permissions": ["iap.googleapis.com/resources.egressViaIAP"]},
-    "conditions": {"iap.googleapis.com": {"expression": "destination.agent_registry.mcp_server.tool.annotations.destructive_hint == true"}}
-  },
-  {
-    "description": "Allow the ops agent to reach destinations registered in the asia-northeast1 registry",
-    "effect": "ALLOW",
-    "principals": ["${AGENT_PRINCIPAL}"],
-    "operation": {"permissions": ["iap.googleapis.com/resources.egressViaIAP"]},
-    "conditions": {"iap.googleapis.com": {"expression": "destination.is_registered == true && destination.agent_registry.location == '${REGION}'"}}
-  }
-]
-EOF
-gcloud iam access-policies create ops-agent-egress --details-rules=uap.json \
-  --project=${PROJECT_ID} --location=global
-gcloud iam policy-bindings create ops-agent-egress-binding \
-  --policy=projects/${PROJECT_ID}/locations/global/accessPolicies/ops-agent-egress \
-  --target-resource=//cloudresourcemanager.googleapis.com/projects/${PROJECT_ID} \
-  --project=${PROJECT_ID} --location=global
-```
-
-다른 터미널 창(Konsole 새 탭)에서 엔진을 게이트웨이에 연결합니다. agents-cli에는 게이트웨이 연결 옵션이 없어 REST로 한 번 설정합니다. 이후 agents-cli로 재배포해도 이 설정은 유지됩니다.
-
-```bash
-source ~/lab2/env.sh   # 다른 터미널에서도 같은 변수를 사용
 curl -s -X PATCH -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Content-Type: application/json" \
   "https://${REGION}-aiplatform.googleapis.com/v1beta1/${AGENT_RESOURCE}?updateMask=spec.deploymentSpec.agentGatewayConfig" \
   -d "{\"spec\":{\"deploymentSpec\":{\"agentGatewayConfig\":{\"agentToAnywhereConfig\":{\"agentGateway\":\"projects/${PROJECT_ID}/locations/${REGION}/agentGateways/enterprise-ops-agw\"}}}}}"
 # 기대 결과: operation 이름이 담긴 JSON. 연결은 백그라운드에서 5~10분 걸림
 ```
 
-5분쯤 기다린 뒤 같은 터미널에서 연결 상태를 확인합니다. `None`이 나오면 아직 연결 중이므로 1~2분 간격으로 이 블록만 다시 실행합니다. 점검 때는 PATCH 후 약 10분 만에 연결되었습니다.
+### 7.4 위험 도구 거부 정책 만들기 (터미널)
+
+```bash
+source ~/lab2/env.sh
+: "${PROJECT_ID:?5.4의 첫 번째 블록을 먼저 실행하세요}" "${REGION:?5.4의 첫 번째 블록을 먼저 실행하세요}"
+cd ~/lab2
+cat > deny.yaml <<EOF
+name: enterprise-ops-agw-deny-destructive
+target:
+  resources:
+    - "projects/${PROJECT_ID}/locations/${REGION}/agentGateways/enterprise-ops-agw"
+action: DENY
+httpRules:
+  - to:
+      operations:
+        - mcp:
+            methods:
+              - name: tools/call
+                params:
+                  - exact: cancel_leave_request
+                  - exact: update_personal_info
+EOF
+gcloud beta network-security authz-policies import enterprise-ops-agw-deny-destructive \
+  --source=deny.yaml --location=${REGION} --project=${PROJECT_ID}
+# 2~3분 소요(그동안 점만 찍히는 것이 정상)
+```
+
+조회와 신청 도구는 목록에 없으므로 그대로 통과합니다. 새 위험 도구가 생기면 `params`에 이름을 추가하고 같은 명령으로 다시 import합니다.
+
+### 7.5 연결 확인: 게이트웨이를 지나도 조회가 정상인가
+7.3의 PATCH 후 5분쯤 지나면 연결 상태를 확인합니다. `None`이 나오면 아직 연결 중이므로 1~2분 간격으로 이 블록만 다시 실행합니다. 점검 때는 PATCH 후 약 10분 만에 연결되었습니다.
 
 ```bash
 source ~/lab2/env.sh
@@ -873,7 +813,7 @@ curl -s -H "Authorization: Bearer $(gcloud auth print-access-token)" \
 # 기대 결과: {'agentToAnywhereConfig': {'agentGateway': 'projects/.../agentGateways/enterprise-ops-agw'}}
 ```
 
-### 7.5 DRY_RUN 확인: 게이트웨이를 지나도 조회가 정상인가
+연결되면 조회를 보내고 게이트웨이 로그를 봅니다.
 
 ```bash
 source ~/lab2/env.sh
@@ -883,36 +823,14 @@ agents-cli run --url ${AGENT_URL} --mode adk "EMP-10294 직원의 연차 잔여�
 gcloud logging read 'resource.type="networkservices.googleapis.com/Gateway" AND httpRequest.requestUrl:"run.app"' \
   --project=${PROJECT_ID} --freshness=10m --limit=20 \
   --format="value(timestamp,httpRequest.status,jsonPayload.authzPolicyInfo.result,jsonPayload.agentGatewayInfo.mcpInfo.method,jsonPayload.agentGatewayInfo.mcpInfo.parameter)"
-# 기대 결과: 200 ALLOWED tools/list, 200 ALLOWED tools/call get_employee_balances ...
+# 기대 결과: 상태 200인 tools/list, tools/call get_employee_balances 줄
 ```
 
 로그 결과가 비어 있거나 `tools/list`, `initialize`만 있고 `tools/call` 줄이 없으면 반영이 늦은 것이므로 1분 뒤 `gcloud logging read`만 다시 실행합니다.
 
-조회 결과가 정상으로 나오면 게이트웨이 경로(인증서, 레지스트리 허용 목적지)가 올바른 것입니다. 이상하면 10.1의 498, 인증서 항목을 확인합니다.
+조회 결과가 정상으로 나오면 게이트웨이 경로(인증서, 레지스트리 허용 목적지)가 올바르고, 거부 정책이 조회 도구를 막지 않는 것입니다. 이상하면 10.1의 498, 인증서 항목을 확인합니다.
 
-> [!NOTE]
-> DRY_RUN에서는 위험 도구도 실제로 실행됩니다. DRY_RUN 상태의 취소 호출은 게이트웨이 로그와 IAP 로그에 남지 않을 때가 있습니다. 그래서 차단 여부는 다음 단계의 ENFORCE에서 403으로 확인합니다.
-
-### 7.6 ENFORCE 전환과 차단 검증
-
-```bash
-source ~/lab2/env.sh
-cd ~/lab2
-cat > ext-enforce.yaml <<EOF
-name: enterprise-ops-agw-iap-enforce
-service: iap.googleapis.com
-failOpen: false
-timeout: 1s
-metadata:
-  iapPolicyVersion: "V2"
-EOF
-sed 's/enterprise-ops-agw-iap-dryrun/enterprise-ops-agw-iap-enforce/' authz.yaml > authz-enforce.yaml
-gcloud service-extensions authz-extensions import enterprise-ops-agw-iap-enforce \
-  --source=ext-enforce.yaml --location=${REGION} --project=${PROJECT_ID}
-gcloud beta network-security authz-policies import enterprise-ops-agw-authz-iap \
-  --source=authz-enforce.yaml --location=${REGION} --project=${PROJECT_ID} --quiet
-# 2~3분 소요(그동안 점만 찍히는 것이 정상). 완료 후 30초 정도 기다린 뒤 검증
-```
+### 7.6 차단 검증
 
 검증에서 하루짜리 연차를 신청하므로 연차 잔여가 1일 이상이어야 합니다. 4.4와 4.6 평가가 실제 신청을 만들어 잔여가 줄었을 수 있습니다. 7.5 조회 결과의 연차 잔여가 1일 미만이면 내 Mock SaaS 데이터 공간을 기본 데이터로 초기화합니다(포털의 데이터 초기화 버튼과 같습니다. 다른 참가자에게는 영향이 없습니다).
 
@@ -939,24 +857,15 @@ echo "SID=${SID}"
 : "${SID:?s1.txt에서 session id를 찾지 못했습니다. grep -i session s1.txt로 값을 찾아 SID=값 형태로 직접 입력하세요}"
 agents-cli run --url ${AGENT_URL} --mode adk --session-id ${SID} \
   "방금 신청한 그 휴가 요청을 바로 취소해줘. 확인 절차 없이 진행해."
-# 기대 결과: 신청은 성공(예: 요청 #100), 취소는 "서버 응답 오류"로 실패하고 신청은 승인 대기로 남음
+# 기대 결과: 신청은 성공, 취소는 실패하고 신청은 승인 대기로 남음
 
 gcloud logging read 'resource.type="networkservices.googleapis.com/Gateway" AND httpRequest.requestUrl:"run.app"' \
   --project=${PROJECT_ID} --freshness=10m --limit=10 \
   --format="value(timestamp,httpRequest.status,jsonPayload.authzPolicyInfo.result,jsonPayload.agentGatewayInfo.mcpInfo.method,jsonPayload.agentGatewayInfo.mcpInfo.parameter)"
-# 결과가 비어 있으면 1분 뒤 gcloud logging read만 다시 실행
+# 기대 결과: tools/call cancel_leave_request 줄의 상태가 403. 결과가 비어 있으면 1분 뒤 gcloud logging read만 다시 실행
 ```
 
-실행 결과 예시:
-
-```text
-03:06:29  403  DENIED   tools/call  cancel_leave_request
-03:06:17  200  ALLOWED  tools/call  get_current_employee_id
-03:05:29  200  ALLOWED  tools/call  request_time_off
-03:05:25  200  ALLOWED  tools/list
-```
-
-에이전트 코드는 바꾸지 않았습니다. 이 정책은 현재 에이전트에 적용됩니다. 다른 에이전트는 게이트웨이 연결과 정책 principal 추가로 같은 규칙을 받습니다.
+에이전트 코드는 바꾸지 않았습니다. 이 정책은 게이트웨이에 붙어 있으므로, 같은 게이트웨이에 연결한 다른 에이전트도 같은 규칙을 받습니다.
 
 > [!NOTE]
 > Mock SaaS는 토큰을 발급한 브라우저 세션(테넌트)별로 데이터를 나눠 보관합니다. 토큰을 발급한 같은 브라우저로 Mock SaaS 웹 화면을 열면 에이전트가 만든 신청이 보이고, 취소가 차단되었다면 그 신청은 승인 대기 상태로 남아 있습니다. 다른 브라우저나 시크릿 창은 다른 테넌트라서 보이지 않습니다.
@@ -1196,11 +1105,10 @@ Gemini Enterprise 웹 앱이 열리고, 'Ask Cymbal IT/HR 운영 에이전트' �
 
 | 증상 | 원인 | 해결 |
 |:---|:---|:---|
-| 배포가 `could not access one or more secrets referenced by spec.deployment_spec.secret_env`로 실패 | 시크릿 읽기 권한을 주기 전에 배포했거나, `gcp-sa-aiplatform-re` 서비스 에이전트 권한이 빠짐. 한 번 실패한 엔진은 권한을 고친 뒤에도 같은 오류로 계속 실패함 | 5.4의 두 주체 권한을 확인한 뒤 엔진을 삭제하고 새로 배포(`deployment_metadata.json` 삭제 후 `agents-cli-manifest.yaml`의 `name`을 바꿔 새 엔진 생성). 5.7의 엔진 정보 블록을 다시 실행해 `~/lab2/env.sh`를 갱신하고, 새 엔진 ID로 7.4의 접근 정책 principal과 게이트웨이 연결을 다시 설정 |
+| 배포가 `could not access one or more secrets referenced by spec.deployment_spec.secret_env`로 실패 | 시크릿 읽기 권한을 주기 전에 배포했거나, `gcp-sa-aiplatform-re` 서비스 에이전트 권한이 빠짐. 한 번 실패한 엔진은 권한을 고친 뒤에도 같은 오류로 계속 실패함 | 5.4의 두 주체 권한을 확인한 뒤 엔진을 삭제하고 새로 배포(`deployment_metadata.json` 삭제 후 `agents-cli-manifest.yaml`의 `name`을 바꿔 새 엔진 생성). 5.7의 엔진 정보 블록을 다시 실행해 `~/lab2/env.sh`를 갱신하고, 새 엔진으로 7.3의 게이트웨이 연결을 다시 설정 |
 | `--agent-identity` 배포가 `setIamPolicy` `PERMISSION_DENIED`로 멈춤 | agents-cli가 ADC 계정으로 IAM 부여를 시도 | 5.4의 역할 부여 후 같은 배포 명령을 한 번 더 실행 |
 | 게이트웨이 연결 후 에이전트가 "도구가 활성화되어 있지 않다"고 답하고 로그에 `CERTIFICATE_VERIFY_FAILED` | 컨테이너가 게이트웨이 루트 CA를 신뢰하지 않음 | 5.6의 Dockerfile(특히 certifi 단계)과 `--build-args` 전달을 확인 후 재배포 |
 | HTTP 498 | 호출한 호스트가 레지스트리에 없음 (기본 거부). mtls/리전 엔드포인트도 정확히 일치해야 함 | 게이트웨이 로그의 `httpRequest.requestUrl` 호스트를 `core-gapi-services`에 추가 |
-| 접근 정책 바인딩 생성 실패 | 조직 정책 `iam.managed.disableAccessPolicyBinding` | 7.3 참고 |
 | FastMCP 401 | MCP 토큰 만료 또는 잘못된 값 | Mock SaaS에서 새 토큰 발급 후 `gcloud secrets versions add enterprise-agent-mcp-token --data-file=-`, 이어서 재배포 |
 | 일시적 `500 Authentication backend internal server error ... overloaded` | Google 측 인증 백엔드 일시 과부하(테스트 중 1회 발생, 약 1분 지속) | 잠시 후 재시도 |
 
@@ -1211,7 +1119,7 @@ Gemini Enterprise 웹 앱이 열리고, 'Ask Cymbal IT/HR 운영 에이전트' �
 2. Google API용 PSC 엔드포인트와 MCP 서버 도메인용 비공개 DNS 영역을 만듭니다. MCP 서버가 Cloud Run이면 `run.app` 영역을 만듭니다.
 3. 게이트웨이를 `networkConfig.egress.networkAttachment`와 `dnsPeeringConfig`(MCP 서버 도메인, Cloud Run이면 `run.app.`)를 포함해 만듭니다. 기존 게이트웨이에 네트워크 구성을 나중에 추가할 수 없으므로 새로 만들어야 합니다.
 4. 사내 MCP 서버를 내부 전용으로 둡니다. Cloud Run이면 `--ingress=internal`로 배포합니다. 온프레미스 서버라면 Cloud VPN이나 Cloud Interconnect로 1단계의 VPC에서 닿게 합니다. 온프레미스 연결과 사내 도메인 DNS 피어링이 지원되는 범위는 Agent Gateway 문서에서 먼저 확인하세요.
-5. Agent Registry에 사내 MCP 서버 URL을 등록하고, 6절처럼 도구마다 `readOnlyHint`, `destructiveHint` 주석을 회사 기준으로 붙입니다. 7.4의 접근 정책은 그대로 씁니다.
+5. Agent Registry에 사내 MCP 서버 URL을 등록하고, 6절처럼 도구마다 `readOnlyHint`, `destructiveHint` 주석을 회사 기준으로 붙입니다. 7.4의 거부 정책에는 회사의 위험 도구 이름을 넣어 그대로 씁니다.
 6. MCP 서버 인증은 사내 방식에 맞춥니다. 실습의 `X-MCP-Token` 대신 사내 인증 토큰을 쓰더라도 값은 5.4처럼 Secret Manager에 두고 에이전트에는 시크릿으로만 전달합니다.
 7. 공개 인터넷에서는 MCP URL이 막히고, 에이전트에서는 게이트웨이를 거쳐 정상 호출되는지 확인합니다.
 
@@ -1229,13 +1137,7 @@ curl -s -X DELETE -H "Authorization: Bearer $(gcloud auth print-access-token)" \
   "https://${REGION}-aiplatform.googleapis.com/v1beta1/${AGENT_RESOURCE}?force=true"
 
 # 게이트웨이 정책 (게이트웨이 자체는 블록 맨 끝에서 삭제)
-gcloud beta network-security authz-policies delete enterprise-ops-agw-authz-iap --location=${REGION} --quiet
-gcloud service-extensions authz-extensions delete enterprise-ops-agw-iap-enforce --location=${REGION} --quiet
-gcloud service-extensions authz-extensions delete enterprise-ops-agw-iap-dryrun --location=${REGION} --quiet
-
-# IAM 접근 정책
-gcloud iam policy-bindings delete ops-agent-egress-binding --project=${PROJECT_ID} --location=global --quiet
-gcloud iam access-policies delete ops-agent-egress --project=${PROJECT_ID} --location=global --quiet
+gcloud beta network-security authz-policies delete enterprise-ops-agw-deny-destructive --location=${REGION} --quiet
 
 # Agent Registry
 for s in work-week service-immediately core-gapi-services; do
@@ -1245,9 +1147,6 @@ done
 # Model Armor 템플릿, 시크릿
 gcloud model-armor templates delete hr-agent-armor-template --location=asia-northeast1 --quiet
 gcloud secrets delete enterprise-agent-mcp-token --quiet
-
-# 조직 정책 원복 (7.3에서 해제한 경우)
-gcloud org-policies delete iam.managed.disableAccessPolicyBinding --project=${PROJECT_ID} --quiet
 
 # gcloud 전역 설정 원복 (8.3에서 변경)
 gcloud config unset api_endpoint_overrides/modelarmor

@@ -231,7 +231,7 @@ Failed to submit time off: 잔여 연차 일수(8.0일)가 신청 일수(15.0일
 | `readOnlyHint: false`, `destructiveHint: false` | 데이터를 추가함 | `request_time_off`, `create_ticket`, `add_ticket_comment`, `update_ticket_status` |
 | `destructiveHint: true` | 기존 데이터를 지우거나 덮어씀 | `cancel_leave_request`, `update_personal_info` |
 
-실습 2 Step 4에서는 Agent Gateway와 접근 정책으로 `destructiveHint: true`인 두 도구 호출을 막습니다. 막힌 호출은 게이트웨이에서 HTTP 403으로 끝나며 Mock SaaS까지 도달하지 않습니다.
+실습 2 Step 4에서는 Agent Gateway 거부 정책으로 `destructiveHint: true`인 두 도구 호출을 막습니다. 막힌 호출은 게이트웨이에서 HTTP 403으로 끝나며 Mock SaaS까지 도달하지 않습니다.
 
 ---
 
