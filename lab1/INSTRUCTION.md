@@ -1016,6 +1016,7 @@ docs/SDD.md의 3절 '오케스트레이션 및 거버넌스 강령'을 반영하
 통합 테스트 스크립트(`tests/test_scenarios.py`)는 완성본 zip에서 가져옵니다. 이 스크립트는 Task 4에서 만든 래퍼 함수 이름을 그대로 import합니다.
 
 ```bash
+# [모두 실행] 완성본 zip에서 test_scenarios.py 파일 하나만 꺼냅니다. 본인 코드는 바뀌지 않습니다.
 cd ~/enterprise-ops-agent
 curl -fsSL https://raw.githubusercontent.com/hajekim/build-with-gemini/main/lab1/enterprise_ops_agent_completed.zip -o /tmp/enterprise_ops_agent_completed.zip
 unzip -j -o /tmp/enterprise_ops_agent_completed.zip enterprise-ops-agent/tests/test_scenarios.py -d tests/
@@ -1466,26 +1467,25 @@ curl -s -X POST http://localhost:8080/ \
 
 Lab 1을 직접 끝냈다면 이 절은 건너뛰고 본인 프로젝트(`~/enterprise-ops-agent`)로 실습 2를 진행합니다. 실습 2에서 새로 필요한 파일(평가 설정, Model Armor 가드)은 실습 2의 해당 단계에서 받습니다.
 
-### 완성본 받기
+### [완성본 전용] 완성본 받기
+
+> [!WARNING]
+> 실습 1을 끝냈고 그 결과물로 실습 2를 진행한다면 이 절은 실행하지 않습니다. 아래 블록은 기존 `~/enterprise-ops-agent` 폴더를 `~/enterprise-ops-agent.mine`으로 옮기고 그 자리에 완성본을 풉니다. 실수로 실행했다면 `rm -rf ~/enterprise-ops-agent && mv ~/enterprise-ops-agent.mine ~/enterprise-ops-agent`로 되돌립니다.
 
 Lab 1을 끝내지 못했거나 완성본 기준으로 실습 2를 진행하려면 완성본을 받습니다.
 
-터미널 창에서 아래 명령을 실행하면 완성본을 받아 압축을 풉니다. 기존 폴더는 덮어쓰지 않도록 먼저 `enterprise-ops-agent.mine`으로 이름을 바꿔 둡니다. 압축 파일만 따로 받아 두려면 [enterprise_ops_agent_completed.zip](./enterprise_ops_agent_completed.zip) 링크를 누르면 됩니다.
+터미널 창에서 아래 명령을 실행하면 완성본을 받아 압축을 풉니다. 기존 폴더는 덮어쓰지 않도록 먼저 `enterprise-ops-agent.mine`으로 이름을 바꿔 둡니다. `~/enterprise-ops-agent.mine`이 이미 있으면 `Directory not empty` 오류로 블록 전체가 멈춥니다. 두 폴더 중 어느 쪽을 남길지 확인한 뒤 다시 실행합니다. 압축 파일만 따로 받아 두려면 [enterprise_ops_agent_completed.zip](./enterprise_ops_agent_completed.zip) 링크를 누르면 됩니다.
 
 ```bash
-# 1. 홈 디렉터리로 이동하고 기존 작업 폴더 백업
-cd ~
-[ -d ~/enterprise-ops-agent ] && mv ~/enterprise-ops-agent ~/enterprise-ops-agent.mine
-
-# 2. 완성본 압축 파일 다운로드 및 해제
-curl -fsSL https://raw.githubusercontent.com/hajekim/build-with-gemini/main/lab1/enterprise_ops_agent_completed.zip -o enterprise_ops_agent_completed.zip
-unzip -o enterprise_ops_agent_completed.zip
-
-# 3. 프로젝트 디렉터리 이동 및 가상 환경 동기화
-cd enterprise-ops-agent
-agents-cli install
+# [완성본 전용] 실습 1 결과물을 쓰는 사람은 실행하지 마세요. 기존 폴더를 .mine으로 옮기고 완성본으로 바꿉니다.
 source ~/lab.env
 : "${MCP_TOKEN:?실습 1 Task 4 1단계에서 MCP_TOKEN을 ~/lab.env에 저장하고 source ~/lab.env를 실행하세요}"
+cd ~ && \
+{ [ ! -d ~/enterprise-ops-agent ] || mv -T ~/enterprise-ops-agent ~/enterprise-ops-agent.mine; } && \
+curl -fsSL https://raw.githubusercontent.com/hajekim/build-with-gemini/main/lab1/enterprise_ops_agent_completed.zip -o enterprise_ops_agent_completed.zip && \
+unzip -o enterprise_ops_agent_completed.zip && \
+cd enterprise-ops-agent && \
+agents-cli install && \
 uv run python3 tests/test_scenarios.py
 ```
 

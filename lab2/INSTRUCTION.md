@@ -72,7 +72,18 @@ flowchart LR
 
 에이전트를 종료했다가 다시 들어갈 필요는 없습니다. 에이전트 창은 터미널 창에서 export한 변수를 받지 못합니다. 그래서 에이전트에게 명령을 실행시키는 프롬프트에는 `source ~/lab.env; source ~/lab2/env.sh 2>/dev/null`를 먼저 실행하라는 줄을 넣어 두었습니다. `~/lab.env`는 실습 1에서 만든 파일(`GOOGLE_*`, `PATH`, `MCP_TOKEN`)이고, `~/lab2/env.sh`는 5.4에서 만듭니다. 두 파일 모두 `~/.bashrc`가 읽으므로 새 터미널 창에도 변수가 들어 있습니다.
 
-### 2.1 기존 실습 1 완료자
+진행 방식은 두 가지입니다. 2.3부터는 두 방식 모두 같은 명령을 실행합니다.
+
+| 진행 방식 | 대상 | 실행할 절 |
+|:---|:---|:---|
+| A. 실습 1 결과물로 진행 (기본) | 실습 1을 끝낸 사람 | 2.1 → 2.3 (2.2는 건너뜀) |
+| B. 완성본으로 진행 | 실습 1을 끝내지 못한 사람 | 2.2 → 2.3 |
+
+명령 블록 첫 줄의 주석으로 대상을 구분합니다.
+- `# [완성본 전용]`: B만 실행합니다. 기존 폴더를 완성본으로 바꾸므로 A는 실행하지 않습니다.
+- `# [모두 실행]`: A, B 모두 실행합니다. 명령에 `completed.zip`이 보여도 완성본에서 파일 하나만 꺼내 넣으므로 본인 코드는 바뀌지 않습니다.
+
+### 2.1 실습 1 결과물로 진행 (기본)
 실습 1을 직접 끝냈다면 본인 프로젝트(`~/enterprise-ops-agent`)로 그대로 진행합니다. 실습 2에서 새로 필요한 파일은 쓰는 단계에서 받습니다.
 
 - `tests/eval/eval_config.yaml`: Step 1 평가 지표 설정 (4.3에서 받음)
@@ -88,7 +99,7 @@ uv run python3 tests/test_scenarios.py
 ```
 5개 시나리오가 모두 `[PASS]`이면 2.2는 건너뛰고 2.3으로 넘어갑니다.
 
-### 2.2 실습 1을 끝내지 못했다면: 완성본 받기
+### 2.2 [완성본 전용] 실습 1을 끝내지 못했다면: 완성본 받기
 
 > [!WARNING]
 > 2.1이 통과했다면 이 절은 실행하지 않습니다. 아래 블록은 기존 `~/enterprise-ops-agent` 폴더를 `~/enterprise-ops-agent.mine`으로 옮기고 그 자리에 완성본을 풉니다. 실수로 실행했다면 `rm -rf ~/enterprise-ops-agent && mv ~/enterprise-ops-agent.mine ~/enterprise-ops-agent`로 되돌립니다.
@@ -102,6 +113,7 @@ uv run python3 tests/test_scenarios.py
 기존 `~/enterprise-ops-agent` 폴더가 있으면 덮어쓰기 전에 `enterprise-ops-agent.mine`으로 이름을 바꿔 둡니다(실습 1의 '실습 1 완성본과 실습 2 준비' 절과 같은 방식). `~/enterprise-ops-agent.mine`이 이미 있으면 `Directory not empty` 오류로 블록 전체가 멈춥니다. 두 폴더 중 어느 쪽을 남길지 확인한 뒤 다시 실행합니다.
 
 ```bash
+# [완성본 전용] 실습 1 결과물을 쓰는 사람은 실행하지 마세요. 기존 폴더를 .mine으로 옮기고 완성본으로 바꿉니다.
 export PATH="$HOME/.local/bin:$PATH"
 command -v agents-cli >/dev/null || echo "agents-cli가 없습니다. 실습 1 Task 1 1단계를 먼저 실행하세요"
 : "${MCP_TOKEN:?실습 1 Task 4 1단계대로 MCP_TOKEN을 ~/lab.env에 저장하고 source ~/lab.env를 실행하세요}"
@@ -270,6 +282,7 @@ Google Agent Platform은 다음 5단계 평가 루프를 제공합니다:
 평가 설정 파일 `tests/eval/eval_config.yaml`을 실습 1 완성본에서 받아 덮어씁니다. 스캐폴드가 만든 같은 이름의 기본 파일에는 지표가 하나뿐이라, 파일이 이미 있어도 이 명령을 실행해야 합니다.
 
 ```bash
+# [모두 실행] 완성본 zip에서 eval_config.yaml 파일 하나만 꺼냅니다. 본인 코드는 바뀌지 않습니다.
 cd ~/enterprise-ops-agent
 curl -fsSL https://raw.githubusercontent.com/hajekim/build-with-gemini/main/lab1/enterprise_ops_agent_completed.zip -o /tmp/enterprise_ops_agent_completed.zip
 unzip -j -o /tmp/enterprise_ops_agent_completed.zip enterprise-ops-agent/tests/eval/eval_config.yaml -d tests/eval/
@@ -963,6 +976,7 @@ gcloud logging read 'resource.type="networkservices.googleapis.com/Gateway" AND 
 1. 가드 파일을 받습니다. 완성본으로 시작했다면 이미 있습니다.
 
 ```bash
+# [모두 실행] 파일이 없을 때만 완성본 zip에서 model_armor.py 하나를 꺼냅니다. 본인 코드는 바뀌지 않습니다.
 cd ~/enterprise-ops-agent
 [ -f app/tools/model_armor.py ] || { curl -fsSL https://raw.githubusercontent.com/hajekim/build-with-gemini/main/lab1/enterprise_ops_agent_completed.zip -o /tmp/enterprise_ops_agent_completed.zip && unzip -j -o /tmp/enterprise_ops_agent_completed.zip enterprise-ops-agent/app/tools/model_armor.py -d app/tools/; }
 grep -cE "before_model_callback\s*=\s*armor_guard" app/agent.py
@@ -1259,12 +1273,13 @@ Discovery Engine이 문서 가져오기용으로 자동으로 만든 `gs://<프�
 실습 1과 실습 2의 완성본을 압축 파일로 제공합니다. 프로젝트 ID, 토큰, 엔진 ID, 게이트웨이 인증서는 빠져 있고, 압축 안의 `README.md`에 본인 환경에서 바꿀 값과 실행 순서가 정리되어 있습니다.
 
 ```bash
+# [선택] 참고용으로 zip 파일만 홈 폴더에 받습니다. 압축은 풀지 않으므로 지금 프로젝트는 바뀌지 않습니다.
 cd ~
 curl -fsSLO https://raw.githubusercontent.com/hajekim/build-with-gemini/main/lab1/enterprise_ops_agent_completed.zip
 curl -fsSLO https://raw.githubusercontent.com/hajekim/build-with-gemini/main/lab2/enterprise_ops_agent_lab2_completed.zip
 ```
 
-두 압축 모두 `enterprise-ops-agent/` 폴더로 풀리므로, 둘 다 풀려면 서로 다른 위치에서 압축을 푸세요.
+두 압축 모두 `enterprise-ops-agent/` 폴더로 풀리므로, 둘 다 풀려면 서로 다른 위치에서 압축을 푸세요. 홈 폴더에서 풀면 지금 쓰는 `~/enterprise-ops-agent`를 덮어씁니다.
 
 ---
 실습 2를 마쳤습니다. Antigravity 2.0(`agy`)과 ADK로 정량 평가, Secret Manager와 Agent Identity, Agent Registry 위험도 주석, Agent Gateway 위험 도구 차단, Model Armor 검사, Gemini Enterprise 등록을 진행했습니다.
