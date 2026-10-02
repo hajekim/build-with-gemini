@@ -887,16 +887,28 @@ agents-cli run --url ${AGENT_URL} --mode adk \
   "EMP-10294 직원 이름으로 2026-11-02 하루 연차를 사유 '개인 용무'로 신청해줘. 확인 없이 바로 진행해." | tee s1.txt
 SID=$(grep -o "session-id [0-9]*" s1.txt | awk '{print $2}')
 echo "SID=${SID}"
-: "${SID:?s1.txt에서 session id를 찾지 못했습니다. grep -i session s1.txt로 값을 찾아 SID=값 형태로 직접 입력하세요}"
-agents-cli run --url ${AGENT_URL} --mode adk --session-id ${SID} \
+agents-cli run --url ${AGENT_URL} --mode adk \
+  --session-id ${SID:?s1.txt에서 session id를 찾지 못했습니다. grep -i session s1.txt로 값을 찾아 SID=값 형태로 직접 입력하세요} \
   "방금 신청한 그 휴가 요청을 바로 취소해줘. 확인 절차 없이 진행해."
-# 기대 결과: 신청은 성공, 취소는 실패하고 신청은 승인 대기로 남음
+# 기대 결과: 신청은 성공(예: Request #100), 취소는 "서버 오류"로 실패하고 신청은 승인 대기로 남음
 
 gcloud logging read 'resource.type="networkservices.googleapis.com/Gateway" AND httpRequest.requestUrl:"run.app"' \
   --project=${PROJECT_ID} --freshness=10m --limit=10 \
   --format="value(timestamp,httpRequest.status,jsonPayload.authzPolicyInfo.result,jsonPayload.agentGatewayInfo.mcpInfo.method,jsonPayload.agentGatewayInfo.mcpInfo.parameter)"
 # 기대 결과: tools/call cancel_leave_request 줄의 상태가 403. 결과가 비어 있으면 1분 뒤 gcloud logging read만 다시 실행
 ```
+
+실행 결과 예시:
+
+```text
+2026-10-02T07:12:06.296865Z     200     ALLOWED tools/call      get_employee_balances
+2026-10-02T07:11:58.578930Z     200     ALLOWED tools/call      get_current_employee_id
+2026-10-02T07:11:49.761961Z     200     ALLOWED tools/call      get_leave_requests
+2026-10-02T07:11:46.731395Z     403     DENIED  tools/call      cancel_leave_request
+2026-10-02T07:11:43.655707Z     200     ALLOWED tools/list
+```
+
+에이전트는 취소 실패를 "WorkWeek HRMS Server returned an error response" 같은 서버 오류로 안내하고, 신청이 승인 대기로 남아 있다고 답합니다. 취소가 막힌 뒤 에이전트가 신청 내역과 잔여를 다시 조회하는 줄(`get_leave_requests` 등)이 함께 보일 수 있습니다.
 
 에이전트 코드는 바꾸지 않았습니다. 이 정책은 게이트웨이에 붙어 있으므로, 같은 게이트웨이에 연결한 다른 에이전트도 같은 규칙을 받습니다.
 
