@@ -3,7 +3,7 @@
 
 실습 1에서 만든 Orchestrator-Worker 멀티 에이전트(`enterprise_ops_agent`)를 Antigravity 2.0(`agy`) 환경에서 이어받아 `agents-cli eval`로 평가하고 개선합니다. 이어서 Secret Manager, Agent Identity, Agent Registry, Agent Gateway, Model Armor를 적용해 Agent Runtime에 배포하고 Gemini Enterprise(GE)에 등록합니다.
 
-소요 시간: 약 100~110분 (터미널 경로 기준. (선택) 절과 강사 요청 대기 시간은 포함하지 않습니다)
+소요 시간: 약 100~110분 ((선택) 절과 강사 요청 대기 시간은 포함하지 않습니다)
 
 | Step | 절 | 내용 | 시간 |
 |:---|:---:|:---|:---:|
@@ -183,7 +183,7 @@ Set up identity를 누르면 Choose identity 화면이 나옵니다. Use Google 
 자세한 내용은 공식 문서 [Configure your identity provider](https://cloud.google.com/gemini/enterprise/docs/configure-identity-provider)를 참고하세요.
 
 #### 3) 웹 앱 URL 복사
-확인을 누르면 "Authentication configurations have been updated successfully" 알림과 함께 "Your Gemini Enterprise webapp is ready" 화면이 나옵니다. Copy URL로 웹 앱 주소(`https://vertexaisearch.cloud.google.com/home/cid/...`)를 복사해 둡니다. 9.5에서 이 주소로 에이전트와 대화합니다. 오른쪽 위 Go to Gemini Enterprise 링크로 바로 열어도 됩니다.
+확인을 누르면 "Authentication configurations have been updated successfully" 알림과 함께 "Your Gemini Enterprise webapp is ready" 화면이 나옵니다. Copy URL로 웹 앱 주소(`https://vertexaisearch.cloud.google.com/home/cid/...`)를 복사해 둡니다. 9.4에서 이 주소로 에이전트와 대화합니다. 오른쪽 위 Go to Gemini Enterprise 링크로 바로 열어도 됩니다.
 
 ![웹 앱 준비 완료 화면](images/ge_setup_04_webapp_ready.png)
 
@@ -234,14 +234,19 @@ ls ~/enterprise-ops-agent/.agents/skills
 ```prompt
 /skills
 ```
-목록에 `google-agents-cli-eval`, `google-agents-cli-deploy`, `google-agents-cli-publish` 등이 등록되어 있는지 확인한 후 `ESC` 키를 눌러 대화창으로 돌아갑니다. 에이전트는 종료하지 않고 그대로 둡니다. 4.3~4.5의 `bash` 블록은 터미널 창에서 실행합니다.
+목록에 `google-agents-cli-eval`, `google-agents-cli-deploy`, `google-agents-cli-publish` 등이 등록되어 있는지 확인한 후 `ESC` 키를 눌러 대화창으로 돌아갑니다. 에이전트는 종료하지 않고 그대로 둡니다.
 
-### 3.3 진행 방식: 터미널 기본, 에이전트 선택
-Step 2~6은 터미널 명령이 기본 경로입니다. 각 Step의 "(선택) 에이전트 창에서 같은 작업 해 보기" 절은 같은 작업을 에이전트(앱 또는 agy CLI)에게 맡겨 보는 선택 과제이며, 시간이 남을 때 진행합니다.
+### 3.3 진행 방식: agents-cli는 에이전트, 클라우드 설정은 터미널
+실습 2는 작업 성격에 따라 기본 경로가 다릅니다.
 
-- 에이전트 창으로 진행하려면 바로 앞 터미널 절의 안내를 따릅니다. 배포·생성 블록은 건너뛰고, 변수 설정과 확인 블록은 터미널 창에서 실행합니다.
-- 터미널 경로를 이미 실행했다면 에이전트가 같은 리소스를 다시 만들거나 다시 배포할 수 있습니다. 이때는 완료 조건의 확인 항목만 시켜 봅니다.
-- 에이전트가 5분 넘게 진척이 없으면(문서만 읽고 명령을 실행하지 않는 경우 등) 작업을 중단하고(CLI는 `ESC`) 터미널 경로로 진행합니다.
+| 작업 | 기본 경로 | 해당 절 |
+|:---|:---|:---|
+| `agents-cli` 명령 하나로 끝나는 작업 (평가, 배포, GE 등록) | 에이전트 창. 실행할 명령을 프롬프트에 적어 에이전트에게 맡기고, 해당 스킬을 쓰게 합니다 | 4.4, 4.6, 5.7, 9.2 |
+| gcloud로 권한, 네트워크, 정책을 설정하는 작업 | 터미널 창. 값이 정확해야 하고 잘못되면 뒤 단계가 막힙니다 | 5.3~5.6, 6, 7, 8 |
+
+- 에이전트 창 단계에는 프롬프트 뒤에 에이전트가 실행해야 하는 명령, 완료 확인 방법, 막혔을 때 실행할 터미널 블록이 함께 있습니다.
+- 에이전트가 5분 넘게 진척이 없으면(문서만 읽고 명령을 실행하지 않는 경우 등) 작업을 멈추고(CLI는 `ESC`) 같은 절의 터미널 블록을 실행합니다.
+- 6, 7, 8절의 "(선택) 에이전트 창에서 같은 작업 해 보기"는 시간이 남을 때 진행합니다. 터미널 경로를 이미 실행했다면 에이전트가 같은 리소스를 다시 만들 수 있으니, 완료 조건의 확인 항목만 시켜 봅니다.
 
 ---
 
@@ -280,8 +285,29 @@ ls tests/eval/eval_config.yaml tests/eval/datasets/
 | `policy_first_order` | 코드 | 1.00 | 쓰기 도구(연차 상신, 티켓 생성 등) 호출 전에 `search_company_policy`가 먼저 호출되었는가 |
 | `rag_citation` | 코드 | >= 0.90 | RAG 인용률. 규정 검색 결과가 있으면 최종 답변에 해당 문서번호(POL-HR/POL-IT)를 인용했는가 |
 
-### 4.4 1단계 평가 실행: Tier별 agents-cli eval run (터미널)
-터미널 창에서 실습 1에서 만든 4-Tier 데이터셋으로 평가를 실행합니다. Tier당 2~4분 걸립니다:
+### 4.4 1단계 평가 실행: Tier별 agents-cli eval run (에이전트 창)
+실습 1에서 만든 4-Tier 데이터셋으로 평가를 실행합니다. 에이전트 창에 다음 프롬프트를 입력합니다:
+
+```prompt
+명령을 실행하기 전에 `source ~/lab.env; source ~/lab2/env.sh 2>/dev/null`를 먼저 실행할 것.
+google-agents-cli-eval 스킬 지침을 따라 진행해줘.
+~/enterprise-ops-agent에서 다음 명령을 그대로 실행하고, Tier별 지표 점수를 표로 요약해줘.
+for t in tier1-single-tool tier2-multi-tool tier3-policy-first-transaction tier4-adversarial-edge; do
+  agents-cli eval run --dataset tests/eval/datasets/$t.json --config tests/eval/eval_config.yaml
+done
+명령이 실패하면 오류 메시지를 보여 주고 멈출 것. 문서를 찾아보거나 다른 명령을 시도하지 말 것.
+```
+
+에이전트는 `agents-cli eval run`을 Tier마다 한 번씩, 모두 4번 실행합니다. Tier당 2~4분 걸리며, 그동안 에이전트 창에 실행 중인 명령이 표시됩니다. 다른 명령을 실행하거나 문서를 계속 읽기만 하면 아래 터미널 블록으로 넘어갑니다.
+
+완료 확인 (터미널 창):
+
+```bash
+ls ~/enterprise-ops-agent/artifacts/grade_results/
+# 기대 결과: Tier마다 results_*.json과 results_*.html이 생성됨
+```
+
+에이전트가 5분 넘게 명령을 실행하지 않거나 같은 오류를 반복하면 작업을 멈추고(CLI는 `ESC`) 터미널 창에서 아래 블록을 실행합니다. 에이전트로 끝냈다면 이 블록은 건너뜁니다.
 
 ```bash
 cd ~/enterprise-ops-agent
@@ -542,8 +568,26 @@ CMD ["uv", "run", "uvicorn", "app.fast_api_app:app", "--host", "0.0.0.0", "--por
 EOF
 ```
 
-### 5.7 agents-cli deploy로 배포하고 검증 (터미널)
-이 절의 명령이 기본 경로입니다. 에이전트 창으로 배포하려면 5.8을 먼저 진행한 뒤, 아래 첫 번째 블록(배포)은 건너뛰고 두 번째 블록(배포된 엔진 정보)부터 실행합니다.
+### 5.7 agents-cli deploy로 배포하고 검증 (에이전트 창)
+에이전트 창에 다음 프롬프트를 입력합니다:
+
+```prompt
+명령을 실행하기 전에 `source ~/lab.env; source ~/lab2/env.sh 2>/dev/null`를 먼저 실행할 것.
+google-agents-cli-deploy 스킬 지침을 따라 진행해줘.
+~/enterprise-ops-agent에서 다음 명령을 그대로 실행하고 결과를 요약해줘.
+CERT=$(awk '{printf "%s\\n", $0}' ~/lab2/agw_root.pem)
+agents-cli deploy -d agent_runtime \
+  --project=${PROJECT_ID} --region=${REGION} \
+  --agent-identity --no-confirm-project \
+  --secrets="MCP_TOKEN=enterprise-agent-mcp-token:latest" \
+  --update-env-vars="GOOGLE_API_PREVENT_AGENT_TOKEN_SHARING_FOR_GCP_SERVICES=false" \
+  --build-args="AGENT_GATEWAY_ROOT_CERTIFICATES=${CERT}"
+명령이 실패하면 오류 메시지를 보여 주고 멈출 것. 문서를 찾아보거나 다른 명령을 시도하지 말 것. 단, PERMISSION_DENIED로 멈추면 같은 명령을 한 번 더 실행할 것.
+```
+
+에이전트는 `agents-cli deploy -d agent_runtime ...`을 실행합니다. 3~5분 걸리며, 끝나면 "Deployment successful!"과 Agent Runtime ID가 보입니다.
+
+에이전트가 5분 넘게 명령을 실행하지 않거나 같은 오류를 반복하면 작업을 멈추고(CLI는 `ESC`) 터미널 창에서 아래 블록을 실행합니다. 에이전트로 끝냈다면 이 블록은 건너뜁니다.
 
 ```bash
 source ~/lab2/env.sh
@@ -560,6 +604,8 @@ agents-cli deploy -d agent_runtime \
   --build-args="AGENT_GATEWAY_ROOT_CERTIFICATES=${CERT}"
 # 3~5분 소요. "Deployment successful!"과 Agent Runtime ID가 출력됨
 ```
+
+어느 경로로 배포했든, 터미널 창에서 아래 블록(배포된 엔진 정보)을 실행합니다.
 
 > [!NOTE]
 > `--agent-identity` 첫 배포에서 agents-cli는 ADC(Application Default Credentials) 계정으로 프로젝트 IAM 부여를 시도합니다. ADC 계정에 `resourcemanager.projects.setIamPolicy` 권한이 없으면 `PERMISSION_DENIED`로 멈춥니다. 5.4에서 필요한 역할을 이미 부여했으므로, 같은 명령을 한 번 더 실행하면 만들어진 엔진에 코드가 배포됩니다.
@@ -590,27 +636,6 @@ agents-cli run --url ${AGENT_URL} --mode adk "EMP-10294 직원의 연차 잔여�
 ```
 
 새 터미널 창은 `~/.bashrc`가 `~/lab2/env.sh`를 읽으므로 따로 할 일이 없습니다. 이미 열려 있던 터미널 창을 위해 이후 블록의 첫 줄에 `source ~/lab2/env.sh`를 넣어 두었습니다.
-
-### 5.8 (선택) 에이전트 창에서 같은 작업 해 보기
-시간이 남으면 같은 배포를 에이전트에게 맡겨 봅니다. 5.7을 이미 실행했다면 재배포(3~5분)가 한 번 더 일어납니다. 에이전트 창에 다음 프롬프트를 입력합니다:
-
-```prompt
-google-agents-cli-deploy 스킬 지침을 준수하여, 우리 에이전트를 Agent Runtime에 배포해줘.
-명령을 실행하기 전에 `source ~/lab.env; source ~/lab2/env.sh 2>/dev/null`를 먼저 실행할 것.
-
-[조건]
-- 배포 도구: agents-cli deploy -d agent_runtime (gcloud 직접 배포 금지)
-- 리전: asia-northeast1, Agent Identity 사용 (--agent-identity)
-- 시크릿: Secret Manager의 enterprise-agent-mcp-token을 MCP_TOKEN 환경 변수로 주입 (--secrets)
-- 환경 변수: GOOGLE_API_PREVENT_AGENT_TOKEN_SHARING_FOR_GCP_SERVICES=false
-- 빌드 인자: ~/lab2/agw_root.pem 내용을 AGENT_GATEWAY_ROOT_CERTIFICATES로 전달 (줄바꿈은 \n 문자열로)
-
-[완료 조건]
-- deployment_metadata.json의 remote_agent_runtime_id를 보여줘.
-- agents-cli run --url ... --mode adk 로 "EMP-10294 직원의 연차 잔여일수 알려줘"를 보내 실제 조회 결과가 나오는지 확인해줘.
-```
-
-에이전트 창으로 배포했다면 터미널 창에서 5.7의 두 번째 블록(배포된 엔진 정보)을 실행해 엔진 변수를 `~/lab2/env.sh`에 추가합니다.
 
 이 단계까지는 게이트웨이를 거치지 않습니다. 게이트웨이 연결은 Step 4에서 합니다.
 
@@ -1079,8 +1104,8 @@ Model Armor 보안 템플릿을 만들고, app/tools/model_armor.py의 armor_gua
 ### 9.1 사건: "임직원이 쓰는 Gemini Enterprise에 에이전트를 올려 주세요"
 품질 평가, 시크릿 격리, 게이트웨이 도구 차단, Model Armor 방어가 끝났습니다. 이제 임직원이 매일 쓰는 Gemini Enterprise에 에이전트를 등록합니다.
 
-### 9.2 Gemini Enterprise 등록 커맨드 (터미널)
-이 절의 명령이 기본 경로입니다. 에이전트 창으로 진행했다면(9.3) 이 절은 건너뛰고 9.4로 갑니다.
+### 9.2 Gemini Enterprise 등록 (에이전트 창)
+먼저 터미널 창에서 프로젝트에 GE 앱이 있는지 확인합니다.
 
 ```bash
 source ~/lab2/env.sh
@@ -1094,6 +1119,28 @@ echo ${GE_APP_ID}
 
 > [!IMPORTANT]
 > `--list` 결과가 `{"apps": []}`이고 `GE_APP_ID`가 비어 있으면 프로젝트에 Gemini Enterprise 앱이 없는 것입니다(새 프로젝트에는 앱이 없습니다). 2.5 절차대로 앱을 만들고 본인 계정에 라이선스를 할당한 뒤 다시 실행하세요.
+
+앱이 확인되면 에이전트 창에 다음 프롬프트를 입력합니다:
+
+```prompt
+명령을 실행하기 전에 `source ~/lab.env; source ~/lab2/env.sh 2>/dev/null`를 먼저 실행할 것.
+google-agents-cli-publish 스킬 지침을 따라 진행해줘.
+~/enterprise-ops-agent에서 다음 명령을 그대로 실행하고, 등록된 agent 리소스 이름을 알려줘.
+GE_APP_ID=$(agents-cli publish gemini-enterprise --list --project=${PROJECT_ID} 2>/dev/null | grep -o '"name": "projects/[^"]*' | head -n1 | cut -d'"' -f4)
+agents-cli publish gemini-enterprise \
+  --agent-runtime-id=${AGENT_RESOURCE} \
+  --gemini-enterprise-app-id=${GE_APP_ID} \
+  --registration-type=adk --deployment-target=agent_runtime \
+  --project=${PROJECT_ID} \
+  --display-name="Cymbal IT/HR 운영 에이전트" \
+  --description="사내 복무 지침(POL-HR)과 IT 자산 지침(POL-IT)을 근거로 휴가와 IT 티켓을 처리하는 에이전트" \
+  --tool-description="임직원의 휴가 조회/신청, 사내 규정 검색, IT 티켓 처리"
+명령이 실패하면 오류 메시지를 보여 주고 멈출 것. 문서를 찾아보거나 다른 명령을 시도하지 말 것.
+```
+
+에이전트는 `agents-cli publish gemini-enterprise --list`로 앱 ID를 읽은 뒤 등록 명령을 실행합니다. 약 20초 걸리고, "Successfully created agent registration!"과 `.../assistants/default_assistant/agents/<ID>`가 보이면 완료입니다.
+
+에이전트가 5분 넘게 명령을 실행하지 않거나 같은 오류를 반복하면 작업을 멈추고(CLI는 `ESC`) 터미널 창에서 아래 블록을 실행합니다. 에이전트로 끝냈다면 이 블록은 건너뜁니다.
 
 ```bash
 # 2. Agent Runtime 에이전트 등록 (약 20초 소요)
@@ -1110,24 +1157,7 @@ agents-cli publish gemini-enterprise \
 
 GE를 통한 대화도 같은 Agent Runtime 엔진에서 실행되므로, Step 4의 게이트웨이 정책과 Step 5의 Model Armor가 그대로 적용됩니다.
 
-### 9.3 (선택) 에이전트 창에서 같은 작업 해 보기
-9.2 대신 에이전트로 등록해 보려면 에이전트 창에 다음 프롬프트를 입력합니다. GE 앱과 라이선스(2.5)가 먼저 준비되어 있어야 합니다.
-
-```prompt
-google-agents-cli-publish 스킬 지침을 바탕으로, Agent Runtime에 배포한 에이전트를 Gemini Enterprise에 등록해줘.
-명령을 실행하기 전에 `source ~/lab.env; source ~/lab2/env.sh 2>/dev/null`를 먼저 실행할 것.
-
-[조건]
-- 명령어: agents-cli publish gemini-enterprise
-- 등록 유형: adk (Agent Runtime 에이전트), 배포 대상: agent_runtime
-- 표시 이름: 'Cymbal IT/HR 운영 에이전트'
-- 설명: '사내 복무 지침(POL-HR)과 IT 자산 지침(POL-IT)을 근거로 휴가와 IT 티켓을 처리하는 에이전트'
-
-[완료 조건]
-- 등록된 agent 리소스 이름을 출력하고, GE 채팅 화면에서 에이전트를 찾는 방법을 안내해줘.
-```
-
-### 9.4 등록 확인과 Preview로 에이전트 열기
+### 9.3 등록 확인과 Preview로 에이전트 열기
 등록이 끝나면 콘솔에서 에이전트를 확인하고, Preview로 열어 대화해 봅니다.
 
 #### 1) Agents 목록에서 등록 확인
@@ -1170,8 +1200,8 @@ Gemini Enterprise 웹 앱이 열리고, 'Ask Cymbal IT/HR 운영 에이전트' �
 
 ![Gemini Enterprise 다중 턴 대화 검증](images/ge_03_defect_repeat_troubleshoot.png)
 
-### 9.5 임직원 실시간 테스트 체크리스트 (직접 수행)
-9.4의 Preview로 에이전트 화면을 열고, 아래 질문을 순서대로 같은 대화창에서 보냅니다. 2.5에서 복사한 웹 앱 URL로 들어갔다면 에이전트 목록에서 'Cymbal IT/HR 운영 에이전트'를 골라야 합니다.
+### 9.4 임직원 실시간 테스트 체크리스트 (직접 수행)
+9.3의 Preview로 에이전트 화면을 열고, 아래 질문을 순서대로 같은 대화창에서 보냅니다. 2.5에서 복사한 웹 앱 URL로 들어갔다면 에이전트 목록에서 'Cymbal IT/HR 운영 에이전트'를 골라야 합니다.
 
 > [!WARNING]
 > 에이전트를 선택하지 않고 GE 기본 채팅창에 질문하면 GE 자체 모델이 답합니다. 이 경우 "3일 이상은 5영업일 전 신청", "잔여 연차 8.5일"처럼 규정과 데이터에 없는 값을 답할 수 있습니다. 답변에 `POL-HR-2026-004` 같은 문서번호가 없거나 숫자가 Mock SaaS 화면과 다르면 에이전트가 호출되지 않은 것입니다.
@@ -1219,7 +1249,7 @@ Gemini Enterprise 웹 앱이 열리고, 'Ask Cymbal IT/HR 운영 에이전트' �
 
 ### 10.3 리소스 정리
 
-먼저 콘솔에서 GE 등록을 삭제합니다. Google Cloud 콘솔 검색창에 `Gemini Enterprise`를 입력해 이동한 뒤, 2.5에서 만든 앱의 Agents table에서 'Cymbal IT/HR 운영 에이전트' 행의 Actions 메뉴(⋮)를 열고 Delete를 누릅니다(9.4의 Preview 메뉴와 같은 위치). 앱이 더 필요 없으면 앱도 삭제합니다.
+먼저 콘솔에서 GE 등록을 삭제합니다. Google Cloud 콘솔 검색창에 `Gemini Enterprise`를 입력해 이동한 뒤, 2.5에서 만든 앱의 Agents table에서 'Cymbal IT/HR 운영 에이전트' 행의 Actions 메뉴(⋮)를 열고 Delete를 누릅니다(9.3의 Preview 메뉴와 같은 위치). 앱이 더 필요 없으면 앱도 삭제합니다.
 
 ```bash
 source ~/lab2/env.sh
