@@ -12,7 +12,7 @@
 | Step 1 | 4 | agents-cli 4-Tier 정량 평가 (도구 호출 정확도, RAG 인용률) 및 힐클라이밍 | 25~30분 |
 | Step 2 | 5 | Secret Manager + Agent Identity 권한 + Agent Gateway 생성 + agents-cli Agent Runtime 배포 (대기 약 10분 포함: 게이트웨이 생성 2~3분, 배포 6~7분) | 24분 |
 | Step 3 | 6 | Agent Registry 등록 (도구 위험도 주석, 허용 목적지) | 5분 |
-| Step 4 | 7 | Agent Gateway 연결, 위험 도구 거부 정책, 403 차단 검증 (대기 약 13분 포함: 엔진 연결 최대 10분, 정책 적용 2~3분) | 23분 |
+| Step 4 | 7 | Agent Gateway 연결, 위험 도구 거부 정책, 403 차단 검증 (대기 약 13분 포함: 엔진 연결 최대 10분, 정책 적용 2~4분) | 23분 |
 | Step 5 | 8 | Model Armor 템플릿 및 런타임 가드 활성화 (재배포 약 4분 포함) | 10분 |
 | Step 6 | 9 | Gemini Enterprise 등록 및 임직원 실시간 테스트 체크리스트 | 10분 |
 
@@ -149,7 +149,7 @@ gcloud services enable \
 
 | 항목 | 확인 방법 | 사용 위치 |
 |:---|:---|:---|
-| 터미널 계정 권한 | 아래 명령으로 확인합니다. Qwiklabs 터미널은 콘솔 로그인 계정이 아니라 서비스 계정(`antigravity-sa@...`)으로 실행됩니다. `roles/owner` 한 줄 또는 나머지 역할 4개가 모두 나오면 됩니다. 빠진 역할이 있으면 아래 부여 블록을 실행합니다. | 5.4, 5.5, 6.x, 7.x |
+| 터미널 계정 권한 | 아래 명령으로 확인합니다. 실습 1 시작 준비에서 실습 계정으로 로그인했다면 account가 Qwiklabs **Username**(`student-...@qwiklabs.net`)이고 `roles/owner` 한 줄이 나옵니다. | 5.4, 5.5, 5.7, 6.x, 7.x, 9.2 |
 | Gemini Enterprise 앱과 라이선스 | 새 프로젝트에는 앱이 없습니다. 2.5 절차대로 앱을 만들고, ID 설정(Set up identity)과 본인 계정 라이선스 할당까지 마칩니다. | 2.5, 9.2 |
 
 ```bash
@@ -159,23 +159,16 @@ gcloud projects get-iam-policy $(gcloud config get-value project 2>/dev/null) \
   --flatten="bindings[].members" \
   --filter="bindings.members:$(gcloud config get-value account 2>/dev/null)" \
   --format="value(bindings.role)" \
-  | grep -xE "roles/(owner|secretmanager\.admin|networkservices\.admin|agentregistry\.admin|networksecurity\.admin)"
-# 기대 결과: roles/owner, 또는 secretmanager.admin, networkservices.admin, agentregistry.admin, networksecurity.admin 4줄
+  | grep -x "roles/owner"
+# 기대 결과: account는 student-...@qwiklabs.net, 마지막 줄은 roles/owner
 ```
 
-위 명령에서 역할이 빠져 있거나, 이후 단계에서 `Permission 'secretmanager.secrets.create' denied`처럼 `does not have permission` 권한 오류가 나면 터미널 계정에 역할 4개를 부여합니다. 이미 있는 역할을 다시 부여해도 문제없습니다.
+account가 `antigravity-sa@...`이면 터미널이 아직 VM 서비스 계정으로 실행 중인 것입니다. 이 계정은 Owner가 아니어서 5.4 시크릿 생성(`Permission 'secretmanager.secrets.create' denied`), 5.7 배포, 9.2 게시에서 권한 오류가 납니다. 다음 두 명령을 실행해 실습 계정으로 로그인한 뒤 위 확인 블록을 다시 실행합니다. 두 명령 모두 `(Y/n)` 질문에 `Y`를 입력하고, 표시된 URL을 Chrome에서 열어 Qwiklabs **Username**으로 로그인한 뒤 인증 코드를 터미널에 붙여넣습니다(실습 1 시작 준비 2단계와 같음).
 
 ```bash
-PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
-SA=$(gcloud config get-value account 2>/dev/null)
-for r in secretmanager.admin networkservices.admin agentregistry.admin networksecurity.admin; do
-  gcloud projects add-iam-policy-binding ${PROJECT_ID} --member="serviceAccount:${SA}" \
-    --role=roles/$r --condition=None --quiet > /dev/null && echo "OK $r"
-done
-# 기대 결과: OK secretmanager.admin 등 4줄. 반영까지 1~2분 걸리므로 그 뒤 실패했던 명령을 다시 실행
+gcloud auth login --no-launch-browser
+gcloud auth application-default login --no-launch-browser
 ```
-
-`OK`가 나오지 않고 권한 오류가 나면 터미널 계정에 역할을 부여할 권한이 없는 것이므로 강사에게 요청합니다.
 
 ### 2.5 Gemini Enterprise 앱 준비
 Step 6(9절)에서 에이전트를 등록할 Gemini Enterprise 앱을 미리 만듭니다. 앱을 만든 직후에는 ID 공급자 설정(Set up identity)을 꼭 해야 웹 앱에서 로그인하고 에이전트를 쓸 수 있습니다. 이미 앱이 있고 ID 설정과 라이선스 할당까지 끝났다면 맨 아래 확인 명령만 실행합니다.
@@ -271,7 +264,7 @@ ls ~/enterprise-ops-agent/.agents/skills
 ```prompt
 /skills
 ```
-목록에 `google-agents-cli-eval`, `google-agents-cli-deploy`, `google-agents-cli-publish` 등이 등록되어 있는지 확인한 후 `ESC` 키를 눌러 대화창으로 돌아갑니다. 에이전트는 종료하지 않고 그대로 둡니다.
+목록에 `google-agents-cli-eval`, `google-agents-cli-deploy`, `google-agents-cli-publish` 등이 등록되어 있는지 확인한 후 `ESC` 키를 눌러 대화창으로 돌아갑니다. agy를 실행한 직후에 입력하면 첫 `/skills`가 무시될 수 있습니다. 목록이 나오지 않으면 화면이 다 뜬 뒤 다시 입력합니다. 에이전트는 종료하지 않고 그대로 둡니다.
 
 ### 3.3 진행 방식: agents-cli는 에이전트, 클라우드 설정은 터미널
 실습 2는 작업 성격에 따라 기본 경로가 다릅니다.
@@ -338,7 +331,7 @@ done
 `--metrics` 옵션을 빼거나 바꾸지 말 것. 이 옵션이 없으면 LLM 판정까지 실행되어 시간이 몇 배로 늘어남.
 ```
 
-에이전트는 `agents-cli eval run`을 Tier마다 한 번씩, 모두 4번 실행합니다. 각 Tier는 에이전트 응답 생성(eval generate) 후 채점(eval grade)을 합니다. LLM 판정을 포함했던 Qwiklabs 점검에서는 보통 Tier당 약 2분이었고, 판정 모델 재시도가 생긴 Tier는 약 10분이었습니다. 기본 실행은 LLM 판정을 하지 않으므로 훨씬 짧습니다(Qwiklabs 점검 때 Tier당 약 1분. 대부분이 응답 생성 시간이고 채점은 몇 초). 실행 중에는 에이전트 창에 중간 출력이 거의 없으므로, 진행 여부는 터미널 창에서 확인합니다.
+에이전트는 `agents-cli eval run`을 Tier마다 한 번씩, 모두 4번 실행합니다. 각 Tier는 에이전트 응답 생성(eval generate) 후 채점(eval grade)을 합니다. LLM 판정을 포함했던 Qwiklabs 점검에서는 판정 모델 재시도가 없으면 Tier당 약 2~3분, 재시도가 생긴 Tier는 약 8~14분이었습니다. 기본 실행은 LLM 판정을 하지 않으므로 훨씬 짧습니다(Qwiklabs 점검 때 Tier당 약 1분. 대부분이 응답 생성 시간이고 채점은 몇 초). 실행 중에는 에이전트 창에 중간 출력이 거의 없으므로, 진행 여부는 터미널 창에서 확인합니다.
 
 진행 확인 (터미널 창, 1분 간격으로 실행):
 
@@ -459,16 +452,25 @@ grep -ohE "(called=|retrieved=|[a-z_]+ called before)[^\"]*" artifacts/grade_res
 
 `WARNING:root:Could not fetch /app-info (HTTPError: 500 ...)`는 모든 Tier에서 나오는 경고이며 평가는 계속됩니다.
 
-선택(실습 2를 마친 뒤 시간이 남을 때): LLM 판정 3개까지 포함하려면 `--metrics` 옵션을 빼고 같은 명령을 실행합니다. 판정 모델이 `500 INTERNAL`을 돌려주면 `Retryable error (code=500) ...` 경고와 함께 재시도하며, 5회 모두 실패한 케이스는 `num_cases_error`로 집계되고 다음으로 넘어갑니다. Qwiklabs 점검에서는 4개 Tier에 약 25분이 걸렸습니다. `PERMISSION_DENIED`로 실패하면 채점 모델 호출 권한 문제입니다.
+선택(실습 2를 마친 뒤 시간이 남을 때): LLM 판정 3개까지 포함하려면 `--metrics` 옵션을 빼고 같은 명령을 실행합니다. 기본은 아래처럼 T1 한 Tier만 돌립니다. 4개 Tier를 모두 보려면 `for t in tier1-single-tool; do`를 `for t in tier1-single-tool tier2-multi-tool tier3-policy-first-transaction tier4-adversarial-edge; do`로 바꿉니다.
+
+| 범위 | 소요 시간 (Qwiklabs 점검) |
+|:---|:---|
+| T1 한 Tier | 약 3~14분 (응답 생성 약 1분 30초, 채점은 500 오류가 없으면 1분 안팎) |
+| 4개 Tier 전체 | 약 15~35분 (점검 33분 19초) |
+
+채점이 오래 걸리는 원인은 LLM 판정 지표 `multi_turn_tool_use_quality` 호출이 약 3분 동안 응답 없이 기다리다 `500 INTERNAL. Internal error occurred. Contact Vertex AI.`로 실패하는 경우가 있기 때문입니다. 이때 `Retryable error (code=500) ...` 경고와 함께 재시도하며, 5회 모두 실패한 케이스는 `num_cases_error`로 집계되고 평균에서 빠집니다(`Scores average only the cases that graded` 경고). 점검에서는 재시도 25회, T1, T2, T4에서 케이스가 1건씩 빠졌습니다. 평가 서버 쪽 오류이므로 기다리면 다음 케이스로 넘어갑니다. 요청 빈도 문제가 아니므로 `--qps`를 바꿀 필요는 없습니다.
+
+응답은 매번 새로 생성하므로 `tool_call_accuracy` 등 결정론적 지표도 4.4 결과와 다르게 나올 수 있습니다(점검에서는 T1 0.75, T2 0.67). `PERMISSION_DENIED`로 실패하면 채점 모델 호출 권한 문제입니다.
 
 ```bash
-# [선택] LLM 판정 3개 포함 (약 10~25분)
+# [선택] LLM 판정 3개 포함. 기본은 T1 한 Tier (약 3~14분)
 cd ~/enterprise-ops-agent
 source ~/lab.env
 export GOOGLE_GENAI_USE_VERTEXAI=true
 export GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project 2>/dev/null)
 export GOOGLE_CLOUD_LOCATION=global
-for t in tier1-single-tool tier2-multi-tool tier3-policy-first-transaction tier4-adversarial-edge; do
+for t in tier1-single-tool; do
   echo "##### $t 시작 $(date +%H:%M:%S)"
   agents-cli eval run --dataset tests/eval/datasets/$t.json --config tests/eval/eval_config.yaml
 done
@@ -555,7 +557,7 @@ uv lock   # enhance로 바뀐 의존성을 lock 파일에 반영. 이미 고정�
 git status --short
 ```
 
-`app/app_utils/reasoning_engine_adapter.py`가 추가되고 `pyproject.toml`, `app/fast_api_app.py`가 바뀌면 정상입니다.
+`app/app_utils/reasoning_engine_adapter.py`가 추가되고 `pyproject.toml`, `app/fast_api_app.py`가 바뀌면 정상입니다. `deployment_metadata.json`도 함께 생기는데, 배포 전이라 `remote_agent_runtime_id`가 `null`입니다. 5.7 배포가 끝나면 엔진 ID가 채워집니다.
 
 ### 5.4 Secret Manager 시크릿과 에이전트 권한 (터미널)
 
@@ -748,14 +750,14 @@ agents-cli deploy -d agent_runtime \
 어느 경로로 배포했든, 터미널 창에서 아래 블록(배포된 엔진 정보)을 실행합니다.
 
 > [!NOTE]
-> `--agent-identity` 첫 배포에서 agents-cli는 ADC(Application Default Credentials) 계정으로 프로젝트 IAM 부여를 시도합니다. ADC 계정에 `resourcemanager.projects.setIamPolicy` 권한이 없으면 `PERMISSION_DENIED`로 멈춥니다. 5.4에서 필요한 역할을 이미 부여했으므로, 같은 명령을 한 번 더 실행하면 만들어진 엔진에 코드가 배포됩니다.
+> `--agent-identity` 첫 배포에서 agents-cli는 ADC(Application Default Credentials) 계정으로 프로젝트 IAM 부여를 시도합니다. 실습 1 시작 준비(또는 2.4)에서 실습 계정으로 ADC를 로그인했다면 Owner라서 그대로 통과합니다. `resourcemanager.projects.setIamPolicy` 관련 `PERMISSION_DENIED`로 멈추면 ADC가 VM 서비스 계정인 것이므로, 2.4의 `gcloud auth application-default login --no-launch-browser`를 실행한 뒤 같은 배포를 한 번 더 실행합니다. 이미 만들어진 엔진에 코드가 배포됩니다.
 
 ```bash
 # 배포된 엔진 정보
 source ~/lab2/env.sh
 : "${TRUST_DOMAIN:?5.4의 첫 번째 블록을 먼저 실행하세요}"
 cd ~/enterprise-ops-agent
-export AGENT_RESOURCE=$(python3 -c "import json; print(json.load(open('deployment_metadata.json'))['remote_agent_runtime_id'])")
+export AGENT_RESOURCE=$(python3 -c "import json; print(json.load(open('deployment_metadata.json'))['remote_agent_runtime_id'] or '')")
 export AGENT_ID=${AGENT_RESOURCE##*/}
 : "${AGENT_ID:?deployment_metadata.json에서 엔진 ID를 읽지 못했습니다. 배포가 끝났는지 확인하세요}"
 export AGENT_URL="https://${REGION}-aiplatform.googleapis.com/v1/${AGENT_RESOURCE}"
@@ -770,7 +772,8 @@ EOF
 
 # 원격 에이전트 질의
 agents-cli run --url ${AGENT_URL} --mode adk "EMP-10294 직원의 연차 잔여일수 알려줘"
-# 기대 결과: workweek_agent가 연차 잔여 일수(예: 12.0일)를 조회해 답변
+# 기대 결과: workweek_agent가 연차 잔여 일수를 조회해 답변
+#   (실습 1 시나리오와 4.4/4.6의 T3 평가에서 신청한 만큼 12.0일보다 줄어 있음. Qwiklabs 점검에서는 3.0일)
 ```
 
 새 터미널 창은 `~/.bashrc`가 `~/lab2/env.sh`를 읽으므로 따로 할 일이 없습니다. 이미 열려 있던 터미널 창을 위해 이후 블록의 첫 줄에 `source ~/lab2/env.sh`를 넣어 두었습니다.
@@ -916,7 +919,7 @@ httpRules:
 EOF
 gcloud beta network-security authz-policies import enterprise-ops-agw-deny-destructive \
   --source=deny.yaml --location=${REGION} --project=${PROJECT_ID}
-# 2~3분 소요(그동안 점만 찍히는 것이 정상)
+# 2~4분 소요(그동안 점만 찍히는 것이 정상)
 ```
 
 조회와 신청 도구는 목록에 없으므로 그대로 통과합니다. 새 위험 도구가 생기면 `params`에 이름을 추가하고 같은 명령으로 다시 import합니다.
@@ -1248,7 +1251,7 @@ Gemini Enterprise 웹 앱이 열리고, 'Ask Cymbal IT/HR 운영 에이전트' �
 | 증상 | 원인 | 해결 |
 |:---|:---|:---|
 | 배포가 `could not access one or more secrets referenced by spec.deployment_spec.secret_env`로 실패 | 시크릿 읽기 권한을 주기 전에 배포했거나, `gcp-sa-aiplatform-re` 서비스 에이전트 권한이 빠짐. 한 번 실패한 엔진은 권한을 고친 뒤에도 같은 오류로 계속 실패함 | 5.4의 두 주체 권한을 확인한 뒤 엔진을 삭제하고 새로 배포(`deployment_metadata.json` 삭제 후 `agents-cli-manifest.yaml`의 `name`을 바꿔 새 엔진 생성). 5.7의 엔진 정보 블록을 다시 실행해 `~/lab2/env.sh`를 갱신하고, 새 엔진으로 7.3의 게이트웨이 연결을 다시 설정 |
-| `--agent-identity` 배포가 `setIamPolicy` `PERMISSION_DENIED`로 멈춤 | agents-cli가 ADC 계정으로 IAM 부여를 시도 | 5.4의 역할 부여 후 같은 배포 명령을 한 번 더 실행 |
+| `--agent-identity` 배포가 `setIamPolicy` `PERMISSION_DENIED`로 멈춤 | agents-cli가 ADC 계정으로 IAM 부여를 시도하는데 ADC가 VM 서비스 계정(Owner 아님) | 2.4의 `gcloud auth application-default login --no-launch-browser`로 실습 계정 ADC를 만든 뒤 같은 배포 명령을 한 번 더 실행 |
 | 게이트웨이 연결 후 에이전트가 "도구가 활성화되어 있지 않다"고 답하고 로그에 `CERTIFICATE_VERIFY_FAILED` | 컨테이너가 게이트웨이 루트 CA를 신뢰하지 않음 | 5.6의 Dockerfile(특히 certifi 단계)과 `--build-args` 전달을 확인 후 재배포 |
 | HTTP 498 | 호출한 호스트가 레지스트리에 없음 (기본 거부). mtls/리전 엔드포인트도 정확히 일치해야 함 | 게이트웨이 로그의 `httpRequest.requestUrl` 호스트를 `core-gapi-services`에 추가 |
 | FastMCP 401 | MCP 토큰 만료 또는 잘못된 값 | Mock SaaS에서 새 토큰 발급 후 `gcloud secrets versions add enterprise-agent-mcp-token --data-file=-`, 이어서 재배포 |
@@ -1300,7 +1303,7 @@ curl -s -X DELETE "${AUTH[@]}" "${DE}/engines/company-policy-app"
 curl -s -X DELETE "${AUTH[@]}" "${DE}/dataStores/company-policy-ds"   # 검색 앱 삭제가 끝나기 전이면 실패할 수 있음. 잠시 뒤 이 줄만 다시 실행
 gcloud storage rm -r gs://${PROJECT_ID}-policy-docs
 
-# Agent Gateway. 엔진을 지운 뒤 7~13분 동안은 FAILED_PRECONDITION(already being used by ...reasoningEngines/...)으로 실패하므로 1분 간격으로 최대 15번 시도
+# Agent Gateway. 엔진을 지운 뒤 한동안(점검 때 바로 성공한 경우도, 7~13분 걸린 경우도 있었음) FAILED_PRECONDITION(already being used by ...reasoningEngines/...)으로 실패할 수 있으므로 1분 간격으로 최대 15번 시도
 for i in $(seq 15); do
   gcloud network-services agent-gateways describe enterprise-ops-agw --location=${REGION} > /dev/null 2>&1 || break
   gcloud network-services agent-gateways delete enterprise-ops-agw --location=${REGION} --quiet && break
