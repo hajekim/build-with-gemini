@@ -1263,4 +1263,4 @@ curl -fsSLO https://raw.githubusercontent.com/hajekim/build-with-gemini/main/lab
 두 압축 모두 `enterprise-ops-agent/` 폴더로 풀리므로, 둘 다 풀려면 서로 다른 위치에서 압축을 푸세요.
 
 ---
-실습 2를 마쳤습니다. Antigravity 2.0(`agy`)과 ADK 2.3.0으로 정량 평가, Secret Manager와 Agent Identity, Agent Registry 위험도 주석, Agent Gateway 위험 도구 차단, Model Armor 검사, Gemini Enterprise 등록을 진행했습니다.
+실습 2를 마쳤습니다. Antigravity 2.0(`agy`)과 ADK로 정량 평가, Secret Manager와 Agent Identity, Agent Registry 위험도 주석, Agent Gateway 위험 도구 차단, Model Armor 검사, Gemini Enterprise 등록을 진행했습니다.
