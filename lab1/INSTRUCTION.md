@@ -119,14 +119,14 @@ Antigravity 2.0에는 데스크톱 앱(Agent Platform), 터미널용 CLI(`agy`),
 > [!NOTE]
 > Konsole 터미널을 열 때 `Warning: Could not find '', starting '/bin/bash' instead. Please check your profile settings.` 경고가 표시되어도 무시해도 됩니다.
 
-2. 실습 계정으로 gcloud에 로그인합니다. 터미널의 gcloud는 처음에 VM 서비스 계정(`antigravity-sa@...`)으로 설정되어 있습니다. 이 계정은 프로젝트 소유자(Owner)가 아니어서 Lab 2의 시크릿 생성, 배포, Gemini Enterprise 게시에서 권한 오류가 납니다. 프로젝트 설정은 그대로 유지됩니다.
+2. 실습 계정으로 gcloud에 로그인합니다. 터미널의 gcloud는 처음에 VM 서비스 계정(`antigravity-sa@...`)으로 설정되어 있습니다. 이 계정은 프로젝트 소유자(Owner)가 아니어서 Lab 2의 시크릿 생성(5.4)과 Gemini Enterprise 게시(9.2)에서 권한 오류가 납니다. 프로젝트 설정은 그대로 유지됩니다.
 
 ```bash
 gcloud auth login --no-launch-browser
 ```
 
 - `You are running on a Google Compute Engine virtual machine. ... Do you want to continue (Y/n)?`가 나오면 `Y`를 입력하고 **ENTER**를 누릅니다.
-- 터미널에 표시된 URL을 복사해 원격 화면의 Chrome 새 탭에서 엽니다. Welcome to Google Chrome 알림은 **OK**, Chrome 초기 로그인 창은 **Stay signed out** 또는 **Use Chrome without an account**를 클릭합니다.
+- 터미널에 표시된 URL을 복사해 원격 화면의 Chrome 새 탭에서 엽니다. Welcome to Google Chrome 알림이 나타나면 **OK**, Chrome 초기 로그인 창이 나타나면 **Stay signed out** 또는 **Use Chrome without an account**를 클릭합니다.
 - Qwiklabs 자격증명 패널의 **Username**과 **Password**로 로그인하고 접근을 허용한 뒤, 표시된 인증 코드를 복사해 터미널에 붙여넣고 **ENTER**를 누릅니다.
 - `You are now logged in as [student-...@qwiklabs.net].`가 나오면 완료입니다.
 
@@ -260,7 +260,7 @@ agy
 색상 테마를 확인하고 원하는 테마를 확정합니다.
 ![색상 테마 확인](./images/12_agy_select_color_scheme.png)
 
-9. 사용할 모델을 확인합니다. 목록에서 Gemini 3.8 Flash 계열(예: `Gemini 3.8 Flash (High)`)을 선택합니다. agy 버전에 따라 목록에 `Gemini 3.6 Flash`와 `Gemini 3.1 Pro`만 보일 수 있습니다. 이때는 기본값 `Gemini 3.6 Flash`를 그대로 씁니다. 실습 프롬프트는 이 모델로도 모두 동작합니다. 여기서 고르는 모델은 코딩 에이전트용이며, 실습에서 만드는 에이전트가 쓰는 모델(`gemini-3.8-flash`)과는 별개입니다.
+9. 사용할 모델을 확인합니다. 목록에 `Gemini 3.6 Flash (current)`와 `Gemini 3.1 Pro`가 보이면 기본값 `Gemini 3.6 Flash`를 그대로 씁니다. 실습 프롬프트는 이 모델로 모두 동작합니다. 목록에 Gemini 3.8 Flash 계열이 있으면 그것을 선택해도 됩니다. 여기서 고르는 모델은 코딩 에이전트용이며, 실습에서 만드는 에이전트가 쓰는 모델(`gemini-3.8-flash`)과는 별개입니다.
 
 ```prompt
 /model

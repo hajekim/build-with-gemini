@@ -163,7 +163,7 @@ gcloud projects get-iam-policy $(gcloud config get-value project 2>/dev/null) \
 # 기대 결과: account는 student-...@qwiklabs.net, 마지막 줄은 roles/owner
 ```
 
-account가 `antigravity-sa@...`이면 터미널이 아직 VM 서비스 계정으로 실행 중인 것입니다. 이 계정은 Owner가 아니어서 5.4 시크릿 생성(`Permission 'secretmanager.secrets.create' denied`), 5.7 배포, 9.2 게시에서 권한 오류가 납니다. 다음 두 명령을 실행해 실습 계정으로 로그인한 뒤 위 확인 블록을 다시 실행합니다. 두 명령 모두 `(Y/n)` 질문에 `Y`를 입력하고, 표시된 URL을 Chrome에서 열어 Qwiklabs **Username**으로 로그인한 뒤 인증 코드를 터미널에 붙여넣습니다(실습 1 시작 준비 2단계와 같음).
+account가 `antigravity-sa@...`이면 터미널이 아직 VM 서비스 계정으로 실행 중인 것입니다. 이 계정은 Owner가 아니어서 5.4 시크릿 생성(`Permission 'secretmanager.secrets.create' denied`)과 9.2 게시(`aiplatform.reasoningEngines.get` denied)에서 권한 오류가 납니다. 다음 두 명령을 실행해 실습 계정으로 로그인한 뒤 위 확인 블록을 다시 실행합니다. 두 명령 모두 `(Y/n)` 질문에 `Y`를 입력하고, 표시된 URL을 Chrome에서 열어 Qwiklabs **Username**으로 로그인한 뒤 인증 코드를 터미널에 붙여넣습니다(실습 1 시작 준비 2단계와 같음).
 
 ```bash
 gcloud auth login --no-launch-browser
@@ -456,10 +456,10 @@ grep -ohE "(called=|retrieved=|[a-z_]+ called before)[^\"]*" artifacts/grade_res
 
 | 범위 | 소요 시간 (Qwiklabs 점검) |
 |:---|:---|
-| T1 한 Tier | 약 3~14분 (응답 생성 약 1분 30초, 채점은 500 오류가 없으면 1분 안팎) |
+| T1 한 Tier | 약 3~14분 (점검 때 T1은 13분 31초. 500 재시도가 없던 T3는 2분 40초) |
 | 4개 Tier 전체 | 약 15~35분 (점검 33분 19초) |
 
-채점이 오래 걸리는 원인은 LLM 판정 지표 `multi_turn_tool_use_quality` 호출이 약 3분 동안 응답 없이 기다리다 `500 INTERNAL. Internal error occurred. Contact Vertex AI.`로 실패하는 경우가 있기 때문입니다. 이때 `Retryable error (code=500) ...` 경고와 함께 재시도하며, 5회 모두 실패한 케이스는 `num_cases_error`로 집계되고 평균에서 빠집니다(`Scores average only the cases that graded` 경고). 점검에서는 재시도 25회, T1, T2, T4에서 케이스가 1건씩 빠졌습니다. 평가 서버 쪽 오류이므로 기다리면 다음 케이스로 넘어갑니다. 요청 빈도 문제가 아니므로 `--qps`를 바꿀 필요는 없습니다.
+채점이 오래 걸리는 원인은 LLM 판정 지표(`multi_turn_task_success`, `multi_turn_tool_use_quality`) 호출이 약 3분 동안 응답 없이 기다리다 `500 INTERNAL. Internal error occurred. Contact Vertex AI.`로 실패하는 경우가 있기 때문입니다. 이때 `Retryable error (code=500) ...` 경고와 함께 재시도하며, 5회 모두 실패한 케이스는 `num_cases_error`로 집계되고 평균에서 빠집니다(`Scores average only the cases that graded` 경고). 점검에서는 재시도 25회, T1, T2, T4에서 케이스가 1건씩 빠졌습니다. 평가 서버 쪽 오류이므로 기다리면 다음 케이스로 넘어갑니다.
 
 응답은 매번 새로 생성하므로 `tool_call_accuracy` 등 결정론적 지표도 4.4 결과와 다르게 나올 수 있습니다(점검에서는 T1 0.75, T2 0.67). `PERMISSION_DENIED`로 실패하면 채점 모델 호출 권한 문제입니다.
 
@@ -750,7 +750,7 @@ agents-cli deploy -d agent_runtime \
 어느 경로로 배포했든, 터미널 창에서 아래 블록(배포된 엔진 정보)을 실행합니다.
 
 > [!NOTE]
-> `--agent-identity` 첫 배포에서 agents-cli는 ADC(Application Default Credentials) 계정으로 프로젝트 IAM 부여를 시도합니다. 실습 1 시작 준비(또는 2.4)에서 실습 계정으로 ADC를 로그인했다면 Owner라서 그대로 통과합니다. `resourcemanager.projects.setIamPolicy` 관련 `PERMISSION_DENIED`로 멈추면 ADC가 VM 서비스 계정인 것이므로, 2.4의 `gcloud auth application-default login --no-launch-browser`를 실행한 뒤 같은 배포를 한 번 더 실행합니다. 이미 만들어진 엔진에 코드가 배포됩니다.
+> `--agent-identity` 첫 배포에서 agents-cli는 ADC(Application Default Credentials) 계정으로 프로젝트 IAM 부여를 시도합니다. 실습 1 시작 준비(또는 2.4)에서 실습 계정으로 ADC를 로그인했다면 Owner라서 그대로 통과합니다. `resourcemanager.projects.setIamPolicy` 관련 `PERMISSION_DENIED`로 멈추면 ADC 계정에 프로젝트 IAM 변경 권한이 없는 것이므로, 2.4의 `gcloud auth application-default login --no-launch-browser`를 실행한 뒤 같은 배포를 한 번 더 실행합니다. 이미 만들어진 엔진에 코드가 배포됩니다.
 
 ```bash
 # 배포된 엔진 정보
@@ -1251,7 +1251,7 @@ Gemini Enterprise 웹 앱이 열리고, 'Ask Cymbal IT/HR 운영 에이전트' �
 | 증상 | 원인 | 해결 |
 |:---|:---|:---|
 | 배포가 `could not access one or more secrets referenced by spec.deployment_spec.secret_env`로 실패 | 시크릿 읽기 권한을 주기 전에 배포했거나, `gcp-sa-aiplatform-re` 서비스 에이전트 권한이 빠짐. 한 번 실패한 엔진은 권한을 고친 뒤에도 같은 오류로 계속 실패함 | 5.4의 두 주체 권한을 확인한 뒤 엔진을 삭제하고 새로 배포(`deployment_metadata.json` 삭제 후 `agents-cli-manifest.yaml`의 `name`을 바꿔 새 엔진 생성). 5.7의 엔진 정보 블록을 다시 실행해 `~/lab2/env.sh`를 갱신하고, 새 엔진으로 7.3의 게이트웨이 연결을 다시 설정 |
-| `--agent-identity` 배포가 `setIamPolicy` `PERMISSION_DENIED`로 멈춤 | agents-cli가 ADC 계정으로 IAM 부여를 시도하는데 ADC가 VM 서비스 계정(Owner 아님) | 2.4의 `gcloud auth application-default login --no-launch-browser`로 실습 계정 ADC를 만든 뒤 같은 배포 명령을 한 번 더 실행 |
+| `--agent-identity` 배포가 `setIamPolicy` `PERMISSION_DENIED`로 멈춤 | agents-cli가 ADC 계정으로 IAM 부여를 시도하는데 ADC 계정에 프로젝트 IAM 변경 권한이 없음 | 2.4의 `gcloud auth application-default login --no-launch-browser`로 실습 계정 ADC를 만든 뒤 같은 배포 명령을 한 번 더 실행 |
 | 게이트웨이 연결 후 에이전트가 "도구가 활성화되어 있지 않다"고 답하고 로그에 `CERTIFICATE_VERIFY_FAILED` | 컨테이너가 게이트웨이 루트 CA를 신뢰하지 않음 | 5.6의 Dockerfile(특히 certifi 단계)과 `--build-args` 전달을 확인 후 재배포 |
 | HTTP 498 | 호출한 호스트가 레지스트리에 없음 (기본 거부). mtls/리전 엔드포인트도 정확히 일치해야 함 | 게이트웨이 로그의 `httpRequest.requestUrl` 호스트를 `core-gapi-services`에 추가 |
 | FastMCP 401 | MCP 토큰 만료 또는 잘못된 값 | Mock SaaS에서 새 토큰 발급 후 `gcloud secrets versions add enterprise-agent-mcp-token --data-file=-`, 이어서 재배포 |
@@ -1303,7 +1303,7 @@ curl -s -X DELETE "${AUTH[@]}" "${DE}/engines/company-policy-app"
 curl -s -X DELETE "${AUTH[@]}" "${DE}/dataStores/company-policy-ds"   # 검색 앱 삭제가 끝나기 전이면 실패할 수 있음. 잠시 뒤 이 줄만 다시 실행
 gcloud storage rm -r gs://${PROJECT_ID}-policy-docs
 
-# Agent Gateway. 엔진을 지운 뒤 한동안(점검 때 바로 성공한 경우도, 7~13분 걸린 경우도 있었음) FAILED_PRECONDITION(already being used by ...reasoningEngines/...)으로 실패할 수 있으므로 1분 간격으로 최대 15번 시도
+# Agent Gateway. 엔진을 지운 직후에는 FAILED_PRECONDITION(already being used by ...reasoningEngines/...)으로 실패할 수 있으므로 1분 간격으로 최대 15번 시도
 for i in $(seq 15); do
   gcloud network-services agent-gateways describe enterprise-ops-agw --location=${REGION} > /dev/null 2>&1 || break
   gcloud network-services agent-gateways delete enterprise-ops-agw --location=${REGION} --quiet && break
