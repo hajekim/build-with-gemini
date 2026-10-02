@@ -376,6 +376,7 @@ cd enterprise-ops-agent
 ```
 +-----------------------------------------------------------------------------------+
 | 출력 예시:                                                                          |
+| Agents CLI v1.8.0                                                                 |
 | Info: --agent not specified. Defaulting to 'adk' in auto-approve mode.            |
 |                                                                                   |
 | ✅ Success! Your agent project is ready.                                          |
@@ -390,6 +391,8 @@ cd enterprise-ops-agent
 |    cd enterprise-ops-agent && agents-cli install && agents-cli playground         |
 +-----------------------------------------------------------------------------------+
 ```
+
+![agents-cli create 실행 결과](./images/task1_create.png)
 
 출력 끝의 Get Started 안내는 지금 실행하지 않습니다. `agents-cli install`은 4단계에서 실행합니다.
 
@@ -425,12 +428,19 @@ ls -lh docs/policies/
 
 ```
 +-----------------------------------------------------------------------------------+
-| 확인할 파일:                                                                        |
-| docs/SDD.md (소프트웨어 설계서 v2.2.0)                                               |
-| docs/policies/it_hardware_guidelines.pdf (POL-IT-2026-009 사내 IT 지침)            |
-| docs/policies/leave_policy_2026.pdf (POL-HR-2026-004 사내 복무 규정)                 |
+| 출력 예시:                                                                          |
+| total 28K                                                                         |
+| -rw-r--r-- 1 abc abc  22K Oct  2 04:53 SDD.md                                     |
+| drwxr-xr-x 2 abc abc 4.0K Oct  2 04:53 policies                                   |
+| total 96K                                                                         |
+| -rw-r--r-- 1 abc abc  50K Oct  2 04:53 it_hardware_guidelines.pdf                 |
+| -rw-r--r-- 1 abc abc  43K Oct  2 04:53 leave_policy_2026.pdf                      |
 +-----------------------------------------------------------------------------------+
 ```
+
+![docs 폴더 확인 결과](./images/task1_docs_ls.png)
+
+`SDD.md`와 PDF 두 개가 보이면 됩니다. 날짜와 시각은 실행 시점에 따라 다릅니다.
 
 ---
 
@@ -447,12 +457,21 @@ agents-cli install
 +-----------------------------------------------------------------------------------+
 | 출력 예시:                                                                          |
 |   ▸ uv sync                                                                       |
-| Using CPython 3.11.2 interpreter at: /usr/bin/python3                             |
+| warning: `VIRTUAL_ENV=/lsiopy` does not match the project environment path ...    |
+| Using CPython 3.13.14                                                             |
 | Creating virtual environment at: .venv                                            |
-| Resolved 173 packages in 235ms                                                    |
-| Installed 154 packages in 182ms                                                   |
+| Resolved 169 packages in 1ms                                                      |
+| Installed 150 packages in 136ms                                                   |
+|  + a2a-sdk==1.1.5                                                                 |
+|  ...                                                                              |
+|  + google-adk==2.9.2                                                              |
+|  ...                                                                              |
 +-----------------------------------------------------------------------------------+
 ```
+
+![agents-cli install 실행 결과](./images/task1_install.png)
+
+uv가 Python 3.13을 직접 내려받아 `.venv`를 만듭니다. 패키지 목록에서 `google-adk==2.9.2`가 보이면 정상입니다. 첫 줄의 `VIRTUAL_ENV` 경고는 무시해도 됩니다.
 
 ---
 
@@ -768,19 +787,35 @@ print(json.dumps(r2, indent=2, ensure_ascii=False))
 | {                                                                                 |
 |   "status": "SUCCESS",                                                            |
 |   "source": "vertex_ai_search",                                                   |
-|   "match_count": 2,                                                               |
+|   "query": "4일 연속으로 휴가 쓰려면 며칠 전에 신청해야 하나요?",                     |
+|   "category": "HR",                                                               |
+|   "match_count": 1,                                                               |
+|   "grounding_confidence": 0.96,                                                   |
 |   "matches": [                                                                    |
 |     {                                                                             |
 |       "doc_id": "POL-HR-2026-004",                                                |
-|       "title": "leave_policy_2026",                                               |
-|       "content": "... 제 4 조 (신청 및 결재 절차) ... 3일을 초과하는 연속 연차:    |
-|                  원활한 부서 내 업무 대행자 지정 및 인수인계를 위하여, 최소 사용  |
-|                  7영업일 전 ..."                                                  |
-|     }, ...                                                                        |
+|       "title": "사내 복무 규정 (POL-HR-2026-004)",                                 |
+|       "content": "제 1 조 (목적) ... 제 4 조 (신청 및 결재 절차) ...              |
+|                  - 3일을 초과하는 연속 연차: ... 최소 사용 7영업일 전 ..."        |
+|     }                                                                             |
+|   ]                                                                               |
+| }                                                                                 |
+|                                                                                   |
+| === 테스트 2: 개발자 노트북 교체 주기 문의 ===                                        |
+| {                                                                                 |
+|   "status": "SUCCESS",                                                            |
+|   "source": "local_fallback",                                                     |
+|   "match_count": 3,                                                               |
+|   "matches": [                                                                    |
+|     { "doc_id": "POL-IT-2026-009", "title": "사내 IT 자산 운용 지침 ...",          |
+|       "content": "제 2 조 (전산 장비 지급 기준): ... MacBook Pro M3 Max ..." },    |
+|     ...                                                                           |
 |   ]                                                                               |
 | }                                                                                 |
 +-----------------------------------------------------------------------------------+
 ```
+
+`query`, `category`, `grounding_confidence`처럼 에이전트가 생성한 코드에 따라 추가 필드가 붙거나, `title` 문구와 `match_count`가 달라질 수 있습니다. 위 예시에서 테스트 2는 `local_fallback`으로 나왔습니다(아래 NOTE 참고).
 
 `status`가 `SUCCESS`이고 `matches`에 `POL-HR-2026-004`(테스트 1), `POL-IT-2026-009`(테스트 2)가 있으면 성공입니다. 필드 순서는 달라도 되지만 `status`, `source`, `match_count`, `matches[].doc_id`, `matches[].title`, `matches[].content` 이름은 정확히 같아야 합니다. Task 5 통합 테스트와 실습 2 `rag_citation` 지표가 이 이름을 읽습니다. 이름이 다르면 에이전트 창에서 위 이름으로 고쳐 달라고 요청합니다.
 
