@@ -1415,7 +1415,7 @@ healthz 응답(`{"status":"ok",...}`)이 출력되면 서버가 실행된 것입
 
 ![로컬 에이전트 웹 콘솔](./images/local_agent_web_chat.png)
 
-화면 상단에는 에이전트 상태(Active)와 연결된 모델(Gemini 3.8 Flash)이 표시되고, 하단에는 추천 질문 칩이 있습니다. 칩을 클릭하거나 직접 질문을 입력하면 에이전트가 규정 검색과 Mock SaaS 도구를 호출해 답합니다.
+화면 구성은 에이전트가 만든 `a2a_server.py`에 따라 다릅니다. 위 화면에서는 상단에 콘솔 제목과 `A2A v0.3 Compatible` 표시가, 하단에 추천 질문 칩(휴가 규정 안내, 잔여 연차 조회, 긴급 랩톱 교체, 연차 상신 신청)이 있습니다. 칩을 클릭하거나 직접 질문을 입력하면 에이전트가 규정 검색과 Mock SaaS 도구를 호출해 답합니다. 답변의 Markdown 기호(`**`, `###`)는 그대로 보일 수 있습니다.
 
 3. A2A JSON-RPC 형식 curl 확인:
 같은 터미널 창에서 실제 GE가 보내는 JSON-RPC 2.0 형식으로도 질의할 수 있습니다.
@@ -1445,13 +1445,13 @@ curl -s -X POST http://localhost:8080/ \
   "id": 1,
   "result": {
     "kind": "message",
-    "messageId": "msg-104f7d29db",
+    "messageId": "msg-55510b7987",
     "contextId": "ctx-session-001",
     "role": "agent",
     "parts": [
       {
         "kind": "text",
-        "text": "현재 임직원님(사번: EMP-10294) 명의로 등록된 활성(Active) IT 인시던트 티켓은 총 8건입니다.\n\n최근 접수된 티켓 내역(최근 3건)은 다음과 같습니다:\n1. INC-88210: 업무용 M3 Max 랩톱 교체 신청 (처리중)\n2. INC-88211: 원격 근무용 보안 VPN 접속 권한 갱신 (접수)\n..."
+        "text": "현재 ServiceImmediately ITMS 시스템에 등록된 IT 인시던트 티켓은 **총 8건**입니다.\n\n간략한 현황은 다음과 같습니다:\n\n* **총 티켓 수**: 8건\n* **상태별 현황**:\n  * **접수**: 6건 (`INC-88211`, `INC-88300`, ...)\n  * **처리중**: 2건 (`INC-88210`, ...)\n..."
       }
     ]
   }
