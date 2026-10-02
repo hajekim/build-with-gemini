@@ -46,7 +46,7 @@ Lab 1에서 만든 에이전트를 정량 평가하고 Agent Runtime에 배포�
 
 이 실습을 마치면 다음 작업을 직접 수행할 수 있습니다.
 
-1. Antigravity 2.0 앱 또는 `agy` CLI에서 Google Cloud 프로젝트 인증을 마치고 모델을 Gemini 3.8 Flash로 설정합니다.
+1. Antigravity 2.0 앱 또는 `agy` CLI에서 Google Cloud 프로젝트 인증을 마치고 코딩 에이전트 모델을 확인합니다(Qwiklabs 기본값 Gemini 3.6 Flash).
 2. `docs/SDD.md`를 Antigravity에 읽혀 아키텍처와 도구 명세를 컨텍스트로 넣습니다.
 3. Antigravity로 `config.yaml`과 ADK 멀티 에이전트 뼈대 코드를 생성합니다.
 4. SDD 2.2절과 내 프로젝트 Cloud Storage 버킷에 올린 규정 PDF를 바탕으로 조항 번호와 근거를 반환하는 검색 도구(`app/tools/policy_rag.py`)를 만듭니다.
@@ -119,7 +119,7 @@ Antigravity 2.0에는 데스크톱 앱(Agent Platform), 터미널용 CLI(`agy`),
 > [!NOTE]
 > Konsole 터미널을 열 때 `Warning: Could not find '', starting '/bin/bash' instead. Please check your profile settings.` 경고가 표시되어도 무시해도 됩니다.
 
-2. 실습 계정으로 gcloud에 로그인합니다. 터미널의 gcloud는 처음에 VM 서비스 계정(`antigravity-sa@...`)으로 설정되어 있습니다. 이 계정은 프로젝트 소유자(Owner)가 아니어서 Lab 2의 시크릿 생성(5.4)과 Gemini Enterprise 게시(9.2)에서 권한 오류가 납니다. 프로젝트 설정은 그대로 유지됩니다.
+2. 실습 계정으로 gcloud에 로그인합니다. 터미널의 gcloud는 처음에 VM 서비스 계정(`antigravity-sa@...`)으로 설정되어 있습니다. 이 계정은 프로젝트 소유자(Owner)가 아니어서 실습 2 5.4절(Step 2)의 시크릿 생성과 9.2절(Step 6)의 Gemini Enterprise 게시에서 권한 오류가 납니다. 프로젝트 설정은 그대로 유지됩니다.
 
 ```bash
 gcloud auth login --no-launch-browser
@@ -130,7 +130,7 @@ gcloud auth login --no-launch-browser
 - Qwiklabs 자격증명 패널의 **Username**과 **Password**로 로그인하고 접근을 허용한 뒤, 표시된 인증 코드를 복사해 터미널에 붙여넣고 **ENTER**를 누릅니다.
 - `You are now logged in as [student-...@qwiklabs.net].`가 나오면 완료입니다.
 
-이어서 같은 방법으로 ADC(Application Default Credentials, 애플리케이션 기본 사용자 인증 정보)도 실습 계정으로 로그인합니다. RAG 도구, `agents-cli run`, 배포가 ADC로 Google Cloud API를 호출합니다. 이번에도 `(Y/n)` 질문에 `Y`를 입력합니다.
+이어서 같은 방법으로 ADC(Application Default Credentials, 애플리케이션 기본 사용자 인증 정보)도 실습 계정으로 로그인합니다. RAG 도구, `agents-cli run`, 배포가 ADC로 Google Cloud API를 호출합니다. 이번에도 `(Y/n)` 질문에 `Y`를 입력합니다. 앞의 로그인이 끝나기를 기다리지 않고 Konsole 새 탭에서 동시에 진행해도 됩니다.
 
 ```bash
 gcloud auth application-default login --no-launch-browser
@@ -216,7 +216,7 @@ gcloud auth application-default print-access-token > /dev/null && echo "ADC OK"
 9. **Finish**를 클릭합니다. 다음과 같은 화면이 보이면 준비가 끝난 것입니다.
 ![Antigravity Agent Platform 준비 완료](./images/agy2_09_ready.png)
 
-앱에서 모델을 고르는 메뉴가 보이면 Gemini 3.8 Flash 계열을 선택합니다(메뉴 이름은 앱 버전에 따라 다를 수 있음). 목록에 없으면 기본 Flash 모델을 그대로 둡니다. 앱 창은 그대로 두고, Task 1 5단계에서 프로젝트 폴더를 엽니다.
+앱에서 모델을 고르는 메뉴가 보이면 기본 Flash 모델(Qwiklabs에서는 Gemini 3.6 Flash)을 그대로 둡니다(메뉴 이름은 앱 버전에 따라 다를 수 있음). 3.8 Flash 계열이 보이면 골라도 됩니다. 앱 창은 그대로 두고, Task 1 5단계에서 프로젝트 폴더를 엽니다.
 
 #### (나) agy CLI 초기 설정
 
@@ -276,7 +276,7 @@ CLI 초기 설정이 끝났으면 `/exit`로 agy를 종료합니다. 작업용 a
 
 Cymbal Group 한국 지사는 사내 업무 효율화를 위해 AI 기반 통합 운영 에이전트를 도입하려고 합니다.
 
-워크스페이스 내 `docs/SDD.md` 파일에 소프트웨어 설계 명세서가 준비되어 있습니다.
+소프트웨어 설계 명세서는 Task 1 3단계에서 워크스페이스의 `docs/SDD.md`로 내려받습니다.
 
 | 구분 | 파일 및 리소스 경로 | 세부 설명 | 링크 |
 |:---|:---|:---|:---|
@@ -293,7 +293,7 @@ SDD는 AI 에이전트를 개발할 때 시스템 구조, 입출력 스키마, �
 
 | SDD 절 | 내용 |
 |:---|:---|
-| 1절 시스템 개요 및 목표 | 에이전트 목표(휴가 신청 자동화, 하드웨어 교체 접수), 모델(Gemini 3.8 Flash, Temperature 0.1), RAG 신뢰도 임계값(0.80), 사번 기본값(EMP-10294) |
+| 1절 시스템 개요 및 목표 | 해결할 문제(분산된 포털, 규정 미숙지로 인한 반려), 목표 KPI(규정 준수율, 응답 지연 시간, 인용 정확도, 다중 사용자 격리). 모델(`gemini-3.8-flash`)은 문서 머리말에 있습니다. |
 | 2절 아키텍처 및 도구 명세 | 규정 검색 RAG 도구(`tools/policy_rag.py`)와 인사/전산 SaaS 연동 MCP 도구(`tools/mcp_tools.py`)의 함수 시그니처와 HTTP 엔드포인트 |
 | 3절 오케스트레이션 및 거버넌스 강령 | 규정 검증 우선 원칙, 위험 작업 사전 승인, 멀티턴 대화 상태 추적 |
 
@@ -393,7 +393,7 @@ cd enterprise-ops-agent
 - `--deployment-target cloud_run`: 배포 대상을 Cloud Run으로 지정해 `Dockerfile`과 FastAPI 서빙 코드를 함께 만듭니다.
 - `--session-type in_memory`: 로컬 테스트에 맞는 인메모리 세션 저장소를 사용합니다.
 - `--cicd-runner skip`: GitHub Actions 등 CI/CD 파이프라인 파일 생성을 건너뜁니다.
-- `--prototype` (`-p`): 인프라 리소스 생성 없이 프로토타입 모드로 프로젝트를 만듭니다.
+- `--prototype` (`-p`): CI/CD와 Terraform 인프라 파일 없이 최소 구성 프로젝트를 만듭니다.
 - `--yes` (`-y`): 대화형 확인 질문을 모두 자동 승인합니다.
 - `--skip-checks` (`-s`): 생성 전 GCP 환경 점검을 건너뜁니다.
 
@@ -564,12 +564,12 @@ cat docs/context_summary.md
 
 ### 6단계: Vertex AI Search로 사내 규정 검색 앱 만들기 (터미널 창)
 
-Task 3의 규정 RAG 도구가 호출할 Vertex AI Search 검색 앱을 지금 만들어 둡니다. 데이터스토어와 검색 앱 생성 요청은 바로 접수되지만, PDF 가져오기(인덱싱)는 PDF 2건 기준으로 보통 4~11분 걸립니다. 지금 시작해 두면 Task 2를 진행하는 동안 끝나므로 Task 3에서 기다릴 필요가 없습니다.
+Task 3의 규정 RAG 도구가 호출할 Vertex AI Search 검색 앱을 지금 만들어 둡니다. 데이터스토어와 검색 앱 생성 요청은 바로 접수되지만, PDF 가져오기(인덱싱)는 PDF 2건 기준으로 약 6~10분 걸립니다. 지금 시작해 두면 Task 3~5를 진행하는 동안 끝납니다. 끝나기 전에는 RAG 도구가 `local_fallback`으로 동작하므로 기다리지 않고 진행합니다.
 
 Vertex AI Search는 `global`/`us`/`eu` 멀티리전만 지원하므로 검색 앱은 `global`에 만들고, 원본 PDF 버킷은 서울(`asia-northeast3`)에 둡니다. 아래 네 블록은 같은 터미널 창에서 순서대로 실행합니다. ② 이후 블록은 ①에서 만든 변수를 씁니다.
 
 > [!TIP]
-> 응답에 `ALREADY_EXISTS`(또는 `409`)가 보이면 이미 만들어진 것이므로 무시하고 다음 블록으로 넘어갑니다. 그 밖의 `error`가 보이면 30초 뒤 그 블록만 다시 실행합니다.
+> 응답에 `ALREADY_EXISTS`(또는 `409`)가 보이면 이미 만들어진 것이므로 무시하고 다음 블록으로 넘어갑니다. 그 밖의 `error`가 보이면 30초 뒤 그 블록만 다시 실행합니다. 셸을 새로 열었다면 ①의 앞 세 줄(`PROJECT_ID`, `DE`, `AUTH`)만 다시 실행합니다. `AUTH`의 액세스 토큰은 약 1시간 뒤 만료되므로 그 뒤 401이 나면 `AUTH` 줄을 다시 실행합니다.
 
 ① 변수, 서비스 에이전트, 버킷
 
@@ -600,7 +600,7 @@ curl -s -X POST "${AUTH[@]}" "${DE}/dataStores?dataStoreId=company-policy-ds" \
   -d '{"displayName":"company-policy-ds","industryVertical":"GENERIC","solutionTypes":["SOLUTION_TYPE_SEARCH"],"contentConfig":"CONTENT_REQUIRED"}'
 ```
 
-③ GCS PDF 가져오기 (비동기, 4~11분 소요. 결과를 기다리지 않고 다음으로 진행)
+③ GCS PDF 가져오기 (비동기, 약 6~10분 소요. 결과를 기다리지 않고 다음으로 진행)
 
 ```bash
 curl -s -X POST "${AUTH[@]}" "${DE}/dataStores/company-policy-ds/branches/0/documents:import" \
@@ -619,7 +619,7 @@ curl -s -X POST "${AUTH[@]}" "${DE}/engines?engineId=company-policy-app" \
 | 요청 | 확인할 응답 | 의미 |
 |:---|:---|:---|
 | ② 데이터스토어 | `"done": true`와 `"name": ".../dataStores/company-policy-ds"` | 생성 완료 |
-| ③ PDF 가져오기 | `"name": ".../operations/import-documents-..."`만 있고 `done`이 없음 | 접수됨. 4~11분 뒤 완료되며, Task 3 0단계에서 확인 |
+| ③ PDF 가져오기 | `"name": ".../operations/import-documents-..."`만 있고 `done`이 없음 | 접수됨. 약 6~10분 뒤 완료되며, Task 3 0단계에서 확인 |
 | ④ 검색 앱 | `"done": true`와 `"name": ".../engines/company-policy-app"` | 생성 완료 |
 
 ③을 두 번 실행해도 같은 PDF는 중복으로 들어가지 않습니다(`INCREMENTAL` 모드).
@@ -748,14 +748,14 @@ SDD 2.2절에 따라 사내 복무 규정(POL-HR-2026-004)과 IT 하드웨어 �
 - [사내 IT 자산 운용 지침 (POL-IT-2026-009) PDF](../docs/policies/it_hardware_guidelines.pdf)
 
 #### 1. 사내 복무 규정 (POL-HR-2026-004) 주요 조항
-- 연차 발생 기준: 1개월 개근 시 1.25일 발생 (연간 기본 15일 부여).
-- 연속 연차 신청 기한: 3일을 초과하는 연속 연차는 업무 인수인계를 위해 **최소 사용 7영업일 전까지 상신**하여 팀장의 사전 승인을 받아야 함.
-- 병가 규정: 연간 14일 유급 병가 지원, 연속 3일 초과 시 의사 진단서 제출 필수.
+- 연차 발생 기준: 입사 1년 미만 사원은 1개월 개근 시 1.25일 발생 (입사 1년 차 총 15일). 3년 이상 근속 시 매 2년에 1일 가산 (최대 25일).
+- 연속 연차 신청 기한: 3일을 초과하는 연속 연차는 업무 인수인계를 위해 **최소 사용 7영업일 전까지 상신**하여 소속 부서장(팀장급 이상)의 사전 승인을 받아야 함.
+- 병가 규정: 연간 최대 14일 유급 병가 지원, 연속 3일 이상이면 전문의 진단서를 복귀 후 3영업일 이내 제출.
 
 #### 2. 사내 IT 자산 운용 지침 (POL-IT-2026-009) 주요 조항
-- 직군별 표준 기종: 데이터 및 엔지니어링 직군은 MacBook Pro 16 M3 Max (64GB RAM), 일반 사무직군은 M3 Pro 모델 지급.
+- 직군별 표준 기종: 엔지니어링/데이터 직군은 MacBook Pro M3 Max / 64GB RAM 급, 기획/일반 사무 직군은 MacBook Air / ThinkPad Series / 16GB RAM 급 지급.
 - 정기 교체 주기: 지급일로부터 36개월 경과 시 신규 기종 교체 신청 가능.
-- 긴급 결함 조치: 배터리 부풀림(스웰링) 등 안전 결함 발생 시 내구연한과 무관하게 4시간 내 접수 점검 및 당일 대여 장비 선지급.
+- 긴급 결함 조치: 배터리 부풀림(스웰링) 등 안전 결함 발생 시 내구연한과 무관하게 접수 후 4근무시간 이내 진단, 즉시 수리가 불가하면 당일 임시 대여 랩톱 선지급.
 
 > [!NOTE]
 > 하이브리드 RAG 구조: 1차로 Cloud Storage에 올린 규정 PDF를 인덱싱한 Vertex AI Search 검색 앱을 호출하고, 검색 앱이 아직 준비되지 않았거나 장애가 나면 PDF에서 발췌한 로컬 조항 인덱스로 폴백합니다. 응답의 `source` 필드(`vertex_ai_search` / `local_fallback`)로 어느 경로가 쓰였는지 확인할 수 있습니다. 관련 조항이 없으면 `NO_MATCH`를 반환해 에이전트가 추측하지 않도록 합니다.
@@ -877,7 +877,7 @@ print(json.dumps(r2, indent=2, ensure_ascii=False))
 `status`가 `SUCCESS`이고 `matches`에 `POL-HR-2026-004`(테스트 1), `POL-IT-2026-009`(테스트 2)가 있으면 성공입니다. 필드 순서는 달라도 되지만 `status`, `source`, `match_count`, `matches[].doc_id`, `matches[].title`, `matches[].content` 이름은 정확히 같아야 합니다. Task 5 통합 테스트와 실습 2 `rag_citation` 지표가 이 이름을 읽습니다. 이름이 다르면 에이전트 창에서 위 이름으로 고쳐 달라고 요청합니다.
 
 > [!NOTE]
-> `source`가 `local_fallback`으로 나오면 Task 1 6단계의 PDF 가져오기가 아직 끝나지 않은 것입니다. 가져오기는 길면 11분 정도 걸립니다. 폴백으로도 실습은 계속할 수 있으며, 가져오기가 끝난 뒤 다시 실행하면 `vertex_ai_search`로 바뀝니다. 진행 상태는 0단계의 `PROJECT_ID`, `DE`, `AUTH` 세 줄을 실행한 셸에서 `curl -s "${AUTH[@]}" "${DE}/dataStores/company-policy-ds/branches/0/documents" | grep -c '"name"'`(2이면 완료)로 확인합니다. 문서 수가 `2`인데도 계속 `local_fallback`이면 ADC 권한 문제일 수 있으므로 `gcloud auth application-default login`을 실행하고 실습 계정으로 로그인한 뒤 다시 확인합니다.
+> `source`가 `local_fallback`으로 나오면 Task 1 6단계의 PDF 가져오기가 아직 끝나지 않은 것입니다. 가져오기는 약 6~10분 걸립니다. 폴백으로도 실습은 계속할 수 있으며, 가져오기가 끝난 뒤 다시 실행하면 `vertex_ai_search`로 바뀝니다. 진행 상태는 0단계의 `PROJECT_ID`, `DE`, `AUTH` 세 줄을 실행한 셸에서 `curl -s "${AUTH[@]}" "${DE}/dataStores/company-policy-ds/branches/0/documents" | grep -c '"name"'`(2이면 완료)로 확인합니다. 문서 수가 `2`인데도 계속 `local_fallback`이면 ADC 권한 문제일 수 있으므로 `gcloud auth application-default login --no-launch-browser`를 실행하고 실습 계정으로 로그인한 뒤 다시 확인합니다.
 
 ---
 
@@ -1015,7 +1015,7 @@ print(json.dumps(list_hardware_assets_and_tickets('EMP-10294'), indent=2, ensure
 +-----------------------------------------------------------------------------------+
 ```
 
-MCP `tools/call`의 `result` 객체가 그대로 반환되므로 `content[].text` 안에 줄바꿈(`\n`)과 이스케이프된 따옴표가 섞여 보입니다. `isError`가 `false`이고, 잔여 연차 숫자(12.0)와 티켓 번호(INC-88210, INC-88211)가 보이면 성공입니다. 출력 형태는 생성된 코드에 따라 다를 수 있습니다. 맨 위의 `VIRTUAL_ENV` 경고와 `[EXPERIMENTAL] ... PLUGGABLE_AUTH` 경고는 무시합니다. `MCP_TOKEN` 오류가 나면 1단계의 저장 명령을 확인하고 `source ~/lab.env`를 실행하고, 401이 나면 토큰을 다시 발급하세요.
+MCP `tools/call`의 `result` 객체가 그대로 반환되므로 `content[].text` 안에 줄바꿈(`\n`)과 이스케이프된 따옴표가 섞여 보입니다. `isError`가 `false`이고, 잔여 연차 숫자(12.0)와 티켓 번호(INC-88210, INC-88211)가 보이면 성공입니다. 출력 형태는 생성된 코드에 따라 다를 수 있습니다. 위쪽의 경고 줄은 무시합니다. `MCP_TOKEN` 오류가 나면 1단계의 저장 명령을 확인하고 `source ~/lab.env`를 실행하고, 401이 나면 토큰을 다시 발급하세요.
 
 ---
 
@@ -1110,13 +1110,13 @@ uv run python3 tests/test_scenarios.py
 +-----------------------------------------------------------------------------------+
 ```
 
-[4/5], [5/5]가 실패하면 `MCP_TOKEN`을 확인하고, [2/5], [3/5]가 실패하면 Task 3 2단계의 단독 테스트를 먼저 확인하세요. ImportError가 나면 Task 4의 래퍼 함수 이름이 프롬프트와 같은지 확인합니다.
+[2/5]의 `검색 경로`가 `local_fallback`이어도 PASS이면 정상입니다. PDF 가져오기가 아직 끝나지 않았다는 뜻입니다. [4/5], [5/5]가 실패하면 `MCP_TOKEN`을 확인하고, [2/5], [3/5]가 실패하면 Task 3 2단계의 단독 테스트를 먼저 확인하세요. ImportError가 나면 Task 4의 래퍼 함수 이름이 프롬프트와 같은지 확인합니다.
 
 ---
 
 ### 4단계: agents-cli run으로 질의 하나 실행
 
-`agents-cli run`은 임시 로컬 서버를 띄워 질의 하나를 실행하고, 끝나면 서버를 내립니다.
+`agents-cli run`은 임시 로컬 서버를 띄워 질의 하나를 실행하고, 끝나면 서버를 내립니다. `MCP_TOKEN` 안내 메시지가 출력되면 Ctrl+C로 멈추고 Task 4 1단계의 토큰 저장부터 합니다.
 
 ```bash
 source ~/lab.env
@@ -1147,7 +1147,7 @@ agents-cli run "안녕하세요, 이민우입니다 (EMP-10294). 3주 뒤 4일 �
 |                                                                                   |
 | **사내 복무 규정(POL-HR-2026-004) 제4조(신청 및 결재 절차) 제2항**에 따르면:       |
 | * **3일을 초과하는 연속 연차**: ... **최소 사용 7영업일 전까지 상신**하여 소속     |
-|   본부장(또는 디렉터급 이상)의 사전 승인을 득하여야 합니다.                         |
+|   부서장(팀장급 이상)의 사전 승인을 득하여야 합니다.                              |
 | ...                                                                               |
 |                                                                                   |
 | Session: 40456518-14c5-4d59-8041-ab22ff715448                                    |
@@ -1156,7 +1156,7 @@ agents-cli run "안녕하세요, 이민우입니다 (EMP-10294). 3주 뒤 4일 �
 +-----------------------------------------------------------------------------------+
 ```
 
-도구 인자와 응답의 한글은 `\uc5f0` 같은 유니코드 이스케이프로 표시됩니다. 응답 본문은 Markdown 기호(`**`, `###`)가 그대로 보이고, 도구 응답 바로 뒤에 줄바꿈 없이 이어서 나올 수 있습니다. `hr_policy_agent`로 전달된 뒤 `search_company_policy`가 호출되고, 답변이 제4조의 7영업일 전 상신 규정을 근거로 들면 성공입니다.
+도구 인자와 응답의 한글은 `\uc5f0` 같은 유니코드 이스케이프로 표시됩니다. 응답 본문은 Markdown 기호(`**`, `###`)가 그대로 보이고, 도구 응답 바로 뒤에 줄바꿈 없이 이어서 나올 수 있습니다. `hr_policy_agent`로 전달된 뒤 `search_company_policy`가 호출되고, 답변이 제4조의 7영업일 전 상신 규정을 근거로 들면 성공입니다. 도구 응답의 `"source"`가 `local_fallback`으로 나와도 정상입니다.
 
 ---
 
@@ -1202,7 +1202,7 @@ agents-cli run "현재 제가 사용 중인 업무용 랩톱 배터리가 심하
 
 #### 기대하는 도구 호출 순서
 
-1. `hr_policy_agent`의 `search_company_policy` (category `IT`): POL-IT-2026-009 제 2 조(엔지니어링/데이터 직군은 MacBook Pro M3 Max 64GB 대상)와 제 4 조(배터리 부풀림 등 결함은 내구연한과 상관없이 긴급 교체 대상이며 4시간 내 1차 점검 및 임시 대여 장비 당일 선지급)를 확인합니다.
+1. `hr_policy_agent`의 `search_company_policy` (category `IT`): POL-IT-2026-009 제 2 조(엔지니어링/데이터 직군은 MacBook Pro M3 Max 64GB 대상)와 제 4 조(배터리 부풀림 등 결함은 내구연한과 상관없이 긴급 교체 대상이며 접수 후 4근무시간 이내 진단, 즉시 수리가 불가하면 당일 임시 대여 랩톱 선지급)를 확인합니다.
 2. `itsm_agent`의 `list_tickets`: 기존 티켓을 조회해 중복 접수 여부를 확인합니다. Mock SaaS에는 장비 사용 개월 수 데이터가 없으므로 교체 근거는 제 4 조 배터리 결함 긴급 교체입니다.
 3. `itsm_agent`의 `create_ticket`: 긴급 교체 티켓을 발행합니다.
 
@@ -1229,7 +1229,7 @@ agents-cli run "현재 제가 사용 중인 업무용 랩톱 배터리가 심하
 
 `agents-cli run`은 질의 하나를 실행하고 끝나면 세션을 버립니다. `agents-cli playground`는 ADK 개발 UI를 띄워, 같은 세션에서 대화를 이어 가며 어떤 에이전트가 어떤 도구를 어떤 순서로 호출했는지 화면으로 보여 줍니다. 여기서는 시나리오 2에서 "확인 절차 없이 바로 진행해 주세요." 문장을 빼고 보내서, 에이전트가 되묻는 질문에 같은 대화 안에서 답해 봅니다.
 
-1. 터미널 창에서 playground를 실행합니다. 이 명령은 **Ctrl+C**로 끌 때까지 터미널을 차지합니다. 그동안 다른 명령이 필요하면 Konsole 새 탭을 엽니다.
+1. 터미널 창에서 playground를 실행합니다. 이 명령은 **Ctrl+C**로 끌 때까지 터미널을 차지합니다. 그동안 다른 명령이 필요하면 Konsole 새 탭을 엽니다. `MCP_TOKEN` 안내 메시지가 출력되면 Ctrl+C로 멈추고 Task 4 1단계의 토큰 저장부터 합니다.
 
 ```bash
 source ~/lab.env
@@ -1339,9 +1339,9 @@ EOF
 ```
 
 > [!IMPORTANT]
-> 실습 2 Step 1에서 이 4개 데이터셋으로 `agents-cli eval run`을 실행합니다. LLM 판정 지표 3종(`multi_turn_task_success`, `multi_turn_tool_use_quality`, `hallucination`)에 결정론적 지표 3종(`tool_call_accuracy`, `policy_first_order`, `rag_citation`)을 더해 Tier별 베이스라인을 측정하고, 실패 케이스를 고쳐 가며 점수를 올립니다.
+> 실습 2 4절(Step 1)에서 이 4개 데이터셋으로 `agents-cli eval run`을 실행합니다. 기본 실행은 결정론적 지표 3종(`tool_call_accuracy`, `policy_first_order`, `rag_citation`)으로 Tier별 베이스라인을 측정하고, 실패 케이스를 고쳐 가며 점수를 올립니다. LLM 판정 지표 3종(`multi_turn_task_success`, `multi_turn_tool_use_quality`, `hallucination`)은 선택 과제입니다.
 
-여기까지 마쳤다면 실습 2를 시작할 수 있습니다. Task 6은 시간이 남을 때만 진행합니다.
+Task 3 0단계의 문서 수 확인 명령을 다시 실행해 `2`가 되었는지 확인합니다. 여기까지 마쳤다면 실습 2를 시작할 수 있습니다. Task 6은 시간이 남을 때만 진행합니다.
 
 ---
 
@@ -1353,7 +1353,7 @@ Gemini Enterprise(GE)에 에이전트를 등록하는 방식은 두 가지입니
 
 | 등록 방식 | 대상 | 필요한 것 |
 |:---|:---|:---|
-| ADK (`--registration-type=adk`) | Agent Runtime에 배포한 ADK 에이전트. 실습 2 Step 6이 이 방식입니다 | Agent Runtime 엔진 ID |
+| ADK (`--registration-type=adk`) | Agent Runtime에 배포한 ADK 에이전트. 실습 2 9절(Step 6)이 이 방식입니다 | Agent Runtime 엔진 ID |
 | A2A (`--registration-type=a2a`) | Cloud Run, GKE 등 Agent Runtime 밖에 A2A 서버로 띄운 에이전트 | 에이전트 카드 URL |
 
 이 실습의 GE 등록은 ADK 방식이라 A2A 서버가 없어도 됩니다. A2A는 Agent Runtime 밖에 둔 에이전트를 GE에 등록하거나, 다른 프레임워크로 만든 에이전트와 서로 호출할 때 씁니다. Task 6은 실습 2와 이어지지 않으므로 건너뛰어도 됩니다.
@@ -1434,7 +1434,7 @@ Gemini Enterprise가 A2A JSON-RPC로 호출할 수 있도록 ADK Runner를 감�
 로컬에서 A2A 서버를 띄우고 웹 콘솔과 JSON-RPC 요청으로 응답을 확인합니다.
 
 1. 로컬 서버 실행:
-8080 포트를 쓰는 프로세스를 정리하고, 터미널을 계속 쓰기 위해 `a2a_server.py`를 백그라운드(`&`)로 실행합니다. 서버 로그는 `/tmp/a2a.log`에 남깁니다.
+8080 포트를 쓰는 프로세스를 정리하고, 터미널을 계속 쓰기 위해 `a2a_server.py`를 백그라운드(`&`)로 실행합니다. 서버 로그는 `/tmp/a2a.log`에 남깁니다. `MCP_TOKEN` 안내 메시지가 출력되면 Ctrl+C로 멈추고 Task 4 1단계의 토큰 저장부터 합니다.
 
 ```bash
 source ~/lab.env
@@ -1472,7 +1472,7 @@ curl -s -X POST http://localhost:8080/ \
         "role": "user",
         "messageId": "msg-001",
         "contextId": "ctx-session-001",
-        "parts": [{"text": "IT 티켓이 총 몇개인가요?"}]
+        "parts": [{"kind": "text", "text": "IT 티켓이 총 몇개인가요?"}]
       }
     }
   }' | jq .
@@ -1491,7 +1491,7 @@ curl -s -X POST http://localhost:8080/ \
     "parts": [
       {
         "kind": "text",
-        "text": "현재 ServiceImmediately ITMS 시스템에 등록된 IT 인시던트 티켓은 **총 8건**입니다.\n\n간략한 현황은 다음과 같습니다:\n\n* **총 티켓 수**: 8건\n* **상태별 현황**:\n  * **접수**: 6건 (`INC-88211`, `INC-88300`, ...)\n  * **처리중**: 2건 (`INC-88210`, ...)\n..."
+        "text": "현재 ServiceImmediately ITSM 시스템에 등록된 IT 인시던트 티켓은 **총 8건**입니다.\n\n간략한 현황은 다음과 같습니다:\n\n* **총 티켓 수**: 8건\n* **상태별 현황**:\n  * **접수**: 6건 (`INC-88211`, `INC-88300`, ...)\n  * **처리중**: 2건 (`INC-88210`, ...)\n..."
       }
     ]
   }
@@ -1513,7 +1513,7 @@ Lab 1을 직접 끝냈다면 이 절은 건너뛰고 본인 프로젝트(`~/ente
 
 Lab 1을 끝내지 못했거나 완성본 기준으로 실습 2를 진행하려면 완성본을 받습니다.
 
-터미널 창에서 아래 명령을 실행하면 완성본을 받아 압축을 풉니다. 기존 폴더는 덮어쓰지 않도록 먼저 `enterprise-ops-agent.mine`으로 이름을 바꿔 둡니다. `~/enterprise-ops-agent.mine`이 이미 있으면 `Directory not empty` 오류로 블록 전체가 멈춥니다. 두 폴더 중 어느 쪽을 남길지 확인한 뒤 다시 실행합니다. 압축 파일만 따로 받아 두려면 [enterprise_ops_agent_completed.zip](./enterprise_ops_agent_completed.zip) 링크를 누르면 됩니다.
+터미널 창에서 아래 명령을 실행하면 완성본을 받아 압축을 풉니다. 기존 폴더는 덮어쓰지 않도록 먼저 `enterprise-ops-agent.mine`으로 이름을 바꿔 둡니다. `~/enterprise-ops-agent.mine`이 이미 있으면 `Directory not empty` 오류로 블록 전체가 멈춥니다. 두 폴더 중 어느 쪽을 남길지 확인한 뒤 다시 실행합니다. 압축 파일만 따로 받아 두려면 [enterprise_ops_agent_completed.zip](./enterprise_ops_agent_completed.zip) 링크를 누르면 됩니다. `MCP_TOKEN` 안내 메시지가 출력되면 Ctrl+C로 멈추고 Task 4 1단계의 토큰 저장부터 합니다.
 
 ```bash
 # [완성본 전용] 실습 1 결과물을 쓰는 사람은 실행하지 마세요. 기존 폴더를 .mine으로 옮기고 완성본으로 바꿉니다.
