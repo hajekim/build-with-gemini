@@ -169,8 +169,14 @@ Step 6(9절)에서 에이전트를 등록할 Gemini Enterprise 앱을 미리 만
 #### 1) 앱 만들기
 1. 원격 Chrome에서 Google Cloud 콘솔을 열고 실습 프로젝트가 선택되어 있는지 확인합니다.
 2. 콘솔 상단 검색창에 `Gemini Enterprise`를 입력해 Gemini Enterprise 페이지로 이동합니다.
-3. 앱 만들기를 선택합니다. 라이선스가 없는 프로젝트라면 이 과정에서 무료 체험을 시작합니다.
-4. 앱 이름(예: `cymbal-ops`)과 위치를 지정하고 앱을 만듭니다. 위치는 `global`로 두면 됩니다.
+3. 앱 만들기를 선택합니다. 앱이 없는 프로젝트라면 Welcome to Gemini Enterprise 화면에서 Create your first app을 누릅니다. 라이선스가 없는 프로젝트라면 이 과정에서 무료 체험을 시작합니다.
+
+![Welcome to Gemini Enterprise 화면](images/ge_setup_00_welcome.png)
+
+4. 앱 이름(예: `cymbal-ops`)과 위치를 지정하고 Create를 눌러 앱을 만듭니다. 위치는 `global`로 두면 됩니다. 화면 위에 "A 30-day free trial license will be created along with this instance." 안내가 보이면 앱과 함께 30일 무료 체험 라이선스가 만들어집니다. 앱 이름 아래의 ID(`cymbal-ops_<숫자>`)는 나중에 바꿀 수 없지만, 9.2에서 자동으로 조회하므로 따로 적어 둘 필요는 없습니다.
+
+![앱 이름과 위치 지정](images/ge_setup_00_create.png)
+
 5. 사용자 및 라이선스 할당 화면에서 본인 계정에 라이선스를 할당합니다.
 
 앱을 만들면 Apps 목록에 나타납니다. 아래 화면은 위치가 `global`인 앱 하나가 만들어진 상태입니다.
