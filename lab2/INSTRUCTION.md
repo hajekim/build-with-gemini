@@ -3,7 +3,7 @@
 
 실습 1에서 만든 Orchestrator-Worker 멀티 에이전트(`enterprise_ops_agent`)를 Antigravity 2.0(`agy`) 환경에서 이어받아 `agents-cli eval`로 평가하고 개선합니다. 이어서 Secret Manager, Agent Identity, Agent Registry, Agent Gateway, Model Armor를 적용해 Agent Runtime에 배포하고 Gemini Enterprise(GE)에 등록합니다.
 
-소요 시간: 약 100~110분 ((선택) 절과 강사 요청 대기 시간은 포함하지 않습니다)
+소요 시간: 약 100~110분 (강사 요청 대기 시간은 포함하지 않습니다)
 
 | Step | 절 | 내용 | 시간 |
 |:---|:---:|:---|:---:|
@@ -246,7 +246,6 @@ ls ~/enterprise-ops-agent/.agents/skills
 
 - 에이전트 창 단계에는 프롬프트 뒤에 에이전트가 실행해야 하는 명령, 완료 확인 방법, 막혔을 때 실행할 터미널 블록이 함께 있습니다.
 - 에이전트가 5분 넘게 진척이 없으면(문서만 읽고 명령을 실행하지 않는 경우 등) 작업을 멈추고(CLI는 `ESC`) 같은 절의 터미널 블록을 실행합니다.
-- 6, 7, 8절의 "(선택) 에이전트 창에서 같은 작업 해 보기"는 시간이 남을 때 진행합니다. 터미널 경로를 이미 실행했다면 에이전트가 같은 리소스를 다시 만들 수 있으니, 완료 조건의 확인 항목만 시켜 봅니다.
 
 ---
 
@@ -660,8 +659,6 @@ agents-cli run --url ${AGENT_URL} --mode adk "EMP-10294 직원의 연차 잔여�
 Mock SaaS 서버는 도구 주석을 제공하지 않습니다. 위험도는 SaaS가 아니라 회사가 레지스트리에서 정합니다. WorkWeek 7개, ServiceImmediately 4개 도구 명세는 저장소의 `lab2/registry/`에 있고, 6.3에서 내려받습니다.
 
 ### 6.3 Agent Registry 등록 커맨드 (터미널)
-이 절의 명령이 기본 경로입니다. 에이전트 창으로 진행했다면(6.4) 1·2번은 건너뛰고 3·4번 감사 명령만 실행합니다.
-
 ```bash
 source ~/lab2/env.sh
 cd ~/lab2
@@ -711,29 +708,6 @@ for s in json.load(sys.stdin):
         if t.get('annotations', {}).get('destructiveHint'):
             print(s['displayName'], '->', t['name'])"
 # 기대 결과: WorkWeek HCM MCP Server -> update_personal_info / cancel_leave_request
-```
-
-### 6.4 (선택) 에이전트 창에서 같은 작업 해 보기
-6.3 대신 에이전트로 등록해 보려면 에이전트 창에 다음 프롬프트를 입력합니다:
-
-```prompt
-WorkWeek, ServiceImmediately MCP 서버와 에이전트가 호출하는 Google API 목적지를 Agent Registry(asia-northeast1)에 등록해줘.
-명령을 실행하기 전에 `source ~/lab.env; source ~/lab2/env.sh 2>/dev/null`를 먼저 실행할 것.
-
-[조건]
-- MCP 서버 URL: https://korean-mock-saas-dri5akvbzq-du.a.run.app/work-week/mcp, /service-immediately/mcp (protocolBinding=JSONRPC)
-- 도구 명세: https://raw.githubusercontent.com/hajekim/build-with-gemini/main/lab2/registry/ 의 work-week.toolspec.json, service-immediately.toolspec.json 사용
-- Google API 목적지: 아래 호스트를 core-gapi-services endpoint 서비스로 등록 (호스트명은 정확히 일치해야 함)
-  aiplatform.googleapis.com aiplatform.mtls.googleapis.com asia-northeast1-aiplatform.googleapis.com asia-northeast1-aiplatform.mtls.googleapis.com aiplatform.asia-northeast1.rep.googleapis.com
-  discoveryengine.googleapis.com discoveryengine.mtls.googleapis.com modelarmor.asia-northeast1.rep.googleapis.com
-  logging.googleapis.com logging.mtls.googleapis.com telemetry.googleapis.com telemetry.mtls.googleapis.com
-  cloudtrace.googleapis.com cloudtrace.mtls.googleapis.com monitoring.googleapis.com monitoring.mtls.googleapis.com
-  secretmanager.googleapis.com secretmanager.mtls.googleapis.com cloudresourcemanager.googleapis.com cloudresourcemanager.mtls.googleapis.com
-  iamcredentials.googleapis.com iamcredentials.mtls.googleapis.com agentregistry.googleapis.com sts.googleapis.com oauth2.googleapis.com
-
-[완료 조건]
-- gcloud agent-registry agents list / mcp-servers list 결과를 보여줘.
-- 보안팀장 질문("WorkWeek 데이터를 파괴/취소할 수 있는 도구 목록")에 레지스트리 조회 결과로 답해줘.
 ```
 
 ---
@@ -794,8 +768,6 @@ gcloud org-policies set-policy ~/lab2/op.yaml --project=${PROJECT_ID}
 > 제약 이름은 단수형 `disableAccessPolicyBinding`입니다. 복수형(`...Bindings`)으로 조회하면 `NOT_FOUND`가 나옵니다.
 
 ### 7.4 게이트웨이 정책 구성 커맨드 (터미널)
-이 절의 명령이 기본 경로입니다. 에이전트 창으로 진행했다면(7.5) 이 절은 건너뛰고 7.6으로 갑니다.
-
 authz 정책 적용(2~3분)과 엔진 연결(4분 30초~5분)은 서로 독립이므로 두 터미널에서 동시에 실행하면 대기 시간이 줄어듭니다.
 
 ```bash
@@ -871,30 +843,7 @@ curl -s -H "Authorization: Bearer $(gcloud auth print-access-token)" \
 # 기대 결과: {'agentToAnywhereConfig': {'agentGateway': 'projects/.../agentGateways/enterprise-ops-agw'}}
 ```
 
-### 7.5 (선택) 에이전트 창에서 같은 작업 해 보기
-7.4 대신 에이전트로 구성해 보려면 에이전트 창에 다음 프롬프트를 입력합니다. 프롬프트 첫 줄의 `source`로 에이전트가 `AGENT_PRINCIPAL`, `AGENT_RESOURCE` 같은 변수를 씁니다. 이 프롬프트는 DRY_RUN부터 ENFORCE 전환까지 한 번에 지시합니다.
-
-```prompt
-명령을 실행하기 전에 `source ~/lab.env; source ~/lab2/env.sh 2>/dev/null`를 먼저 실행할 것.
-Step 2에서 만든 Agent Gateway(enterprise-ops-agw, asia-northeast1)에 에이전트를 연결하고, 위험 도구를 중앙에서 차단해줘.
-
-[조건]
-1. IAP V2 승인 확장(DRY_RUN)과 REQUEST_AUTHZ authz 정책을 게이트웨이에 연결
-2. IAM 접근 정책 ops-agent-egress: 우리 에이전트 신원(AGENT_PRINCIPAL)에 대해
-   - ALLOW: destination.is_registered == true && destination.agent_registry.location == 'asia-northeast1'
-   - DENY: destination.agent_registry.mcp_server.tool.annotations.destructive_hint == true
-   - 권한: iap.googleapis.com/resources.egressViaIAP, 프로젝트에 바인딩
-3. 에이전트 엔진의 spec.deploymentSpec.agentGatewayConfig에 게이트웨이를 연결 (REST PATCH)
-4. 조회가 통과하는지 확인한 뒤 ENFORCE 확장(failOpen=false)으로 전환
-
-[완료 조건]
-- 같은 세션에서 "11월 2일 하루 연차 신청" 후 "방금 신청 취소"를 요청했을 때 신청은 성공, 취소는 실패하는지 확인
-- 게이트웨이 로그에서 cancel_leave_request가 403 DENIED로 기록된 줄을 보여줘
-```
-
-에이전트가 ENFORCE 전환까지 마쳤다면 7.6을 실행한 뒤, 7.7의 첫 번째 블록(ENFORCE 전환)은 건너뛰고 차단 검증 블록만 실행합니다.
-
-### 7.6 DRY_RUN 확인: 게이트웨이를 지나도 조회가 정상인가
+### 7.5 DRY_RUN 확인: 게이트웨이를 지나도 조회가 정상인가
 
 ```bash
 source ~/lab2/env.sh
@@ -914,7 +863,7 @@ gcloud logging read 'resource.type="networkservices.googleapis.com/Gateway" AND 
 > [!NOTE]
 > DRY_RUN에서는 위험 도구도 실제로 실행됩니다. DRY_RUN 상태의 취소 호출은 게이트웨이 로그와 IAP 로그에 남지 않을 때가 있습니다. 그래서 차단 여부는 다음 단계의 ENFORCE에서 403으로 확인합니다.
 
-### 7.7 ENFORCE 전환과 차단 검증
+### 7.6 ENFORCE 전환과 차단 검증
 
 ```bash
 source ~/lab2/env.sh
@@ -1021,8 +970,6 @@ Model Armor 호출(`modelarmor.asia-northeast1.rep.googleapis.com`)도 게이트
 > 리전은 도쿄(`asia-northeast1`)를 씁니다. 서울에서는 프롬프트 인젝션/탈옥 필터가 지원되지 않습니다(`CAPABILITY_NOT_SUPPORTED` 오류).
 
 ### 8.3 Model Armor 방어 검증 (터미널)
-이 절의 명령이 기본 경로입니다. 첫 번째 블록(변수와 엔드포인트 설정)은 항상 실행합니다. 에이전트 창으로 진행했다면(8.4) 두 번째 블록의 1~3번은 건너뛰고 4번 검증만 실행합니다.
-
 ```bash
 source ~/lab2/env.sh
 export ARMOR_LOCATION=asia-northeast1
@@ -1077,25 +1024,6 @@ agents-cli eval run --dataset tests/eval/datasets/tier4-adversarial-edge.json \
 |:---|:---:|:---:|
 | `tool_call_accuracy` | 0.75 | 1.00 |
 | `policy_first_order` | 0.75 | 1.00 |
-
-### 8.4 (선택) 에이전트 창에서 같은 작업 해 보기
-8.3 대신 에이전트로 진행해 보려면 에이전트 창에 다음 프롬프트를 입력합니다:
-
-```prompt
-Model Armor 보안 템플릿을 만들고, app/tools/model_armor.py의 armor_guard를 Agent Runtime 배포본에서 활성화해줘.
-명령을 실행하기 전에 `source ~/lab.env; source ~/lab2/env.sh 2>/dev/null`를 먼저 실행할 것.
-
-[조건]
-1. 템플릿: hr-agent-armor-template, 리전 asia-northeast1
-   - Prompt Injection/Jailbreak 탐지 (medium-and-above), 민감정보 기본 필터
-2. agents-cli deploy -d agent_runtime --update-env-vars 로 MODEL_ARMOR_TEMPLATE 설정
-   (빌드 인자 AGENT_GATEWAY_ROOT_CERTIFICATES는 Step 2와 동일하게 다시 전달)
-3. model_armor.py가 어떤 입력을 언제 검사하는지 요약
-
-[완료 조건]
-- sanitize-user-prompt로 인젝션 문장과 신용카드번호 문장이 MATCH_FOUND인지 확인
-- 배포된 에이전트에 인젝션 문장을 보내 차단 메시지가 오는지, 정상 규정 질문은 통과하는지 확인
-```
 
 ---
 

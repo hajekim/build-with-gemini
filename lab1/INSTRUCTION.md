@@ -1,14 +1,14 @@
 # Build with Gemini 핸즈온 Track 3 | Architect: AI 엔지니어링 (개발자)
 
 ### [실습 Part 1] ADK 멀티 에이전트 구현과 A2A 인터페이스 로컬 검증
-Antigravity 2.0(데스크톱 앱 또는 CLI `agy`)으로 ADK(Agent Development Kit) 멀티 에이전트를 단계별로 만들고, Gemini Enterprise 등록에 쓸 A2A 인터페이스를 로컬에서 확인합니다.
+Antigravity 2.0(데스크톱 앱 또는 CLI `agy`)으로 ADK(Agent Development Kit) 멀티 에이전트를 단계별로 만들고 시나리오로 동작을 확인합니다. 시간이 남으면 A2A 인터페이스를 로컬에서 띄워 봅니다.
 
 ### [실습 Part 2] 에이전트 신뢰성 확보를 위한 Evaluation 및 Governance (연계)
 Lab 1에서 만든 에이전트를 정량 평가하고 Agent Runtime에 배포한 뒤, Agent Registry, Agent Gateway, Model Armor로 통제하고 Gemini Enterprise에 등록합니다.
 
 ---
 
-**소요 시간**: 90분 (Task 6 진행 시 +15분)  
+**소요 시간**: 95분 (Task 6 진행 시 +15분)  
 **과정 코드**: BWG-TRACK3-ARCH  
 **행사**: Build with Gemini 핸즈온 Track 3  
 **대상**: Google Cloud Customer Engineer, Solution Architect, AI/ML 엔지니어  
@@ -23,8 +23,8 @@ Lab 1에서 만든 에이전트를 정량 평가하고 Agent Runtime에 배포�
 | Task 2 | ADK Orchestrator-Worker 멀티 에이전트 뼈대 | 10분 |
 | Task 3 | Vertex AI Search + GCS PDF 하이브리드 Policy RAG (Task 1에서 시작한 인덱싱 결과 사용) | 13분 |
 | Task 4 | ADK McpToolset으로 Mock SaaS MCP 서버 연동 | 15분 |
-| Task 5 | 시나리오 통합 테스트 + 4-Tier Golden Evalset 생성 | 25분 |
-| Task 6 (선택) | A2A 인터페이스 로컬 검증 (시간 여유 시, 실습 2 배포에는 완성본 사용) | +15분 |
+| Task 5 | 시나리오 통합 테스트, playground 확인, 4-Tier Golden Evalset 생성 | 30분 |
+| Task 6 (선택) | A2A 인터페이스 로컬 검증 (시간 여유 시, 실습 2와 무관) | +15분 |
 
 ---
 
@@ -46,12 +46,12 @@ Lab 1에서 만든 에이전트를 정량 평가하고 Agent Runtime에 배포�
 
 이 실습을 마치면 다음 작업을 직접 수행할 수 있습니다.
 
-1. Antigravity 2.0 앱 또는 `agy` CLI에서 Google Cloud 프로젝트 인증을 마치고 모델을 `gemini-3.8-flash`로 설정합니다.
+1. Antigravity 2.0 앱 또는 `agy` CLI에서 Google Cloud 프로젝트 인증을 마치고 모델을 Gemini 3.8 Flash로 설정합니다.
 2. `docs/SDD.md`를 Antigravity에 읽혀 아키텍처와 도구 명세를 컨텍스트로 넣습니다.
 3. Antigravity로 `config.yaml`과 ADK 멀티 에이전트 뼈대 코드를 생성합니다.
 4. SDD 2.2절과 내 프로젝트 Cloud Storage 버킷에 올린 규정 PDF를 바탕으로 조항 번호와 근거를 반환하는 검색 도구(`app/tools/policy_rag.py`)를 만듭니다.
 5. Mock SaaS 플랫폼(`https://korean-mock-saas-dri5akvbzq-du.a.run.app/`)의 MCP 서버에 개인 토큰으로 연결하는 도구(`app/tools/mcp_tools.py`)를 만듭니다.
-6. 규정 검증 우선 규칙을 적용해 에이전트를 완성하고, `agents-cli run`으로 연차 신청과 노트북 교체 요청을 실행한 뒤 웹 화면에서 결과를 확인합니다. 실습 2에서 쓸 4-Tier 평가 데이터셋도 만듭니다.
+6. 규정 검증 우선 규칙을 적용해 에이전트를 완성하고, `agents-cli run`으로 연차 신청과 노트북 교체 요청을 실행한 뒤 웹 화면에서 결과를 확인합니다. `agents-cli playground`에서 도구 호출 순서를 확인하고, 실습 2에서 쓸 4-Tier 평가 데이터셋도 만듭니다.
 7. (선택) A2A 매니페스트(`agent_manifest.json`)와 A2A 서버(`a2a_server.py`)를 만들고 로컬에서 curl로 응답 형식을 확인합니다.
 
 ---
@@ -192,7 +192,7 @@ gcloud auth application-default print-access-token > /dev/null && echo "ADC OK"
 9. **Finish**를 클릭합니다. 다음과 같은 화면이 보이면 준비가 끝난 것입니다.
 ![Antigravity Agent Platform 준비 완료](./images/agy2_09_ready.png)
 
-앱에서 모델을 고르는 메뉴가 보이면 `gemini-3.8-flash`를 선택합니다(메뉴 이름은 앱 버전에 따라 다를 수 있음). 앱 창은 그대로 두고, Task 1 5단계에서 프로젝트 폴더를 엽니다.
+앱에서 모델을 고르는 메뉴가 보이면 Gemini 3.8 Flash 계열을 선택합니다(메뉴 이름은 앱 버전에 따라 다를 수 있음). 앱 창은 그대로 두고, Task 1 5단계에서 프로젝트 폴더를 엽니다.
 
 #### (나) agy CLI 초기 설정
 
@@ -236,7 +236,7 @@ agy
 색상 테마를 확인하고 원하는 테마를 확정합니다.
 ![색상 테마 확인](./images/12_agy_select_color_scheme.png)
 
-9. 사용할 모델을 확인하고 목록에서 `gemini-3.8-flash`를 선택합니다.
+9. 사용할 모델을 확인합니다. 목록에서 Gemini 3.8 Flash 계열(예: `Gemini 3.8 Flash (High)`)을 선택합니다.
 
 ```prompt
 /model
@@ -288,8 +288,8 @@ Python 패키지를 설치하고 `agents-cli`로 프로젝트를 만든 뒤, SDD
 `PATH`와 Vertex AI 환경 변수는 `~/lab.env` 파일에 저장합니다. 터미널, agy CLI, Antigravity 앱이 모두 같은 값을 읽을 수 있게 하기 위해서입니다. `~/.bashrc`에는 이 파일을 읽는 한 줄만 추가하므로, 이후 새로 여는 Konsole 탭에는 값이 자동으로 적용됩니다.
 
 ```bash
-# 1. 압축 해제 유틸리티와 JSON 처리 도구 설치
-sudo apt-get update -qq && sudo apt-get install -y -qq unzip jq
+# 1. pip, 압축 해제 유틸리티, JSON 처리 도구 설치
+sudo apt-get update -qq && sudo apt-get install -y -qq python3-pip unzip jq
 
 # 2. Google Agent Development Kit(ADK) CLI 및 필수 라이브러리 설치
 pip install --break-system-packages --upgrade pip
@@ -316,6 +316,11 @@ source ~/lab.env
 ```bash
 agents-cli --version
 ```
+
+`command not found`가 나오면 위 설치 블록의 출력에서 `ERROR`로 시작하는 줄을 찾아 원인을 확인합니다.
+
+> [!NOTE]
+> 이 실습의 명령 출력에는 `WARNING` 또는 `Warning`으로 시작하는 줄(NumPy, npx, 실험 기능 안내 등)이 섞여 나올 수 있습니다. 이런 줄은 무시하고, 각 단계에 적힌 성공 기준만 확인합니다.
 
 ---
 
@@ -655,7 +660,7 @@ uv run python3 -m app.agent
 +-----------------------------------------------------------------------------------+
 ```
 
-에러 없이 서브 에이전트 3개 이름이 출력되면 성공입니다. 출력 형식은 생성된 코드에 따라 다를 수 있습니다. ValidationError가 나면 Agent 생성자에 `instruction` 키워드를 썼는지 확인하세요.
+에러 없이 서브 에이전트 3개 이름이 출력되면 성공입니다. 위에 `Warning` 줄이 함께 나와도 됩니다. 출력 형식은 생성된 코드에 따라 다를 수 있습니다. ValidationError가 나면 Agent 생성자에 `instruction` 키워드를 썼는지 확인하세요.
 
 ---
 
@@ -730,6 +735,7 @@ docs/SDD.md의 2.2절 '사내 규정 RAG 도구 명세'와 '하이브리드 Poli
 터미널 창에서 RAG 도구를 직접 호출해 원하는 조항이 검색되는지 확인합니다.
 
 ```bash
+cd ~/enterprise-ops-agent
 uv run python3 -c "
 from app.tools.policy_rag import search_company_policy
 import json
@@ -860,6 +866,7 @@ docs/SDD.md의 2.3절 'Google ADK FastMCP SaaS 연동 도구 명세'를 바탕�
 터미널 창에서 실제 서버와 통신하는지 테스트합니다.
 
 ```bash
+cd ~/enterprise-ops-agent
 uv run python3 -c "
 from app.tools.mcp_tools import get_employee_leave_balance, list_hardware_assets_and_tickets
 import json
@@ -886,13 +893,13 @@ print(json.dumps(list_hardware_assets_and_tickets('EMP-10294'), indent=2, ensure
 +-----------------------------------------------------------------------------------+
 ```
 
-잔여 연차 숫자와 티켓 목록(INC-...)이 보이면 성공입니다. 필드 이름은 생성된 코드에 따라 다를 수 있습니다. `MCP_TOKEN` 오류가 나면 1단계의 저장 명령을 확인하고 `source ~/lab.env`를 실행하고, 401이 나면 토큰을 다시 발급하세요.
+잔여 연차 숫자와 티켓 목록(INC-...)이 보이면 성공입니다. `Warning` 줄은 무시합니다. 필드 이름은 생성된 코드에 따라 다를 수 있습니다. `MCP_TOKEN` 오류가 나면 1단계의 저장 명령을 확인하고 `source ~/lab.env`를 실행하고, 401이 나면 토큰을 다시 발급하세요.
 
 ---
 
 ## Task 5. 오케스트레이션 프롬프트 완성 및 시나리오 검증
 
-SDD 3절 규칙을 반영해 `app/agent.py`를 완성하고, 통합 테스트와 `agents-cli run` 시나리오로 확인합니다. 마지막으로 실습 2에서 쓸 평가 데이터셋을 만듭니다.
+SDD 3절 규칙을 반영해 `app/agent.py`를 완성하고, 통합 테스트와 `agents-cli run` 시나리오로 확인합니다. playground에서 도구 호출 순서를 본 뒤, 실습 2에서 쓸 평가 데이터셋을 만듭니다.
 
 ### 1단계: 최종 에이전트 완성 지시
 
@@ -1076,15 +1083,54 @@ agents-cli run "현재 제가 사용 중인 업무용 랩톱 배터리가 심하
 2. **WorkWeek** 탭을 클릭합니다.
    - 에이전트가 신청한 연차 내역이 **휴가 신청 내역** 목록에 `승인 대기` 상태로 등록되어 있는지 확인합니다.
 3. **ServiceImmediately** 탭을 클릭합니다.
-   - 에이전트 답변에 나온 티켓 번호(실행마다 다름)가 **인시던트 티켓 목록 (Incident Tickets)**에 `하드웨어`, 우선순위 `2 - 높음 (High)`, 상태 `접수`로 보이는지 확인합니다.
+   - 에이전트 답변에 나온 티켓 번호(실행마다 다름)가 **인시던트 티켓 목록 (Incident Tickets)**에 `하드웨어`, 상태 `접수`로 보이는지 확인합니다. 우선순위는 에이전트 판단에 따라 `1`(긴급) 또는 `2`(높음)로 기록됩니다.
 
-![ServiceImmediately 포털 실시간 확인](./images/mock_saas_serviceimmediately.png)
+![ServiceImmediately 인시던트 티켓 목록](./images/mock_saas_serviceimmediately.png)
 
 에이전트가 규정을 먼저 확인한 뒤 WorkWeek와 ServiceImmediately에 각각 기록한 것을 확인했습니다.
 
 ---
 
-### 8단계: 4-Tier Golden Evalset 평가 데이터셋 생성
+### 8단계: agents-cli playground로 도구 호출 과정 보기
+
+`agents-cli run`은 질의 하나를 실행하고 끝나면 세션을 버립니다. `agents-cli playground`는 ADK 개발 UI를 띄워, 같은 세션에서 대화를 이어 가며 어떤 에이전트가 어떤 도구를 어떤 순서로 호출했는지 화면으로 보여 줍니다. 여기서는 시나리오 2에서 "확인 절차 없이 바로 진행해 주세요." 문장을 빼고 보내서, 에이전트가 되묻는 질문에 같은 대화 안에서 답해 봅니다.
+
+1. 터미널 창에서 playground를 실행합니다. 이 명령은 **Ctrl+C**로 끌 때까지 터미널을 차지합니다. 그동안 다른 명령이 필요하면 Konsole 새 탭을 엽니다.
+
+```bash
+source ~/lab.env
+cd ~/enterprise-ops-agent
+: "${MCP_TOKEN:?실습 1 Task 4 1단계에서 MCP_TOKEN을 ~/lab.env에 저장하고 source ~/lab.env를 실행하세요}"
+agents-cli playground --port 8085
+```
+
+`Will be available at: http://127.0.0.1:8085/dev-ui/?app=app`과 `Uvicorn running on http://127.0.0.1:8085`가 출력되면 준비된 것입니다.
+
+2. 원격 세션 안 Chrome에서 `http://localhost:8085/dev-ui/?app=app`을 엽니다. **Help Improve ADK!** 대화상자가 나타나면 **No Thanks**를 클릭합니다.
+
+3. 화면 아래 **Type a message...** 입력창에 다음 질문을 붙여넣고 **ENTER**를 누릅니다.
+
+```chat
+현재 제가 사용 중인 업무용 랩톱 배터리가 심하게 부풀어 올라서(스웰링) 정상적인 업무가 불가능합니다. 제가 데이터/엔지니어링 직군인데, M3 Max 64GB 랩톱으로 교체 지원이 가능한지 사내 IT 지원 규정을 확인해 주세요. 제 현재 장비 지급 이력을 확인하고 ServiceImmediately 시스템에 긴급 교체 인시던트 티켓을 발행해 주세요.
+```
+
+4. 에이전트는 규정을 검색한 뒤 사번 같은 정보를 물어볼 수 있습니다. 그러면 같은 입력창에 답합니다.
+
+```chat
+사번은 EMP-10294입니다. 자산번호는 모르니 지급 이력에서 확인해서 진행해 주세요.
+```
+
+5. 대화 영역의 이벤트 목록(`#1`, `#2` ...)에서 호출 순서를 확인합니다. 번개 아이콘 행은 도구 호출, 체크 아이콘 행은 도구 응답입니다. 왼쪽 그래프에서는 지금 동작 중인 에이전트가 강조됩니다.
+
+![playground 이벤트 목록과 에이전트 그래프](./images/playground_tool_calls.png)
+
+`transfer_to_agent("hr_policy_agent")`와 `search_company_policy`가 `list_tickets`, `create_ticket`보다 먼저 나오면 6단계의 기대 순서와 같습니다. 이 단계에서 만든 티켓도 ServiceImmediately 화면에 추가됩니다.
+
+확인이 끝나면 playground를 실행한 터미널 창에서 **Ctrl+C**를 눌러 종료합니다.
+
+---
+
+### 9단계: 4-Tier Golden Evalset 평가 데이터셋 생성
 
 실습 2에서 `agents-cli eval`로 정량 평가를 하려면 먼저 "무엇을 정답으로 볼지"를 정한 골든 데이터셋이 있어야 합니다. 에이전트로 난이도별 데이터셋 4개를 만들고, 각 케이스에 호출해야 하는 도구(`expected_tools`)와 호출하면 안 되는 도구(`forbidden_tools`)를 적습니다. 이 두 필드는 실습 2의 결정론적 지표(같은 트레이스면 항상 같은 점수를 내는 코드 기반 채점) `tool_call_accuracy`가 채점 기준으로 사용합니다.
 
@@ -1153,17 +1199,24 @@ EOF
 ```
 
 > [!IMPORTANT]
-> 실습 2 Step 1에서 이 4개 데이터셋으로 `agents-cli eval run`을 실행합니다. LLM 판정 지표 3종(`multi_turn_task_success`, `multi_turn_tool_use_quality`, `hallucination`)에 결정론적 지표 3종(`tool_call_accuracy`, `policy_first_order`, `rag_citation`)을 더해 Tier별 베이스라인을 측정하고, 실패 케이스를 고쳐 가며 점수를 올립니다(힐클라이밍).
+> 실습 2 Step 1에서 이 4개 데이터셋으로 `agents-cli eval run`을 실행합니다. LLM 판정 지표 3종(`multi_turn_task_success`, `multi_turn_tool_use_quality`, `hallucination`)에 결정론적 지표 3종(`tool_call_accuracy`, `policy_first_order`, `rag_citation`)을 더해 Tier별 베이스라인을 측정하고, 실패 케이스를 고쳐 가며 점수를 올립니다.
 
 여기까지 마쳤다면 실습 2를 시작할 수 있습니다. Task 6은 시간이 남을 때만 진행합니다.
 
 ---
 
-## Task 6 (선택): Gemini Enterprise 등록용 A2A 인터페이스 만들고 로컬에서 확인하기
+## Task 6 (선택): A2A 인터페이스 만들고 로컬에서 확인하기
 
 ### 배경
 
-실습 1에서는 Gemini Enterprise(GE)에 바로 등록하지 않습니다. 실제 GE 등록과 임직원 테스트는 품질 평가와 보안 배포를 거친 뒤 실습 2 Step 6에서 진행합니다.
+Gemini Enterprise(GE)에 에이전트를 등록하는 방식은 두 가지입니다.
+
+| 등록 방식 | 대상 | 필요한 것 |
+|:---|:---|:---|
+| ADK (`--registration-type=adk`) | Agent Runtime에 배포한 ADK 에이전트. 실습 2 Step 6이 이 방식입니다 | Agent Runtime 엔진 ID |
+| A2A (`--registration-type=a2a`) | Cloud Run, GKE 등 Agent Runtime 밖에 A2A 서버로 띄운 에이전트 | 에이전트 카드 URL |
+
+이 실습의 GE 등록은 ADK 방식이라 A2A 서버가 없어도 됩니다. A2A는 Agent Runtime 밖에 둔 에이전트를 GE에 등록하거나, 다른 프레임워크로 만든 에이전트와 서로 호출할 때 씁니다. Task 6은 실습 2와 이어지지 않으므로 건너뛰어도 됩니다.
 
 여기서는 A2A 매니페스트(`agent_manifest.json`)와 서버를 만들고 로컬에서 응답 형식을 확인합니다.
 
@@ -1174,7 +1227,7 @@ EOF
 에이전트 창에 다음 프롬프트를 입력하고 **ENTER**를 누릅니다.
 
 ```prompt
-docs/SDD.md의 3.1절 '실습 1 & 실습 2 라이프사이클 경계 및 핸드오프'에 있는 agent_manifest.json 산출물 규격을 바탕으로, 우리 에이전트가 사내 Gemini Enterprise 또는 Agent Engine에 등록될 수 있도록 'agent_manifest.json' 파일을 생성해 주세요.
+docs/SDD.md의 3.1절 '실습 1 & 실습 2 라이프사이클 경계 및 핸드오프'에 있는 agent_manifest.json 산출물 규격을 바탕으로, A2A 클라이언트가 우리 에이전트의 기능과 엔드포인트를 알 수 있도록 'agent_manifest.json' 파일을 생성해 주세요.
 
 요구사항:
 - schema_version: "1.0.0"
@@ -1216,7 +1269,7 @@ Gemini Enterprise가 A2A JSON-RPC로 호출할 수 있도록 ADK Runner를 감�
        "result": {
          "kind": "message",
          "messageId": f"msg-{uuid4().hex[:10]}",
-         "contextId": params에서 추출한 contextId,
+         "contextId": params.message.contextId (없으면 params.contextId, 둘 다 없으면 새로 생성),
          "role": "agent",
          "parts": [{"kind": "text", "text": reply_text}]
        }
@@ -1238,7 +1291,7 @@ Gemini Enterprise가 A2A JSON-RPC로 호출할 수 있도록 ADK Runner를 감�
 
 ### 3단계: 로컬에서 에이전트 웹 앱 실행 및 확인
 
-Gemini Enterprise에 배포하기 전에 로컬에서 웹 앱을 띄워 에이전트와 대화해 봅니다.
+로컬에서 A2A 서버를 띄우고 웹 콘솔과 JSON-RPC 요청으로 응답을 확인합니다.
 
 1. 로컬 서버 실행:
 8080 포트를 쓰는 프로세스를 정리하고, 터미널을 계속 쓰기 위해 `a2a_server.py`를 백그라운드(`&`)로 실행합니다. 서버 로그는 `/tmp/a2a.log`에 남깁니다.
@@ -1255,7 +1308,7 @@ uv run python3 a2a_server.py > /tmp/a2a.log 2>&1 &
 for i in $(seq 10); do curl -sf http://localhost:8080/healthz && break; sleep 2; done
 ```
 
-healthz 응답(`{"status":"ok",...}`)이 출력되면 서버가 실행된 것입니다. 아무것도 나오지 않으면 `tail /tmp/a2a.log`로 오류를 확인하세요. 백그라운드로 띄웠으므로 같은 터미널 창에서 다음 curl을 실행할 수 있습니다. 확인이 모두 끝나면 `fuser -k 8080/tcp`로 서버를 종료합니다.
+healthz 응답(`{"status":"ok",...}`)이 출력되면 서버가 실행된 것입니다. 아무것도 나오지 않으면 `tail /tmp/a2a.log`로 오류를 확인하세요. 백그라운드로 띄웠으므로 같은 터미널 창에서 다음 curl을 실행할 수 있습니다.
 
 2. 로컬 테스트 콘솔 접속:
 원격 세션 안의 브라우저에서 `http://localhost:8080`에 접속합니다.
@@ -1305,20 +1358,7 @@ curl -s -X POST http://localhost:8080/ \
 }
 ```
 
-건수와 티켓 목록은 본인 테넌트 데이터에 따라 다릅니다. `result.parts[0].text`에 티켓 번호가 들어 있고 ServiceImmediately 화면과 같으면 도구 호출이 제대로 된 것입니다.
-
-4. 선택: ADK 개발 UI (agents-cli playground)  
-   이벤트, 세션 상태, 트레이스를 화면에서 보려면 `agents-cli playground`를 실행합니다. 종료할 때는 그 터미널 창에서 **Ctrl+C**를 누릅니다.
-
-   ```bash
-   # Vertex AI 환경 변수 적용 후 공식 플레이그라운드 기동
-   source ~/lab.env
-   cd ~/enterprise-ops-agent
-   agents-cli playground --port 8085
-   ```
-
-   > [!NOTE]
-   > 원격 세션 안의 브라우저에서 `http://localhost:8085/dev-ui/?app=app`을 엽니다.
+건수와 티켓 목록은 본인 테넌트 데이터에 따라 다릅니다. `result.parts[0].text`에 티켓 번호가 들어 있고 ServiceImmediately 화면과 같으면 도구 호출이 제대로 된 것입니다. 확인이 끝나면 `fuser -k 8080/tcp`로 서버를 종료합니다.
 
 ---
 
@@ -1372,6 +1412,6 @@ Lab 1에서는 SDD를 기준으로 Antigravity에 코드를 생성하게 해서 
 
 [실습 2 시작하기](../index.html?tab=codelab2)
 
-**문서 최종 갱신일**: 2026년 9월 29일  
-**실습 환경 검증일**: 2026년 9월 29일  
+**문서 최종 갱신일**: 2026년 10월 2일  
+**실습 환경 검증일**: 2026년 10월 2일  
 **Copyright 2026 Google LLC**. All rights reserved.

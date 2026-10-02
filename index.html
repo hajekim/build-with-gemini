@@ -293,6 +293,8 @@
     .code.prompt pre { padding: 16px 20px 18px 18px; }
     .code.prompt pre code { min-width: 0; white-space: pre-wrap; word-break: break-word; font: 16px/1.8 var(--sans); color: var(--text); }
     .code.prompt pre code::before { content: "✦ "; font: 700 15px var(--mono); color: #9b72cb; }
+    .code.chat .lang { background: var(--g-blue); }
+    .code.chat pre code { min-width: 0; white-space: pre-wrap; word-break: break-word; }
     .mermaid-wrap { margin: 18px 0 26px; padding: 20px; border-radius: var(--radius); background: var(--bg-2); border: 1px solid var(--line-soft); overflow-x: auto; text-align: center; }
 
     /* pager */
@@ -461,6 +463,7 @@
       bash: { lang: "bash", hint: "터미널 창에서 실행" },
       prompt: { lang: "agy", hint: "에이전트 창(앱 또는 CLI)에 붙여넣기" },
       text: { lang: "output", hint: "" },
+      chat: { lang: "chat", hint: "playground 입력창에 붙여넣기" },
       json: { lang: "json", hint: "" },
     };
     const ALERTS = ["NOTE", "TIP", "IMPORTANT", "WARNING", "CAUTION"];
