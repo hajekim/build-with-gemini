@@ -1104,7 +1104,7 @@ cd ~/enterprise-ops-agent
 agents-cli playground --port 8085
 ```
 
-`Will be available at: http://127.0.0.1:8085/dev-ui/?app=app`과 `Uvicorn running on http://127.0.0.1:8085`가 출력되면 준비된 것입니다.
+처음 실행하면 터미널에 `Enable telemetry? [Y/n]:` 질문이 나옵니다. 답하기 전까지 서버가 시작되지 않으므로 `n`을 입력하고 **ENTER**를 누릅니다. `Will be available at: http://127.0.0.1:8085/dev-ui/?app=app`과 `Uvicorn running on http://127.0.0.1:8085`가 출력되면 준비된 것입니다.
 
 2. 원격 세션 안 Chrome에서 `http://localhost:8085/dev-ui/?app=app`을 엽니다. **Help Improve ADK!** 대화상자가 나타나면 **No Thanks**를 클릭합니다.
 
@@ -1114,7 +1114,7 @@ agents-cli playground --port 8085
 현재 제가 사용 중인 업무용 랩톱 배터리가 심하게 부풀어 올라서(스웰링) 정상적인 업무가 불가능합니다. 제가 데이터/엔지니어링 직군인데, M3 Max 64GB 랩톱으로 교체 지원이 가능한지 사내 IT 지원 규정을 확인해 주세요. 제 현재 장비 지급 이력을 확인하고 ServiceImmediately 시스템에 긴급 교체 인시던트 티켓을 발행해 주세요.
 ```
 
-4. 에이전트는 규정을 검색한 뒤 사번 같은 정보를 물어볼 수 있습니다. 그러면 같은 입력창에 답합니다.
+4. 에이전트가 규정을 검색한 뒤 사번 같은 정보를 되물으면 같은 입력창에 답합니다. 되묻지 않고 티켓 발행까지 끝냈다면 이 답은 보내지 않고 5번으로 넘어갑니다. 실행할 때마다 둘 중 어느 쪽으로든 진행될 수 있습니다.
 
 ```chat
 사번은 EMP-10294입니다. 자산번호는 모르니 지급 이력에서 확인해서 진행해 주세요.
