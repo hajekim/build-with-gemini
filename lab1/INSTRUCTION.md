@@ -753,7 +753,7 @@ curl -s "${AUTH[@]}" "${DE}/dataStores/company-policy-ds/branches/0/documents" |
 
 콘솔에서도 같은 내용을 확인할 수 있습니다.
 
-1. 원격 Chrome의 Google Cloud 콘솔 상단 검색창에 `AI Applications`를 입력해 이동합니다.
+1. 원격 Chrome의 Google Cloud 콘솔 상단 검색창에 `Vertex AI Search`를 입력합니다. 검색 결과에는 바뀐 제품 이름인 AI Applications로 표시되므로 이것을 선택합니다.
 2. Apps 목록에서 `company-policy-app`(App type `Search`)과 연결된 데이터 스토어 `company-policy-ds`를 확인합니다. 실습 2에서 만드는 Gemini Enterprise 앱도 나중에 같은 목록에 나타납니다.
 
 ![AI Applications Apps 목록](./images/vais_console_01_apps.png)
