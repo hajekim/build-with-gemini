@@ -288,8 +288,8 @@ Python 패키지를 설치하고 `agents-cli`로 프로젝트를 만든 뒤, SDD
 `PATH`와 Vertex AI 환경 변수는 `~/lab.env` 파일에 저장합니다. 터미널, agy CLI, Antigravity 앱이 모두 같은 값을 읽을 수 있게 하기 위해서입니다. `~/.bashrc`에는 이 파일을 읽는 한 줄만 추가하므로, 이후 새로 여는 Konsole 탭에는 값이 자동으로 적용됩니다.
 
 ```bash
-# 1. pip, 압축 해제 유틸리티, JSON 처리 도구 설치
-sudo apt-get update -qq && sudo apt-get install -y -qq python3-pip unzip jq
+# 1. pip, git, 압축 해제 유틸리티, JSON 처리 도구 설치
+sudo apt-get update -qq && sudo apt-get install -y -qq python3-pip git unzip jq
 
 # 2. Google Agent Development Kit(ADK) CLI 및 필수 라이브러리 설치
 pip install --break-system-packages --upgrade pip
