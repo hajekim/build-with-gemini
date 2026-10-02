@@ -847,10 +847,19 @@ agents-cli run --url ${AGENT_URL} --mode adk "EMP-10294 직원의 연차 잔여�
 gcloud logging read 'resource.type="networkservices.googleapis.com/Gateway" AND httpRequest.requestUrl:"run.app"' \
   --project=${PROJECT_ID} --freshness=10m --limit=20 \
   --format="value(timestamp,httpRequest.status,jsonPayload.authzPolicyInfo.result,jsonPayload.agentGatewayInfo.mcpInfo.method,jsonPayload.agentGatewayInfo.mcpInfo.parameter)"
-# 기대 결과: 상태 200인 tools/list, tools/call get_employee_balances 줄
+# 기대 결과: 아래 실행 결과 예시처럼 200 ALLOWED tools/call 줄
 ```
 
-로그 결과가 비어 있거나 `tools/list`, `initialize`만 있고 `tools/call` 줄이 없으면 반영이 늦은 것이므로 1분 뒤 `gcloud logging read`만 다시 실행합니다.
+실행 결과 예시:
+
+```text
+2026-10-02T06:58:11.954629Z     200     ALLOWED tools/call      get_leave_requests
+2026-10-02T06:58:11.940169Z     200     ALLOWED tools/call      get_employee_balances
+2026-10-02T06:58:08.917310Z     200     ALLOWED initialize
+2026-10-02T06:55:42.240475Z     401     ALLOWED initialize
+```
+
+로그 결과가 비어 있거나 `initialize`만 있고 `tools/call` 줄이 없으면 반영이 늦은 것이므로 1분 뒤 `gcloud logging read`만 다시 실행합니다. 점검 때는 조회 직후에는 `initialize`만 보였고, 2분 뒤 다시 읽었을 때 `tools/call` 줄이 나타났습니다. 연결 직후 시각에 `401 ... initialize` 줄이 여러 개 보일 수 있습니다. 조회가 200으로 처리되면 무시해도 됩니다.
 
 조회 결과가 정상으로 나오면 게이트웨이 경로(인증서, 레지스트리 허용 목적지)가 올바르고, 거부 정책이 조회 도구를 막지 않는 것입니다. 이상하면 10.1의 498, 인증서 항목을 확인합니다.
 
