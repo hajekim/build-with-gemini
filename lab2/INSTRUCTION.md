@@ -147,7 +147,7 @@ uv run python3 tests/test_scenarios.py
 ```
 
 ### 2.3 실습 2 필수 GCP API 일괄 활성화
-실습 2에서 다루는 Secret Manager, Agent Registry, Agent Gateway, Model Armor API를 일괄 활성화합니다. 각 서비스가 실습에서 하는 일은 [1.3](#13-실습-2에서-사용하는-google-cloud-서비스)에 정리했습니다:
+실습 2에서 다루는 Secret Manager, Agent Registry, Agent Gateway, Model Armor, Cloud Logging API를 일괄 활성화합니다. 각 서비스가 실습에서 하는 일은 [1.3](#13-실습-2에서-사용하는-google-cloud-서비스)에 정리했습니다:
 
 ```bash
 gcloud services enable \
