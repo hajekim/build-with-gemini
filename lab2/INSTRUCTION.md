@@ -59,6 +59,26 @@ flowchart LR
 | Step 5 | 레드팀 점검 | 레드팀: "IT 티켓 본문에 숨겨진 악의적 지시문(간접 인젝션)이 작동하고, 직원이 입력한 신용카드번호가 SaaS에 평문 저장되고 있습니다." | Model Armor 템플릿으로 사용자 입력과 도구 응답 검사 (프롬프트 인젝션 차단, PII 탐지 시 차단) |
 | Step 6 | 전사 공개 | 임직원: "보안 검증이 끝났으면 매일 쓰는 Gemini Enterprise 채팅 화면에서 쓸 수 있게 해 주세요." | `agents-cli publish gemini-enterprise`로 Agent Runtime 에이전트 등록 및 실시간 대화 검증 |
 
+### 1.3 실습 2에서 사용하는 Google Cloud 서비스
+
+실습 2에서 쓰는 Google Cloud 서비스와 각 서비스가 실습에서 하는 일입니다. API는 2.3에서 활성화하는 이름이고, 서비스별 리전은 5.2 표에 있습니다.
+
+| 서비스 | API | 실습에서 하는 일 | 사용 절 |
+|:---|:---|:---|:---:|
+| Gemini 모델 (Vertex AI) | `aiplatform.googleapis.com` | 에이전트가 질문을 이해하고, 어떤 도구를 부를지 정하고, 답변을 만드는 모델입니다. 실습 1과 같이 `global` 엔드포인트로 호출합니다. Step 1 평가에서는 Vertex AI 판정 모델이 최종 답변을 도구 응답(규정 원문, SaaS 데이터)과 대조해, 도구 응답에 없는 내용을 지어냈는지(`hallucination`) 채점합니다. | 4.4~4.6, 5.7 이후 |
+| Agent Runtime | `aiplatform.googleapis.com` | 에이전트를 Google Cloud에 배포해 실행하는 환경입니다. 실습 1에서 VM에서 로컬로 실행하던 에이전트를 도쿄(`asia-northeast1`)에 배포합니다. Step 4의 Agent Gateway는 현재 Agent Runtime과 Gemini Enterprise에 배포된 에이전트만 지원하므로 Cloud Run 대신 Agent Runtime을 씁니다. API와 로그에서는 `reasoningEngines`(`ReasoningEngine`)로 표시됩니다. | 5.3, 5.7, 7.3, 8.3 |
+| Agent Identity | 별도 API 없음 (배포 옵션 `--agent-identity`) | 배포한 에이전트가 받는 고유 신원(SPIFFE 기반)입니다. 서비스 계정 키를 만들거나 나눠 줄 필요가 없고, IAM 권한은 이 신원을 기준으로 줍니다. 5.4에서 이 프로젝트의 모든 Agent Runtime 에이전트를 가리키는 `principalSet`(`ALL_AGENTS`)에 시크릿 읽기 권한과 실행에 필요한 역할 9개를 부여하고, 5.7에서 `--agent-identity`로 엔진에 신원을 붙입니다. | 5.4, 5.7 |
+| Secret Manager | `secretmanager.googleapis.com` | Mock SaaS 토큰(`MCP_TOKEN`)을 보관합니다. 실습 1까지는 토큰이 `~/lab.env`에 평문으로 있었는데, 5.4에서 시크릿 `enterprise-agent-mcp-token`으로 옮깁니다. 5.7 배포에서 `--secrets`로 이 시크릿을 `MCP_TOKEN` 환경 변수로 넣으므로 토큰 값이 코드나 이미지에 남지 않습니다. 주입은 Agent Runtime 서비스 에이전트가 하므로, 이 서비스 에이전트와 에이전트 신원 모두에 읽기 권한을 줍니다. | 5.4, 5.7 |
+| Agent Registry | `agentregistry.googleapis.com` | 회사의 에이전트, MCP 서버, 호출을 허용할 목적지를 한곳에 등록하는 목록입니다. Agent Runtime에 배포한 에이전트는 자동으로 등록됩니다. 6.3에서 MCP 서버 2개를 도구별 위험도 주석(`readOnlyHint`, `destructiveHint`)과 함께 등록하고, 에이전트가 호출하는 Google API 주소를 `core-gapi-services`로 등록합니다. Agent Gateway는 레지스트리에 등록된 목적지만 통과시키므로(기본 거부), 빠진 주소는 HTTP 498로 실패합니다. | 5.5, 6.3 |
+| Agent Gateway | `networkservices.googleapis.com` | 에이전트의 외부 호출이 모두 지나가는 관문(이그레스)입니다. TLS를 복호화해 MCP 요청의 메서드와 도구 이름을 식별합니다. 그래서 5.5에서 게이트웨이를 배포 전에 먼저 만들고, 루트 인증서를 받아 5.6에서 컨테이너 이미지에 넣습니다. 7.3에서 엔진을 게이트웨이에 연결하고, 7.5와 7.6에서 게이트웨이 로그로 허용과 차단을 확인합니다. | 5.5, 5.6, 7.3, 7.5, 7.6 |
+| 게이트웨이 authz 정책 | `networksecurity.googleapis.com` | 게이트웨이에 붙이는 접근 정책입니다. 7.4에서 `gcloud beta network-security authz-policies import`로, MCP `tools/call`의 도구 이름이 `cancel_leave_request` 또는 `update_personal_info`이면 거부(`DENY`)하는 정책을 만듭니다. 에이전트 코드를 고치지 않고 403으로 막으며, 같은 게이트웨이에 연결한 다른 에이전트에도 같은 규칙이 적용됩니다. | 7.4, 7.6 |
+| Model Armor | `modelarmor.googleapis.com` | 모델에 들어가는 입력을 검사하는 서비스입니다. 8.3에서 도쿄 리전에 템플릿 `hr-agent-armor-template`을 만들어 프롬프트 인젝션·탈옥 필터와 개인정보(신용카드 번호 등) 탐지를 켭니다. 8.2에서 에이전트에 연결한 가드(`armor_guard`)는 모델 호출 직전에 최신 입력(사용자 메시지, 또는 티켓 본문 같은 도구 응답)을 이 템플릿으로 검사하고, 탐지되면 모델을 호출하지 않고 차단 메시지를 돌려줍니다. 서울 리전은 프롬프트 인젝션 필터를 지원하지 않아 도쿄를 씁니다. | 8.2, 8.3 |
+| Vertex AI Search, Gemini Enterprise | `discoveryengine.googleapis.com` | 두 가지 용도로 씁니다. 하나는 실습 1 Task 1 6단계에서 만든 규정 검색 앱(Vertex AI Search)으로, 에이전트가 사내 규정(POL-HR, POL-IT)을 찾을 때 호출합니다. 이를 위해 5.4에서 에이전트 신원에 `discoveryengine.viewer` 역할을 줍니다. 다른 하나는 임직원이 쓰는 Gemini Enterprise 앱입니다. 2.5에서 앱을 만들고, 9.2에서 배포한 에이전트를 이 앱에 등록해 웹 앱에서 대화합니다. | 2.5, 5.4, 9.2 |
+| Cloud Resource Manager | `cloudresourcemanager.googleapis.com` | 프로젝트 정보와 프로젝트 IAM 정책을 다루는 API입니다. 2.4에서 내 계정의 프로젝트 역할을 확인하고(`gcloud projects get-iam-policy`), 5.4에서 프로젝트 번호와 상위 조직 ID를 조회해 에이전트 신원의 trust domain을 정한 뒤, 이 신원에 프로젝트 역할을 부여합니다(`gcloud projects add-iam-policy-binding`). 5.7 첫 배포에서 agents-cli가 하는 프로젝트 IAM 부여도 이 API를 씁니다. | 2.4, 5.4, 5.7 |
+
+> [!NOTE]
+> Cloud Logging은 새 프로젝트에 기본으로 켜져 있어 2.3에서 따로 활성화하지 않습니다. 7.5와 7.6에서 `gcloud logging read`로 게이트웨이 로그(`resource.type="networkservices.googleapis.com/Gateway"`)를 읽어 도구 호출마다 허용(`ALLOWED`)인지 거부(`403 DENIED`)인지 확인합니다. 9.4에서는 실패한 항목의 원인을 에이전트 로그와 게이트웨이 로그에서 찾습니다.
+
 ---
 
 ## 2. 시작 전 준비: 실습 1 결과물과 사전 조건 확인
@@ -127,7 +147,7 @@ uv run python3 tests/test_scenarios.py
 ```
 
 ### 2.3 실습 2 필수 GCP API 일괄 활성화
-실습 2에서 다루는 Secret Manager, Agent Registry, Agent Gateway, Model Armor API를 일괄 활성화합니다:
+실습 2에서 다루는 Secret Manager, Agent Registry, Agent Gateway, Model Armor API를 일괄 활성화합니다. 각 서비스가 실습에서 하는 일은 [1.3](#13-실습-2에서-사용하는-google-cloud-서비스)에 정리했습니다:
 
 ```bash
 gcloud services enable \
