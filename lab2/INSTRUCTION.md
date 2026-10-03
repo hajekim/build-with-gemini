@@ -77,7 +77,7 @@ flowchart LR
 | Cloud Resource Manager | `cloudresourcemanager.googleapis.com` | 프로젝트 정보와 프로젝트 IAM 정책을 다루는 API입니다. 2.4에서 내 계정의 프로젝트 역할을 확인하고(`gcloud projects get-iam-policy`), 5.4에서 프로젝트 번호와 상위 조직 ID를 조회해 에이전트 신원의 trust domain을 정한 뒤, 이 신원에 프로젝트 역할을 부여합니다(`gcloud projects add-iam-policy-binding`). 5.7 첫 배포에서 agents-cli가 하는 프로젝트 IAM 부여도 이 API를 씁니다. | 2.4, 5.4, 5.7 |
 
 > [!NOTE]
-> Cloud Logging은 새 프로젝트에 기본으로 켜져 있어 2.3에서 따로 활성화하지 않습니다. 7.5와 7.6에서 `gcloud logging read`로 게이트웨이 로그(`resource.type="networkservices.googleapis.com/Gateway"`)를 읽어 도구 호출마다 허용(`ALLOWED`)인지 거부(`403 DENIED`)인지 확인합니다. 9.4에서는 실패한 항목의 원인을 에이전트 로그와 게이트웨이 로그에서 찾습니다.
+> Cloud Logging(`logging.googleapis.com`)은 새 프로젝트에 기본으로 켜져 있는 경우가 많지만, 생성 방식(예: Resource Manager API)에 따라 비활성화되어 있을 가능성을 방지하기 위해 2.3에서 함께 활성화합니다. 7.5와 7.6에서 `gcloud logging read`로 게이트웨이 로그(`resource.type="networkservices.googleapis.com/Gateway"`)를 읽어 도구 호출마다 허용(`ALLOWED`)인지 거부(`403 DENIED`)인지 확인합니다. 9.4에서는 실패한 항목의 원인을 에이전트 로그와 게이트웨이 로그에서 찾습니다.
 
 ---
 
@@ -161,7 +161,8 @@ gcloud services enable \
   iap.googleapis.com \
   orgpolicy.googleapis.com \
   cloudresourcemanager.googleapis.com \
-  aiplatform.googleapis.com
+  aiplatform.googleapis.com \
+  logging.googleapis.com
 # 기대 결과: Operation "operations/..." finished successfully.
 ```
 
