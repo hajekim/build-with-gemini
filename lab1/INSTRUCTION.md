@@ -955,7 +955,7 @@ docs/SDD.md의 2.3절 'Google ADK FastMCP SaaS 연동 도구 명세'를 바탕�
    - tools/call SSE 응답(data: 접두어) 파싱하여 result 객체 반환
    - Cloud Run 세션 어피니티(GAESA 쿠키)를 유지하기 위해 영속 httpx.Client 캐시를 사용할 것
    - 토큰은 os.environ['MCP_TOKEN']에서만 읽고, 없으면 RuntimeError로 즉시 중단할 것 (토큰 자동 발급 금지: 토큰이 곧 개인 테넌트임)
-   - McpToolset(connection_params=StreamableHTTPConnectionParams(url=...), header_provider=lambda ctx: {"X-MCP-Token": ...}) 형태로 header_provider는 StreamableHTTPConnectionParams가 아닌 McpToolset의 인자로 전달하여, import 시점이 아닌 호출 시점에 토큰을 읽을 것
+   - StreamableHTTPConnectionParams(url=url, headers=headers)와 McpToolset(connection_params=params, header_provider=...) 형태로 필수 헤더({'X-MCP-Token': token, 'Accept': 'application/json, text/event-stream', 'MCP-Protocol-Version': '2025-06-18'})를 전달하여 호출 시점에 토큰을 읽도록 구성할 것 (header_provider는 StreamableHTTPConnectionParams가 아닌 McpToolset의 인자임)
 ```
 
 에이전트가 파일 작성을 제안하면 **Allow**를 선택합니다.
