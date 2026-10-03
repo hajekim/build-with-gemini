@@ -955,7 +955,7 @@ docs/SDD.md의 2.3절 'Google ADK FastMCP SaaS 연동 도구 명세'를 바탕�
    - tools/call SSE 응답(data: 접두어) 파싱하여 result 객체 반환
    - Cloud Run 세션 어피니티(GAESA 쿠키)를 유지하기 위해 영속 httpx.Client 캐시를 사용할 것
    - 토큰은 os.environ['MCP_TOKEN']에서만 읽고, 없으면 RuntimeError로 즉시 중단할 것 (토큰 자동 발급 금지: 토큰이 곧 개인 테넌트임)
-   - McpToolset에는 header_provider로 X-MCP-Token을 넣어, import 시점이 아닌 호출 시점에 토큰을 읽을 것
+   - McpToolset(connection_params=StreamableHTTPConnectionParams(url=...), header_provider=lambda ctx: {"X-MCP-Token": ...}) 형태로 header_provider는 StreamableHTTPConnectionParams가 아닌 McpToolset의 인자로 전달하여, import 시점이 아닌 호출 시점에 토큰을 읽을 것
 ```
 
 에이전트가 파일 작성을 제안하면 **Allow**를 선택합니다.
@@ -971,10 +971,19 @@ docs/SDD.md의 2.3절 'Google ADK FastMCP SaaS 연동 도구 명세'를 바탕�
 ```bash
 cd ~/enterprise-ops-agent
 uv run python3 -c "
-from app.tools.mcp_tools import get_employee_leave_balance, list_hardware_assets_and_tickets
+import asyncio
+from app.tools.mcp_tools import (
+    get_employee_leave_balance,
+    list_hardware_assets_and_tickets,
+    get_workweek_mcp_toolset,
+)
 import json
 
-print('=== WorkWeek 잔여 연차 조회 ===')
+print('=== McpToolset 도구 목록 확인 ===')
+tools = asyncio.run(get_workweek_mcp_toolset().get_tools())
+print(f'WorkWeek tools ({len(tools)}개): {[t.name for t in tools]}')
+
+print('\n=== WorkWeek 잔여 연차 조회 ===')
 print(json.dumps(get_employee_leave_balance('EMP-10294'), indent=2, ensure_ascii=False))
 
 print('\n=== ServiceImmediately 지급 장비 조회 ===')
@@ -986,6 +995,11 @@ print(json.dumps(list_hardware_assets_and_tickets('EMP-10294'), indent=2, ensure
 +-----------------------------------------------------------------------------------+
 | 출력 예시:                                                                          |
 | UserWarning: [EXPERIMENTAL] feature FeatureName.PLUGGABLE_AUTH is enabled.        |
+| === McpToolset 도구 목록 확인 ===                                                 |
+| WorkWeek tools (7개): ['cancel_leave_request', 'get_current_employee_id',         |
+|   'get_employee_balances', 'get_leave_requests', 'get_personal_info',             |
+|   'request_time_off', 'update_personal_info']                                     |
+|                                                                                   |
 | === WorkWeek 잔여 연차 조회 ===                                                     |
 | {                                                                                 |
 |   "content": [                                                                    |
@@ -1015,7 +1029,7 @@ print(json.dumps(list_hardware_assets_and_tickets('EMP-10294'), indent=2, ensure
 +-----------------------------------------------------------------------------------+
 ```
 
-MCP `tools/call`의 `result` 객체가 그대로 반환되므로 `content[].text` 안에 줄바꿈(`\n`)과 이스케이프된 따옴표가 섞여 보입니다. `isError`가 `false`이고, 잔여 연차 숫자(12.0)와 티켓 번호(INC-88210, INC-88211)가 보이면 성공입니다. 출력 형태는 생성된 코드에 따라 다를 수 있습니다. 위쪽의 경고 줄은 무시합니다. `MCP_TOKEN` 오류가 나면 1단계의 저장 명령을 확인하고 `source ~/lab.env`를 실행하고, 401이 나면 토큰을 다시 발급하세요.
+도구 목록 확인에서 `WorkWeek tools (7개)`가 출력되고, MCP `tools/call`의 `result` 객체가 그대로 반환되므로 `content[].text` 안에 줄바꿈(`\n`)과 이스케이프된 따옴표가 섞여 보입니다. `isError`가 `false`이고, 잔여 연차 숫자(12.0)와 티켓 번호(INC-88210, INC-88211)가 보이면 성공입니다. 도구 목록 확인에서 `ConnectionError`가 발생하면 `app/tools/mcp_tools.py`에서 `header_provider`가 `McpToolset`의 인자로 올바르게 지정되었는지 확인하세요. 출력 형태는 생성된 코드에 따라 다를 수 있습니다. 위쪽의 경고 줄은 무시합니다. `MCP_TOKEN` 오류가 나면 1단계의 저장 명령을 확인하고 `source ~/lab.env`를 실행하고, 401이 나면 토큰을 다시 발급하세요.
 
 ---
 
@@ -1167,6 +1181,7 @@ agents-cli run "안녕하세요, 이민우입니다 (EMP-10294). 3주 뒤 4일 �
 에이전트가 날짜를 되묻지 않도록 실제 날짜를 계산해 질의에 넣고, 끝에 "확인 절차 없이 바로 진행해 주세요."를 붙입니다. 터미널 창에서 4단계에 이어 실행합니다.
 
 ```bash
+cd ~/enterprise-ops-agent
 START=$(date -d "next monday +14 days" +%F)   # 약 3주 뒤 월요일
 END=$(date -d "$START +3 days" +%F)           # 같은 주 목요일
 echo "$START ~ $END"
@@ -1175,7 +1190,8 @@ agents-cli run "안녕하세요, 이민우입니다 (EMP-10294). ${START}(월)�
 ```
 
 > [!TIP]
-> 에이전트가 "상신할까요?"처럼 질문으로 답을 끝내면 WorkWeek에는 아무것도 기록되지 않습니다. 기본 `agents-cli run`은 실행이 끝나면 로컬 서버와 함께 세션도 사라지므로 앞선 대화가 이어지지 않습니다. 같은 명령의 질의 끝에 답을 붙여(예: `... 확인 절차 없이 바로 진행해 주세요. 네, 진행해 주세요.`) 다시 실행합니다.
+> - 에이전트가 "상신할까요?"처럼 질문으로 답을 끝내면 WorkWeek에는 아무것도 기록되지 않습니다. 기본 `agents-cli run`은 실행이 끝나면 로컬 서버와 함께 세션도 사라지므로 앞선 대화가 이어지지 않습니다. 같은 명령의 질의 끝에 답을 붙여(예: `... 확인 절차 없이 바로 진행해 주세요. 네, 진행해 주세요.`) 다시 실행합니다.
+> - 에이전트가 "도구에 접근할 수 없다"거나 "연동 도구에 직접 접근할 수 없는 상태"라고 답하면 MCP 서버 연결에 실패한 것입니다. `~/enterprise-ops-agent/.google-agents-cli/run_server.log` 파일에서 오류 원인을 확인하세요. `ConnectionError: Failed to create MCP session` 오류가 보이면 `app/tools/mcp_tools.py`에서 `header_provider`가 `StreamableHTTPConnectionParams`가 아닌 `McpToolset`의 인자로 올바르게 지정되었는지 확인합니다.
 
 #### 기대하는 도구 호출 순서
 
@@ -1194,6 +1210,7 @@ agents-cli run "안녕하세요, 이민우입니다 (EMP-10294). ${START}(월)�
 터미널 창에서 실행합니다. 에이전트가 질문으로 끝나면 5단계 TIP과 같이 답을 붙여 다시 실행합니다.
 
 ```bash
+cd ~/enterprise-ops-agent
 agents-cli run "현재 제가 사용 중인 업무용 랩톱 배터리가 심하게 부풀어 올라서(스웰링) 정상적인 업무가 불가능합니다. 제가 데이터/엔지니어링 직군인데, M3 Max 64GB 랩톱으로 교체 지원이 가능한지 사내 IT 지원 규정을 확인해 주세요. 제 현재 장비 지급 이력을 확인하고 ServiceImmediately 시스템에 긴급 교체 인시던트 티켓을 발행해 주세요. 확인 절차 없이 바로 진행해 주세요."
 ```
 
