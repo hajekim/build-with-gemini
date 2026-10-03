@@ -355,7 +355,14 @@
 
     /* responsive */
     @media (max-width: 1500px) { .tab .desc { display: none; } }
+    @media (max-width: 1380px) { .chip .label { display: none; } .search-chip { min-width: 0; } }
     @media (max-width: 1180px) { .tab .desc, .chip .label { display: none; } .search-chip { min-width: 0; } }
+    @media (max-width: 1180px) { .top-actions .hide-sm { display: none; } }
+    @media (max-width: 960px) {
+      .brand small { display: none; }
+      .topbar { gap: 8px; padding: 0 8px; }
+      .tab { padding: 0 7px; }
+    }
     @media (max-width: 820px) {
       body { font-size: 16.5px; }
       #menu-btn { display: inline-flex; }
