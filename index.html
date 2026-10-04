@@ -204,6 +204,7 @@
     .toc .sub { list-style: none; margin: 6px 0 10px 24px; padding: 0 0 0 12px; border-left: 2px solid var(--line-soft); }
     .toc .sub a { display: block; padding: 4px 0 4px 6px; font-size: 14px; line-height: 1.5; color: var(--text-faint); }
     .toc .sub a:hover { color: var(--blue); text-decoration: none; }
+    .toc .sub a.on { font-weight: 600; color: var(--text-hi); }
 
     .main { min-width: 0; padding: 36px clamp(20px, 5vw, 72px) calc(90px + var(--status)); }
     .doc { max-width: 900px; margin: 0 auto; }
@@ -607,7 +608,7 @@
             const ul = document.createElement("ul"); ul.className = "sub";
             subs.forEach(h => {
               const a = document.createElement("a");
-              a.href = `#${h.id}`; a.textContent = h.textContent.replace(/^\d+(\.\d+)*\.?\s+/, "");  // "7.1 X" -> "X", keeps "1단계"
+              a.href = `#${h.id}`; a.dataset.id = h.id; a.textContent = h.textContent.replace(/^\d+(\.\d+)*\.?\s+/, "");  // "7.1 X" -> "X", keeps "1단계"
               a.addEventListener("click", e => { e.preventDefault(); scrollToId(h.id); closeMenu(); });
               const sli = document.createElement("li"); sli.append(a); ul.append(sli);
             });
@@ -617,7 +618,19 @@
         $("#toc").append(li);
       });
       $("#toc .active")?.scrollIntoView({ block: "nearest" });
+      markCurrentSub();
     }
+
+    // Bold the sidebar sub-entry whose H3 has scrolled past the topbar (last one at page bottom).
+    function markCurrentSub() {
+      const links = [...document.querySelectorAll("#toc .sub a")];
+      const atBottom = scrollY > 0 && innerHeight + scrollY >= document.documentElement.scrollHeight - 2;
+      let cur = null;
+      for (const a of links) if (document.getElementById(a.dataset.id)?.getBoundingClientRect().top <= 80) cur = a;
+      if (atBottom && links.length) cur = links[links.length - 1];
+      links.forEach(a => a.classList.toggle("on", a === cur));
+    }
+    window.addEventListener("scroll", markCurrentSub, { passive: true });
 
     function renderStatus() {
       $("#st-file").textContent = LABS[tab].src;
