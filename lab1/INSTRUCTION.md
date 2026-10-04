@@ -1,10 +1,10 @@
 # Build with Gemini 핸즈온 Track 3 | Architect: AI 엔지니어링 (개발자)
 
-### [실습 Part 1] ADK 멀티 에이전트 구현과 A2A 인터페이스 로컬 검증
+### [실습 1] ADK 멀티 에이전트 구현과 A2A 인터페이스 로컬 검증
 Antigravity 2.0(데스크톱 앱 또는 CLI `agy`)으로 ADK(Agent Development Kit) 멀티 에이전트를 단계별로 만들고 시나리오로 동작을 확인합니다. 시간이 남으면 A2A 인터페이스를 로컬에서 띄워 봅니다.
 
-### [실습 Part 2] 에이전트 신뢰성 확보를 위한 Evaluation 및 Governance (연계)
-Lab 1에서 만든 에이전트를 정량 평가하고 Agent Runtime에 배포한 뒤, Agent Registry, Agent Gateway, Model Armor로 통제하고 Gemini Enterprise에 등록합니다.
+### [실습 2] 에이전트 평가, 보안 거버넌스, Gemini Enterprise 배포 (연계)
+실습 1에서 만든 에이전트를 정량 평가하고 Agent Runtime에 배포한 뒤, Agent Registry, Agent Gateway, Model Armor로 통제하고 Gemini Enterprise에 등록합니다.
 
 ---
 
@@ -90,8 +90,6 @@ Lab 1에서 만든 에이전트를 정량 평가하고 Agent Runtime에 배포�
 
 이 실습은 미리 구성된 개발자 가상 머신(VM)과 Cloud Run 프록시 서비스를 제공합니다. 로컬에 아무것도 설치하지 않고 브라우저로 개발 환경에 접속합니다.
 
-Antigravity 2.0에는 데스크톱 앱(Agent Platform), 터미널용 CLI(`agy`), SDK가 있습니다. 이 실습은 앱과 CLI 중 하나를 골라 진행합니다.
-
 #### 원격 브라우저 세션 열기
 
 1. Google Cloud 콘솔 상단 검색창에 **Cloud Run**을 입력하고, 결과에서 **Cloud Run**을 클릭합니다.
@@ -122,7 +120,7 @@ Antigravity 2.0에는 데스크톱 앱(Agent Platform), 터미널용 CLI(`agy`),
 > [!NOTE]
 > Konsole 터미널을 열 때 `Warning: Could not find '', starting '/bin/bash' instead. Please check your profile settings.` 경고가 표시되어도 무시해도 됩니다.
 
-2. 실습 계정으로 gcloud에 로그인합니다. 터미널의 gcloud는 처음에 VM 서비스 계정(`antigravity-sa@...`)으로 설정되어 있습니다. 이 계정은 프로젝트 소유자(Owner)가 아니어서 실습 2 5.4절(Step 2)의 시크릿 생성과 9.2절(Step 6)의 Gemini Enterprise 게시에서 권한 오류가 납니다. 프로젝트 설정은 그대로 유지됩니다.
+2. 실습 계정으로 gcloud에 로그인합니다. 터미널의 gcloud는 처음에 VM 서비스 계정(`antigravity-sa@...`)으로 설정되어 있습니다. 이 계정은 프로젝트 소유자(Owner)가 아니어서 실습 2 5.4절(Step 2)의 시크릿 생성과 9.2절(Step 6)의 Gemini Enterprise 등록에서 권한 오류가 납니다. 계정만 바뀌고 gcloud의 프로젝트 설정은 그대로 유지됩니다.
 
 ```bash
 gcloud auth login --no-launch-browser
@@ -146,7 +144,7 @@ gcloud config get-value account
 gcloud config get-value project
 ```
 
-3. Lab 1과 Lab 2에서 쓰는 API를 미리 켭니다.
+3. 실습 1과 실습 2에서 쓰는 주요 API를 미리 켭니다(나머지는 실습 2의 2.3에서 켭니다).
 
 ```bash
 gcloud services enable \
@@ -279,7 +277,7 @@ CLI 초기 설정이 끝났으면 `/exit`로 agy를 종료합니다. 작업용 a
 
 Cymbal Group 한국 지사는 사내 업무 효율화를 위해 AI 기반 통합 운영 에이전트를 도입하려고 합니다.
 
-소프트웨어 설계 명세서는 Task 1 3단계에서 워크스페이스의 `docs/SDD.md`로 내려받습니다.
+소프트웨어 설계서(SDD)는 Task 1 3단계에서 워크스페이스의 `docs/SDD.md`로 내려받습니다.
 
 | 구분 | 파일 및 리소스 경로 | 세부 설명 | 링크 |
 |:---|:---|:---|:---|
@@ -298,7 +296,7 @@ SDD는 AI 에이전트를 개발할 때 시스템 구조, 입출력 스키마, �
 |:---|:---|
 | 1절 시스템 개요 및 목표 | 해결할 문제(분산된 포털, 규정 미숙지로 인한 반려), 목표 KPI(규정 준수율, 응답 지연 시간, 인용 정확도, 다중 사용자 격리). 모델(`gemini-3.8-flash`)은 문서 머리말에 있습니다. |
 | 2절 아키텍처 및 도구 명세 | 규정 검색 RAG 도구(`tools/policy_rag.py`)와 인사/전산 SaaS 연동 MCP 도구(`tools/mcp_tools.py`)의 함수 시그니처와 HTTP 엔드포인트 |
-| 3절 오케스트레이션 및 거버넌스 강령 | 규정 검증 우선 원칙, 위험 작업 사전 승인, 멀티턴 대화 상태 추적 |
+| 3절 오케스트레이션 및 거버넌스 강령 | 규정 우선 확인, 근거 조항 인용, 서브 에이전트 위임 순서, 한국어 응답 |
 
 SDD의 `tools/`는 프로젝트의 `app/tools/`를 가리킵니다.
 
@@ -310,7 +308,7 @@ Python 패키지를 설치하고 `agents-cli`로 프로젝트를 만든 뒤, SDD
 
 ### 1단계: 필수 라이브러리 및 런타임 툴 설치
 
-시작 준비에서 연 Konsole 터미널(이하 터미널 창)에서 시스템 도구와 ADK CLI를 설치합니다. 설치에는 몇 분 걸릴 수 있습니다. 실습 환경에는 Python 가상 환경 `/opt/venv`가 미리 만들어져 있고 `PATH`에도 들어 있어, ADK CLI는 이 가상 환경에 설치합니다. `/opt/venv`는 root 소유라 `sudo`를 붙입니다.
+시작 준비에서 연 Konsole 터미널(이하 터미널 창)에서 시스템 도구와 agents-cli, ADK 라이브러리를 설치합니다. 설치에는 몇 분 걸릴 수 있습니다. 실습 환경에는 Python 가상 환경 `/opt/venv`가 미리 만들어져 있고 `PATH`에도 들어 있어, agents-cli는 이 가상 환경에 설치합니다. `/opt/venv`는 root 소유라 `sudo`를 붙입니다.
 
 `PATH`와 Vertex AI 환경 변수는 `~/lab.env` 파일에 저장합니다. 터미널, agy CLI, Antigravity 앱이 모두 같은 값을 읽을 수 있게 하기 위해서입니다. `~/.bashrc`에는 이 파일을 읽는 한 줄만 추가하므로, 이후 새로 여는 Konsole 탭에는 값이 자동으로 적용됩니다.
 
@@ -321,7 +319,7 @@ sudo apt-get purge -y -qq packagekit
 sudo apt-get update -qq && sudo apt-get install -y -qq python3-pip git unzip jq
 type pip3 git unzip jq
 
-# 2. 실습 환경의 Python 가상 환경(/opt/venv)에 ADK CLI와 필수 라이브러리 설치
+# 2. 실습 환경의 Python 가상 환경(/opt/venv)에 agents-cli와 필수 라이브러리 설치
 sudo /opt/venv/bin/pip install --upgrade pip
 sudo /opt/venv/bin/pip install google-agents-cli==1.8.0 "google-adk>=2.9.2,<=2.11.0" mcp httpx pydantic pyyaml uv
 
@@ -366,8 +364,8 @@ agents-cli --version
 | `create`, `install`, `scaffold enhance` | 프로젝트 구조를 만들고, `pyproject.toml`의 의존성을 uv로 `.venv`에 설치합니다. |
 | `run`, `playground` | `agents-cli run "질의"`는 질의 하나를 실행하고, `agents-cli playground`는 이벤트와 도구 호출을 볼 수 있는 ADK 개발 UI를 엽니다. |
 | `eval run`, `generate`, `grade` | 골든 데이터셋으로 LLM 판정 지표와 코드 기반 지표를 채점합니다. |
-| `deploy` | Agent Runtime, Cloud Run, GKE 배포를 지원합니다(Lab 2는 Agent Runtime 사용). |
-| `publish gemini-enterprise` | Gemini Enterprise에 에이전트를 등록합니다(Lab 2 Step 6). |
+| `deploy` | Agent Runtime, Cloud Run, GKE 배포를 지원합니다(실습 2는 Agent Runtime 사용). |
+| `publish gemini-enterprise` | Gemini Enterprise에 에이전트를 등록합니다(실습 2 Step 6). |
 
 #### agents-cli-manifest.yaml의 역할
 프로젝트 루트에 생성되는 `agents-cli-manifest.yaml`은 `agents-cli`가 이 폴더를 에이전트 프로젝트로 인식하게 하는 파일입니다. 주요 항목은 다음과 같습니다.
@@ -567,7 +565,7 @@ cat docs/context_summary.md
 
 ### 6단계: Vertex AI Search로 사내 규정 검색 앱 만들기 (터미널 창)
 
-Task 3의 규정 RAG 도구가 호출할 Vertex AI Search 검색 앱을 지금 만들어 둡니다. 데이터스토어와 검색 앱 생성 요청은 바로 접수되지만, PDF 가져오기(인덱싱)는 PDF 2건 기준으로 약 4~10분 걸립니다. 지금 시작해 두면 Task 3~5를 진행하는 동안 끝납니다. 끝나기 전에는 RAG 도구가 `local_fallback`으로 동작하므로 기다리지 않고 진행합니다.
+Task 3의 규정 RAG 도구가 호출할 Vertex AI Search 검색 앱을 지금 만들어 둡니다. 데이터스토어와 검색 앱 생성 요청은 바로 접수되지만, PDF 가져오기(인덱싱)는 PDF 2건 기준으로 약 4~10분 걸립니다. 지금 시작해 두면 Task 3~5를 진행하는 동안 끝납니다. 끝나기 전에는 RAG 도구가 PDF에서 발췌한 로컬 조항 인덱스(`local_fallback`, Task 3에서 설명)로 대신 검색하므로 기다리지 않고 진행합니다.
 
 Vertex AI Search는 `global`/`us`/`eu` 멀티리전만 지원하므로 검색 앱은 `global`에 만들고, 원본 PDF 버킷은 서울(`asia-northeast3`)에 둡니다. 아래 네 블록은 같은 터미널 창에서 순서대로 실행합니다. ② 이후 블록은 ①에서 만든 변수를 씁니다.
 
@@ -630,7 +628,7 @@ curl -s -X POST "${AUTH[@]}" "${DE}/engines?engineId=company-policy-app" \
 ---
 
 
-## Task 2. Antigravity로 ADK 2.0 멀티 에이전트 구조 만들기
+## Task 2. Antigravity로 ADK 멀티 에이전트 구조 만들기
 
 `agents-cli create`가 만든 단일 에이전트(`app/agent.py`)를 SDD에 따라 오케스트레이터 1개와 워커 3개 구조로 바꿉니다.
 
@@ -643,12 +641,12 @@ curl -s -X POST "${AUTH[@]}" "${DE}/engines?engineId=company-policy-app" \
 
 ```mermaid
 flowchart TD
-    User["임직원 (사용자)"] --> Orch["Central Orchestrator (Lead Agent)<br/>(enterprise_ops_agent)<br/>gemini-3.8-flash"]
+    User["임직원 (사용자)"] --> Orch["오케스트레이터<br/>(enterprise_ops_agent)<br/>gemini-3.8-flash"]
 
     subgraph Specialist_Workers ["도메인별 전문 워커 계층 (Google ADK)"]
-        Orch -->|"1. 규정 확인 위임"| W1["Worker 1: hr_policy_agent<br/>(사내 복무/IT 규정 RAG 전문가)"]
-        Orch -->|"2. 연차/근태 위임"| W2["Worker 2: workweek_agent<br/>(WorkWeek HRMS 연동 전담)"]
-        Orch -->|"3. 전산지원 위임"| W3["Worker 3: itsm_agent<br/>(ServiceImmediately ITSM 전담)"]
+        Orch -->|"규정 확인 (항상 먼저)"| W1["Worker 1: hr_policy_agent<br/>(사내 복무/IT 규정 RAG 전문가)"]
+        Orch -->|"연차/근태 위임"| W2["Worker 2: workweek_agent<br/>(WorkWeek HRMS 연동 전담)"]
+        Orch -->|"전산지원 위임"| W3["Worker 3: itsm_agent<br/>(ServiceImmediately ITSM 전담)"]
     end
 ```
 
@@ -741,7 +739,7 @@ uv run python3 -m app.agent
 
 ## Task 3. 프롬프트 기반 사내 규정 RAG 도구 구현
 
-SDD 2.2절에 따라 사내 복무 규정(POL-HR-2026-004)과 IT 하드웨어 지침(POL-IT-2026-009)을 검색하는 RAG 도구(`app/tools/policy_rag.py`)를 에이전트로 만듭니다.
+SDD 2.2절에 따라 사내 복무 규정(POL-HR-2026-004)과 사내 IT 자산 운용 지침(POL-IT-2026-009)을 검색하는 RAG 도구(`app/tools/policy_rag.py`)를 에이전트로 만듭니다.
 
 ### 사내 규정 원본 문서와 주요 조항
 
@@ -756,7 +754,7 @@ SDD 2.2절에 따라 사내 복무 규정(POL-HR-2026-004)과 IT 하드웨어 �
 - 병가 규정: 연간 최대 14일 유급 병가 지원, 연속 3일 이상이면 전문의 진단서를 복귀 후 3영업일 이내 제출.
 
 #### 2. 사내 IT 자산 운용 지침 (POL-IT-2026-009) 주요 조항
-- 직군별 표준 기종: 엔지니어링/데이터 직군은 MacBook Pro M3 Max / 64GB RAM 급, 기획/일반 사무 직군은 MacBook Air / ThinkPad Series / 16GB RAM 급 지급.
+- 직군별 표준 기종: 엔지니어링/데이터 직군은 MacBook Pro M3 Max / 64GB RAM 급, 기획/일반 사무 직군은 MacBook Air / ThinkPad / 16GB RAM 급 지급.
 - 정기 교체 주기: 지급일로부터 36개월 경과 시 신규 기종 교체 신청 가능.
 - 긴급 결함 조치: 배터리 부풀림(스웰링) 등 안전 결함 발생 시 내구연한과 무관하게 접수 후 4근무시간 이내 진단, 즉시 수리가 불가하면 당일 임시 대여 랩톱 선지급.
 
@@ -880,7 +878,7 @@ print(json.dumps(r2, indent=2, ensure_ascii=False))
 `status`가 `SUCCESS`이고 `matches`에 `POL-HR-2026-004`(테스트 1), `POL-IT-2026-009`(테스트 2)가 있으면 성공입니다. 필드 순서는 달라도 되지만 `status`, `source`, `match_count`, `matches[].doc_id`, `matches[].title`, `matches[].content` 이름은 정확히 같아야 합니다. Task 5 통합 테스트와 실습 2 `rag_citation` 지표가 이 이름을 읽습니다. 이름이 다르면 에이전트 창에서 위 이름으로 고쳐 달라고 요청합니다.
 
 > [!NOTE]
-> `source`가 `local_fallback`으로 나오면 Task 1 6단계의 PDF 가져오기가 아직 끝나지 않은 것입니다. 가져오기는 약 4~10분 걸립니다. 폴백으로도 실습은 계속할 수 있으며, 가져오기가 끝난 뒤 다시 실행하면 `vertex_ai_search`로 바뀝니다. 진행 상태는 0단계의 `PROJECT_ID`, `DE`, `AUTH` 세 줄을 실행한 셸에서 `curl -s "${AUTH[@]}" "${DE}/dataStores/company-policy-ds/branches/0/documents" | grep -c '"name"'`(2이면 완료)로 확인합니다. 문서 수가 `2`인데도 계속 `local_fallback`이면 ADC 권한 문제일 수 있으므로 `gcloud auth application-default login --no-launch-browser`를 실행하고 실습 계정으로 로그인한 뒤 다시 확인합니다.
+> `source`가 `local_fallback`으로 나오면 Task 1 6단계의 PDF 가져오기가 아직 끝나지 않았거나, 검색 앱이 그 질의에 결과를 돌려주지 않은 것입니다. 가져오기는 약 4~10분 걸립니다. 폴백으로도 실습은 계속할 수 있으며, 가져오기가 끝난 뒤 다시 실행하면 `vertex_ai_search`로 바뀝니다. 진행 상태는 0단계의 `PROJECT_ID`, `DE`, `AUTH` 세 줄을 실행한 셸에서 `curl -s "${AUTH[@]}" "${DE}/dataStores/company-policy-ds/branches/0/documents" | grep -c '"name"'`(2이면 완료)로 확인합니다. 문서 수가 `2`인데도 계속 `local_fallback`이면 ADC 권한 문제일 수 있으므로 `gcloud auth application-default login --no-launch-browser`를 실행하고 실습 계정으로 로그인한 뒤 다시 확인합니다.
 
 ---
 
@@ -888,7 +886,7 @@ print(json.dumps(r2, indent=2, ensure_ascii=False))
 
 Mock SaaS(`https://korean-mock-saas-dri5akvbzq-du.a.run.app/`)의 MCP 서버를 호출하는 도구(`app/tools/mcp_tools.py`)를 에이전트로 만듭니다.
 
-### FastMCP와 한국형 Mock SaaS 명세
+### FastMCP와 Mock SaaS 명세
 
 FastMCP는 MCP(Model Context Protocol) 서버를 만드는 Python 프레임워크입니다. 이 실습의 Mock SaaS는 FastMCP로 만든 MCP 서버를 Streamable HTTP 전송으로 노출하며, 에이전트는 HTTP POST로 JSON-RPC 2.0 메시지(`initialize`, `tools/call`)를 보냅니다.
 
@@ -901,7 +899,7 @@ FastMCP는 MCP(Model Context Protocol) 서버를 만드는 Python 프레임워�
 
 > [!IMPORTANT]
 > 왜 일반 REST API가 아니라 MCP(`tools/call`)인가요?  
-> 실습 2에서 다룰 Agent Gateway와 Model Armor는 MCP `tools/call` 요청의 도구 이름과 인자를 보고 차단합니다. 일반 REST로 호출하면 이 검사를 거치지 않으므로 MCP 엔드포인트로 호출합니다.
+> 실습 2에서 다룰 Agent Gateway는 MCP `tools/call` 요청에서 도구 이름을 식별해 위험 도구를 차단합니다. 일반 REST로 호출하면 도구 이름을 식별할 수 없으므로 MCP 엔드포인트로 호출합니다.
 
 > [!TIP]
 > 실습생 모두가 같은 Mock SaaS 서버를 쓰지만, 요청 헤더 `X-MCP-Token`의 개인 토큰으로 데이터가 분리됩니다. 토큰은 발급한 브라우저 세션의 테넌트에 묶여 있어서, 같은 토큰을 쓰면 에이전트와 웹 화면이 같은 데이터를 봅니다.
@@ -913,7 +911,7 @@ FastMCP는 MCP(Model Context Protocol) 서버를 만드는 Python 프레임워�
 1. 원격 세션 안의 Chrome에서 아래 Mock SaaS 주소로 접속합니다. 시작 준비의 로그인 과정에서 열린 Chrome 창을 써도 됩니다. 원격 세션 안에서 열어야 토큰을 같은 화면의 터미널 창에 바로 붙여넣을 수 있습니다.  
    [https://korean-mock-saas-dri5akvbzq-du.a.run.app/](https://korean-mock-saas-dri5akvbzq-du.a.run.app/)
 2. 화면 오른쪽 상단의 **MCP 토큰 발급** 버튼을 클릭합니다.
-3. 팝업 창에 나타난 고유 토큰(예: `mcp_eyJp...`)을 복사합니다.
+3. 팝업 창의 토큰 용도/식별 이름 칸에 `lab`처럼 이름을 입력하고 **발급하기**를 클릭한 뒤, 표시된 고유 토큰(예: `mcp_eyJp...`)을 복사합니다.
 
 ![개인 MCP 토큰 발급](./images/mock_saas_mcp_modal.png)
 
@@ -929,7 +927,7 @@ echo "export MCP_TOKEN=mcp_여러분의토큰값" >> ~/lab.env && source ~/lab.e
 > [!NOTE]
 > - 새로 여는 Konsole 탭은 `~/.bashrc`를 통해 `~/lab.env`를 읽으므로 토큰을 다시 입력하지 않아도 됩니다. 이미 열려 있던 탭에서는 `source ~/lab.env`를 실행합니다.
 > - 에이전트 창은 셸 변수를 이어받지 않을 수 있습니다. 그래서 명령 실행을 맡기는 프롬프트에 `source ~/lab.env` 줄을 넣었습니다.
-> - 토큰이 곧 개인 데이터 공간(테넌트)이므로 자동 발급하지 않습니다. 토큰이 없으면 도구가 `MCP_TOKEN 환경 변수가 없습니다` 오류로 즉시 중단됩니다.
+> - 토큰이 곧 개인 데이터 공간(테넌트)이므로 자동 발급하지 않습니다. 토큰이 없으면 도구가 `MCP_TOKEN` 관련 오류로 즉시 중단됩니다(문구는 생성된 코드에 따라 다를 수 있습니다).
 
 ---
 
@@ -1032,7 +1030,7 @@ print(json.dumps(list_hardware_assets_and_tickets('EMP-10294'), indent=2, ensure
 +-----------------------------------------------------------------------------------+
 ```
 
-도구 목록 확인에서 `WorkWeek tools (7개)`가 출력되고, MCP `tools/call`의 `result` 객체가 그대로 반환되므로 `content[].text` 안에 줄바꿈(`\n`)과 이스케이프된 따옴표가 섞여 보입니다. `isError`가 `false`이고, 잔여 연차 숫자(12.0)와 티켓 번호(INC-88210, INC-88211)가 보이면 성공입니다. 도구 목록 확인에서 `ConnectionError`가 발생하면 `app/tools/mcp_tools.py`에서 `header_provider`가 `McpToolset`의 인자로 올바르게 지정되었는지 확인하세요. 출력 형태는 생성된 코드에 따라 다를 수 있습니다. 위쪽의 경고 줄은 무시합니다. `MCP_TOKEN` 오류가 나면 1단계의 저장 명령을 확인하고 `source ~/lab.env`를 실행하고, 401이 나면 토큰을 다시 발급하세요.
+도구 목록 확인에서 `WorkWeek tools (7개)`가 출력되고, MCP `tools/call`의 `result` 객체가 그대로 반환되므로 `content[].text` 안에 줄바꿈(`\n`)과 이스케이프된 따옴표가 섞여 보입니다. `isError`가 `false`이고, 잔여 연차 숫자(12.0)와 티켓 번호(INC-88210, INC-88211)가 보이면 성공입니다. 도구 목록 확인에서 `ConnectionError`가 발생하면 `app/tools/mcp_tools.py`에서 `header_provider`가 `McpToolset`의 인자로 올바르게 지정되었는지 확인하세요. 출력 형태는 생성된 코드에 따라 다를 수 있습니다. 위쪽의 경고 줄은 무시합니다. `MCP_TOKEN` 오류가 나면 1단계의 저장 명령을 확인한 뒤 `source ~/lab.env`를 실행합니다. 401이 나면 토큰을 다시 발급하세요.
 
 ---
 
@@ -1082,7 +1080,7 @@ unzip -j -o /tmp/enterprise_ops_agent_completed.zip enterprise-ops-agent/tests/t
 
 ---
 
-### 3단계: 통합 테스트 실행 (시나리오 5개)
+### 3단계: 통합 테스트 실행 (5개 항목)
 
 터미널 창에서 통합 테스트를 실행하여 5개 항목이 모두 PASS인지 확인합니다.
 
@@ -1208,7 +1206,7 @@ agents-cli run "안녕하세요, 이민우입니다 (EMP-10294). ${START}(월)�
 
 ### 6단계: 시나리오 2 - 개발자 노트북 배터리 고장 및 교체 신청
 
-엔지니어가 노트북 배터리 부풀음으로 긴급 교체를 요청하는 상황입니다.
+엔지니어가 노트북 배터리 부풀림(스웰링)으로 긴급 교체를 요청하는 상황입니다.
 
 터미널 창에서 실행합니다. 에이전트가 질문으로 끝나면 5단계 TIP과 같이 답을 붙여 다시 실행합니다.
 
@@ -1218,7 +1216,7 @@ agents-cli run "현재 제가 사용 중인 업무용 랩톱 배터리가 심하
 ```
 
 > [!TIP]
-> 답변이 "`itsm_agent`를 통해 이어 진행해 주세요"처럼 다른 에이전트로 넘기라는 말로 끝나고 `create_ticket` 호출이 없으면, `hr_policy_agent`가 `enterprise_ops_agent`로 제어를 돌려주지 않은 것입니다. 같은 명령을 다시 실행합니다. 계속 반복되면 에이전트 창에서 "app/agent.py의 서브 에이전트 3종 instruction에 '맡은 작업을 마치면 답변을 끝내지 말고 transfer_to_agent로 enterprise_ops_agent에 제어를 돌려주세요.'를 추가해 주세요."라고 요청한 뒤 다시 실행합니다.
+> 답변이 "`itsm_agent`를 통해 이어 진행해 주세요"처럼 다른 에이전트로 넘기라는 말로 끝나고 `create_ticket` 호출이 없으면, `hr_policy_agent`가 `enterprise_ops_agent`로 제어를 돌려주지 않은 것입니다. 같은 명령을 다시 실행합니다. 계속 반복되면 `app/agent.py`의 서브 에이전트 3종 instruction 끝에 1단계 요구사항 6의 문장("맡은 작업을 마치면 답변을 끝내지 말고 transfer_to_agent로 enterprise_ops_agent에 제어를 돌려주세요.")이 들어 있는지 확인합니다. 빠져 있으면 에이전트 창에서 추가해 달라고 요청한 뒤 다시 실행합니다.
 
 #### 기대하는 도구 호출 순서
 
@@ -1235,9 +1233,9 @@ agents-cli run "현재 제가 사용 중인 업무용 랩톱 배터리가 심하
 1. Task 4 1단계에서 토큰을 발급한 원격 세션 안 Chrome의 Korean Enterprise Mock SaaS 플랫폼 탭으로 이동합니다.  
    `https://korean-mock-saas-dri5akvbzq-du.a.run.app/`
 2. **WorkWeek** 탭을 클릭합니다.
-   - **신청 내역**에 에이전트가 신청한 기간(4.0일)이 추가되고, **연차 잔여 현황**이 `7.0 / 15.0 일`로 바뀌었는지 확인합니다. 아래의 `연차 3.0`일 행은 처음부터 들어 있는 데이터입니다.
+   - 왼쪽 **휴가 관리** 메뉴를 엽니다. **신청 내역**에 에이전트가 신청한 기간(4.0일)이 추가되고, **연차 잔여 현황**의 부여/사용 일수가 `3.0 / 15.0 일`에서 `7.0 / 15.0 일`로 바뀌었는지 확인합니다. 신청 내역의 `연차 3.0`일 행은 처음부터 들어 있는 데이터입니다.
 3. **ServiceImmediately** 탭을 클릭합니다.
-   - 에이전트 답변에 나온 티켓 번호(실행마다 다름)가 **인시던트 티켓 목록**(Incident Tickets)에 `하드웨어`, 상태 `접수`로 보이는지 확인합니다. 우선순위는 에이전트 판단에 따라 `1`(긴급) 또는 `2`(높음)로 기록됩니다.
+   - 에이전트 답변에 나온 티켓 번호(실행마다 다름)가 왼쪽 **인시던트 현황** 목록에 `하드웨어`, 상태 `접수`로 보이는지 확인합니다. 우선순위는 에이전트 판단에 따라 `1`(긴급) 또는 `2`(높음)로 기록됩니다.
 
 ![ServiceImmediately 인시던트 티켓 목록](./images/mock_saas_serviceimmediately.png)
 
@@ -1361,7 +1359,7 @@ EOF
 > [!IMPORTANT]
 > 실습 2 4절(Step 1)에서 이 4개 데이터셋으로 `agents-cli eval run`을 실행합니다. 기본 실행은 결정론적 지표 3종(`tool_call_accuracy`, `policy_first_order`, `rag_citation`)과 LLM 판정 `hallucination`으로 Tier별 베이스라인을 측정하고, 실패 케이스를 고쳐 가며 점수를 올립니다. 나머지 LLM 판정 지표 2종(`multi_turn_task_success`, `multi_turn_tool_use_quality`)은 선택 과제입니다.
 
-Task 3 0단계의 문서 수 확인 명령을 다시 실행해 `2`가 되었는지 확인합니다. 여기까지 마쳤다면 실습 2를 시작할 수 있습니다. Task 6은 시간이 남을 때만 진행합니다.
+Task 3 0단계의 문서 수 확인 명령을 다시 실행해 `2`가 되었는지 확인합니다. 아직 `0`이면 몇 분 뒤 다시 확인합니다. 실습 2를 시작하기 전에 `2`가 되어 있어야 RAG 결과가 `vertex_ai_search`로 나옵니다. 여기까지 마쳤다면 실습 2를 시작할 수 있습니다. Task 6은 시간이 남을 때만 진행합니다.
 
 ---
 
@@ -1454,15 +1452,15 @@ Gemini Enterprise가 A2A JSON-RPC로 호출할 수 있도록 ADK Runner를 감�
 로컬에서 A2A 서버를 띄우고 웹 콘솔과 JSON-RPC 요청으로 응답을 확인합니다.
 
 1. 로컬 서버 실행:
-8080 포트를 쓰는 프로세스를 정리하고, 터미널을 계속 쓰기 위해 `a2a_server.py`를 백그라운드(`&`)로 실행합니다. 서버 로그는 `/tmp/a2a.log`에 남깁니다. `MCP_TOKEN` 안내 메시지가 출력되면 Ctrl+C로 멈추고 Task 4 1단계의 토큰 저장부터 합니다.
+8080 포트를 쓰는 프로세스를 정리하고, 터미널을 계속 쓰기 위해 `a2a_server.py`를 백그라운드(`&`)로 실행합니다. 서버 로그는 `/tmp/a2a.log`에 남깁니다. `MCP_TOKEN` 안내 메시지가 출력되면 서버는 실행되지 않습니다. Task 4 1단계의 토큰 저장부터 하고 다시 실행합니다.
 
 ```bash
 source ~/lab.env
-: "${MCP_TOKEN:?실습 1 Task 4 1단계에서 MCP_TOKEN을 ~/lab.env에 저장하고 source ~/lab.env를 실행하세요}"
-# 1. 기존 점유 포트(8080) 정리 및 로컬 A2A 서버 백그라운드(&) 실행
-fuser -k 8080/tcp 2>/dev/null || true
-cd ~/enterprise-ops-agent
-uv run python3 a2a_server.py > /tmp/a2a.log 2>&1 &
+# 1. 토큰 확인 후 기존 점유 포트(8080) 정리 및 로컬 A2A 서버 백그라운드(&) 실행 (토큰이 없으면 여기서 멈춤)
+: "${MCP_TOKEN:?실습 1 Task 4 1단계에서 MCP_TOKEN을 ~/lab.env에 저장하고 source ~/lab.env를 실행하세요}" && \
+{ fuser -k 8080/tcp 2>/dev/null || true; } && \
+cd ~/enterprise-ops-agent && \
+{ uv run python3 a2a_server.py > /tmp/a2a.log 2>&1 & }
 
 # 2. 서버 기동 확인 (최대 20초 재시도)
 for i in $(seq 10); do curl -sf http://localhost:8080/healthz && break; sleep 2; done
@@ -1524,21 +1522,21 @@ curl -s -X POST http://localhost:8080/ \
 
 ## 실습 1 완성본과 실습 2 준비
 
-Lab 1을 직접 끝냈다면 이 절은 건너뛰고 본인 프로젝트(`~/enterprise-ops-agent`)로 실습 2를 진행합니다. 실습 2에서 새로 필요한 파일(평가 설정, Model Armor 가드)은 실습 2의 해당 단계에서 받습니다.
+실습 1을 직접 끝냈다면 이 절은 건너뛰고 본인 프로젝트(`~/enterprise-ops-agent`)로 실습 2를 진행합니다. 실습 2에서 새로 필요한 파일(평가 설정, Model Armor 가드)은 실습 2의 해당 단계에서 받습니다.
 
 ### [완성본 전용] 완성본 받기
 
 > [!WARNING]
 > 실습 1을 끝냈고 그 결과물로 실습 2를 진행한다면 이 절은 실행하지 않습니다. 아래 블록은 기존 `~/enterprise-ops-agent` 폴더를 `~/enterprise-ops-agent.mine`으로 옮기고 그 자리에 완성본을 풉니다. 실수로 실행했다면 `rm -rf ~/enterprise-ops-agent && mv ~/enterprise-ops-agent.mine ~/enterprise-ops-agent`로 되돌립니다.
 
-Lab 1을 끝내지 못했거나 완성본 기준으로 실습 2를 진행하려면 완성본을 받습니다.
+실습 1을 끝내지 못했거나 완성본 기준으로 실습 2를 진행하려면 완성본을 받습니다.
 
-터미널 창에서 아래 명령을 실행하면 완성본을 받아 압축을 풉니다. 기존 폴더는 덮어쓰지 않도록 먼저 `enterprise-ops-agent.mine`으로 이름을 바꿔 둡니다. `~/enterprise-ops-agent.mine`이 이미 있으면 `Directory not empty` 오류로 블록 전체가 멈춥니다. 두 폴더 중 어느 쪽을 남길지 확인한 뒤 다시 실행합니다. 압축 파일만 따로 받아 두려면 [enterprise_ops_agent_completed.zip](./enterprise_ops_agent_completed.zip) 링크를 누르면 됩니다. `MCP_TOKEN` 안내 메시지가 출력되면 Ctrl+C로 멈추고 Task 4 1단계의 토큰 저장부터 합니다.
+터미널 창에서 아래 명령을 실행하면 완성본을 받아 압축을 풀고, 의존성을 설치한 뒤 통합 테스트를 실행합니다. 마지막에 5개 항목이 모두 PASS이면 됩니다. 기존 폴더는 덮어쓰지 않도록 먼저 `enterprise-ops-agent.mine`으로 이름을 바꿔 둡니다. `~/enterprise-ops-agent.mine`이 이미 있으면 `Directory not empty` 오류로 블록 전체가 멈춥니다. 두 폴더 중 어느 쪽을 남길지 확인한 뒤 다시 실행합니다. 압축 파일만 따로 받아 두려면 [enterprise_ops_agent_completed.zip](./enterprise_ops_agent_completed.zip) 링크를 누르면 됩니다. `MCP_TOKEN` 안내 메시지가 출력되면 아무것도 바뀌지 않은 상태로 멈춥니다. Task 4 1단계의 토큰 저장부터 하고 다시 실행합니다.
 
 ```bash
 # [완성본 전용] 실습 1 결과물을 쓰는 사람은 실행하지 마세요. 기존 폴더를 .mine으로 옮기고 완성본으로 바꿉니다.
 source ~/lab.env
-: "${MCP_TOKEN:?실습 1 Task 4 1단계에서 MCP_TOKEN을 ~/lab.env에 저장하고 source ~/lab.env를 실행하세요}"
+: "${MCP_TOKEN:?실습 1 Task 4 1단계에서 MCP_TOKEN을 ~/lab.env에 저장하고 source ~/lab.env를 실행하세요}" && \
 cd ~ && \
 { [ ! -d ~/enterprise-ops-agent ] || mv -T ~/enterprise-ops-agent ~/enterprise-ops-agent.mine; } && \
 curl -fsSL https://raw.githubusercontent.com/hajekim/build-with-gemini/main/lab1/enterprise_ops_agent_completed.zip -o enterprise_ops_agent_completed.zip && \
@@ -1556,7 +1554,7 @@ uv run python3 tests/test_scenarios.py
 
 ## 마무리
 
-Lab 1에서는 SDD를 기준으로 Antigravity에 코드를 생성하게 해서 ADK 멀티 에이전트를 만들었습니다.
+실습 1에서는 SDD를 기준으로 Antigravity에 코드를 생성하게 해서 ADK 멀티 에이전트를 만들었습니다.
 
 ### 정리
 

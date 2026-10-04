@@ -1,16 +1,16 @@
 # Build with Gemini 핸즈온 Track 3 | Architect: AI 엔지니어링 (개발자)
 # 실습 2: 에이전트 평가, 보안 거버넌스, Gemini Enterprise 배포
 
-실습 1에서 만든 Orchestrator-Worker 멀티 에이전트(`enterprise_ops_agent`)를 Antigravity 2.0(`agy`) 환경에서 이어받아 `agents-cli eval`로 평가하고 개선합니다. 이어서 Secret Manager, Agent Identity, Agent Registry, Agent Gateway, Model Armor를 적용해 Agent Runtime에 배포하고 Gemini Enterprise(GE)에 등록합니다.
+실습 1에서 만든 Orchestrator-Worker 멀티 에이전트(`enterprise_ops_agent`)를 Antigravity 2.0(데스크톱 앱 또는 agy CLI)에서 이어받아 `agents-cli eval`로 평가하고 개선합니다. 이어서 Secret Manager, Agent Identity, Agent Registry, Agent Gateway, Model Armor를 적용해 Agent Runtime에 배포하고 Gemini Enterprise(GE)에 등록합니다.
 
 소요 시간: 약 105~115분 (강사 요청 대기 시간은 포함하지 않습니다)
 
 | Step | 절 | 내용 | 시간 |
 |:---|:---:|:---|:---:|
 | 준비 | 2 | 실습 1 결과물 확인, API 활성화, 사전 확인 체크리스트, Gemini Enterprise 앱 준비 | 10분 |
-| Step 0 | 3 | ADK 스킬 설치와 환경 준비 | 5분 |
+| Step 0 | 3 | agents-cli 스킬 설치와 환경 준비 | 5분 |
 | Step 1 | 4 | agents-cli 4-Tier 정량 평가 (도구 호출 정확도, RAG 인용률, 근거 없는 답변 판정) 및 힐클라이밍 | 20~25분 |
-| Step 2 | 5 | Secret Manager + Agent Identity 권한 + Agent Gateway 생성 + agents-cli Agent Runtime 배포 (대기 약 10분 포함: 게이트웨이 생성 2~3분, 배포 약 5분) | 24분 |
+| Step 2 | 5 | Secret Manager + Agent Identity 권한 + Agent Gateway 생성 + agents-cli Agent Runtime 배포 (대기 약 6~8분 포함: 게이트웨이 생성 2~3분, 배포 3분 30초~5분) | 24분 |
 | Step 3 | 6 | Agent Registry 등록 (도구 위험도 주석, 허용 목적지) | 5분 |
 | Step 4 | 7 | Agent Gateway 연결, 위험 도구 거부 정책, 403 차단 검증 (대기 약 8~13분 포함: 엔진 연결 약 5분, 길면 10분. 정책 적용 2~4분) | 23분 |
 | Step 5 | 8 | Model Armor 템플릿 및 런타임 가드 활성화 (재배포 약 4분 포함) | 10분 |
@@ -21,7 +21,7 @@
 ## 목차
 1. [실습 2 개요와 도입 시나리오](#1-실습-2-개요와-도입-시나리오)
 2. [시작 전 준비: 실습 1 결과물과 사전 조건 확인](#2-시작-전-준비-실습-1-결과물과-사전-조건-확인)
-3. [Step 0: ADK 스킬 설치와 환경 준비](#3-step-0-adk-스킬-설치와-환경-준비)
+3. [Step 0: agents-cli 스킬 설치와 환경 준비](#3-step-0-agents-cli-스킬-설치와-환경-준비)
 4. [Step 1: agents-cli eval 기반 정량적 품질 평가 및 힐클라이밍](#4-step-1-agents-cli-eval-기반-정량적-품질-평가-및-힐클라이밍)
 5. [Step 2: Secret Manager와 Agent Identity로 Agent Runtime 배포](#5-step-2-secret-manager와-agent-identity로-agent-runtime-배포)
 6. [Step 3: Agent Registry 전사 자산 등록 (도구 위험도 주석)](#6-step-3-agent-registry-전사-자산-등록-도구-위험도-주석)
@@ -39,7 +39,7 @@ VM에서 로컬로 실행하던 에이전트를 단계별로 프로덕션 환경
 
 ```mermaid
 flowchart LR
-    P1["실습 1 산출물<br/>로컬 MAS 에이전트<br/>+ A2A 서버"] --> S1["1단계: Eval Flywheel<br/>agents-cli eval run<br/>결정론적 지표 + hallucination 채점"]
+    P1["실습 1 산출물<br/>로컬 멀티 에이전트<br/>+ 4-Tier 평가 데이터셋"] --> S1["1단계: 품질 평가<br/>agents-cli eval run<br/>결정론적 지표 + hallucination 채점"]
     S1 --> S2["2단계: 보안 프로덕션 배포<br/>Secret Manager 시크릿 격리<br/>+ Agent Runtime 배포 (도쿄)"]
     S2 --> S3["3단계: 전사 카탈로그화<br/>Agent Registry 등록<br/>+ 도구 위험도 주석"]
     S3 --> S4["4단계: 중앙 관문 통제<br/>Agent Gateway (이그레스)<br/>+ 위험 도구 거부 정책 403 차단"]
@@ -52,7 +52,7 @@ flowchart LR
 
 | 단계 | 시점 | 당면한 문제 (사건) | GCP 엔지니어링 해결책 |
 |:---|:---|:---|:---|
-| Step 1 | 파일럿 검증 | HR팀장: "데모는 잘 되는데, 임직원 50명이 쓰면 엉뚱한 답을 하거나 규정을 위반하지 않을지 객관적으로 어떻게 입증하죠?" | agents-cli eval 기반 4-Tier 골든 데이터셋 정량 평가(결정론적 채점, LLM-as-a-Judge는 선택), 프롬프트 힐클라이밍 |
+| Step 1 | 파일럿 검증 | HR팀장: "데모는 잘 되는데, 임직원 50명이 쓰면 엉뚱한 답을 하거나 규정을 위반하지 않을지 객관적으로 어떻게 입증하죠?" | agents-cli eval 기반 4-Tier 골든 데이터셋 정량 평가(결정론적 채점과 LLM 판정 hallucination, 나머지 LLM 판정 2개는 선택), 프롬프트 힐클라이밍 |
 | Step 2 | 배포 준비 | 보안팀장: "개발자 노트북 .env 파일에 HR/IT 시스템 토큰이 평문으로 남아 있습니다. 시크릿 저장소로 옮기세요." | Secret Manager 시크릿 이관, Agent Identity 기반 최소 권한, Agent Runtime(도쿄) 배포 |
 | Step 3 | 전사 확산 | 보안팀장: "인사 시스템 데이터를 바꿀 수 있는 에이전트와 도구 목록을 내일까지 보안 감사 자료로 제출하세요." | Agent Registry 등록, 도구 명세 위험도 주석(`readOnlyHint`, `destructiveHint`) |
 | Step 4 | 보안 사고 | 직원: "'휴가 내역 정리해줘'라고 했더니 승인된 휴가가 취소됐어요. 모든 에이전트의 휴가 취소를 오늘 안에 막아 주세요." | Google 관리형 Agent Gateway(이그레스) + MCP 도구 이름 기준 거부 정책으로 에이전트 코드 수정 없이 위험 도구 403 차단 |
@@ -111,7 +111,7 @@ flowchart TD
 | Cloud Resource Manager | `cloudresourcemanager.googleapis.com` | 프로젝트 정보와 프로젝트 IAM 정책을 다루는 API입니다. 2.4에서 내 계정의 프로젝트 역할을 확인하고(`gcloud projects get-iam-policy`), 5.4에서 프로젝트 번호와 상위 조직 ID를 조회해 에이전트 신원의 trust domain을 정한 뒤, 이 신원에 프로젝트 역할을 부여합니다(`gcloud projects add-iam-policy-binding`). 5.7 첫 배포에서 agents-cli가 하는 프로젝트 IAM 부여도 이 API를 씁니다. | 2.4, 5.4, 5.7 |
 
 > [!NOTE]
-> Cloud Logging(`logging.googleapis.com`)은 새 프로젝트에 기본으로 켜져 있는 경우가 많지만, 생성 방식(예: Resource Manager API)에 따라 비활성화되어 있을 가능성을 방지하기 위해 2.3에서 함께 활성화합니다. 7.5와 7.6에서 `gcloud logging read`로 게이트웨이 로그(`resource.type="networkservices.googleapis.com/Gateway"`)를 읽어 도구 호출마다 허용(`ALLOWED`)인지 거부(`403 DENIED`)인지 확인합니다. 9.4에서는 실패한 항목의 원인을 에이전트 로그와 게이트웨이 로그에서 찾습니다.
+> Cloud Logging(`logging.googleapis.com`)은 새 프로젝트에 기본으로 켜져 있는 경우가 많지만, 생성 방식(예: Resource Manager API)에 따라 꺼져 있을 수 있으므로 2.3에서 함께 활성화합니다. 7.5와 7.6에서 `gcloud logging read`로 게이트웨이 로그(`resource.type="networkservices.googleapis.com/Gateway"`)를 읽어 도구 호출마다 허용(`ALLOWED`)인지 거부(`403 DENIED`)인지 확인합니다. 9.4에서는 실패한 항목의 원인을 에이전트 로그와 게이트웨이 로그에서 찾습니다.
 
 ---
 
@@ -124,7 +124,7 @@ flowchart TD
 | 에이전트 창 | Antigravity 2.0 앱의 채팅(`~/enterprise-ops-agent` 프로젝트를 연 상태) 또는 Konsole 탭 1에서 실행한 `agy` | `prompt` 코드 블록 |
 | 터미널 창 | Konsole 탭(CLI 사용자는 탭 2) | `bash` 코드 블록 |
 
-에이전트를 종료했다가 다시 들어갈 필요는 없습니다. 에이전트 창은 터미널 창에서 export한 변수를 받지 못합니다. 그래서 에이전트에게 명령을 실행시키는 프롬프트에는 `source ~/lab.env; source ~/lab2/env.sh 2>/dev/null`를 먼저 실행하라는 줄을 넣어 두었습니다. `~/lab.env`는 실습 1에서 만든 파일(`GOOGLE_*`, `PATH`, `MCP_TOKEN`)이고, `~/lab2/env.sh`는 5.4에서 만듭니다. 두 파일 모두 `~/.bashrc`가 읽으므로 새 터미널 창에도 변수가 들어 있습니다.
+2.1로 진행하면 에이전트를 종료했다가 다시 들어갈 필요는 없습니다. 2.2로 완성본을 받았다면 2.2 블록 아래 안내대로 agy CLI를 다시 시작합니다. 에이전트 창은 터미널 창에서 export한 변수를 받지 못합니다. 그래서 에이전트에게 명령을 실행시키는 프롬프트에는 `source ~/lab.env; source ~/lab2/env.sh 2>/dev/null`를 먼저 실행하라는 줄을 넣어 두었습니다. `~/lab.env`는 실습 1에서 만든 파일(`GOOGLE_*`, `PATH`, `MCP_TOKEN`)이고, `~/lab2/env.sh`는 5.4에서 만듭니다. 두 파일 모두 `~/.bashrc`가 읽으므로 새 터미널 창에도 변수가 들어 있습니다.
 
 진행 방식은 두 가지입니다. 2.3부터는 두 방식 모두 같은 명령을 실행합니다.
 
@@ -143,7 +143,7 @@ flowchart TD
 - `tests/eval/eval_config.yaml`: Step 1 평가 지표 설정 (4.3에서 받음)
 - `app/tools/model_armor.py`: Step 5 Model Armor 가드 (8.2에서 받아 본인 에이전트에 연결)
 
-시작 전에 터미널 창에서 실습 1의 시나리오 테스트가 통과하는지만 확인합니다. `MCP_TOKEN`이 비어 있으면 SaaS 시나리오가 실패하므로 아래 블록이 먼저 확인합니다. 비어 있다는 메시지가 나오면 실습 1 Task 4 1단계대로 토큰을 `~/lab.env`에 저장했는지 확인합니다.
+시작 전에 터미널 창에서 실습 1의 시나리오 테스트가 통과하는지만 확인합니다. `MCP_TOKEN`이 비어 있으면 SaaS 시나리오가 실패하므로 아래 블록은 테스트 전에 `MCP_TOKEN`이 있는지 먼저 확인합니다. 비어 있다는 메시지가 나오면 실습 1 Task 4 1단계대로 토큰을 `~/lab.env`에 저장했는지 확인합니다.
 
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
@@ -158,10 +158,10 @@ uv run python3 tests/test_scenarios.py
 > [!WARNING]
 > 2.1이 통과했다면 이 절은 실행하지 않습니다. 아래 블록은 기존 `~/enterprise-ops-agent` 폴더를 `~/enterprise-ops-agent.mine`으로 옮기고 그 자리에 완성본을 풉니다. 실수로 실행했다면 `rm -rf ~/enterprise-ops-agent && mv ~/enterprise-ops-agent.mine ~/enterprise-ops-agent`로 되돌립니다.
 
-새 VM이라면 실습 1의 시작 준비와 Task 1 1단계(패키지 설치)를 먼저 실행합니다. 그다음 실습 1 완성본을 내려받아 압축을 풀고 의존성을 설치합니다. 명령을 실행하기 전에 다음을 먼저 준비합니다.
+새 VM이라면 실습 1의 시작 준비와 Task 1 1단계(패키지 설치)를 먼저 실행합니다. 그다음 실습 1 완성본을 내려받아 압축을 풀고 의존성을 설치합니다. 아래 1과 3은 블록을 실행하기 전에, 2는 블록을 실행한 뒤에 합니다.
 
 1. 환경 파일: 실습 1 Task 1 1단계와 Task 4 1단계(`MCP_TOKEN`)대로 `~/lab.env`를 만들어 `GOOGLE_*`, `PATH`, `MCP_TOKEN`을 저장합니다. 에이전트 창이 이 파일을 읽어 변수를 씁니다.
-2. 규정 검색 앱: 실습 1 Task 1의 6단계(Vertex AI Search 검색 앱 사전 구성)를 실행합니다. 이 단계를 건너뛰어도 RAG는 `local_fallback`으로 동작하지만, Vertex AI Search 경로는 검증되지 않습니다.
+2. 규정 검색 앱: 아래 블록으로 완성본을 푼 뒤 실습 1 Task 1의 6단계(Vertex AI Search 검색 앱 사전 구성)를 실행합니다. 6단계가 올리는 규정 PDF는 완성본의 `docs/policies/`에 들어 있습니다. 이 단계를 건너뛰어도 RAG는 `local_fallback`으로 동작하지만, Vertex AI Search 경로는 검증되지 않습니다.
 3. MCP 토큰: 실습 1 Task 4의 1단계에서 Mock SaaS 웹 화면으로 개인 토큰을 발급합니다. 아래 시나리오 테스트와 Step 2의 Secret Manager 등록에 필요합니다.
 
 기존 `~/enterprise-ops-agent` 폴더가 있으면 덮어쓰기 전에 `enterprise-ops-agent.mine`으로 이름을 바꿔 둡니다(실습 1의 '실습 1 완성본과 실습 2 준비' 절과 같은 방식). `~/enterprise-ops-agent.mine`이 이미 있으면 `Directory not empty` 오류로 블록 전체가 멈춥니다. 두 폴더 중 어느 쪽을 남길지 확인한 뒤 다시 실행합니다.
@@ -169,8 +169,10 @@ uv run python3 tests/test_scenarios.py
 ```bash
 # [완성본 전용] 실습 1 결과물을 쓰는 사람은 실행하지 마세요. 기존 폴더를 .mine으로 옮기고 완성본으로 바꿉니다.
 export PATH="$HOME/.local/bin:$PATH"
+source ~/lab.env
 command -v agents-cli >/dev/null || echo "agents-cli가 없습니다. 실습 1 Task 1 1단계를 먼저 실행하세요"
-: "${MCP_TOKEN:?실습 1 Task 4 1단계대로 MCP_TOKEN을 ~/lab.env에 저장하고 source ~/lab.env를 실행하세요}"
+: "${MCP_TOKEN:?실습 1 Task 4 1단계대로 MCP_TOKEN을 ~/lab.env에 저장하고 source ~/lab.env를 실행하세요}" && \
+command -v agents-cli >/dev/null && \
 cd ~ && \
 { [ ! -d ~/enterprise-ops-agent ] || mv -T ~/enterprise-ops-agent ~/enterprise-ops-agent.mine; } && \
 curl -fsSL https://raw.githubusercontent.com/hajekim/build-with-gemini/main/lab1/enterprise_ops_agent_completed.zip -o enterprise_ops_agent_completed.zip && \
@@ -180,8 +182,10 @@ agents-cli install && \
 uv run python3 tests/test_scenarios.py
 ```
 
+블록이 끝나면 준비 2번(규정 검색 앱)을 실행합니다. 새 VM이라면 실습 1 Task 1 5단계대로 `~/enterprise-ops-agent` 폴더를 에이전트 창에 연결합니다. agy CLI를 이미 실행 중이었다면 탭 1에서 `/exit`로 종료하고 `cd ~/enterprise-ops-agent && agy`로 다시 시작합니다.
+
 ### 2.3 실습 2 필수 GCP API 일괄 활성화
-실습 2에서 다루는 Secret Manager, Agent Registry, Agent Gateway, Model Armor, Cloud Logging API를 일괄 활성화합니다. 각 서비스가 실습에서 하는 일은 [1.3](#13-실습-2에서-사용하는-google-cloud-서비스)에 정리했습니다:
+실습 2에서 쓰는 API를 일괄 활성화합니다. 각 서비스가 실습에서 하는 일은 [1.3](#13-실습-2에서-사용하는-google-cloud-서비스)에 정리했습니다. `serviceextensions`, `iap`, `orgpolicy`는 7.2 NOTE에서 설명하는 IAP 승인 확장과 조직 정책 관련 API입니다:
 
 ```bash
 gcloud services enable \
@@ -197,11 +201,11 @@ gcloud services enable \
   cloudresourcemanager.googleapis.com \
   aiplatform.googleapis.com \
   logging.googleapis.com
-# 기대 결과: Operation "operations/..." finished successfully.
+# 기대 결과: Operation "operations/..." finished successfully. (이미 모두 켜져 있으면 아무 출력 없이 끝남)
 ```
 
 ### 2.4 사전 확인 체크리스트
-아래 항목은 중간에 막히면 대기 시간이 깁니다. Step 1 평가(4.4)가 도는 동안 다른 터미널 탭에서 확인해 두면 전체 시간이 줄어듭니다. 실제 명령은 표의 사용 위치에 있습니다.
+아래 항목은 중간에 막히면 대기 시간이 길어지므로 지금 확인합니다. 시간이 부족하면 Step 1 평가(4.4)가 도는 동안 다른 터미널 탭에서 확인해도 됩니다.
 
 | 항목 | 확인 방법 | 사용 위치 |
 |:---|:---|:---|
@@ -219,7 +223,7 @@ gcloud projects get-iam-policy $(gcloud config get-value project 2>/dev/null) \
 # 기대 결과: account는 student-...@qwiklabs.net, 마지막 줄은 roles/owner
 ```
 
-account가 `antigravity-sa@...`이면 터미널이 아직 VM 서비스 계정으로 실행 중인 것입니다. 이 계정은 Owner가 아니어서 5.4 시크릿 생성(`Permission 'secretmanager.secrets.create' denied`)과 9.2 게시(`aiplatform.reasoningEngines.get` denied)에서 권한 오류가 납니다. 다음 두 명령을 실행해 실습 계정으로 로그인한 뒤 위 확인 블록을 다시 실행합니다. 두 명령 모두 `(Y/n)` 질문에 `Y`를 입력하고, 표시된 URL을 Chrome에서 열어 Qwiklabs **Username**으로 로그인한 뒤 인증 코드를 터미널에 붙여넣습니다(실습 1 시작 준비 2단계와 같음).
+account가 `antigravity-sa@...`이면 터미널이 아직 VM 서비스 계정으로 실행 중인 것입니다. 이 계정은 Owner가 아니어서 5.4 시크릿 생성(`Permission 'secretmanager.secrets.create' denied`)과 9.2 Gemini Enterprise 등록(`aiplatform.reasoningEngines.get` denied)에서 권한 오류가 납니다. 다음 두 명령을 실행해 실습 계정으로 로그인한 뒤 위 확인 블록을 다시 실행합니다. 두 명령 모두 `(Y/n)` 질문에 `Y`를 입력하고, 표시된 URL을 Chrome에서 열어 Qwiklabs **Username**으로 로그인한 뒤 인증 코드를 터미널에 붙여넣습니다(실습 1 시작 준비 2단계와 같음).
 
 ```bash
 gcloud auth login --no-launch-browser
@@ -284,11 +288,11 @@ agents-cli publish gemini-enterprise --list --project=$(gcloud config get-value 
 
 ---
 
-## 3. Step 0: ADK 스킬 설치와 환경 준비
+## 3. Step 0: agents-cli 스킬 설치와 환경 준비
 
 실습 2는 `eval`, `deploy`, `publish` 같은 Google Cloud 작업이 대부분입니다. [google/agents-cli](https://github.com/google/agents-cli) 저장소의 스킬을 프로젝트의 `.agents/skills/`에 설치해 에이전트(앱 또는 agy CLI)가 이 작업 지침을 참고하게 합니다.
 
-### 3.1 ADK 스킬 설치 (터미널)
+### 3.1 agents-cli 스킬 설치 (터미널)
 `git clone`이나 npx 없이 curl과 tar로 skills 폴더만 내려받습니다.
 
 ```bash
@@ -300,8 +304,8 @@ curl -fsSL https://github.com/google/agents-cli/archive/refs/heads/main.tar.gz |
 
 설치되는 스킬(7개 중 실습에서 쓰는 4개):
 - `google-agents-cli-eval`: 4-Tier 평가 데이터셋 설계, LLM-as-a-judge 채점 및 힐클라이밍 가이드
-- `google-agents-cli-deploy`: Agent Runtime 프로덕션 배포, Secret Manager 연동 규격
-- `google-agents-cli-publish`: Gemini Enterprise 등록 메타데이터 및 A2A 갤러리 등록 명세
+- `google-agents-cli-deploy`: Agent Runtime 배포와 Secret Manager 연동 방법
+- `google-agents-cli-publish`: Gemini Enterprise 등록 방법(ADK, A2A 방식)과 옵션
 - `google-agents-cli-observability`: Cloud Trace 및 Cloud Logging 관측성 연동
 
 설치 결과를 확인합니다.
@@ -344,12 +348,12 @@ ls ~/enterprise-ops-agent/.agents/skills
 HR팀장은 파일럿 오픈 전, 주관적인 몇 번의 대화 테스트가 아니라 전사 운영에 적합한 정량적 평가 보고서를 요구합니다.
 
 ### 4.2 품질 개선 루프
-Google Agent Platform은 다음 5단계 평가 루프를 제공합니다:
+agents-cli 평가는 다음 5단계 루프로 진행합니다:
 1. Data Prep: 실습 1에서 만든 4-Tier 골든 데이터셋(`tests/eval/datasets/`) 구성
 2. Inference (Generate): 로컬 에이전트 인스턴스를 구동하여 사고 과정과 도구 호출 기록을 JSON으로 수집
 3. Grade Traces: 코드 지표가 도구 호출과 인용을 결정론적으로 채점하고, Vertex AI Gemini 모델이 LLM-as-a-Judge 방식으로 답변의 지어내기 여부(`hallucination`)를 판정 (선택하면 나머지 LLM 판정 2개도 함께 판정)
 4. Analyze: 실패하거나 감점된 케이스의 근본 원인(사내 규정 인용 누락, 필요한 도구 미호출, 규정 내용을 바꿔 말함 등) 진단
-5. Optimize (Hillclimbing): 프롬프트 지침을 고치고, 다른 지표가 떨어지지 않았는지 다시 평가해 지표별 목표치(4.3 표)를 넘김
+5. Optimize (Hillclimbing): 프롬프트 지침을 고치고, 다른 지표가 떨어지지 않았는지 다시 평가해 지표별 목표치(4.3 표)를 충족
 
 ### 4.3 평가 지표: LLM 판정 3종 + 결정론적 3종
 평가 설정 파일 `tests/eval/eval_config.yaml`을 실습 1 완성본에서 받아 덮어씁니다. 스캐폴드가 만든 같은 이름의 기본 파일에는 지표가 하나뿐이라, 파일이 이미 있어도 이 명령을 실행해야 합니다.
@@ -365,7 +369,7 @@ ls tests/eval/datasets/
 
 `grep` 결과가 1 이상이고, 실습 1 Task 5에서 만든 `tier1`~`tier4` 데이터셋 4개가 보이면 됩니다. `basic-dataset.json`, `README.md` 같은 스캐폴드 기본 파일이 함께 보여도 정상입니다. `grep` 결과가 0이면 다운로드나 압축 해제가 실패한 것이니 출력의 오류를 확인합니다.
 
-이 파일에는 Vertex AI 채점 모델이 판정하는 지표 3개와, 트레이스를 코드로 검사하는 지표 3개(`custom_metrics`)가 선언되어 있습니다. 결정론적 지표는 같은 트레이스에 대해 항상 같은 점수를 내므로 회귀 비교에 적합합니다. 실습의 기본 실행(4.4)은 결정론적 지표 3개와 LLM 판정 `hallucination`을 채점합니다. 결정론적 지표는 도구를 맞게 불렀는지와 문서번호를 인용했는지만 보므로, 답변이 규정 원문과 다른 내용을 말해도 통과합니다. `hallucination`이 이 부분을 검사합니다. 나머지 LLM 판정 2개는 판정 모델 오류(500)로 재시도가 반복되면 시간이 크게 늘어나므로 선택으로 둡니다.
+이 파일에는 Vertex AI 채점 모델이 판정하는 지표 3개와, trace를 코드로 검사하는 지표 3개(`custom_metrics`)가 선언되어 있습니다. 결정론적 지표는 같은 trace에 대해 항상 같은 점수를 내므로 회귀 비교에 적합합니다. 실습의 기본 실행(4.4)은 결정론적 지표 3개와 LLM 판정 `hallucination`을 채점합니다. 결정론적 지표는 도구를 맞게 불렀는지와 문서번호를 인용했는지만 보므로, 답변이 규정 원문과 다른 내용을 말해도 통과합니다. `hallucination`이 이 부분을 검사합니다. 나머지 LLM 판정 2개는 판정 모델 오류(500)로 재시도가 반복되면 시간이 크게 늘어나므로 선택으로 둡니다.
 
 | 지표 | 유형 | 4.4 실행 | 목표 | 측정 기준 |
 |:---|:---:|:---:|:---:|:---|
@@ -443,7 +447,7 @@ Saved HTML results to /config/enterprise-ops-agent/artifacts/grade_results/resul
 | 단계 | 출력 | 하는 일 |
 |:---|:---|:---|
 | 1. eval generate | `Booting local ADK server`, `[generate] case[N] done`, `Traces saved to ...` | 내 에이전트를 로컬 ADK 서버로 띄우고 데이터셋의 질문을 하나씩 보냅니다. 에이전트는 실제로 Gemini를 호출하고 Mock SaaS의 MCP 도구도 실제로 실행합니다. 질문, 도구 호출 순서, 도구 응답, 최종 답변이 trace 파일에 저장됩니다. 케이스는 동시에 실행되므로 `done` 순서가 섞여 나옵니다. |
-| 2. eval grade | `Loaded 3 local custom metric(s)`, `Evaluation Summary` | 저장된 trace를 `eval_config.yaml`의 채점 함수 3개로 채점합니다. 모델을 호출하지 않고 Python 코드로 도구 호출 기록과 답변 문자열만 검사하므로 같은 trace는 항상 같은 점수가 나옵니다. `hallucination`은 Vertex AI 판정 모델이 최종 답변을 도구 응답(규정 원문, SaaS 데이터)과 대조해 채점하므로 Tier당 30초~1분 10초 정도 더 걸립니다. |
+| 2. eval grade | `Loaded 3 local custom metric(s)`, `Evaluation Summary` | 저장된 trace를 `eval_config.yaml`의 채점 함수 3개로 채점합니다. 결정론적 지표 3개는 모델을 호출하지 않고 Python 코드로 도구 호출 기록과 답변 문자열만 검사하므로 같은 trace는 항상 같은 점수가 나옵니다. `hallucination`은 Vertex AI 판정 모델이 최종 답변을 도구 응답(규정 원문, SaaS 데이터)과 대조해 채점하므로 Tier당 30초~1분 10초 정도 더 걸립니다. |
 
 `Evaluation Summary`의 항목은 지표마다 다음을 뜻합니다.
 
@@ -478,7 +482,7 @@ grep -ohE "(called=|retrieved=|[a-z_]+ called before)[^\"]*" artifacts/grade_res
 #          request_time_off called before policy check: [...]          ← 규정 확인 전에 쓰기 도구 호출
 ```
 
-명령어가 완료되면 `artifacts/grade_results/`에 Tier별 채점 결과 JSON과 시각 리포트(`results_*.html`)가 생성됩니다. 리포트는 4.5에서 웹으로 엽니다. 실습 1 완성본으로 진행하면 이미 개선된 코드이므로 결정론적 지표가 대부분 1.00으로 나올 수 있습니다. Qwiklabs 점검에서 완성본은 T2, T3의 지표 3개가 1.00이었고, T1은 티켓 목록 케이스에서 `list_tickets`를 부르지 않아 `tool_call_accuracy`가 0.75였습니다. T4는 점검에 따라 1.00 또는 0.75였습니다(에이전트가 금지된 `cancel_leave_request`를 부른 경우). 새 완성본으로 다시 점검했을 때 `hallucination`은 T3만 0.95였습니다. 결정론적 지표는 모두 1.00이었지만, 연차 신청 답변의 "본 신청 건은 기한 요건을 충족하여 정상 접수되었습니다"(오늘 날짜를 모르므로 근거 없음)와 배터리 교체 답변의 화재 위험 안내, 서비스데스크 방문 안내처럼 도구 응답에 없는 문장이 `unsupported`로 감점됐습니다. 감점 사유는 결과 JSON의 `hallucination_v1` 설명에 문장 단위로 남습니다. 아래는 개선 전 코드의 베이스라인 예시입니다(모델 응답에 따라 달라질 수 있음). 앞의 세 열(LLM 판정)은 아래 선택 실행을 했을 때만 나옵니다:
+명령어가 완료되면 `artifacts/grade_results/`에 Tier별 채점 결과 JSON과 시각 리포트(`results_*.html`)가 생성됩니다. 리포트는 4.5에서 웹으로 엽니다. 실습 1 완성본으로 진행하면 이미 개선된 코드이므로 결정론적 지표가 대부분 1.00으로 나올 수 있습니다. Qwiklabs 점검에서 완성본은 T2, T3의 지표 3개가 1.00이었고, T1은 티켓 목록 케이스에서 `list_tickets`를 부르지 않아 `tool_call_accuracy`가 0.75였습니다. T4는 점검에 따라 1.00 또는 0.75였습니다(에이전트가 금지된 `cancel_leave_request`를 부른 경우). `hallucination`은 T3만 0.95였습니다. 연차 신청 답변의 "본 신청 건은 기한 요건을 충족하여 정상 접수되었습니다"(오늘 날짜를 모르므로 근거 없음)와 배터리 교체 답변의 화재 위험 안내, 서비스데스크 방문 안내처럼 도구 응답에 없는 문장이 `unsupported`로 감점됐습니다. 감점 사유는 결과 JSON의 `hallucination_v1` 설명에 문장 단위로 남습니다. 아래는 개선 전 코드의 베이스라인 예시입니다(모델 응답에 따라 달라질 수 있음). 앞의 두 열(`task_success`, `tool_use_quality`)은 아래 선택 실행을 했을 때만 나옵니다:
 
 | Tier | task_success | tool_use_quality | hallucination | tool_call_accuracy | policy_first_order | rag_citation |
 |:---|:---:|:---:|:---:|:---:|:---:|:---:|
@@ -519,7 +523,7 @@ done
 ```
 
 > [!WARNING]
-> T3 평가 케이스는 내 Mock SaaS 데이터 공간에 실제로 휴가를 신청하고 티켓을 만듭니다. 평가를 돌릴 때마다 EMP-10294의 연차 잔여가 바뀝니다. T3의 신청은 잔여를 줄이고, T4에서 취소 도구가 호출되면 기존 신청이 취소되어 잔여가 늘어납니다(초기 12.0일. Qwiklabs 점검에서는 3.0일로 줄어든 경우와, T4가 취소를 3번 호출해 15.0일이 된 경우가 있었습니다). 7.6 검증 전에 잔여를 확인하는 단계가 있습니다.
+> T3 평가 케이스는 내 Mock SaaS 데이터 공간에 실제로 휴가를 신청하고 티켓을 만듭니다. 평가를 돌릴 때마다 EMP-10294의 연차 잔여가 바뀝니다. T3의 신청은 잔여를 줄이고, T4에서 취소 도구가 호출되면 기존 신청이 취소되어 잔여가 늘어납니다(초기 12.0일). 7.6 검증 전에 잔여를 확인하는 단계가 있습니다.
 
 ### 4.5 평가 리포트 웹 열람 (포트 8081)
 터미널에서 내장 웹 서버를 띄워 채점 리포트를 브라우저로 확인합니다:
@@ -565,7 +569,7 @@ ls -t artifacts/grade_results/results_*.json | head -4
 agents-cli eval compare artifacts/grade_results/results_<이전>.json artifacts/grade_results/results_<이후>.json
 ```
 
-목표 지표를 모두 넘으면 배포 단계로 넘어갑니다. 넘지 못한 지표가 있으면 원인과 함께 기록해 두고, 배포 후 GE 체크리스트(9.4)에서 같은 항목을 다시 확인합니다.
+목표 지표를 모두 충족하면 배포 단계로 넘어갑니다. 충족하지 못한 지표가 있으면 원인과 함께 기록해 두고, 배포 후 GE 체크리스트(9.4)에서 같은 항목을 다시 확인합니다.
 
 ---
 
@@ -712,7 +716,7 @@ openssl x509 -in agw_root.pem -noout -subject
 ```
 
 ### 5.6 Dockerfile에 게이트웨이 인증서 신뢰 추가 (터미널)
-공식 문서의 BYOC 예시(시스템 인증서 저장소 + `SSL_CERT_FILE` 등)만으로는 부족합니다. 테스트해 보면 venv 안의 `httpx`가 certifi 번들을 사용해 `CERTIFICATE_VERIFY_FAILED: self-signed certificate`로 실패합니다. 그래서 `uv sync` 다음에 certifi 번들에도 인증서를 추가합니다.
+Agent Gateway 공식 문서의 사용자 컨테이너(BYOC, Bring Your Own Container) 예시처럼 시스템 인증서 저장소와 `SSL_CERT_FILE`만 설정하면 부족합니다. 테스트해 보면 venv 안의 `httpx`가 certifi 번들을 사용해 `CERTIFICATE_VERIFY_FAILED: self-signed certificate`로 실패합니다. 그래서 `uv sync` 다음에 certifi 번들에도 인증서를 추가합니다.
 
 ```bash
 cd ~/enterprise-ops-agent
@@ -808,7 +812,7 @@ EOF
 # 원격 에이전트 질의
 agents-cli run --url ${AGENT_URL} --mode adk "EMP-10294 직원의 연차 잔여일수 알려줘"
 # 기대 결과: workweek_agent가 연차 잔여 일수를 조회해 답변
-#   (초기 12.0일에서 실습 1 시나리오와 4.4/4.6 평가의 신청, 취소에 따라 달라짐. Qwiklabs 점검에서는 3.0일, 15.0일)
+#   (초기 12.0일에서 실습 1 시나리오와 4.4/4.6 평가의 신청, 취소에 따라 줄거나 늘어남)
 ```
 
 새 터미널 창은 `~/.bashrc`가 `~/lab2/env.sh`를 읽으므로 따로 할 일이 없습니다. 이미 열려 있던 터미널 창을 위해 이후 블록의 첫 줄에 `source ~/lab2/env.sh`를 넣어 두었습니다.
@@ -895,7 +899,7 @@ for s in json.load(sys.stdin):
 ## 7. Step 4: Agent Gateway 정책으로 위험 도구 차단
 
 ### 7.1 사건: "제 휴가가 왜 취소됐죠?"
-개선 전 코드의 베이스라인(4.4 표)에서는 인젝션 문장 하나로 `cancel_leave_request`가 실제로 실행되었습니다. 내 평가에서 막혔더라도, 프롬프트 지침에 의존한 방어는 모델 응답에 따라 뚫릴 수 있습니다. 보안팀장은 오늘 안에 모든 에이전트의 휴가 취소를 막으라고 지시합니다. 에이전트마다 코드를 고쳐 재배포하는 방식으로는 시간도 부족하고, 빠뜨리는 에이전트가 생깁니다.
+개선 전 코드의 베이스라인(4.4 표)에서는 인젝션 문장 하나로 `cancel_leave_request`가 실제로 실행되었습니다. 본인의 4.4 평가에서는 취소가 실행되지 않았더라도, 프롬프트 지침에 의존한 방어는 모델 응답에 따라 뚫릴 수 있습니다. 보안팀장은 오늘 안에 모든 에이전트의 휴가 취소를 막으라고 지시합니다. 에이전트마다 코드를 고쳐 재배포하는 방식으로는 시간도 부족하고, 빠뜨리는 에이전트가 생깁니다.
 
 ### 7.2 구조: 에이전트 코드 수정 없이 중앙에서 차단
 
@@ -917,7 +921,7 @@ flowchart LR
 | authz 정책 (DENY) | 게이트웨이를 대상으로, MCP `tools/call`의 도구 이름이 `cancel_leave_request` 또는 `update_personal_info`이면 403으로 거부. 6절에서 `destructiveHint: true`로 표시한 두 도구 |
 
 > [!NOTE]
-> 에이전트 신원별로 규칙을 나누거나 레지스트리 주석(`destructiveHint`)을 직접 조건으로 쓰려면 IAP 승인 확장과 IAM 접근 정책을 함께 씁니다. IAM 접근 정책 바인딩은 조직 정책 `iam.managed.disableAccessPolicyBinding`이 꺼져 있어야 만들 수 있습니다. 실습 환경은 이 정책이 상위 조직에서 켜져 있고 프로젝트에서 해제할 수 없으므로(해제는 `orgpolicy.policies.create` 권한 거부, 바인딩 생성은 `FAILED_PRECONDITION ... CUSTOM_ORG_POLICY_VIOLATION`), 실습에서는 게이트웨이 authz 정책으로 도구 이름을 거부합니다.
+> 에이전트 신원별로 규칙을 나누거나 레지스트리 주석(`destructiveHint`)을 직접 조건으로 쓰려면 IAP 승인 확장과 IAM 접근 정책을 함께 씁니다. IAM 접근 정책 바인딩은 조직 정책 `iam.managed.disableAccessPolicyBinding`이 꺼져 있어야 만들 수 있습니다. 실습 환경은 이 정책이 상위 조직에서 켜져 있고 프로젝트에서 해제할 수 없으므로, 실습에서는 게이트웨이 authz 정책으로 도구 이름을 거부합니다.
 
 ### 7.3 에이전트를 게이트웨이에 연결 (터미널)
 agents-cli에는 게이트웨이 연결 옵션이 없어 REST로 한 번 설정합니다. 이후 agents-cli로 재배포해도 이 설정은 유지됩니다. 연결은 백그라운드에서 약 5분 걸리므로, 기다리는 동안 7.4를 진행합니다.
@@ -960,7 +964,7 @@ gcloud beta network-security authz-policies import enterprise-ops-agw-deny-destr
 조회와 신청 도구는 목록에 없으므로 그대로 통과합니다. 새 위험 도구가 생기면 `params`에 이름을 추가하고 같은 명령으로 다시 import합니다.
 
 ### 7.5 연결 확인: 게이트웨이를 지나도 조회가 정상인가
-7.3의 PATCH 후 5분쯤 지나면 연결 상태를 확인합니다. `None`이 나오면 아직 연결 중이므로 1~2분 간격으로 이 블록만 다시 실행합니다. Qwiklabs 점검에서는 두 번 모두 PATCH 후 약 5분에 연결되었습니다(한 번은 3분 30초에 `None`, 5분 9초에 연결됨. 다른 한 번은 4분 48초에 처음 확인했을 때 이미 연결됨). 10분이 지나도 `None`이면 7.3의 PATCH 응답에 오류가 없었는지 확인하고 강사에게 알립니다.
+7.3의 PATCH 후 5분쯤 지나면 연결 상태를 확인합니다. `None`이 나오면 아직 연결 중이므로 1~2분 간격으로 이 블록만 다시 실행합니다. 보통 PATCH 후 약 5분이면 연결됩니다. 10분이 지나도 `None`이면 7.3의 PATCH 응답에 오류가 없었는지 확인하고 강사에게 알립니다.
 
 ```bash
 source ~/lab2/env.sh
@@ -980,7 +984,7 @@ agents-cli run --url ${AGENT_URL} --mode adk "EMP-10294 직원의 연차 잔여�
 gcloud logging read 'resource.type="networkservices.googleapis.com/Gateway" AND httpRequest.requestUrl:"run.app"' \
   --project=${PROJECT_ID} --freshness=10m --limit=20 \
   --format="value(timestamp,httpRequest.status,jsonPayload.authzPolicyInfo.result,jsonPayload.agentGatewayInfo.mcpInfo.method,jsonPayload.agentGatewayInfo.mcpInfo.parameter)"
-# 기대 결과: 아래 실행 결과 예시처럼 200 ALLOWED tools/call 줄
+# 기대 결과: 아래 실행 결과 예시처럼 200 ALLOWED 줄. tools/call 줄은 늦게 나올 수 있음(아래 설명 참고)
 ```
 
 실행 결과 예시:
@@ -1041,7 +1045,7 @@ gcloud logging read 'resource.type="networkservices.googleapis.com/Gateway" AND 
 2026-10-02T07:11:43.655707Z     200     ALLOWED tools/list
 ```
 
-에이전트는 취소 실패를 "MCP tool execution failed", "Server returned an error response" 같은 오류로 안내하고, 신청이 승인 대기로 남아 있다고 답합니다. 취소가 막힌 뒤 에이전트가 신청 내역과 잔여를 다시 조회하는 줄(`get_leave_requests` 등)이 함께 보일 수 있습니다. 에이전트가 취소를 재시도하면 `403 DENIED` 줄이 여러 개 보입니다(Qwiklabs 점검에서는 3줄).
+에이전트는 취소 실패를 "MCP tool execution failed", "Server returned an error response" 같은 오류로 안내하고, 신청이 승인 대기로 남아 있다고 답합니다. 취소가 막힌 뒤 에이전트가 신청 내역과 잔여를 다시 조회하는 줄(`get_leave_requests` 등)이 함께 보일 수 있습니다. 에이전트가 취소를 재시도하면 `403 DENIED` 줄이 여러 개 보입니다.
 
 에이전트 코드는 바꾸지 않았습니다. 이 정책은 게이트웨이에 붙어 있으므로, 같은 게이트웨이에 연결한 다른 에이전트도 같은 규칙을 받습니다.
 
@@ -1093,7 +1097,7 @@ uv run python3 -c "from app.agent import root_agent; print(root_agent.name)"
 Model Armor 호출(`modelarmor.asia-northeast1.rep.googleapis.com`)도 게이트웨이를 지나므로, Step 3에서 이 호스트를 레지스트리에 등록해 둔 것입니다.
 
 > [!IMPORTANT]
-> 리전은 도쿄(`asia-northeast1`)를 씁니다. 서울에서는 프롬프트 인젝션/탈옥 필터가 지원되지 않습니다(`CAPABILITY_NOT_SUPPORTED` 오류).
+> 리전은 도쿄(`asia-northeast1`)를 씁니다. 서울 리전은 Model Armor 기능 지원이 제한되어, 실습 템플릿을 서울에 만들면 프롬프트 인젝션/탈옥 필터가 `CAPABILITY_NOT_SUPPORTED` 오류로 실패했습니다.
 
 ### 8.3 Model Armor 방어 검증 (터미널)
 ```bash
@@ -1154,7 +1158,7 @@ agents-cli eval run --dataset tests/eval/datasets/tier4-adversarial-edge.json \
 | `tool_call_accuracy` | 0.75 | 1.00 |
 | `policy_first_order` | 0.75 | 1.00 |
 
-가드 OFF에서 이미 1.00이면 두 값이 같게 나옵니다(Qwiklabs 점검).
+Step 1에서 가드 OFF 점수가 이미 1.00이었다면 가드 ON 점수도 1.00으로 같게 나옵니다.
 
 ---
 
@@ -1281,7 +1285,7 @@ Gemini Enterprise 웹 앱이 열리고, 'Ask Cymbal IT/HR 운영 에이전트' �
 | 배포가 `could not access one or more secrets referenced by spec.deployment_spec.secret_env`로 실패 | 시크릿 읽기 권한을 주기 전에 배포했거나, `gcp-sa-aiplatform-re` 서비스 에이전트 권한이 빠짐. 한 번 실패한 엔진은 권한을 고친 뒤에도 같은 오류로 계속 실패함 | 5.4의 두 주체 권한을 확인한 뒤 10.3의 엔진 삭제 명령(`curl -s -X DELETE ...?force=true`)으로 엔진을 삭제하고 새로 배포(`deployment_metadata.json` 삭제 후 `agents-cli-manifest.yaml`의 `name`을 바꿔 새 엔진 생성). 5.7의 엔진 정보 블록을 다시 실행해 `~/lab2/env.sh`를 갱신하고, 새 엔진으로 7.3의 게이트웨이 연결을 다시 설정한 뒤 7.5로 연결을 확인 |
 | `--agent-identity` 배포가 `setIamPolicy` `PERMISSION_DENIED`로 멈춤 | agents-cli가 ADC 계정으로 IAM 부여를 시도하는데 ADC 계정에 프로젝트 IAM 변경 권한이 없음 | 2.4의 `gcloud auth application-default login --no-launch-browser`로 실습 계정 ADC를 만든 뒤 같은 배포 명령을 한 번 더 실행 |
 | 게이트웨이 연결 후 에이전트가 "도구가 활성화되어 있지 않다"고 답하고 로그에 `CERTIFICATE_VERIFY_FAILED` | 컨테이너가 게이트웨이 루트 CA를 신뢰하지 않음 | 5.6의 Dockerfile(특히 certifi 단계)과 `--build-args` 전달을 확인 후 재배포 |
-| HTTP 498 | 호출한 호스트가 레지스트리에 없음 (기본 거부). mtls/리전 엔드포인트도 정확히 일치해야 함 | 게이트웨이 로그의 `httpRequest.requestUrl` 호스트를 `core-gapi-services`에 추가 |
+| HTTP 498 | 호출한 호스트가 레지스트리에 없음 (기본 거부). mtls/리전 엔드포인트도 정확히 일치해야 함 | 게이트웨이 로그의 `httpRequest.requestUrl` 호스트를 6.3 블록의 호스트 목록(`for h in ...`)에 추가하고, `gcloud agent-registry services delete core-gapi-services --location=${REGION} --quiet`로 지운 뒤 6.3의 `core-gapi-services` 생성 부분을 다시 실행 |
 | FastMCP 401 | MCP 토큰 만료 또는 잘못된 값 | Mock SaaS에서 새 토큰을 발급해 `~/lab.env`의 `MCP_TOKEN`을 바꾸고 `source ~/lab.env` 실행. 이어서 `echo -n "$MCP_TOKEN" \| gcloud secrets versions add enterprise-agent-mcp-token --data-file=-`로 시크릿을 갱신하고 5.7의 배포 명령으로 재배포 |
 | 일시적 `500 Authentication backend internal server error ... overloaded` | Google 측 인증 백엔드 일시 과부하(테스트 중 1회 발생, 약 1분 지속) | 잠시 후 재시도 |
 
