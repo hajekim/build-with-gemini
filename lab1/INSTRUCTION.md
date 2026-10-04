@@ -40,6 +40,9 @@ Lab 1에서 만든 에이전트를 정량 평가하고 Agent Runtime에 배포�
 
 ![엔터프라이즈 에이전트 아키텍처](./images/agent_architecture.png)
 
+> [!NOTE]
+> 그림의 `search_company_policy`는 Vertex AI Search 검색 앱(원본 PDF는 Cloud Storage)을 먼저 호출하고, 검색 앱이 준비되지 않았으면 로컬 조항 인덱스로 폴백합니다(Task 3). 실습에서 쓰는 ADK 버전은 `google-adk` 2.9.2입니다.
+
 ---
 
 ## 실습 목표
