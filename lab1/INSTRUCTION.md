@@ -238,7 +238,7 @@ agy
    - 안내에 따라 접근 권한을 허용하고 생성된 인증 코드를 복사합니다.
    - 터미널로 돌아와 인증 코드를 붙여넣고 **ENTER**를 누릅니다. `Enter Google Cloud Project ID:` 입력란이 나오면 본인의 **Google Cloud Project ID**를 입력하고 **ENTER**를 누릅니다.
 ![인증 코드 입력 및 프로젝트 선택](./images/07_agy_auth_code.png)
-화면은 Project ID 입력란이 먼저 나온 버전에서 촬영했습니다. 순서가 달라도 같은 값을 입력하면 됩니다.
+화면은 로그인 전 상태에서 Project ID를 묻는 모습입니다. 인증 코드와 Project ID를 묻는 순서가 본문과 달라도 같은 값을 입력하면 됩니다.
 
 4. Google Cloud Location은 **global**을 선택합니다.
 

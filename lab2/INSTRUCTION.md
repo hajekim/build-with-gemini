@@ -246,7 +246,7 @@ Step 6(9절)에서 에이전트를 등록할 Gemini Enterprise 앱을 미리 만
 
 5. 사용자 및 라이선스 할당 화면에서 본인 계정에 라이선스를 할당합니다.
 
-앱을 만들면 Apps 목록에 나타납니다. 아래 화면은 위치가 `global`인 앱 하나가 만들어진 상태입니다. 이 절의 화면은 앱 이름을 `bwg-ge`로 만들어 촬영했으므로, 본인 화면에는 4번에서 정한 이름이 보입니다.
+앱을 만들면 Apps 목록에 나타납니다. 아래 화면은 위치가 `global`인 앱 하나가 만들어진 상태입니다. 이 화면과 이어지는 Choose identity, 웹 앱 준비 화면은 다른 앱(`bwg-ge`)으로 촬영했으므로, 본인 화면에는 4번에서 정한 이름이 보입니다.
 
 ![Gemini Enterprise Apps 목록](images/ge_setup_01_apps.png)
 
@@ -964,7 +964,7 @@ gcloud beta network-security authz-policies import enterprise-ops-agw-deny-destr
 조회와 신청 도구는 목록에 없으므로 그대로 통과합니다. 새 위험 도구가 생기면 `params`에 이름을 추가하고 같은 명령으로 다시 import합니다.
 
 ### 7.5 연결 확인: 게이트웨이를 지나도 조회가 정상인가
-7.3의 PATCH 후 5분쯤 지나면 연결 상태를 확인합니다. `None`이 나오면 아직 연결 중이므로 1~2분 간격으로 이 블록만 다시 실행합니다. 보통 PATCH 후 약 5분이면 연결됩니다. 10분이 지나도 `None`이면 7.3의 PATCH 응답에 오류가 없었는지 확인하고 강사에게 알립니다.
+7.3의 PATCH 후 5분쯤 지나면 연결 상태를 확인합니다. `None`이 나오면 아직 연결 중이므로 1~2분 간격으로 이 블록만 다시 실행합니다. 실습 점검에서는 PATCH 후 약 5분 안에 연결되었습니다. 10분이 지나도 `None`이면 7.3의 PATCH 응답에 오류가 없었는지 확인하고 강사에게 알립니다.
 
 ```bash
 source ~/lab2/env.sh
@@ -1246,7 +1246,7 @@ Gemini Enterprise 웹 앱이 열리고, 'Ask Cymbal IT/HR 운영 에이전트' �
 
 ![티켓 조회 결과](images/ge_test_06_answer.png)
 
-아래는 다른 질문의 응답 예시입니다. 이전 Cloud Run 배포본으로 촬영해 에이전트 이름(Cymbal Enterprise Ops Agent), 연차 잔여, 티켓 목록이 본인 화면과 다릅니다. 대화 흐름은 같습니다.
+아래는 다른 질문의 응답 예시입니다. 이전 Cloud Run 배포본으로 촬영해 에이전트 이름(Cymbal Enterprise Ops Agent)이 9.2에서 등록한 이름과 다르고, 연차 잔여와 티켓 목록도 본인 화면과 다를 수 있습니다. 대화 흐름은 같습니다.
 
 ![Gemini Enterprise 사내 규정 RAG 검증](images/ge_05_policy_rag_grounding.png)
 
