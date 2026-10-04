@@ -186,6 +186,7 @@ gcloud auth application-default print-access-token > /dev/null && echo "ADC OK"
 
 1. 원격 화면 좌측 하단 **Application Launcher > Development > Antigravity**를 클릭합니다.
 ![Application Launcher에서 Antigravity 실행](./images/agy2_01_launcher.png)
+화면에는 VS Code에도 빨간 박스가 있지만, 클릭하는 항목은 Antigravity입니다.
 
 2. Welcome to Antigravity 화면에서 **Use Google Cloud project instead**를 클릭합니다.
 ![Use Google Cloud project instead 선택](./images/agy2_02_use_gcp_project.png)
@@ -237,6 +238,7 @@ agy
    - 안내에 따라 접근 권한을 허용하고 생성된 인증 코드를 복사합니다.
    - 터미널로 돌아와 인증 코드를 붙여넣고 **ENTER**를 누릅니다. `Enter Google Cloud Project ID:` 입력란이 나오면 본인의 **Google Cloud Project ID**를 입력하고 **ENTER**를 누릅니다.
 ![인증 코드 입력 및 프로젝트 선택](./images/07_agy_auth_code.png)
+화면은 Project ID 입력란이 먼저 나온 버전에서 촬영했습니다. 순서가 달라도 같은 값을 입력하면 됩니다.
 
 4. Google Cloud Location은 **global**을 선택합니다.
 
@@ -251,6 +253,7 @@ agy
 
 설정이 완료되면 터미널 화면이 다음과 같이 준비됩니다.
 ![Antigravity CLI 환경 준비 완료](./images/11_agy_environment_setup.png)
+화면의 CLI 버전과 모델 이름(Gemini 3.5 Flash)은 촬영 시점 기준이며, 실습 환경에서는 다를 수 있습니다.
 
 8. 설정을 다시 확인하거나 바꾸려면 `agy` 프롬프트에서 다음 명령어를 입력합니다.
 
@@ -267,7 +270,8 @@ agy
 /model
 ```
 
-![모델 선택 화면](./images/agy_terminal_session.png)
+![agy CLI 실행 화면](./images/agy_terminal_session.png)
+위 화면은 agy를 실행한 직후의 배너입니다. 모델 목록은 `/model`을 입력했을 때 9단계 설명대로 확인합니다.
 
 CLI 초기 설정이 끝났으면 `/exit`로 agy를 종료합니다. 작업용 agy는 Task 1 5단계에서 프로젝트 폴더로 이동한 뒤 다시 실행합니다.
 
@@ -519,6 +523,8 @@ uv가 Python 3.13을 직접 내려받아 `.venv`를 만듭니다. 패키지 목�
 1. 왼쪽 사이드바의 **Projects** 오른쪽에 있는 폴더 추가 아이콘(+ 모양 폴더)을 클릭합니다.
 
    ![Projects 옆 폴더 추가 아이콘](./images/agy2_project_01_sidebar.png)
+
+   화면은 프로젝트를 이미 추가한 뒤에 촬영해 목록에 항목이 보입니다.
 
 2. **Create Project** 대화상자에서 **Add Folder**를 클릭합니다.
 
@@ -1200,7 +1206,7 @@ agents-cli run "안녕하세요, 이민우입니다 (EMP-10294). ${START}(월)�
 2. `workweek_agent`의 `get_employee_balances`: 잔여 연차가 12.0일로 충분함을 확인합니다.
 3. `workweek_agent`의 `request_time_off`: 휴가를 상신하고 규정 안내를 포함해 답변합니다.
 
-![시나리오 1 실행 결과](./images/scenario_leave_result.png)
+답변에 신청 기한 규정(7영업일 전 상신), 잔여 연차, 휴가 신청 완료 내용이 들어 있으면 성공입니다. WorkWeek에 기록되었는지는 7단계에서 확인합니다.
 
 ---
 
@@ -1224,7 +1230,7 @@ agents-cli run "현재 제가 사용 중인 업무용 랩톱 배터리가 심하
 2. `itsm_agent`의 `list_tickets`: 기존 티켓을 조회해 중복 접수 여부를 확인합니다. Mock SaaS에는 장비 사용 개월 수 데이터가 없으므로 교체 근거는 제 4 조 배터리 결함 긴급 교체입니다.
 3. `itsm_agent`의 `create_ticket`: 긴급 교체 티켓을 발행합니다.
 
-![시나리오 2 실행 결과](./images/scenario_hardware_result.png)
+답변에 제 4 조 긴급 교체 규정과 새 티켓 번호(실행마다 다름)가 들어 있으면 성공입니다. ServiceImmediately에 기록되었는지는 7단계에서 확인합니다.
 
 ---
 
@@ -1238,6 +1244,7 @@ agents-cli run "현재 제가 사용 중인 업무용 랩톱 배터리가 심하
    - 에이전트 답변에 나온 티켓 번호(실행마다 다름)가 왼쪽 **인시던트 현황** 목록에 `하드웨어`, 상태 `접수`로 보이는지 확인합니다. 우선순위는 에이전트 판단에 따라 `1`(긴급) 또는 `2`(높음)로 기록됩니다.
 
 ![ServiceImmediately 인시던트 티켓 목록](./images/mock_saas_serviceimmediately.png)
+위 화면은 시나리오를 실행하기 전 상태로, 처음부터 있는 INC-88210, INC-88211만 보입니다. 시나리오 2를 실행한 뒤에는 에이전트가 만든 티켓이 한 건 더 보입니다.
 
 에이전트가 규정을 먼저 확인한 뒤 WorkWeek와 ServiceImmediately에 각각 기록한 것을 확인했습니다.
 

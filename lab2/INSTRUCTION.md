@@ -246,7 +246,7 @@ Step 6(9절)에서 에이전트를 등록할 Gemini Enterprise 앱을 미리 만
 
 5. 사용자 및 라이선스 할당 화면에서 본인 계정에 라이선스를 할당합니다.
 
-앱을 만들면 Apps 목록에 나타납니다. 아래 화면은 위치가 `global`인 앱 하나가 만들어진 상태입니다.
+앱을 만들면 Apps 목록에 나타납니다. 아래 화면은 위치가 `global`인 앱 하나가 만들어진 상태입니다. 이 절의 화면은 앱 이름을 `bwg-ge`로 만들어 촬영했으므로, 본인 화면에는 4번에서 정한 이름이 보입니다.
 
 ![Gemini Enterprise Apps 목록](images/ge_setup_01_apps.png)
 
@@ -1246,15 +1246,13 @@ Gemini Enterprise 웹 앱이 열리고, 'Ask Cymbal IT/HR 운영 에이전트' �
 
 ![티켓 조회 결과](images/ge_test_06_answer.png)
 
-아래는 다른 질문의 응답 예시입니다(이전 Cloud Run 배포본으로 촬영했으며 대화 흐름은 같습니다).
+아래는 다른 질문의 응답 예시입니다. 이전 Cloud Run 배포본으로 촬영해 에이전트 이름(Cymbal Enterprise Ops Agent), 연차 잔여, 티켓 목록이 본인 화면과 다릅니다. 대화 흐름은 같습니다.
 
 ![Gemini Enterprise 사내 규정 RAG 검증](images/ge_05_policy_rag_grounding.png)
 
 ![Gemini Enterprise WorkWeek 연차 조회](images/ge_06_leave_balance_check.png)
 
 ![Gemini Enterprise IT 티켓 처리](images/ge_04_it_ticket_list.png)
-
-![Gemini Enterprise 다중 턴 대화 검증](images/ge_03_defect_repeat_troubleshoot.png)
 
 ### 9.4 임직원 실시간 테스트 체크리스트 (직접 수행)
 9.3의 Preview로 에이전트 화면을 열고, 아래 질문을 순서대로 같은 대화창에서 보냅니다. 2.5에서 복사한 웹 앱 URL로 들어갔다면 에이전트 목록에서 'Cymbal IT/HR 운영 에이전트'를 골라야 합니다. 4번은 하루짜리 연차를 신청하므로 연차 잔여가 1일 미만이면 7.6의 초기화 블록을 먼저 실행합니다.
