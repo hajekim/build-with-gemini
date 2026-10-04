@@ -63,6 +63,40 @@ flowchart LR
 
 실습 2에서 쓰는 Google Cloud 서비스와 각 서비스가 실습에서 하는 일입니다. API는 2.3에서 활성화하는 이름이고, 서비스별 리전은 5.2 표에 있습니다.
 
+아래 그림은 실습 2를 마쳤을 때의 구성입니다. 실선은 요청 흐름이고, 점선은 설정이나 정책 관계입니다. 게이트웨이 주변의 세부 구조는 7.2에 있습니다.
+
+```mermaid
+flowchart TD
+    DEV["실습 VM<br/>agents-cli eval, deploy, publish"]
+    U["임직원"] --> GE["Gemini Enterprise 앱<br/>(9.2 등록)"]
+    subgraph GCP["Google Cloud 프로젝트"]
+        subgraph TOKYO["도쿄 asia-northeast1"]
+            AR["Agent Runtime 에이전트<br/>Agent Identity, armor_guard"]
+            GW["Agent Gateway (이그레스)<br/>TLS 복호화, MCP 도구 이름 식별"]
+            REG["Agent Registry<br/>에이전트 자동 등록, MCP 서버 2개,<br/>core-gapi-services"]
+            AZ["authz 정책<br/>위험 도구 2개 DENY (403)"]
+            MA["Model Armor<br/>hr-agent-armor-template"]
+        end
+        SM["Secret Manager<br/>enterprise-agent-mcp-token"]
+        GEM["Gemini 모델<br/>global 엔드포인트"]
+        VS["Vertex AI Search<br/>규정 검색 앱 (global)"]
+        LOG["Cloud Logging<br/>게이트웨이, 에이전트 로그"]
+    end
+    SAAS["Mock SaaS MCP 서버<br/>공용 Cloud Run (*.run.app)"]
+
+    DEV -->|"5.7 배포, 9.2 등록"| AR
+    GE --> AR
+    SM -.->|"배포 시 MCP_TOKEN 주입"| AR
+    AR --> GW
+    REG -.->|"허용 목적지 (미등록은 498)"| GW
+    AZ -.->|"정책 적용"| GW
+    GW --> GEM
+    GW --> MA
+    GW --> VS
+    GW --> SAAS
+    GW -.->|"허용, 거부 기록"| LOG
+```
+
 | 서비스 | API | 실습에서 하는 일 | 사용 절 |
 |:---|:---|:---|:---:|
 | Gemini 모델 (Vertex AI) | `aiplatform.googleapis.com` | 에이전트가 질문을 이해하고, 어떤 도구를 부를지 정하고, 답변을 만드는 모델입니다. 실습 1과 같이 `global` 엔드포인트로 호출합니다. Step 1 평가에서는 Vertex AI 판정 모델이 최종 답변을 도구 응답(규정 원문, SaaS 데이터)과 대조해, 도구 응답에 없는 내용을 지어냈는지(`hallucination`) 채점합니다. | 4.4~4.6, 5.7 이후 |
