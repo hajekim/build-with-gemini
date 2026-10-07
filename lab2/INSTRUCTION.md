@@ -282,9 +282,15 @@ Confirm Workforce Identity를 누르면 "Authentication configurations have been
 
 ```bash
 agents-cli publish gemini-enterprise --list --project=$(gcloud config get-value project 2>/dev/null)
-# 기대 결과: {"apps": [{"display_name": "<앱 이름>", "location": "global", "name": "projects/.../engines/..."}]}
-# display_name은 만들 때 입력한 앱 이름. {"apps": []}이면 앱이 아직 없는 것
 ```
+
+```
+출력 예시:
+  ▸ gcloud projects describe qwiklabs-gcp-00-d9c1f26b4165 '--format=value(projectNumber)'
+{"apps": [{"display_name": "cymbal-ops", "location": "global", "name": "projects/458102501662/locations/global/collections/default_collection/engines/cymbal-ops_1791346141855"}]}
+```
+
+`apps` 목록에 만들 때 입력한 앱 이름(`display_name`)이 보이면 성공입니다. 프로젝트 ID, 프로젝트 번호, 엔진 ID는 사람마다 다릅니다. `{"apps": []}`가 나오면 앱이 아직 만들어지지 않은 것이니 1)부터 다시 확인합니다.
 
 ---
 
