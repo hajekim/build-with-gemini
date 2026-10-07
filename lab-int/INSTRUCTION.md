@@ -370,16 +370,76 @@ agents-cli --version
 
 `agents-cli`로 에이전트 프로젝트를 만듭니다.
 
-#### agents-cli 주요 명령
-`agents-cli`는 ADK 에이전트의 생성, 로컬 실행, 평가, 배포, 등록 명령을 제공합니다.
+#### agents-cli란
 
-| 명령 | 하는 일 |
+agents-cli는 Google Cloud에서 AI 에이전트를 만들고, 평가하고, 배포하는 명령줄 도구이자 스킬 묶음입니다. 에이전트 코드는 ADK로 작성하고, 그 밖의 일(프로젝트 뼈대 만들기, 평가, 배포, 관측)은 agents-cli가 맡습니다.
+
+쓰는 방법은 두 가지이고, 이 실습은 둘 다 씁니다.
+
+- 코딩 에이전트와 함께 쓰기: 3단계에서 설치하는 agents-cli 스킬을 Antigravity가 읽고, 배포나 평가처럼 절차가 정해진 작업에서 그 지침을 따릅니다.
+- 터미널에서 직접 쓰기: 모든 명령은 코딩 에이전트 없이 단독으로 실행됩니다. 이 문서의 `bash` 블록이 이 방식입니다.
+
+인증은 gcloud의 ADC(Application Default Credentials)를 그대로 씁니다. 시작 준비에서 ADC 로그인을 한 것도 이 때문입니다.
+
+실습에서 쓰는 명령은 아래 순서로 등장합니다.
+
+| 순서 | 명령 | 하는 일 | 실습 위치 |
+|:---:|:---|:---|:---|
+| 1 | `agents-cli create` | 에이전트 프로젝트 뼈대 생성 | Task 1 2단계 |
+| 2 | `agents-cli install`, `run`, `playground` | 의존성 설치, 로컬 실행과 개발 UI | Task 1 4단계, Task 6 |
+| 3 | `agents-cli scaffold enhance`, `deploy` | 배포 대상 전환, Agent Runtime 배포 | Task 7 1~2단계 |
+| 4 | `agents-cli publish gemini-enterprise` | Gemini Enterprise에 에이전트 등록 | Task 7 4단계 |
+| 5 | `agents-cli eval run`, `eval compare` | 데이터셋으로 에이전트 평가, 개선 전후 비교 | Task 9 |
+
+#### agents-cli create: 에이전트 뼈대 생성
+
+`create`는 ADK 에이전트가 들어갈 프로젝트 폴더를 만듭니다. 폴더에는 샘플 에이전트(`app/agent.py`), 로컬 서버 코드(`app/fast_api_app.py`), 의존성 파일(`pyproject.toml`), 테스트 폴더, 그리고 이 폴더를 agents-cli 프로젝트로 표시하는 `agents-cli-manifest.yaml`이 들어갑니다.
+
+`-d`(`--deployment-target`)로 배포 대상(`agent_runtime`, `cloud_run`, `gke`)을 고르면 그 값이 manifest의 `create_params.deployment_target`에 기록됩니다. 나중에 `deploy`가 이 값을 읽고 배포 방식을 정합니다. `--prototype`을 붙이면 CI/CD와 Terraform 파일을 빼고 최소 구성으로 만듭니다.
+
+만든 뒤에는 `agents-cli install`로 의존성을 설치하고, `agents-cli playground`로 개발 UI를 띄워 바로 대화해 볼 수 있습니다. 이 실습은 Cloud Run 대상으로 프로젝트를 만들고, Task 7에서 `agents-cli scaffold enhance -d agent_runtime`으로 배포 대상을 Agent Runtime으로 바꿉니다. `scaffold enhance`는 이미 만든 프로젝트의 배포 대상을 바꿀 때 쓰는 명령입니다.
+
+#### agents-cli deploy: Agent Runtime 배포
+
+`deploy`는 에이전트 코드로 컨테이너를 빌드해 Google Cloud에 올리고 서비스를 시작합니다. 어디에 올릴지는 manifest의 `deployment_target`을 보고 정합니다.
+
+| `deployment_target` | 배포 방식 |
 |:---|:---|
-| `create`, `install`, `scaffold enhance` | 프로젝트 구조를 만들고, `pyproject.toml`의 의존성을 uv로 `.venv`에 설치합니다. |
-| `run`, `playground` | `agents-cli run "질의"`는 질의 하나를 실행하고, `agents-cli playground`는 이벤트와 도구 호출을 볼 수 있는 ADK 개발 UI를 엽니다. |
-| `eval run`, `generate`, `grade` | 골든 데이터셋으로 LLM 판정 지표와 코드 기반 지표를 채점합니다. |
-| `deploy` | Agent Runtime, Cloud Run, GKE 배포를 지원합니다(Task 7은 Agent Runtime 사용). |
-| `publish gemini-enterprise` | Gemini Enterprise에 에이전트를 등록합니다(Task 7). |
+| `agent_runtime` | Agent Runtime(완전 관리형). 프로젝트의 Dockerfile로 컨테이너를 빌드해 실행하며, 클러스터나 서비스를 직접 운영하지 않습니다. Task 7이 이 방식입니다 |
+| `cloud_run` | 소스에서 컨테이너를 빌드해 Cloud Run 서비스로 배포합니다 |
+| `gke` | Terraform과 kubectl로 GKE 클러스터에 배포합니다 |
+
+Agent Runtime 배포에서 자주 쓰는 옵션은 다음과 같습니다.
+
+- `--project`, `--region`: 배포할 프로젝트와 리전
+- `--update-env-vars KEY=VALUE`: 엔진에 넣을 환경 변수. Task 7은 Mock SaaS 토큰을 이 옵션으로 넘깁니다
+- `--secrets KEY=<시크릿>:<버전>`: Secret Manager 값을 환경 변수로 넣습니다
+- `--build-args KEY=VALUE`: Docker 빌드 인자. Agent Runtime은 항상 Dockerfile로 빌드하므로 미리 만든 이미지(`--image`)는 쓸 수 없습니다
+- `--no-wait`, `--status`, `--list`: 배포를 걸어 두고 바로 돌아오기, 진행 상태 확인, 배포 목록 보기
+
+배포가 끝나면 엔진 ID가 프로젝트의 `deployment_metadata.json`에 기록되고, `publish`가 이 값을 씁니다. 비슷한 이름의 `agents-cli infra`는 서비스 계정, IAM, API, 텔레메트리 버킷 같은 클라우드 리소스를 Terraform으로 준비하는 명령입니다. 이 실습은 `infra` 없이 `deploy`만 씁니다.
+
+#### agents-cli publish gemini-enterprise: GE에 에이전트 등록
+
+`publish gemini-enterprise`는 배포된 에이전트를 Gemini Enterprise 앱에 등록해, 임직원이 GE 화면에서 에이전트를 골라 대화할 수 있게 합니다. 에이전트 코드나 엔진은 건드리지 않고 GE 쪽에 등록 정보만 만듭니다.
+
+| 등록 방식 | 대상 | 필요한 값 |
+|:---|:---|:---|
+| `--registration-type=adk` | Agent Runtime에 배포한 ADK 에이전트. Task 7이 이 방식입니다 | 엔진 ID(`--agent-runtime-id`) |
+| `--registration-type=a2a` | Cloud Run, GKE 등에서 A2A 서버로 띄운 에이전트 | 에이전트 카드 URL |
+
+`--list`는 프로젝트의 GE 앱 목록을 보여 주고, `--display-name`, `--description`, `--tool-description`은 GE 에이전트 목록에 보이는 이름과 설명을 정합니다. GE에서 보낸 질문은 등록한 엔진이 처리하므로, 코드를 고친 뒤에는 `deploy`만 다시 하면 되고 등록은 다시 하지 않아도 됩니다.
+
+#### agents-cli eval: 에이전트 평가
+
+`eval run`은 두 단계로 진행됩니다. 먼저 eval generate가 로컬에서 에이전트를 띄워 데이터셋의 질문을 보내고, 도구 호출과 답변을 trace 파일로 저장합니다. 이어서 eval grade가 저장된 trace를 지표로 채점합니다. 지표는 판정 모델이 채점하는 LLM 판정 지표와, Python 코드로 검사하는 결정론적 지표를 섞어 쓸 수 있고 `--metrics`로 이번에 채점할 지표를 고릅니다. `eval compare`는 두 결과 파일을 나란히 놓고 개선 전후 점수를 비교합니다.
+
+평가 대상은 배포된 엔진이 아니라 로컬 코드입니다. 데이터셋 설계부터 채점, 개선까지의 절차는 `google-agents-cli-eval` 스킬에 정리되어 있습니다. 이 실습에서는 Task 8에서 데이터셋을 만들고, Task 9(선택)에서 평가와 개선을 1회 진행합니다.
+
+> [!NOTE]
+> 참고 문서: [agents-cli Getting Started](https://google.github.io/agents-cli/guide/getting-started/), [agents-cli Deployment](https://google.github.io/agents-cli/guide/deployment/)
+
+#### 프로젝트 만들기
 
 #### agents-cli-manifest.yaml의 역할
 프로젝트 루트에 생성되는 `agents-cli-manifest.yaml`은 `agents-cli`가 이 폴더를 에이전트 프로젝트로 인식하게 하는 파일입니다. 주요 항목은 다음과 같습니다.
@@ -1404,7 +1464,7 @@ Agent Runtime은 ADK 에이전트를 서버 관리 없이 실행하는 관리형
 | Agent Runtime 엔진 | `asia-northeast1` (도쿄) |
 | Vertex AI Search 검색 앱, Gemini Enterprise 앱 | `global` (Task 2에서 만든 그대로) |
 
-이 Task의 배포, 등록 명령은 정해져 있으므로 에이전트에게 맡기지 않고 터미널 창에서 직접 실행합니다. 에이전트가 명령을 실행하면 매번 모델을 호출하고, 긴 명령은 백그라운드로 돌려 진행 상황이 보이지 않기 때문입니다.
+`agents-cli deploy`와 `agents-cli publish gemini-enterprise`가 하는 일은 Task 1 2단계의 "agents-cli란"에 정리했습니다. 이 Task의 배포, 등록 명령은 정해져 있으므로 에이전트에게 맡기지 않고 터미널 창에서 직접 실행합니다. 에이전트가 명령을 실행하면 매번 모델을 호출하고, 긴 명령은 백그라운드로 돌려 진행 상황이 보이지 않기 때문입니다.
 
 ### 0단계 [완성본 전용]: Task 6까지 끝내지 못했다면 완성본 받기
 
@@ -1683,7 +1743,7 @@ EOF
 
 ## Task 9 (선택). agents-cli eval 4-Tier 평가와 힐클라이밍
 
-몇 번의 대화로 "잘 되는 것 같다"고 판단하는 대신, Task 8의 데이터셋으로 에이전트를 채점하고 점수가 낮은 케이스의 원인을 찾아 지침을 고칩니다. 평가 실행은 터미널 창에서, 결과를 읽고 고치는 일은 에이전트 창에서 합니다.
+몇 번의 대화로 "잘 되는 것 같다"고 판단하는 대신, Task 8의 데이터셋으로 에이전트를 채점하고 점수가 낮은 케이스의 원인을 찾아 지침을 고칩니다. 평가 실행은 터미널 창에서, 결과를 읽고 고치는 일은 에이전트 창에서 합니다. `agents-cli eval`의 동작은 Task 1 2단계의 "agents-cli란"에 정리했습니다.
 
 agents-cli 평가는 다음 순서로 진행합니다.
 
