@@ -1560,7 +1560,10 @@ agents-cli deploy -d agent_runtime \
 | `--update-env-vars` | 배포된 에이전트가 Mock SaaS를 호출할 때 쓸 개인 토큰을 `MCP_TOKEN` 환경 변수로 넣습니다 |
 
 > [!NOTE]
-> 실습에서는 편의를 위해 토큰을 환경 변수 값으로 바로 넘깁니다. 이 값은 Agent Runtime 엔진 설정에 평문으로 저장됩니다. 실제 서비스에서는 토큰을 Secret Manager에 두고 `--secrets="MCP_TOKEN=<시크릿 이름>:latest"`로 넘겨, 코드와 엔진 설정에 값이 남지 않게 합니다.
+> 실습에서는 편의를 위해 토큰을 환경 변수 값으로 바로 넘깁니다. 이 값은 Agent Runtime 엔진 설정에 평문으로 저장됩니다. 배포 출력의 `Environment Variables` 목록에도 토큰이 그대로 찍히므로, 이 화면은 캡처해 공유하지 않습니다. 실제 서비스에서는 토큰을 Secret Manager에 두고 `--secrets="MCP_TOKEN=<시크릿 이름>:latest"`로 넘겨, 코드와 엔진 설정에 값이 남지 않게 합니다.
+
+> [!TIP]
+> `--update-env-vars` 대신 프로젝트의 `.env` 파일을 써도 됩니다. `~/enterprise-ops-agent/.env`에 `MCP_TOKEN=<토큰>` 한 줄을 넣고, 위 명령에서 `--update-env-vars` 줄을 빼고 배포합니다. `agents-cli deploy`는 `.env`의 값을 엔진 환경 변수로 넣습니다. `.env` 파일 자체는 컨테이너 이미지에 들어가지 않습니다. 두 방법을 함께 쓰면 `--update-env-vars` 값이 우선합니다. 이 방법을 쓰면 토큰을 다시 발급했을 때 `~/lab.env`와 `.env` 두 곳을 모두 고치고 다시 배포해야 합니다.
 
 ### 3단계: 배포된 에이전트 확인 (터미널 창)
 
