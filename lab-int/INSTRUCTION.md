@@ -1505,10 +1505,11 @@ git init -q 2>/dev/null; git add -A && git -c user.name=lab -c user.email=lab@ex
 
 agents-cli scaffold enhance . -d agent_runtime --region asia-northeast1 -y -s
 uv lock   # enhance로 바뀐 의존성을 lock 파일에 반영. 이미 고정된 google-adk 버전은 그대로 유지됨
+uv add "mcp>=1.24,<2"   # McpToolset에 필요한 mcp 패키지를 의존성에 추가(배포 이미지에 설치되도록)
 git status --short
 ```
 
-`app/app_utils/reasoning_engine_adapter.py`가 추가되고 `pyproject.toml`, `app/fast_api_app.py`가 바뀌면 정상입니다. `deployment_metadata.json`도 함께 생기는데, 배포 전이라 `remote_agent_runtime_id`가 `null`입니다. 2단계 배포가 끝나면 엔진 ID가 채워집니다.
+`app/app_utils/reasoning_engine_adapter.py`가 추가되고 `pyproject.toml`, `app/fast_api_app.py`가 바뀌면 정상입니다. ADK에서 `mcp` 패키지는 선택 의존성이라 `pyproject.toml`에 없으면 배포 이미지에 설치되지 않습니다. 그러면 배포가 약 5분 뒤 "Reasoning Engine failed to deploy"로 실패하고, 엔진 로그에 `ImportError: cannot import name 'McpToolset'`이 남습니다. 로컬에서는 이미 설치되어 있어 잘 동작하므로 `uv add` 줄을 빠뜨리지 않습니다. `deployment_metadata.json`도 함께 생기는데, 배포 전이라 `remote_agent_runtime_id`가 `null`입니다. 2단계 배포가 끝나면 엔진 ID가 채워집니다.
 
 ### 2단계: agents-cli deploy로 배포 (터미널 창)
 
