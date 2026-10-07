@@ -1246,11 +1246,39 @@ unzip -j -o /tmp/enterprise_ops_agent_completed.zip enterprise-ops-agent/tests/t
 
 `inflating: tests/test_scenarios.py`가 출력되면 됩니다.
 
+#### 내려받는 파일
+
+`curl`로 받는 파일은 실습 1 완성본 zip(`lab1/enterprise_ops_agent_completed.zip`)이고, `/tmp`에 저장됩니다. `unzip -j -o`는 이 zip에서 `enterprise-ops-agent/tests/test_scenarios.py` 하나만 폴더 경로를 떼고(`-j`) 꺼내 내 프로젝트의 `tests/`에 덮어씁니다(`-o`). 나머지 완성본 코드는 풀지 않으므로 Task 3~5에서 만든 내 코드는 그대로입니다.
+
+테스트는 에이전트가 만든 코드를 미리 정해 둔 이름과 반환 형식으로 검사합니다. 이 스크립트가 불러오는 이름은 다음과 같습니다.
+
+| 모듈 | 불러오는 이름 |
+|:---|:---|
+| `app/agent.py` | `root_agent` |
+| `app/tools/policy_rag.py` | `search_company_policy` |
+| `app/tools/mcp_tools.py` | `get_employee_leave_balance`, `submit_leave_request`, `list_hardware_assets_and_tickets`, `create_hardware_incident_ticket` |
+
+`submit_leave_request`와 `create_hardware_incident_ticket`은 불러오기만 하고 호출하지는 않습니다. 그래도 이름이 하나라도 다르면 테스트가 시작하자마자 `ImportError`로 멈춥니다.
+
 ---
 
 ### 3단계: 통합 테스트 실행 (5개 항목)
 
 터미널 창에서 통합 테스트를 실행하여 5개 항목이 모두 PASS인지 확인합니다.
+
+#### 테스트 구성
+
+스크립트는 모델을 호출하지 않습니다. 에이전트 객체와 도구 함수를 Python에서 직접 불러, 결과를 `assert`로 확인합니다. 그래서 몇 초 안에 끝나고, 같은 코드라면 매번 같은 결과가 나옵니다. Mock SaaS에는 조회만 하므로 내 연차나 티켓 데이터는 바뀌지 않습니다.
+
+| 항목 | 호출하는 것 | 통과 조건 |
+|:---|:---|:---|
+| [1/5] 멀티 에이전트 구조 | `root_agent` | 루트 이름이 `enterprise_ops_agent`이고, 서브 에이전트가 `hr_policy_agent`, `workweek_agent`, `itsm_agent` 정확히 3개 |
+| [2/5] 인사 규정 검색 | `search_company_policy("4일 연속 연차 신청 기한 및 승인 요건", "HR")` | `status`가 `SUCCESS`, 결과 1건 이상, 결과 중 하나에 "7영업일"이 있고 첫 결과의 `doc_id`가 `POL-HR-2026-004` |
+| [3/5] IT 규정 검색 | `search_company_policy("배터리 부풀림 장애 긴급 교체 및 엔지니어 스펙 기준", "IT")` | `status`가 `SUCCESS`, 결과 1건 이상, 첫 결과의 `doc_id`가 `POL-IT-2026-009` |
+| [4/5] WorkWeek 연동 | `get_employee_leave_balance("EMP-10294")` | 오류 없이 응답이 옴. 잔여 일수 값은 검사하지 않고 앞부분만 화면에 보여 줌 |
+| [5/5] ServiceImmediately 연동 | `list_hardware_assets_and_tickets("EMP-10294")` | 오류 없이 응답이 옴. 장비와 티켓 내용은 앞부분만 화면에 보여 줌 |
+
+항목은 1번부터 차례로 실행되고, 하나가 실패하면 그 자리에서 `AssertionError`를 내고 멈춥니다. 뒤 항목은 실행되지 않으니, 메시지에 나온 항목부터 고친 뒤 다시 실행합니다. [2/5]는 검색 경로(`source`)를 검사하지 않으므로, 규정 PDF 가져오기가 끝나기 전에도 통과할 수 있습니다.
 
 ```bash
 cd ~/enterprise-ops-agent
