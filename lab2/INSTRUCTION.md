@@ -147,8 +147,8 @@ flowchart TD
 
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
-: "${MCP_TOKEN:?실습 1 Task 4 1단계대로 MCP_TOKEN을 ~/lab.env에 저장하고 source ~/lab.env를 실행하세요}"
-cd ~/enterprise-ops-agent
+: "${MCP_TOKEN:?실습 1 Task 4 1단계대로 MCP_TOKEN을 ~/lab.env에 저장하고 source ~/lab.env를 실행하세요}" && \
+cd ~/enterprise-ops-agent && \
 uv run python3 tests/test_scenarios.py
 ```
 5개 시나리오가 모두 `[PASS]`이면 2.2는 건너뛰고 2.3으로 넘어갑니다.
@@ -394,8 +394,7 @@ cd ~/enterprise-ops-agent
 export GOOGLE_GENAI_USE_VERTEXAI=true
 export GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project 2>/dev/null)
 export GOOGLE_CLOUD_LOCATION=global
-: "${MCP_TOKEN:?실습 1 Task 4 1단계대로 MCP_TOKEN을 ~/lab.env에 저장하고 source ~/lab.env를 실행하세요}"
-
+: "${MCP_TOKEN:?실습 1 Task 4 1단계대로 MCP_TOKEN을 ~/lab.env에 저장하고 source ~/lab.env를 실행하세요}" && \
 for t in tier1-single-tool tier2-multi-tool tier3-policy-first-transaction tier4-adversarial-edge; do
   echo "##### $t 시작 $(date +%H:%M:%S)"
   agents-cli eval run --dataset tests/eval/datasets/$t.json --config tests/eval/eval_config.yaml --metrics tool_call_accuracy,policy_first_order,rag_citation,hallucination
@@ -649,7 +648,8 @@ cat ~/lab2/env.sh
 ```bash
 source ~/lab2/env.sh
 # MCP_TOKEN 미설정 시 즉시 중단
-echo -n "${MCP_TOKEN:?실습 1 Task 4 1단계대로 MCP_TOKEN을 ~/lab.env에 저장하고 source ~/lab.env를 실행하세요}" | \
+: "${MCP_TOKEN:?실습 1 Task 4 1단계대로 MCP_TOKEN을 ~/lab.env에 저장하고 source ~/lab.env를 실행하세요}" && \
+echo -n "${MCP_TOKEN}" | \
   gcloud secrets create enterprise-agent-mcp-token --data-file=- --replication-policy=automatic
 # 기대 결과: Created version [1] of the secret [enterprise-agent-mcp-token].
 ```

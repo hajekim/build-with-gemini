@@ -1167,13 +1167,12 @@ uv run python3 tests/test_scenarios.py
 
 ### 4단계: agents-cli run으로 질의 하나 실행
 
-`agents-cli run`은 임시 로컬 서버를 띄워 질의 하나를 실행하고, 끝나면 서버를 내립니다. `MCP_TOKEN` 안내 메시지가 출력되면 Ctrl+C로 멈추고 Task 4 1단계의 토큰 저장부터 합니다.
+`agents-cli run`은 임시 로컬 서버를 띄워 질의 하나를 실행하고, 끝나면 서버를 내립니다. `MCP_TOKEN` 안내 메시지가 출력되면 뒤 명령은 실행되지 않습니다. Task 4 1단계의 토큰 저장부터 하고 다시 실행합니다.
 
 ```bash
 source ~/lab.env
 cd ~/enterprise-ops-agent
-: "${MCP_TOKEN:?실습 1 Task 4 1단계에서 MCP_TOKEN을 ~/lab.env에 저장하고 source ~/lab.env를 실행하세요}"
-
+: "${MCP_TOKEN:?실습 1 Task 4 1단계에서 MCP_TOKEN을 ~/lab.env에 저장하고 source ~/lab.env를 실행하세요}" && \
 agents-cli run "안녕하세요, 이민우입니다 (EMP-10294). 3주 뒤 4일 동안 연속으로 연차를 사용하고 싶습니다. 사내 규정상 신청 기한에 문제가 없는지 확인해 주세요."
 ```
 
@@ -1284,12 +1283,12 @@ agents-cli run "현재 제가 사용 중인 업무용 랩톱 배터리가 심하
 
 `agents-cli run`은 질의 하나를 실행하고 끝나면 세션을 버립니다. `agents-cli playground`는 ADK 개발 UI를 띄워, 같은 세션에서 대화를 이어 가며 어떤 에이전트가 어떤 도구를 어떤 순서로 호출했는지 화면으로 보여 줍니다. 여기서는 시나리오 2에서 "확인 절차 없이 바로 진행해 주세요." 문장을 빼고 보내서, 에이전트가 되묻는 질문에 같은 대화 안에서 답해 봅니다.
 
-1. 터미널 창에서 playground를 실행합니다. 이 명령은 **Ctrl+C**로 끌 때까지 터미널을 차지합니다. 그동안 다른 명령이 필요하면 Konsole 새 탭을 엽니다. `MCP_TOKEN` 안내 메시지가 출력되면 Ctrl+C로 멈추고 Task 4 1단계의 토큰 저장부터 합니다.
+1. 터미널 창에서 playground를 실행합니다. 이 명령은 **Ctrl+C**로 끌 때까지 터미널을 차지합니다. 그동안 다른 명령이 필요하면 Konsole 새 탭을 엽니다. `MCP_TOKEN` 안내 메시지가 출력되면 뒤 명령은 실행되지 않습니다. Task 4 1단계의 토큰 저장부터 하고 다시 실행합니다.
 
 ```bash
 source ~/lab.env
 cd ~/enterprise-ops-agent
-: "${MCP_TOKEN:?실습 1 Task 4 1단계에서 MCP_TOKEN을 ~/lab.env에 저장하고 source ~/lab.env를 실행하세요}"
+: "${MCP_TOKEN:?실습 1 Task 4 1단계에서 MCP_TOKEN을 ~/lab.env에 저장하고 source ~/lab.env를 실행하세요}" && \
 agents-cli playground --port 8085
 ```
 
