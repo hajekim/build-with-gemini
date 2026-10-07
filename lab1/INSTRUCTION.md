@@ -979,6 +979,7 @@ docs/SDD.md의 2.3절 'Google ADK FastMCP SaaS 연동 도구 명세'를 바탕�
 cd ~/enterprise-ops-agent
 uv run python3 -c "
 import asyncio
+from types import SimpleNamespace
 from app.tools.mcp_tools import (
     get_employee_leave_balance,
     list_hardware_assets_and_tickets,
@@ -987,7 +988,8 @@ from app.tools.mcp_tools import (
 import json
 
 print('=== McpToolset 도구 목록 확인 ===')
-tools = asyncio.run(get_workweek_mcp_toolset().get_tools())
+# ADK는 컨텍스트가 있을 때만 header_provider를 호출하므로, 에이전트 밖에서 확인할 때는 빈 컨텍스트를 넘깁니다.
+tools = asyncio.run(get_workweek_mcp_toolset().get_tools(readonly_context=SimpleNamespace(state={})))
 print(f'WorkWeek tools ({len(tools)}개): {[t.name for t in tools]}')
 
 print('\n=== WorkWeek 잔여 연차 조회 ===')
@@ -1036,7 +1038,7 @@ print(json.dumps(list_hardware_assets_and_tickets('EMP-10294'), indent=2, ensure
 +-----------------------------------------------------------------------------------+
 ```
 
-도구 목록 확인에서 `WorkWeek tools (7개)`가 출력되고, MCP `tools/call`의 `result` 객체가 그대로 반환되므로 `content[].text` 안에 줄바꿈(`\n`)과 이스케이프된 따옴표가 섞여 보입니다. `isError`가 `false`이고, 잔여 연차 숫자(12.0)와 티켓 번호(INC-88210, INC-88211)가 보이면 성공입니다. 도구 목록 확인에서 `ConnectionError`가 발생하면 `app/tools/mcp_tools.py`에서 `header_provider`가 `McpToolset`의 인자로 올바르게 지정되었는지 확인하세요. 출력 형태는 생성된 코드에 따라 다를 수 있습니다. 위쪽의 경고 줄은 무시합니다. `MCP_TOKEN` 오류가 나면 1단계의 저장 명령을 확인한 뒤 `source ~/lab.env`를 실행합니다. 401이 나면 토큰을 다시 발급하세요.
+도구 목록 확인에서 `WorkWeek tools (7개)`가 출력되고, MCP `tools/call`의 `result` 객체가 그대로 반환되므로 `content[].text` 안에 줄바꿈(`\n`)과 이스케이프된 따옴표가 섞여 보입니다. `isError`가 `false`이고, 잔여 연차 숫자(12.0)와 티켓 번호(INC-88210, INC-88211)가 보이면 성공입니다. 도구 목록 확인에서 `ConnectionError`가 발생하면 `app/tools/mcp_tools.py`에서 `header_provider`가 `McpToolset`의 인자로 올바르게 지정되었는지, `MCP_TOKEN`이 현재 셸에 있는지 확인하세요. 출력 형태는 생성된 코드에 따라 다를 수 있습니다. 위쪽의 경고 줄은 무시합니다. `MCP_TOKEN` 오류가 나면 1단계의 저장 명령을 확인한 뒤 `source ~/lab.env`를 실행합니다. 401이 나면 토큰을 다시 발급하세요.
 
 ---
 
