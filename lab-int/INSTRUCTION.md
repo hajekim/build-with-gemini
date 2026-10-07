@@ -395,13 +395,13 @@ agents-cli는 Google Cloud에서 AI 에이전트를 만들고, 평가하고, 배
 
 `create`는 ADK 에이전트가 들어갈 프로젝트 폴더를 만듭니다. 폴더에는 샘플 에이전트(`app/agent.py`), 로컬 서버 코드(`app/fast_api_app.py`), 의존성 파일(`pyproject.toml`), 테스트 폴더, 그리고 이 폴더를 agents-cli 프로젝트로 표시하는 `agents-cli-manifest.yaml`이 들어갑니다.
 
-`-d`(`--deployment-target`)로 배포 대상(`agent_runtime`, `cloud_run`, `gke`)을 고르면 그 값이 manifest의 `create_params.deployment_target`에 기록됩니다. 나중에 `deploy`가 이 값을 읽고 배포 방식을 정합니다. `--prototype`을 붙이면 CI/CD와 Terraform 파일을 빼고 최소 구성으로 만듭니다.
+`-d`(`--deployment-target`)로 배포 대상(`agent_runtime`, `cloud_run`, `gke`)을 고르면 그 값이 manifest의 `create_params.deployment_target`에 기록됩니다. 나중에 `deploy`가 이 값을 읽고 배포 방식을 정합니다. `--prototype`을 붙이면 CI/CD 구성을 빼고 최소 구성으로 만듭니다. `-d` 없이 쓰면 배포 대상이 `none`이 되어 Terraform 파일도 만들지 않습니다.
 
-만든 뒤에는 `agents-cli install`로 의존성을 설치하고, `agents-cli playground`로 개발 UI를 띄워 바로 대화해 볼 수 있습니다. 이 실습은 Cloud Run 대상으로 프로젝트를 만들고, Task 7에서 `agents-cli scaffold enhance -d agent_runtime`으로 배포 대상을 Agent Runtime으로 바꿉니다. `scaffold enhance`는 이미 만든 프로젝트의 배포 대상을 바꿀 때 쓰는 명령입니다.
+만든 뒤에는 `agents-cli install`로 의존성을 설치하고, `agents-cli playground`로 개발 UI를 띄워 바로 대화해 볼 수 있습니다. 이 실습은 Cloud Run 대상으로 프로젝트를 만들고, Task 7에서 `agents-cli scaffold enhance -d agent_runtime`으로 배포 대상을 Agent Runtime으로 바꿉니다. `scaffold enhance`는 이미 만든 프로젝트에 배포 대상이나 CI/CD 구성을 추가하거나 배포 대상을 바꿀 때 쓰는 명령입니다.
 
 #### agents-cli deploy: Agent Runtime 배포
 
-`deploy`는 에이전트 코드로 컨테이너를 빌드해 Google Cloud에 올리고 서비스를 시작합니다. 어디에 올릴지는 manifest의 `deployment_target`을 보고 정합니다.
+`deploy`는 에이전트 코드로 컨테이너를 빌드해 Google Cloud에 올리고 서비스를 시작합니다. 어디에 올릴지는 manifest의 `deployment_target`을 보고 정하고, `-d`로 지정하면 그 값이 manifest보다 우선합니다.
 
 | `deployment_target` | 배포 방식 |
 |:---|:---|
@@ -413,7 +413,7 @@ Agent Runtime 배포에서 자주 쓰는 옵션은 다음과 같습니다.
 
 - `--project`, `--region`: 배포할 프로젝트와 리전
 - `--update-env-vars KEY=VALUE`: 엔진에 넣을 환경 변수. Task 7은 Mock SaaS 토큰을 이 옵션으로 넘깁니다
-- `--secrets KEY=<시크릿>:<버전>`: Secret Manager 값을 환경 변수로 넣습니다
+- `--secrets KEY=<시크릿>` 또는 `KEY=<시크릿>:<버전>`: Secret Manager 값을 환경 변수로 넣습니다
 - `--build-args KEY=VALUE`: Docker 빌드 인자. Agent Runtime은 항상 Dockerfile로 빌드하므로 미리 만든 이미지(`--image`)는 쓸 수 없습니다
 - `--no-wait`, `--status`, `--list`: 배포를 걸어 두고 바로 돌아오기, 진행 상태 확인, 배포 목록 보기
 
@@ -434,10 +434,10 @@ Agent Runtime 배포에서 자주 쓰는 옵션은 다음과 같습니다.
 
 `eval run`은 두 단계로 진행됩니다. 먼저 eval generate가 로컬에서 에이전트를 띄워 데이터셋의 질문을 보내고, 도구 호출과 답변을 trace 파일로 저장합니다. 이어서 eval grade가 저장된 trace를 지표로 채점합니다. 지표는 판정 모델이 채점하는 LLM 판정 지표와, Python 코드로 검사하는 결정론적 지표를 섞어 쓸 수 있고 `--metrics`로 이번에 채점할 지표를 고릅니다. `eval compare`는 두 결과 파일을 나란히 놓고 개선 전후 점수를 비교합니다.
 
-평가 대상은 배포된 엔진이 아니라 로컬 코드입니다. 데이터셋 설계부터 채점, 개선까지의 절차는 `google-agents-cli-eval` 스킬에 정리되어 있습니다. 이 실습에서는 Task 8에서 데이터셋을 만들고, Task 9(선택)에서 평가와 개선을 1회 진행합니다.
+`--url`을 주지 않으면 로컬 코드를 임시 서버로 띄워 평가합니다. `--url`로 배포된 에이전트 주소를 주면 배포본을 평가할 수도 있지만, 이 실습은 `--url` 없이 로컬 코드를 평가합니다. 데이터셋 설계부터 채점, 개선까지의 절차는 `google-agents-cli-eval` 스킬에 정리되어 있습니다. 이 실습에서는 Task 8에서 데이터셋을 만들고, Task 9(선택)에서 평가와 개선을 1회 진행합니다.
 
 > [!NOTE]
-> 참고 문서: [agents-cli Getting Started](https://google.github.io/agents-cli/guide/getting-started/), [agents-cli Deployment](https://google.github.io/agents-cli/guide/deployment/)
+> 참고 문서: [agents-cli Getting Started](https://google.github.io/agents-cli/guide/getting-started/), [Project Structure](https://google.github.io/agents-cli/guide/project-structure/), [Deployment](https://google.github.io/agents-cli/guide/deployment/), [Evaluation](https://google.github.io/agents-cli/guide/evaluation/), [CLI 레퍼런스](https://google.github.io/agents-cli/cli/)
 
 #### 프로젝트 만들기
 
