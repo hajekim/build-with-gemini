@@ -5,7 +5,7 @@ Antigravity 2.0(데스크톱 앱 또는 CLI `agy`)으로 ADK(Agent Development K
 
 ---
 
-**소요 시간**: 약 120분 (Task 9 선택 진행 시 +20분)  
+**소요 시간**: 약 110분 (Task 8 선택 진행 시 +30분)  
 **과정 코드**: BWG-TRACK3-ARCH  
 **행사**: Build with Gemini 핸즈온 Track 3  
 **대상**: 에이전트를 직접 만들어 보려는 개발자, Customer Engineer, Solution Architect  
@@ -23,8 +23,7 @@ Antigravity 2.0(데스크톱 앱 또는 CLI `agy`)으로 ADK(Agent Development K
 | Task 5 | ADK McpToolset으로 Mock SaaS MCP 서버 연동 | 15분 |
 | Task 6 | 시나리오 통합 테스트 | 20분 |
 | Task 7 | Agent Runtime 배포, Gemini Enterprise 등록, 임직원 실시간 테스트 | 20분 |
-| Task 8 | 4-Tier Golden Evalset 생성 | 8분 |
-| Task 9 (선택) | agents-cli eval 4-Tier 평가와 힐클라이밍 | +20분 |
+| Task 8 (선택) | 4-Tier Golden Evalset 생성, agents-cli eval 평가와 힐클라이밍 | +30분 |
 
 > [!TIP]
 > Task 3~6을 시간 안에 끝내지 못했다면 Task 7의 0단계에서 Task 6까지의 완성본을 받아 배포부터 이어서 진행합니다.
@@ -59,7 +58,7 @@ Antigravity 2.0(데스크톱 앱 또는 CLI `agy`)으로 ADK(Agent Development K
 5. Mock SaaS 플랫폼(`https://korean-mock-saas-dri5akvbzq-du.a.run.app/`)의 MCP 서버에 개인 토큰으로 연결하는 도구(`app/tools/mcp_tools.py`)를 만듭니다.
 6. 규정 검증 우선 규칙을 적용해 에이전트를 완성하고, `agents-cli run`으로 연차 신청과 노트북 교체 요청을 로컬에서 실행합니다.
 7. `agents-cli deploy`로 Agent Runtime에 배포하고, `agents-cli publish gemini-enterprise`로 Gemini Enterprise에 등록해 GE 화면에서 대화합니다.
-8. 4-Tier 평가 데이터셋을 만들고, (선택) `agents-cli eval`로 채점한 뒤 지침을 고칩니다.
+8. (선택) 4-Tier 평가 데이터셋을 만들고, `agents-cli eval`로 채점한 뒤 지침을 고칩니다.
 
 ---
 
@@ -389,7 +388,7 @@ agents-cli는 Google Cloud에서 AI 에이전트를 만들고, 평가하고, 배
 | 2 | `agents-cli install`, `run`, `playground` | 의존성 설치, 로컬 실행과 개발 UI | Task 1 4단계, Task 6 |
 | 3 | `agents-cli scaffold enhance`, `deploy` | 배포 대상 전환, Agent Runtime 배포 | Task 7 1~2단계 |
 | 4 | `agents-cli publish gemini-enterprise` | Gemini Enterprise에 에이전트 등록 | Task 7 4단계 |
-| 5 | `agents-cli eval run`, `eval compare` | 데이터셋으로 에이전트 평가, 개선 전후 비교 | Task 9 |
+| 5 | `agents-cli eval run`, `eval compare` | 데이터셋으로 에이전트 평가, 개선 전후 비교 | Task 8(선택) |
 
 #### agents-cli create: 에이전트 뼈대 생성
 
@@ -434,7 +433,7 @@ Agent Runtime 배포에서 자주 쓰는 옵션은 다음과 같습니다.
 
 `eval run`은 두 단계로 진행됩니다. 먼저 eval generate가 로컬에서 에이전트를 띄워 데이터셋의 질문을 보내고, 도구 호출과 답변을 trace 파일로 저장합니다. 이어서 eval grade가 저장된 trace를 지표로 채점합니다. 지표는 판정 모델이 채점하는 LLM 판정 지표와, Python 코드로 검사하는 결정론적 지표를 섞어 쓸 수 있고 `--metrics`로 이번에 채점할 지표를 고릅니다. `eval compare`는 두 결과 파일을 나란히 놓고 개선 전후 점수를 비교합니다.
 
-`--url`을 주지 않으면 로컬 코드를 임시 서버로 띄워 평가합니다. `--url`로 배포된 에이전트 주소를 주면 배포본을 평가할 수도 있지만, 이 실습은 `--url` 없이 로컬 코드를 평가합니다. 데이터셋 설계부터 채점, 개선까지의 절차는 `google-agents-cli-eval` 스킬에 정리되어 있습니다. 이 실습에서는 Task 8에서 데이터셋을 만들고, Task 9(선택)에서 평가와 개선을 1회 진행합니다.
+`--url`을 주지 않으면 로컬 코드를 임시 서버로 띄워 평가합니다. `--url`로 배포된 에이전트 주소를 주면 배포본을 평가할 수도 있지만, 이 실습은 `--url` 없이 로컬 코드를 평가합니다. 데이터셋 설계부터 채점, 개선까지의 절차는 `google-agents-cli-eval` 스킬에 정리되어 있습니다. 이 실습에서는 Task 8(선택)에서 데이터셋을 만들고 평가와 개선을 1회 진행합니다.
 
 > [!NOTE]
 > 참고 문서: [agents-cli Getting Started](https://google.github.io/agents-cli/guide/getting-started/), [Project Structure](https://google.github.io/agents-cli/guide/project-structure/), [Deployment](https://google.github.io/agents-cli/guide/deployment/), [Evaluation](https://google.github.io/agents-cli/guide/evaluation/), [CLI 레퍼런스](https://google.github.io/agents-cli/cli/)
@@ -541,7 +540,7 @@ ls -lh docs/policies/
 
 `SDD.md`와 PDF 두 개가 보이면 됩니다. 날짜와 시각은 실행 시점에 따라 다릅니다.
 
-이어서 agents-cli 스킬을 설치합니다. [google/agents-cli](https://github.com/google/agents-cli) 저장소의 스킬을 프로젝트의 `.agents/skills/`에 넣어 두면, 에이전트(앱 또는 agy CLI)가 Task 7의 배포와 GE 등록, Task 9의 평가에서 이 작업 지침을 참고합니다. `git clone`이나 npx 없이 curl과 tar로 skills 폴더만 내려받습니다. 스킬 버전이 CLI와 다르면 agents-cli가 매번 버전 불일치 경고를 내므로, 설치한 CLI와 같은 v1.8.0 태그에서 받습니다.
+이어서 agents-cli 스킬을 설치합니다. [google/agents-cli](https://github.com/google/agents-cli) 저장소의 스킬을 프로젝트의 `.agents/skills/`에 넣어 두면, 에이전트(앱 또는 agy CLI)가 Task 7의 배포와 GE 등록, Task 8의 평가에서 이 작업 지침을 참고합니다. `git clone`이나 npx 없이 curl과 tar로 skills 폴더만 내려받습니다. 스킬 버전이 CLI와 다르면 agents-cli가 매번 버전 불일치 경고를 내므로, 설치한 CLI와 같은 v1.8.0 태그에서 받습니다.
 
 ```bash
 cd ~/enterprise-ops-agent
@@ -833,7 +832,7 @@ enterprise-ops-agent/
 ├── docs/                    # 소프트웨어 설계서(SDD.md) 및 사내 규정 원본 PDF
 ├── tests/
 │   ├── test_scenarios.py    # 시나리오 5개 통합 테스트
-│   └── eval/                # 평가 데이터셋과 설정 (Task 8, Task 9)
+│   └── eval/                # 평가 데이터셋과 설정 (Task 8)
 ├── Dockerfile               # 컨테이너 빌드 명세 (Task 7 배포에 사용)
 └── pyproject.toml           # 파이썬 의존성 패키지 명세
 ```
@@ -973,7 +972,7 @@ docs/SDD.md의 2.2절 '사내 규정 RAG 도구 명세'와 '하이브리드 Poli
    PDF 파일명으로 문서번호를 매핑: leave_policy_2026.pdf -> POL-HR-2026-004(HR), it_hardware_guidelines.pdf -> POL-IT-2026-009(IT)
 3. 2차 폴백: Vertex AI Search 호출 예외 또는 결과 0건이면 SDD의 Ground Truth 조항을 로컬 인덱스로 키워드 검색할 것.
 4. category('HR'/'IT')로 결과를 필터링하고, 반환 딕셔너리에 status, source('vertex_ai_search' 또는 'local_fallback'), match_count, matches(doc_id, title, content)를 포함할 것.
-   키 이름은 정확히 이대로 쓸 것(성공 시 status='SUCCESS'). Task 6 통합 테스트와 Task 9 평가 지표가 이 이름을 읽음.
+   키 이름은 정확히 이대로 쓸 것(성공 시 status='SUCCESS'). Task 6 통합 테스트와 Task 8 평가 지표가 이 이름을 읽음.
    결과가 없으면 status='NO_MATCH'와 추측 금지 안내 메시지를 반환할 것.
 5. 작성이 완료되면 `uv run python3 -m app.tools.policy_rag`로 자체 검증(assert)을 실행해 결과를 보여주세요.
    명령을 실행하기 전에 `source ~/lab.env`를 먼저 실행할 것.
@@ -1040,7 +1039,7 @@ print(json.dumps(r2, indent=2, ensure_ascii=False))
 
 `query`, `category`, `grounding_confidence`처럼 에이전트가 생성한 코드에 따라 추가 필드가 붙거나, `title` 문구와 `match_count`가 달라질 수 있습니다. 위 예시에서 테스트 2는 `local_fallback`으로 나왔습니다(아래 NOTE 참고).
 
-`status`가 `SUCCESS`이고 `matches`에 `POL-HR-2026-004`(테스트 1), `POL-IT-2026-009`(테스트 2)가 있으면 성공입니다. 필드 순서는 달라도 되지만 `status`, `source`, `match_count`, `matches[].doc_id`, `matches[].title`, `matches[].content` 이름은 정확히 같아야 합니다. Task 6 통합 테스트와 Task 9 `rag_citation` 지표가 이 이름을 읽습니다. 이름이 다르면 에이전트 창에서 위 이름으로 고쳐 달라고 요청합니다.
+`status`가 `SUCCESS`이고 `matches`에 `POL-HR-2026-004`(테스트 1), `POL-IT-2026-009`(테스트 2)가 있으면 성공입니다. 필드 순서는 달라도 되지만 `status`, `source`, `match_count`, `matches[].doc_id`, `matches[].title`, `matches[].content` 이름은 정확히 같아야 합니다. Task 6 통합 테스트와 Task 8 `rag_citation` 지표가 이 이름을 읽습니다. 이름이 다르면 에이전트 창에서 위 이름으로 고쳐 달라고 요청합니다.
 
 > [!NOTE]
 > `source`가 `local_fallback`으로 나오면 Task 2의 PDF 가져오기가 아직 끝나지 않았거나, 검색 앱이 그 질의에 결과를 돌려주지 않은 것입니다. 가져오기는 약 4~10분 걸립니다. 폴백으로도 실습은 계속할 수 있으며, 가져오기가 끝난 뒤 다시 실행하면 `vertex_ai_search`로 바뀝니다. 진행 상태는 0단계의 `PROJECT_ID`, `DE`, `AUTH` 세 줄을 실행한 셸에서 `curl -s "${AUTH[@]}" "${DE}/dataStores/company-policy-ds/branches/0/documents" | grep -c '"name"'`(2이면 완료)로 확인합니다. 문서 수가 `2`인데도 계속 `local_fallback`이면 ADC 권한 문제일 수 있으므로 `gcloud auth application-default login --no-launch-browser`를 실행하고 실습 계정으로 로그인한 뒤 다시 확인합니다.
@@ -1664,9 +1663,24 @@ Gemini Enterprise 웹 앱이 열리고, 'Ask Cymbal IT/HR 운영 에이전트' �
 
 ---
 
-## Task 8. 4-Tier Golden Evalset 평가 데이터셋 생성
+## Task 8 (선택). 4-Tier Golden Evalset 생성과 agents-cli eval 평가
 
-`agents-cli eval`로 정량 평가를 하려면 먼저 "무엇을 정답으로 볼지"를 정한 골든 데이터셋이 있어야 합니다. 에이전트로 난이도별 데이터셋 4개를 만들고, 각 케이스에 호출해야 하는 도구(`expected_tools`)와 호출하면 안 되는 도구(`forbidden_tools`)를 적습니다. 이 두 필드는 Task 9의 결정론적 지표(같은 트레이스면 항상 같은 점수를 내는 코드 기반 채점) `tool_call_accuracy`가 채점 기준으로 사용합니다.
+> [!IMPORTANT]
+> Task 8은 선택입니다. 평가는 Tier마다 에이전트 응답 생성과 채점을 실제로 수행하므로 시간이 오래 걸릴 수 있습니다. 실습 시간이 30분 이상 남았을 때만 진행합니다.
+
+몇 번의 대화로 "잘 되는 것 같다"고 판단하는 대신, 골든 데이터셋을 직접 만들어 에이전트를 채점하고 점수가 낮은 케이스의 원인을 찾아 지침을 고칩니다. 평가 실행은 터미널 창에서, 결과를 읽고 고치는 일은 에이전트 창에서 합니다. `agents-cli eval`의 동작은 Task 1 2단계의 "agents-cli란"에 정리했습니다.
+
+agents-cli 평가는 다음 순서로 진행합니다.
+
+1. Data Prep: 1단계에서 만드는 4-Tier 골든 데이터셋(`tests/eval/datasets/`)
+2. Inference (Generate): 로컬 에이전트를 띄워 데이터셋 질문을 보내고, 도구 호출 기록과 답변을 trace로 저장
+3. Grade: 코드 지표가 도구 호출과 인용을 결정론적으로 채점하고, Vertex AI Gemini 모델이 답변의 지어내기 여부(`hallucination`)를 판정
+4. Analyze: 감점된 케이스의 원인(규정 인용 누락, 필요한 도구 미호출 등) 진단
+5. Optimize (Hill-climbing): 지침을 고치고 다시 평가해 다른 지표가 떨어지지 않았는지 확인
+
+### 1단계: 4-Tier Golden Evalset 만들기 (에이전트 창)
+
+평가를 하려면 먼저 "무엇을 정답으로 볼지"를 정한 골든 데이터셋이 있어야 합니다. 에이전트로 난이도별 데이터셋 4개를 만들고, 각 케이스에 호출해야 하는 도구(`expected_tools`)와 호출하면 안 되는 도구(`forbidden_tools`)를 적습니다. 이 두 필드는 3단계의 결정론적 지표(같은 트레이스면 항상 같은 점수를 내는 코드 기반 채점) `tool_call_accuracy`가 채점 기준으로 사용합니다.
 
 | Tier | 파일 | 검증 목적 | 케이스 수 |
 |:---|:---|:---|:---:|
@@ -1678,7 +1692,7 @@ Gemini Enterprise 웹 앱이 열리고, 'Ask Cymbal IT/HR 운영 에이전트' �
 에이전트 창에 다음 프롬프트를 입력합니다.
 
 ```prompt
-Task 9의 agents-cli eval 정량 평가에 사용할 4-Tier Golden Evalset을 tests/eval/datasets/ 아래에 생성해줘.
+agents-cli eval 정량 평가에 사용할 4-Tier Golden Evalset을 tests/eval/datasets/ 아래에 생성해줘.
 
 [파일 및 Tier]
 - tier1-single-tool.json: 단일 도구 조회 4건 (HR 규정, IT 규정, 잔여 연차, IT 티켓 목록)
@@ -1732,26 +1746,9 @@ EOF
 +-----------------------------------------------------------------------------------+
 ```
 
-`OK`가 4줄 나오면 Task 8은 끝입니다. 데이터셋은 로컬 에이전트(`agents-cli eval run`이 띄우는 임시 서버)로 채점하므로, Task 7의 배포와는 상관없이 Task 9에서 바로 쓸 수 있습니다.
+`OK`가 4줄 나오면 1단계는 끝입니다. 데이터셋은 로컬 에이전트(`agents-cli eval run`이 띄우는 임시 서버)로 채점하므로, Task 7의 배포와는 상관없이 바로 쓸 수 있습니다.
 
-> [!IMPORTANT]
-> Task 9는 선택입니다. 평가는 Tier마다 에이전트 응답 생성과 채점을 실제로 수행하므로 시간이 오래 걸릴 수 있습니다. 실습 시간이 20분 이상 남았을 때만 진행합니다.
-
----
-
-## Task 9 (선택). agents-cli eval 4-Tier 평가와 힐클라이밍
-
-몇 번의 대화로 "잘 되는 것 같다"고 판단하는 대신, Task 8의 데이터셋으로 에이전트를 채점하고 점수가 낮은 케이스의 원인을 찾아 지침을 고칩니다. 평가 실행은 터미널 창에서, 결과를 읽고 고치는 일은 에이전트 창에서 합니다. `agents-cli eval`의 동작은 Task 1 2단계의 "agents-cli란"에 정리했습니다.
-
-agents-cli 평가는 다음 순서로 진행합니다.
-
-1. Data Prep: Task 8에서 만든 4-Tier 골든 데이터셋(`tests/eval/datasets/`)
-2. Inference (Generate): 로컬 에이전트를 띄워 데이터셋 질문을 보내고, 도구 호출 기록과 답변을 trace로 저장
-3. Grade: 코드 지표가 도구 호출과 인용을 결정론적으로 채점하고, Vertex AI Gemini 모델이 답변의 지어내기 여부(`hallucination`)를 판정
-4. Analyze: 감점된 케이스의 원인(규정 인용 누락, 필요한 도구 미호출 등) 진단
-5. Optimize (Hill-climbing): 지침을 고치고 다시 평가해 다른 지표가 떨어지지 않았는지 확인
-
-### 1단계: 평가 설정 파일 받기 (터미널 창)
+### 2단계: 평가 설정 파일 받기 (터미널 창)
 
 평가 설정 파일 `tests/eval/eval_config.yaml`을 완성본에서 받아 덮어씁니다. 스캐폴드가 만든 같은 이름의 기본 파일에는 지표가 하나뿐이라, 파일이 이미 있어도 이 명령을 실행해야 합니다.
 
@@ -1764,11 +1761,11 @@ grep -c tool_call_accuracy tests/eval/eval_config.yaml
 ls tests/eval/datasets/
 ```
 
-`grep` 결과가 1 이상이고, Task 8에서 만든 `tier1`~`tier4` 데이터셋 4개가 보이면 됩니다. `basic-dataset.json`, `README.md` 같은 스캐폴드 기본 파일이 함께 보여도 정상입니다. `grep` 결과가 0이면 다운로드나 압축 해제가 실패한 것이니 출력의 오류를 확인합니다.
+`grep` 결과가 1 이상이고, 1단계에서 만든 `tier1`~`tier4` 데이터셋 4개가 보이면 됩니다. `basic-dataset.json`, `README.md` 같은 스캐폴드 기본 파일이 함께 보여도 정상입니다. `grep` 결과가 0이면 다운로드나 압축 해제가 실패한 것이니 출력의 오류를 확인합니다.
 
-이 파일에는 Vertex AI 채점 모델이 판정하는 지표 3개와, trace를 코드로 검사하는 지표 3개(`custom_metrics`)가 선언되어 있습니다. 결정론적 지표는 같은 trace에 대해 항상 같은 점수를 내므로 회귀 비교에 적합합니다. 2단계의 기본 실행은 결정론적 지표 3개와 LLM 판정 `hallucination`을 채점합니다. 결정론적 지표는 도구를 맞게 불렀는지와 문서번호를 인용했는지만 보므로, 답변이 규정 원문과 다른 내용을 말해도 통과합니다. `hallucination`이 이 부분을 검사합니다. 나머지 LLM 판정 2개는 판정 모델 오류(500)로 재시도가 반복되면 시간이 크게 늘어나므로 선택으로 둡니다.
+이 파일에는 Vertex AI 채점 모델이 판정하는 지표 3개와, trace를 코드로 검사하는 지표 3개(`custom_metrics`)가 선언되어 있습니다. 결정론적 지표는 같은 trace에 대해 항상 같은 점수를 내므로 회귀 비교에 적합합니다. 3단계의 기본 실행은 결정론적 지표 3개와 LLM 판정 `hallucination`을 채점합니다. 결정론적 지표는 도구를 맞게 불렀는지와 문서번호를 인용했는지만 보므로, 답변이 규정 원문과 다른 내용을 말해도 통과합니다. `hallucination`이 이 부분을 검사합니다. 나머지 LLM 판정 2개는 판정 모델 오류(500)로 재시도가 반복되면 시간이 크게 늘어나므로 선택으로 둡니다.
 
-| 지표 | 유형 | 2단계 실행 | 목표 | 측정 기준 |
+| 지표 | 유형 | 3단계 실행 | 목표 | 측정 기준 |
 |:---|:---:|:---:|:---:|:---|
 | `multi_turn_task_success` | LLM 판정 | 선택 | >= 0.85 | 사용자의 최종 목적(연차 상신, 결함 티켓 접수)을 실제로 완수했는가 |
 | `multi_turn_tool_use_quality` | LLM 판정 | 선택 | >= 0.85 | 도구 선택과 인자가 적절했는가 |
@@ -1777,9 +1774,9 @@ ls tests/eval/datasets/
 | `policy_first_order` | 코드 | 기본 | 1.00 | 쓰기 도구(연차 상신, 티켓 생성 등) 호출 전에 `search_company_policy`가 먼저 호출되었는가 |
 | `rag_citation` | 코드 | 기본 | >= 0.90 | RAG 인용률. 규정 검색 결과가 있으면 최종 답변에 해당 문서번호(POL-HR/POL-IT)를 인용했는가 |
 
-### 2단계: Tier별 평가 실행 (터미널 창)
+### 3단계: Tier별 평가 실행 (터미널 창)
 
-Task 8의 4-Tier 데이터셋으로 결정론적 지표 3개(`tool_call_accuracy`, `policy_first_order`, `rag_citation`)와 `hallucination`을 평가합니다. 명령이 정해져 있으므로 터미널 창에서 직접 실행합니다. 에이전트에게 맡기면 `--metrics` 옵션을 빼고 실행해 평가 시간이 크게 늘어난 사례가 있습니다.
+1단계의 4-Tier 데이터셋으로 결정론적 지표 3개(`tool_call_accuracy`, `policy_first_order`, `rag_citation`)와 `hallucination`을 평가합니다. 명령이 정해져 있으므로 터미널 창에서 직접 실행합니다. 에이전트에게 맡기면 `--metrics` 옵션을 빼고 실행해 평가 시간이 크게 늘어난 사례가 있습니다.
 
 ```bash
 cd ~/enterprise-ops-agent
@@ -1798,7 +1795,7 @@ done
 |:---|:---|
 | `export ...`, `: "${MCP_TOKEN:?...}"` | 평가 중 로컬 에이전트가 Vertex AI의 Gemini를 쓰도록 설정하고, Mock SaaS 토큰이 있는지 먼저 확인합니다 |
 | `for t in ...` | Tier 4개를 차례로 평가합니다. 이미 끝난 Tier는 이 줄에서 빼고 다시 실행해도 됩니다 |
-| `--dataset`, `--config` | Task 8의 데이터셋과 1단계의 지표 설정 파일 |
+| `--dataset`, `--config` | 1단계의 데이터셋과 2단계의 지표 설정 파일 |
 | `--metrics` | 설정 파일의 지표 6개 중 이번에 채점할 4개. 이 옵션을 빼면 LLM 판정 2개까지 채점해 판정 모델 재시도로 시간이 몇 배로 늘어날 수 있습니다 |
 
 `agents-cli eval run`은 Tier마다 응답 생성(eval generate) 후 채점(eval grade)을 합니다. Qwiklabs 점검에서 이 4개 지표로 4개 Tier를 모두 도는 데 약 9분(8분 52초)이 걸렸습니다. Tier마다 `##### <Tier> 시작` 줄과 `Evaluation Summary`가 출력되고, `Evaluation Summary`가 4번 나오면 완료입니다. 같은 Tier가 15분 넘게 끝나지 않으면 `Ctrl+C`로 멈추고 그 Tier부터 다시 실행합니다. `WARNING:root:Could not fetch /app-info (HTTPError: 500 ...)`는 모든 Tier에서 나오는 경고이며 평가는 계속됩니다.
@@ -1831,7 +1828,7 @@ grep -ohE "(called=|retrieved=|[a-z_]+ called before)[^\"]*" artifacts/grade_res
 
 명령이 끝나면 `artifacts/grade_results/`에 Tier별 채점 결과 JSON과 시각 리포트(`results_*.html`)가 생깁니다. 리포트를 브라우저로 보려면 터미널 창에서 `python3 -m http.server 8081 --directory artifacts/grade_results &`를 실행하고 원격 세션의 Chrome에서 `http://localhost:8081`을 엽니다. 다 보면 `fuser -k 8081/tcp`로 서버를 끕니다.
 
-### 3단계: 에이전트 창에서 지침 개선 1회 (힐클라이밍)
+### 4단계: 에이전트 창에서 지침 개선 1회 (힐클라이밍)
 
 > [!NOTE]
 > 시간 상한: 개선은 1회, 다시 평가는 점수가 가장 낮았던 Tier 1개만 합니다. `google-agents-cli-eval` 스킬은 여러 번 반복하라고 안내하지만, 실습에서는 아래 프롬프트의 1회 제한을 따릅니다.
@@ -1860,9 +1857,9 @@ ls -t artifacts/grade_results/results_*.json | head -4
 agents-cli eval compare artifacts/grade_results/results_<이전>.json artifacts/grade_results/results_<이후>.json
 ```
 
-### 4단계 (선택): 개선한 지침을 GE 에이전트에 반영
+### 5단계 (선택): 개선한 지침을 GE 에이전트에 반영
 
-3단계에서 고친 `app/agent.py`는 로컬 코드에만 반영되어 있습니다. GE에서 대화하는 에이전트에도 반영하려면 Task 7 2단계의 배포 명령을 다시 실행합니다. 같은 엔진에 새 코드가 배포되므로 GE 등록은 다시 하지 않아도 됩니다. 배포에는 약 3분 30초~5분이 걸립니다.
+4단계에서 고친 `app/agent.py`는 로컬 코드에만 반영되어 있습니다. GE에서 대화하는 에이전트에도 반영하려면 Task 7 2단계의 배포 명령을 다시 실행합니다. 같은 엔진에 새 코드가 배포되므로 GE 등록은 다시 하지 않아도 됩니다. 배포에는 약 3분 30초~5분이 걸립니다.
 
 ---
 
@@ -1900,7 +1897,7 @@ Discovery Engine이 문서 가져오기용으로 자동으로 만든 `gs://<프�
 2. 규정 PDF를 검색해 답변에 조항 번호를 넣고, 근거가 없으면 `NO_MATCH`를 반환하게 했습니다.
 3. 인사 시스템과 IT 시스템을 같은 MCP 방식(McpToolset)으로 연결하고, 개인 토큰(`X-MCP-Token`)으로 실습생별 데이터를 분리했습니다.
 4. 로컬에서 확인한 코드를 `agents-cli deploy` 한 번으로 Agent Runtime에 올리고, `agents-cli publish gemini-enterprise`로 임직원이 쓰는 GE 화면에 등록했습니다.
-5. 4-Tier 평가 데이터셋을 만들어, 지침을 고칠 때 다른 지표가 떨어지지 않았는지 숫자로 확인할 수 있게 했습니다.
+5. (Task 8을 진행했다면) 4-Tier 평가 데이터셋을 만들어, 지침을 고칠 때 다른 지표가 떨어지지 않았는지 숫자로 확인할 수 있게 했습니다.
 
 실습 완성본(Task 6까지의 코드)은 아래 명령으로 홈 폴더에 받아 둘 수 있습니다. 압축은 풀지 않으므로 지금 프로젝트는 바뀌지 않습니다.
 
