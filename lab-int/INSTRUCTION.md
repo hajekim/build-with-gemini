@@ -541,12 +541,12 @@ ls -lh docs/policies/
 
 `SDD.md`와 PDF 두 개가 보이면 됩니다. 날짜와 시각은 실행 시점에 따라 다릅니다.
 
-이어서 agents-cli 스킬을 설치합니다. [google/agents-cli](https://github.com/google/agents-cli) 저장소의 스킬을 프로젝트의 `.agents/skills/`에 넣어 두면, 에이전트(앱 또는 agy CLI)가 Task 7의 배포와 GE 등록, Task 9의 평가에서 이 작업 지침을 참고합니다. `git clone`이나 npx 없이 curl과 tar로 skills 폴더만 내려받습니다.
+이어서 agents-cli 스킬을 설치합니다. [google/agents-cli](https://github.com/google/agents-cli) 저장소의 스킬을 프로젝트의 `.agents/skills/`에 넣어 두면, 에이전트(앱 또는 agy CLI)가 Task 7의 배포와 GE 등록, Task 9의 평가에서 이 작업 지침을 참고합니다. `git clone`이나 npx 없이 curl과 tar로 skills 폴더만 내려받습니다. 스킬 버전이 CLI와 다르면 agents-cli가 매번 버전 불일치 경고를 내므로, 설치한 CLI와 같은 v1.8.0 태그에서 받습니다.
 
 ```bash
 cd ~/enterprise-ops-agent
 mkdir -p .agents/skills
-curl -fsSL https://github.com/google/agents-cli/archive/refs/heads/main.tar.gz | tar -xz -C .agents/skills --strip-components=2 "agents-cli-main/skills"
+curl -fsSL https://github.com/google/agents-cli/archive/refs/tags/v1.8.0.tar.gz | tar -xz -C .agents/skills --strip-components=2 "agents-cli-1.8.0/skills"
 ls .agents/skills
 ```
 
