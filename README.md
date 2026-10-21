@@ -1,8 +1,8 @@
-# Build with Gemini Track 3: AI 엔지니어링 핸즈온
+# Build with Antigravity: 엔터프라이즈 AI 에이전트 개발 핸즈온
 
-Build with Gemini 행사 Track 3 실습 가이드와 자산을 모아 둔 저장소입니다.
+Antigravity 2.0과 Google ADK를 이용한 엔터프라이즈 AI 에이전트 개발·배포 실습 가이드와 자산을 모아 둔 저장소입니다.
 
-참가자는 Antigravity 2.0(데스크톱 앱 또는 agy CLI)에게 설계서(SDD)를 바탕으로 프롬프트를 주며, ADK 멀티 에이전트를 만듭니다. 이 에이전트는 사내 규정 RAG와 Mock SaaS MCP 도구를 씁니다. 실습 2에서는 이 에이전트를 평가하고 보안 설정을 더해 Agent Runtime에 배포한 뒤 Gemini Enterprise에 등록합니다.
+Antigravity 2.0(데스크톱 앱 또는 agy CLI)에게 설계서(SDD)를 바탕으로 프롬프트를 주며, ADK 멀티 에이전트를 만듭니다. 이 에이전트는 사내 규정 RAG와 Mock SaaS MCP 도구를 씁니다. 실습 2에서는 이 에이전트를 평가하고 보안 설정을 더해 Agent Runtime에 배포한 뒤 Gemini Enterprise에 등록합니다.
 
 ## 가이드 웹사이트
 

@@ -2,7 +2,7 @@
 
 **문서 버전**: 2.2.0  
 **작성일**: 2026-09-30  
-**프로젝트**: Build with Gemini (Lab 1)  
+**프로젝트**: Build with Antigravity · 엔터프라이즈 AI 운영 에이전트  
 **대상 프레임워크**: Google Antigravity 2.0 (`agy`), Google Agent Development Kit 2.3.0 (`google-adk`)  
 **주력 모델**: `gemini-3.8-flash`  
 
@@ -30,7 +30,7 @@ Cymbal Group Korea 임직원은 일상 업무에서 분산된 사내 포털과 �
 | **규정 준수율 (Compliance Rate)** | **98% 이상** | 휴가 신청 및 티켓 발행 전 RAG 규정 검증 여부 전수 감사 |
 | **응답 지연 시간 (E2E Latency)** | **3.5초 이내** | 복수 도구 호출 및 최종 응답 생성 총 소요 시간 |
 | **인용 정확도 (Grounding Accuracy)** | **95% 이상** | 답변 내 사내 지침 문서번호(POL-*) 및 조항 명시 여부 |
-| **다중 사용자 격리 (Multi-Tenant)** | **100% 격리** | 150명 동시 실습 시 `X-MCP-Token` 기반 독립 샌드박스 보장 |
+| **다중 사용자 격리 (Multi-Tenant)** | **100% 격리** | 다중 사용자 동시 실행 시 `X-MCP-Token` 기반 독립 샌드박스 보장 |
 
 ---
 
@@ -116,7 +116,7 @@ def search_company_policy(query: str, category: str = "ALL") -> dict:
 - FastMCP 서버 베이스 URL: `https://korean-mock-saas-dri5akvbzq-du.a.run.app`
 - 프로토콜: **Streamable HTTP 기반 JSON-RPC 2.0** (`initialize`, `tools/list`, `tools/call`)
 - 세션 어피니티 보장: Cloud Run 인스턴스 간 세션 ID 유지를 위해 `_get_persistent_client`로 `GAESA` 쿠키 및 `Mcp-Session-Id`를 영속화
-- 인증: 참가자가 Mock SaaS 웹 화면에서 발급한 개인 토큰을 환경 변수 `MCP_TOKEN`으로만 읽습니다 (`_get_mcp_token`). 토큰이 곧 테넌트이므로 자동 발급은 하지 않으며, 값이 없으면 `RuntimeError`로 즉시 중단합니다. `McpToolset`은 `header_provider`로 호출 시점에 토큰을 주입합니다.
+- 인증: 사용자가 Mock SaaS 웹 화면에서 발급한 개인 토큰을 환경 변수 `MCP_TOKEN`으로만 읽습니다 (`_get_mcp_token`). 토큰이 곧 테넌트이므로 자동 발급은 하지 않으며, 값이 없으면 `RuntimeError`로 즉시 중단합니다. `McpToolset`은 `header_provider`로 호출 시점에 토큰을 주입합니다.
 - Google ADK 클라이언트: `google.adk.tools.mcp_tool.McpToolset` + `StreamableHTTPConnectionParams`
 
 #### 1. WorkWeek HRMS FastMCP 서버 도구 (`/work-week/mcp`)
@@ -187,7 +187,7 @@ FastMCP 서버와 통신할 때는 반드시 다음 HTTP 헤더 및 세션 핸�
 
 ### 3.1 실습 1 & 실습 2 라이프사이클 경계 및 핸드오프
 
-본 워크숍은 150명의 실습생이 3시간 동안 완주할 수 있도록 명확한 2부 단계로 설계되었습니다:
+본 실습은 전체 엔터프라이즈 에이전트 라이프사이클을 완주할 수 있도록 명확한 2부 단계로 설계되었습니다:
 
 - **실습 1 (로컬 멀티 에이전트 구축 및 검증, 80분)**:
   - Antigravity 2.0(`agy`) 프롬프트 주도 개발

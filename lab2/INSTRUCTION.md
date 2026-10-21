@@ -1,9 +1,9 @@
-# Build with Gemini 핸즈온 Track 3 | Architect: AI 엔지니어링 (개발자)
+# Build with Antigravity | 엔터프라이즈 AI 에이전트 개발 핸즈온
 # 실습 2: 에이전트 평가, 보안 거버넌스, Gemini Enterprise 배포
 
 실습 1에서 만든 Orchestrator-Worker 멀티 에이전트(`enterprise_ops_agent`)를 Antigravity 2.0(데스크톱 앱 또는 agy CLI)에서 이어받아 `agents-cli eval`로 평가하고 개선합니다. 이어서 Secret Manager, Agent Identity, Agent Registry, Agent Gateway, Model Armor를 적용해 Agent Runtime에 배포하고 Gemini Enterprise(GE)에 등록합니다.
 
-소요 시간: 약 105~115분 (강사 요청 대기 시간은 포함하지 않습니다)
+소요 시간: 약 105~115분
 
 | Step | 절 | 내용 | 시간 |
 |:---|:---:|:---|:---:|
@@ -970,7 +970,7 @@ gcloud beta network-security authz-policies import enterprise-ops-agw-deny-destr
 조회와 신청 도구는 목록에 없으므로 그대로 통과합니다. 새 위험 도구가 생기면 `params`에 이름을 추가하고 같은 명령으로 다시 import합니다.
 
 ### 7.5 연결 확인: 게이트웨이를 지나도 조회가 정상인가
-7.3의 PATCH 후 5분쯤 지나면 연결 상태를 확인합니다. `None`이 나오면 아직 연결 중이므로 1~2분 간격으로 이 블록만 다시 실행합니다. 실습 점검에서는 PATCH 후 약 5분 안에 연결되었습니다. 10분이 지나도 `None`이면 7.3의 PATCH 응답에 오류가 없었는지 확인하고 강사에게 알립니다.
+7.3의 PATCH 후 5분쯤 지나면 연결 상태를 확인합니다. `None`이 나오면 아직 연결 중이므로 1~2분 간격으로 이 블록만 다시 실행합니다. 사전 검증에서는 PATCH 후 약 5분 안에 연결되었습니다. 10분이 지나도 `None`이면 7.3의 PATCH 응답에 오류가 없었는지 확인하고 다시 실행합니다.
 
 ```bash
 source ~/lab2/env.sh
@@ -1008,7 +1008,7 @@ gcloud logging read 'resource.type="networkservices.googleapis.com/Gateway" AND 
 
 ### 7.6 차단 검증
 
-검증에서 하루짜리 연차를 신청하므로 연차 잔여가 1일 이상이어야 합니다. 4.4와 4.6 평가가 실제 신청을 만들어 잔여가 줄었을 수 있습니다. 7.5 조회 결과의 연차 잔여가 1일 미만이면 내 Mock SaaS 데이터 공간을 기본 데이터로 초기화합니다(포털의 데이터 초기화 버튼과 같습니다. 다른 참가자에게는 영향이 없습니다).
+검증에서 하루짜리 연차를 신청하므로 연차 잔여가 1일 이상이어야 합니다. 4.4와 4.6 평가가 실제 신청을 만들어 잔여가 줄었을 수 있습니다. 7.5 조회 결과의 연차 잔여가 1일 미만이면 내 Mock SaaS 데이터 공간을 기본 데이터로 초기화합니다(포털의 데이터 초기화 버튼과 같습니다. 다른 사용자에게는 영향이 없습니다).
 
 ```bash
 curl -s -X POST https://korean-mock-saas-dri5akvbzq-du.a.run.app/api/tenant/reset \

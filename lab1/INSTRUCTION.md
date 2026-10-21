@@ -1,4 +1,4 @@
-# Build with Gemini 핸즈온 Track 3 | Architect: AI 엔지니어링 (개발자)
+# Build with Antigravity | 엔터프라이즈 AI 에이전트 개발 핸즈온
 
 ### [실습 1] ADK 멀티 에이전트 구현과 A2A 인터페이스 로컬 검증
 Antigravity 2.0(데스크톱 앱 또는 CLI `agy`)으로 ADK(Agent Development Kit) 멀티 에이전트를 단계별로 만들고 시나리오로 동작을 확인합니다. 시간이 남으면 A2A 인터페이스를 로컬에서 띄워 봅니다.
@@ -9,9 +9,7 @@ Antigravity 2.0(데스크톱 앱 또는 CLI `agy`)으로 ADK(Agent Development K
 ---
 
 **소요 시간**: 95분 (Task 6 진행 시 +15분)  
-**과정 코드**: BWG-TRACK3-ARCH  
-**행사**: Build with Gemini 핸즈온 Track 3  
-**대상**: Google Cloud Customer Engineer, Solution Architect, AI/ML 엔지니어  
+**대상**: AI/ML 엔지니어, 개발자, Solution Architect, Customer Engineer  
 
 > [!NOTE]
 > 본인의 Google Cloud 프로젝트(로컬 PC, Cloud Shell, Compute Engine VM 등) 또는 실습용 원격 브라우저 VM 환경에서 모두 진행할 수 있습니다.
@@ -912,7 +910,7 @@ FastMCP는 MCP(Model Context Protocol) 서버를 만드는 Python 프레임워�
 > 실습 2에서 다룰 Agent Gateway는 MCP `tools/call` 요청에서 도구 이름을 식별해 위험 도구를 차단합니다. 일반 REST로 호출하면 도구 이름을 식별할 수 없으므로 MCP 엔드포인트로 호출합니다.
 
 > [!TIP]
-> 실습생 모두가 같은 Mock SaaS 서버를 쓰지만, 요청 헤더 `X-MCP-Token`의 개인 토큰으로 데이터가 분리됩니다. 토큰은 발급한 브라우저 세션의 테넌트에 묶여 있어서, 같은 토큰을 쓰면 에이전트와 웹 화면이 같은 데이터를 봅니다.
+> 여러 사용자가 같은 Mock SaaS 서버를 쓰지만, 요청 헤더 `X-MCP-Token`의 개인 토큰으로 데이터가 분리됩니다. 토큰은 발급한 브라우저 세션의 테넌트에 묶여 있어서, 같은 토큰을 쓰면 에이전트와 웹 화면이 같은 데이터를 봅니다.
 
 ![WorkWeek 메인 화면](./images/mock_saas_workweek.png)
 
@@ -1601,7 +1599,7 @@ uv run python3 tests/test_scenarios.py
 1. SDD를 먼저 읽힌 뒤 코드를 생성하게 해서 API 경로와 함수 인자를 설계서에 맞췄습니다.
 2. 규정 PDF를 검색해 답변에 조항 번호를 넣고, 근거가 없으면 `NO_MATCH`를 반환하게 했습니다.
 3. 인사 시스템과 IT 시스템을 같은 MCP 방식(McpToolset)으로 연결했습니다.
-4. 개인 토큰(`X-MCP-Token`)으로 실습생별 데이터를 분리했습니다.
+4. 개인 토큰(`X-MCP-Token`)으로 사용자별 데이터를 분리했습니다.
 
 ### 다음 단계: 실습 2
 
