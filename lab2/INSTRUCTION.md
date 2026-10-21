@@ -121,8 +121,8 @@ flowchart TD
 
 | 창 | 무엇을 쓰나 | 입력하는 블록 |
 |:---|:---|:---|
-| 에이전트 창 | Antigravity 2.0 앱의 채팅(`~/enterprise-ops-agent` 프로젝트를 연 상태) 또는 Konsole 탭 1에서 실행한 `agy` | `prompt` 코드 블록 |
-| 터미널 창 | Konsole 탭(CLI 사용자는 탭 2) | `bash` 코드 블록 |
+| 에이전트 창 | Antigravity 2.0 앱의 채팅(`~/enterprise-ops-agent` 프로젝트를 연 상태) 또는 터미널 탭 1에서 실행한 `agy` | `prompt` 코드 블록 |
+| 터미널 창 | 터미널 탭(CLI 사용자는 탭 2) | `bash` 코드 블록 |
 
 2.1로 진행하면 에이전트를 종료했다가 다시 들어갈 필요는 없습니다. 2.2로 완성본을 받았다면 2.2 블록 아래 안내대로 agy CLI를 다시 시작합니다. 에이전트 창은 터미널 창에서 export한 변수를 받지 못합니다. 그래서 에이전트에게 명령을 실행시키는 프롬프트에는 `source ~/lab.env; source ~/lab2/env.sh 2>/dev/null`를 먼저 실행하라는 줄을 넣어 두었습니다. `~/lab.env`는 실습 1에서 만든 파일(`GOOGLE_*`, `PATH`, `MCP_TOKEN`)이고, `~/lab2/env.sh`는 5.4에서 만듭니다. 두 파일 모두 `~/.bashrc`가 읽으므로 새 터미널 창에도 변수가 들어 있습니다.
 
@@ -209,7 +209,7 @@ gcloud services enable \
 
 | 항목 | 확인 방법 | 사용 위치 |
 |:---|:---|:---|
-| 터미널 계정 권한 | 아래 명령으로 확인합니다. 실습 1 시작 준비에서 실습 계정으로 로그인했다면 account가 Qwiklabs **Username**(`student-...@qwiklabs.net`)이고 `roles/owner` 한 줄이 나옵니다. | 5.4, 5.5, 5.7, 6.x, 7.x, 9.2 |
+| 터미널 계정 권한 | 아래 명령으로 확인합니다. 본인 Google 계정(Qwiklabs 환경에서는 `student-...@qwiklabs.net`)으로 로그인되어 있고 `roles/owner` 한 줄이 나오면 정상입니다. | 5.4, 5.5, 5.7, 6.x, 7.x, 9.2 |
 | Gemini Enterprise 앱과 라이선스 | 새 프로젝트에는 앱이 없습니다. 2.5 절차대로 앱을 만들고, ID 설정(Set up identity)과 본인 계정 라이선스 할당까지 마칩니다. | 2.5, 9.2 |
 
 ```bash
@@ -220,10 +220,10 @@ gcloud projects get-iam-policy $(gcloud config get-value project 2>/dev/null) \
   --filter="bindings.members:$(gcloud config get-value account 2>/dev/null)" \
   --format="value(bindings.role)" \
   | grep -x "roles/owner"
-# 기대 결과: account는 student-...@qwiklabs.net, 마지막 줄은 roles/owner
+# 기대 결과: account는 본인 Google 계정 이메일, 마지막 줄은 roles/owner
 ```
 
-account가 `antigravity-sa@...`이면 터미널이 아직 VM 서비스 계정으로 실행 중인 것입니다. 이 계정은 Owner가 아니어서 5.4 시크릿 생성(`Permission 'secretmanager.secrets.create' denied`)과 9.2 Gemini Enterprise 등록(`aiplatform.reasoningEngines.get` denied)에서 권한 오류가 납니다. 다음 두 명령을 실행해 실습 계정으로 로그인한 뒤 위 확인 블록을 다시 실행합니다. 두 명령 모두 `(Y/n)` 질문에 `Y`를 입력하고, 표시된 URL을 Chrome에서 열어 Qwiklabs **Username**으로 로그인한 뒤 인증 코드를 터미널에 붙여넣습니다(실습 1 시작 준비 2단계와 같음).
+account가 VM 서비스 계정(예: `antigravity-sa@...`)으로 나오면 아직 개인 계정으로 로그인하지 않은 상태입니다. 이 서비스 계정은 Owner가 아니어서 5.4 시크릿 생성(`Permission 'secretmanager.secrets.create' denied`)과 9.2 Gemini Enterprise 등록(`aiplatform.reasoningEngines.get` denied)에서 권한 오류가 납니다. 다음 두 명령을 실행해 본인 Google 계정(Qwiklabs에서는 제공된 실습 계정)으로 로그인한 뒤 위 확인 블록을 다시 실행합니다.
 
 ```bash
 gcloud auth login --no-launch-browser
@@ -234,7 +234,7 @@ gcloud auth application-default login --no-launch-browser
 Step 6(9절)에서 에이전트를 등록할 Gemini Enterprise 앱을 미리 만듭니다. 앱을 만든 직후에는 ID 공급자 설정(Set up identity)을 꼭 해야 웹 앱에서 로그인하고 에이전트를 쓸 수 있습니다. 이미 앱이 있고 ID 설정과 라이선스 할당까지 끝났다면 맨 아래 확인 명령만 실행합니다.
 
 #### 1) 앱 만들기
-1. 원격 Chrome에서 Google Cloud 콘솔을 열고 실습 프로젝트가 선택되어 있는지 확인합니다.
+1. 브라우저에서 Google Cloud 콘솔을 열고 실습 프로젝트가 선택되어 있는지 확인합니다.
 2. 콘솔 상단 검색창에 `Gemini Enterprise`를 입력해 Gemini Enterprise 페이지로 이동합니다.
 3. 앱 만들기를 선택합니다. 앱이 없는 프로젝트라면 Welcome to Gemini Enterprise 화면에서 Create your first app을 누릅니다. 라이선스가 없는 프로젝트라면 이 과정에서 무료 체험을 시작합니다.
 
@@ -324,7 +324,7 @@ ls ~/enterprise-ops-agent/.agents/skills
 ### 3.2 에이전트 창에서 스킬 활성화 확인
 에이전트 창에서 스킬이 인식되는지 확인합니다.
 
-- agy CLI: Konsole 탭 1에서 `cd ~/enterprise-ops-agent && agy`로 실행한 뒤, 아래 명령을 입력합니다.
+- agy CLI: 터미널 탭 1에서 `cd ~/enterprise-ops-agent && agy`로 실행한 뒤, 아래 명령을 입력합니다.
 - Antigravity 2.0 앱: `~/enterprise-ops-agent` 프로젝트를 연 채팅을 씁니다. 앱에서는 3.1의 `ls` 결과로 이 확인을 대신해도 됩니다.
 
 ```prompt
@@ -343,7 +343,7 @@ ls ~/enterprise-ops-agent/.agents/skills
 명령이 정해진 작업까지 에이전트에게 맡기지 않는 이유는 다음과 같습니다.
 
 - 에이전트가 판단할 일이 없습니다. 같은 명령을 그대로 실행할 뿐이라 결과는 터미널에서 직접 실행한 것과 같습니다. 대신 매번 모델을 호출하므로 토큰 비용이 듭니다.
-- 에이전트가 명령을 바꿀 수 있습니다. Qwiklabs 점검에서 에이전트가 평가 명령의 `--metrics` 옵션을 빼고 실행해 평가 시간이 크게 늘어난 적이 있습니다.
+- 에이전트가 명령을 바꿀 수 있습니다. 사전 검증에서 에이전트가 평가 명령의 `--metrics` 옵션을 빼고 실행해 평가 시간이 크게 늘어난 적이 있습니다.
 - 진행 상황이 보이지 않습니다. 에이전트는 긴 명령을 백그라운드로 돌리므로 에이전트 창에는 중간 출력이 거의 없습니다. 터미널에서는 Tier별 진행, 배포 단계, 오류 메시지가 바로 보입니다.
 
 ---
@@ -411,23 +411,23 @@ done
 | `--config` | 4.3에서 받은 지표 설정 파일 |
 | `--metrics` | 설정 파일에 선언된 지표 6개 중 이번에 채점할 4개. 이 옵션을 빼면 LLM 판정 2개까지 모두 채점해 시간이 몇 배로 늘어납니다 |
 
-`agents-cli eval run`은 Tier마다 에이전트 응답 생성(eval generate) 후 채점(eval grade)을 합니다. LLM 판정을 포함했던 Qwiklabs 점검에서는 판정 모델 재시도가 없으면 Tier당 약 2~3분, 재시도가 생긴 Tier는 약 8~14분이었습니다. 기본 실행은 500 재시도가 잦은 LLM 판정 2개를 빼므로 재시도로 시간이 늘어나지 않습니다(Qwiklabs 점검 때 Tier당 약 1분 20초~2분 50초. 응답 생성이 약 50초~2분, `hallucination` 채점이 약 30초~1분 10초). Tier마다 `##### <Tier> 시작` 줄과 `Evaluation Summary`가 화면에 출력되고, `Evaluation Summary`가 4번 나오면 완료입니다. 같은 Tier가 15분 넘게 끝나지 않으면 `Ctrl+C`로 멈추고 그 Tier부터 다시 실행합니다.
+`agents-cli eval run`은 Tier마다 에이전트 응답 생성(eval generate) 후 채점(eval grade)을 합니다. LLM 판정 전체를 포함했던 사전 검증에서는 판정 모델 재시도가 없으면 Tier당 약 2~3분, 재시도가 생긴 Tier는 약 8~14분이었습니다. 기본 실행은 500 재시도가 잦은 LLM 판정 2개를 빼므로 재시도로 시간이 늘어나지 않습니다(사전 검증 때 Tier당 약 1분 20초~2분 50초. 응답 생성이 약 50초~2분, `hallucination` 채점이 약 30초~1분 10초). Tier마다 `##### <Tier> 시작` 줄과 `Evaluation Summary`가 화면에 출력되고, `Evaluation Summary`가 4번 나오면 완료입니다. 같은 Tier가 15분 넘게 끝나지 않으면 `Ctrl+C`로 멈추고 그 Tier부터 다시 실행합니다.
 
 #### 출력 읽는 법
-Qwiklabs 점검에서 완성본으로 T4를 실행한 출력입니다(가운데 일부 생략). `hallucination`을 기본에 넣기 전의 출력이라 채점 줄에 지표가 3개만 보입니다. 지금 명령으로 실행하면 이 줄 끝에 `hallucination`이 붙고, `Evaluation Summary`에 `hallucination_v1` 항목이 추가됩니다.
+완성본으로 T4를 실행한 출력 예시입니다(가운데 일부 생략). `hallucination`을 기본에 넣기 전의 출력이라 채점 줄에 지표가 3개만 보입니다. 지금 명령으로 실행하면 이 줄 끝에 `hallucination`이 붙고, `Evaluation Summary`에 `hallucination_v1` 항목이 추가됩니다.
 
 ```text
 ##### tier4-adversarial-edge 시작 07:50:23
 ──────────── Step 1/2: eval generate ────────────
 Booting local ADK server (app_name=app)
-Running inference on dataset: /config/enterprise-ops-agent/tests/eval/datasets/tier4-adversarial-edge.json
+Running inference on dataset: ~/enterprise-ops-agent/tests/eval/datasets/tier4-adversarial-edge.json
 Starting a temporary local server on port 18082 (stops automatically when done).
 ...
 [generate] case[2] done
 [generate] case[3] done
 [generate] case[1] done
 [generate] case[0] done
-Traces saved to /config/enterprise-ops-agent/artifacts/traces/traces_20261002_075030.json
+Traces saved to ~/enterprise-ops-agent/artifacts/traces/traces_20261002_075030.json
 Local server stopped.
 ──────────── Step 2/2: eval grade ────────────
 Loaded 3 local custom metric(s). These execute in-process; user-supplied code runs with the CLI's privileges.
@@ -443,8 +443,8 @@ tool_call_accuracy:
   mean_score: 1.0000
   stdev_score: 0.0000
 ...
-Saved full results to /config/enterprise-ops-agent/artifacts/grade_results/results_20261002_075115.json
-Saved HTML results to /config/enterprise-ops-agent/artifacts/grade_results/results_20261002_075115.html
+Saved full results to ~/enterprise-ops-agent/artifacts/grade_results/results_20261002_075115.json
+Saved HTML results to ~/enterprise-ops-agent/artifacts/grade_results/results_20261002_075115.html
 ```
 
 `agents-cli eval run`은 두 단계를 차례로 실행합니다.
@@ -487,7 +487,7 @@ grep -ohE "(called=|retrieved=|[a-z_]+ called before)[^\"]*" artifacts/grade_res
 #          request_time_off called before policy check: [...]          ← 규정 확인 전에 쓰기 도구 호출
 ```
 
-명령어가 완료되면 `artifacts/grade_results/`에 Tier별 채점 결과 JSON과 시각 리포트(`results_*.html`)가 생성됩니다. 리포트는 4.5에서 웹으로 엽니다. 실습 1 완성본으로 진행하면 이미 개선된 코드이므로 결정론적 지표가 대부분 1.00으로 나올 수 있습니다. Qwiklabs 점검에서 완성본은 T2, T3의 지표 3개가 1.00이었고, T1은 티켓 목록 케이스에서 `list_tickets`를 부르지 않아 `tool_call_accuracy`가 0.75였습니다. T4는 점검에 따라 1.00 또는 0.75였습니다(에이전트가 금지된 `cancel_leave_request`를 부른 경우). `hallucination`은 T3만 0.95였습니다. 연차 신청 답변의 "본 신청 건은 기한 요건을 충족하여 정상 접수되었습니다"(오늘 날짜를 모르므로 근거 없음)와 배터리 교체 답변의 화재 위험 안내, 서비스데스크 방문 안내처럼 도구 응답에 없는 문장이 `unsupported`로 감점됐습니다. 감점 사유는 결과 JSON의 `hallucination_v1` 설명에 문장 단위로 남습니다. 아래는 개선 전 코드의 베이스라인 예시입니다(모델 응답에 따라 달라질 수 있음). 앞의 두 열(`task_success`, `tool_use_quality`)은 아래 선택 실행을 했을 때만 나옵니다:
+명령어가 완료되면 `artifacts/grade_results/`에 Tier별 채점 결과 JSON과 시각 리포트(`results_*.html`)가 생성됩니다. 리포트는 4.5에서 웹으로 엽니다. 실습 1 완성본으로 진행하면 이미 개선된 코드이므로 결정론적 지표가 대부분 1.00으로 나올 수 있습니다. 사전 검증에서 완성본은 T2, T3의 지표 3개가 1.00이었고, T1은 티켓 목록 케이스에서 `list_tickets`를 부르지 않아 `tool_call_accuracy`가 0.75였습니다. T4는 실행에 따라 1.00 또는 0.75였습니다(에이전트가 금지된 `cancel_leave_request`를 부른 경우). `hallucination`은 T3만 0.95였습니다. 연차 신청 답변의 "본 신청 건은 기한 요건을 충족하여 정상 접수되었습니다"(오늘 날짜를 모르므로 근거 없음)와 배터리 교체 답변의 화재 위험 안내, 서비스데스크 방문 안내처럼 도구 응답에 없는 문장이 `unsupported`로 감점됐습니다. 감점 사유는 결과 JSON의 `hallucination_v1` 설명에 문장 단위로 남습니다. 아래는 개선 전 코드의 베이스라인 예시입니다(모델 응답에 따라 달라질 수 있음). 앞의 두 열(`task_success`, `tool_use_quality`)은 아래 선택 실행을 했을 때만 나옵니다:
 
 | Tier | task_success | tool_use_quality | hallucination | tool_call_accuracy | policy_first_order | rag_citation |
 |:---|:---:|:---:|:---:|:---:|:---:|:---:|
@@ -505,14 +505,14 @@ grep -ohE "(called=|retrieved=|[a-z_]+ called before)[^\"]*" artifacts/grade_res
 
 선택(실습 2를 마친 뒤 시간이 남을 때): 나머지 LLM 판정 2개(`multi_turn_task_success`, `multi_turn_tool_use_quality`)까지 포함하려면 `--metrics` 옵션을 빼고 같은 명령을 실행합니다. 기본은 아래처럼 T1 한 Tier만 돌립니다. 4개 Tier를 모두 보려면 `for t in tier1-single-tool; do`를 `for t in tier1-single-tool tier2-multi-tool tier3-policy-first-transaction tier4-adversarial-edge; do`로 바꿉니다.
 
-| 범위 | 소요 시간 (Qwiklabs 점검) |
+| 범위 | 소요 시간 (사전 검증 기준) |
 |:---|:---|
-| T1 한 Tier | 약 3~14분 (점검 때 T1은 13분 31초. 500 재시도가 없던 T3는 2분 40초) |
-| 4개 Tier 전체 | 약 15~35분 (점검 33분 19초) |
+| T1 한 Tier | 약 3~14분 (재시도 포함 시 13분 31초. 500 재시도가 없던 T3는 2분 40초) |
+| 4개 Tier 전체 | 약 15~35분 (33분 19초) |
 
-채점이 오래 걸리는 원인은 LLM 판정 지표(`multi_turn_task_success`, `multi_turn_tool_use_quality`) 호출이 약 3분 동안 응답 없이 기다리다 `500 INTERNAL. Internal error occurred. Contact Vertex AI.`로 실패하는 경우가 있기 때문입니다. 이때 `Retryable error (code=500) ...` 경고와 함께 재시도하며, 5회 모두 실패한 케이스는 `num_cases_error`로 집계되고 평균에서 빠집니다(`Scores average only the cases that graded` 경고). 점검에서는 재시도 25회, T1, T2, T4에서 케이스가 1건씩 빠졌습니다. 평가 서버 쪽 오류이므로 기다리면 다음 케이스로 넘어갑니다.
+채점이 오래 걸리는 원인은 LLM 판정 지표(`multi_turn_task_success`, `multi_turn_tool_use_quality`) 호출이 약 3분 동안 응답 없이 기다리다 `500 INTERNAL. Internal error occurred. Contact Vertex AI.`로 실패하는 경우가 있기 때문입니다. 이때 `Retryable error (code=500) ...` 경고와 함께 재시도하며, 5회 모두 실패한 케이스는 `num_cases_error`로 집계되고 평균에서 빠집니다(`Scores average only the cases that graded` 경고). 사전 검증에서는 재시도 25회, T1, T2, T4에서 케이스가 1건씩 빠졌습니다. 평가 서버 쪽 오류이므로 기다리면 다음 케이스로 넘어갑니다.
 
-응답은 매번 새로 생성하므로 `tool_call_accuracy` 등 결정론적 지표도 4.4 결과와 다르게 나올 수 있습니다(점검에서는 T1 0.75, T2 0.67). `PERMISSION_DENIED`로 실패하면 채점 모델 호출 권한 문제입니다.
+응답은 매번 새로 생성하므로 `tool_call_accuracy` 등 결정론적 지표도 4.4 결과와 다르게 나올 수 있습니다(사전 검증에서는 T1 0.75, T2 0.67). `PERMISSION_DENIED`로 실패하면 채점 모델 호출 권한 문제입니다.
 
 ```bash
 # [선택] LLM 판정 3개 포함. 기본은 T1 한 Tier (약 3~14분)
@@ -537,7 +537,7 @@ done
 cd ~/enterprise-ops-agent
 python3 -m http.server 8081 --directory artifacts/grade_results &
 ```
-원격 브라우저에서 `http://localhost:8081`에 접속해 케이스별 판정 사유를 확인합니다. 결정론적 지표의 사유에는 `called=[...] missing=[...]`, `retrieved=[...] cited=[...]`처럼 실제 호출된 도구와 인용 여부가 그대로 표시됩니다. 리포트를 다 보면 `fuser -k 8081/tcp`로 서버를 끕니다.
+브라우저에서 `http://localhost:8081`에 접속해 케이스별 판정 사유를 확인합니다. 결정론적 지표의 사유에는 `called=[...] missing=[...]`, `retrieved=[...] cited=[...]`처럼 실제 호출된 도구와 인용 여부가 그대로 표시됩니다. 리포트를 다 보면 `fuser -k 8081/tcp`로 서버를 끕니다.
 
 ### 4.6 에이전트 창에서 프롬프트 반복 개선하기
 
@@ -546,7 +546,7 @@ python3 -m http.server 8081 --directory artifacts/grade_results &
 
 | 작업 | 예상 시간 |
 |:---|:---:|
-| 4.4 베이스라인 평가 (4개 Tier, 기본 지표 4개) | 약 9분 (Qwiklabs 점검 8분 52초) |
+| 4.4 베이스라인 평가 (4개 Tier, 기본 지표 4개) | 약 9분 (사전 검증 8분 52초) |
 | 4.5 리포트 확인 | 2~3분 |
 | 4.6 개선 1회 + 실패 Tier 1개 다시 평가 + 비교 | 5~8분 |
 
@@ -780,7 +780,7 @@ agents-cli deploy -d agent_runtime \
   --secrets="MCP_TOKEN=enterprise-agent-mcp-token:latest" \
   --update-env-vars="GOOGLE_API_PREVENT_AGENT_TOKEN_SHARING_FOR_GCP_SERVICES=false" \
   --build-args="AGENT_GATEWAY_ROOT_CERTIFICATES=${CERT}"
-# 약 3분 30초~5분 소요(Qwiklabs 점검 3분 34초~5분 9초). "Deployment successful!"과 Agent Runtime ID가 출력됨
+# 약 3분 30초~5분 소요(사전 검증 3분 34초~5분 9초). "Deployment successful!"과 Agent Runtime ID가 출력됨
 ```
 
 | 인자 | 뜻 |
@@ -1138,7 +1138,7 @@ agents-cli deploy -d agent_runtime --project=${PROJECT_ID} --region=${REGION} \
   --agent-identity --no-confirm-project \
   --update-env-vars="MODEL_ARMOR_TEMPLATE=projects/${PROJECT_ID}/locations/${ARMOR_LOCATION}/templates/hr-agent-armor-template" \
   --build-args="AGENT_GATEWAY_ROOT_CERTIFICATES=${CERT}"
-# 약 4분 소요(Qwiklabs 점검에서는 원격 확인까지 4분 30초). 첫 줄의 "Ignoring reserved Agent Runtime env var GOOGLE_CLOUD_PROJECT" 경고는 정상
+# 약 4분 소요(사전 검증에서는 원격 확인까지 4분 30초). 첫 줄의 "Ignoring reserved Agent Runtime env var GOOGLE_CLOUD_PROJECT" 경고는 정상
 
 # 4. 검증
 agents-cli run --url ${AGENT_URL} --mode adk \

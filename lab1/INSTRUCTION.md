@@ -14,11 +14,11 @@ Antigravity 2.0(데스크톱 앱 또는 CLI `agy`)으로 ADK(Agent Development K
 **대상**: Google Cloud Customer Engineer, Solution Architect, AI/ML 엔지니어  
 
 > [!NOTE]
-> 실습을 시작하면 Google Cloud 프로젝트와 실습용 가상 머신(VM) 환경이 준비되기까지 약 3~5분이 걸립니다.
+> 본인의 Google Cloud 프로젝트(로컬 PC, Cloud Shell, Compute Engine VM 등) 또는 실습용 원격 브라우저 VM 환경에서 모두 진행할 수 있습니다.
 
 | Task | 내용 | 시간 |
 |:---|:---|:---:|
-| 시작 준비 | 콘솔 로그인, 원격 세션 접속, 실습 계정 gcloud 로그인, API 활성화, Antigravity 2.0 앱 또는 agy CLI 인증 | 10분 |
+| 시작 준비 | Google Cloud 프로젝트 설정, gcloud 및 ADC 인증, API 활성화, Antigravity 2.0 앱 또는 agy CLI 인증 | 10분 |
 | Task 1 | 개발 환경 설정, 프로젝트 생성, SDD 다운로드, 규정 검색 앱 인덱싱 시작 | 17분 |
 | Task 2 | ADK Orchestrator-Worker 멀티 에이전트 뼈대 | 10분 |
 | Task 3 | Vertex AI Search + GCS PDF 하이브리드 Policy RAG (Task 1에서 시작한 인덱싱 결과 사용) | 13분 |
@@ -49,7 +49,7 @@ Antigravity 2.0(데스크톱 앱 또는 CLI `agy`)으로 ADK(Agent Development K
 
 이 실습을 마치면 다음 작업을 직접 수행할 수 있습니다.
 
-1. Antigravity 2.0 앱 또는 `agy` CLI에서 Google Cloud 프로젝트 인증을 마치고 코딩 에이전트 모델을 확인합니다(Qwiklabs 기본값 Gemini 3.6 Flash).
+1. Antigravity 2.0 앱 또는 `agy` CLI에서 Google Cloud 프로젝트 인증을 마치고 코딩 에이전트 모델을 확인합니다(기본 Flash 모델 사용).
 2. `docs/SDD.md`를 Antigravity에 읽혀 아키텍처와 도구 명세를 컨텍스트로 넣습니다.
 3. Antigravity로 `config.yaml`과 ADK 멀티 에이전트 뼈대 코드를 생성합니다.
 4. SDD 2.2절과 내 프로젝트 Cloud Storage 버킷에 올린 규정 PDF를 바탕으로 조항 번호와 근거를 반환하는 검색 도구(`app/tools/policy_rag.py`)를 만듭니다.
@@ -61,83 +61,77 @@ Antigravity 2.0(데스크톱 앱 또는 CLI `agy`)으로 ADK(Agent Development K
 
 ## 사전 준비 및 환경 안내
 
-### 시작 전 확인 사항
+### 실습 환경 요건
+
+- **Google Cloud 프로젝트**: 결제가 활성화된 Google Cloud 프로젝트가 필요합니다. 실습 2(Secret Manager, Agent Identity IAM 바인딩, Agent Gateway, Gemini Enterprise 등록)까지 모두 진행하려면 프로젝트 `Owner`(`roles/owner`) 권한이 있는 계정을 권장합니다.
+- **실행 환경**: 로컬 PC(Linux / macOS), Google Cloud Shell, 일반 Linux VM, 또는 사전 구성된 원격 브라우저 VM(`remote-browser-vm1`) 어디서든 진행할 수 있습니다.
+- **필수 도구**: `gcloud` CLI, Python 3.11 이상, `curl`, `git`, `unzip`, `jq`, 그리고 코딩 에이전트(Antigravity 2.0 데스크톱 앱 또는 `agy` CLI)를 사용합니다.
+
+<details>
+<summary>Qwiklabs 또는 원격 브라우저 VM(remote-browser-vm1) 환경에서 진행하는 경우 (클릭하여 펼치기)</summary>
+
+#### Qwiklabs 시작 및 Google Cloud 콘솔 로그인
 
 - 실습 시간은 제한되어 있으며 일시 중지할 수 없습니다. **Start Lab** 버튼을 누르면 타이머가 동작합니다.
-- 이 실습은 실제 Google Cloud 환경에서 진행됩니다. 실습 시작 시 제공되는 임시 계정을 사용해 로그인합니다.
-- 브라우저는 Google Chrome 시크릿 창을 권장합니다. 개인 Google 계정과 실습 계정이 섞이지 않게 하기 위해서입니다.
+- 개인 Google 계정과 실습 계정이 섞이지 않도록 Chrome 시크릿 창 사용을 권장합니다.
 
-> [!IMPORTANT]
-> 본인의 개인 Google Cloud 계정이나 프로젝트를 사용하지 마세요. 실습 화면 왼쪽 패널의 임시 자격증명을 사용합니다.
+1. 실습 페이지에서 **Start Lab**을 클릭하고 왼쪽 패널의 **Username**(예: `student-01-xxxx@qwiklabs.net`), **Password**, **GCP Project ID**를 확인합니다.
+2. **Open Google Cloud console**을 마우스 우클릭하여 **시크릿 창에서 링크 열기**를 선택합니다.
+3. 전달받은 **Username**과 **Password**로 로그인하고 이용약관에 동의합니다.
 
----
+#### 원격 브라우저(remote-browser-vm1) 세션 열기
 
-### 실습 시작 및 Google Cloud 콘솔 로그인
+미리 구성된 개발자 VM과 Cloud Run 프록시 서비스가 제공되는 환경에서는 브라우저로 개발 환경에 접속합니다.
 
-1. 실습 페이지에서 **Start Lab**을 클릭합니다.
-2. 왼쪽 패널에 표시되는 정보를 확인합니다.
-   - **Username** (예: `student-01-xxxx@qwiklabs.net`)
-   - **Password**
-   - **GCP Project ID**
-3. **Open Google Cloud console**을 마우스 우클릭하여 **시크릿 창에서 링크 열기**를 선택합니다.
-4. 로그인 창에 전달받은 **Username**과 **Password**를 차례로 입력합니다.
-5. 이용약관에 동의합니다. (복구 옵션이나 2단계 인증 설정은 건너뜁니다.)
-6. 잠시 후 Google Cloud 콘솔 홈 화면이 나타납니다.
-
----
-
-### 실습용 원격 브라우저 접속
-
-이 실습은 미리 구성된 개발자 가상 머신(VM)과 Cloud Run 프록시 서비스를 제공합니다. 로컬에 아무것도 설치하지 않고 브라우저로 개발 환경에 접속합니다.
-
-#### 원격 브라우저 세션 열기
-
-1. Google Cloud 콘솔 상단 검색창에 **Cloud Run**을 입력하고, 결과에서 **Cloud Run**을 클릭합니다.
+1. Google Cloud 콘솔 상단 검색창에 **Cloud Run**을 입력하고 **Cloud Run**을 클릭합니다.
 ![Cloud Run 검색](./images/01_cloud_run_search.png)
 
 2. 왼쪽 탐색 메뉴에서 **Services**를 클릭합니다.
 ![Cloud Run Services](./images/02_cloud_run_services.png)
 
-3. 서비스 목록에서 **remote-browser-vm1**을 클릭하여 서비스 세부정보 페이지를 엽니다. 상단의 URL 링크를 클릭하여 새 브라우저 탭에서 원격 세션을 엽니다.
+3. 서비스 목록에서 **remote-browser-vm1**을 클릭하고 상단의 URL 링크를 열어 새 브라우저 탭에서 원격 세션을 엽니다.
 ![원격 브라우저 서비스 URL](./images/03_remote_browser_service_url.png)
 
-4. 브라우저에서 클립보드 권한 요청 팝업이 나타나면 **허용**을 클릭합니다. 허용해야 로컬 PC와 원격 세션 사이에 복사/붙여넣기가 됩니다.
+4. 브라우저에서 클립보드 권한 요청 팝업이 나타나면 **허용**을 클릭합니다.
 ![클립보드 권한 허용](./images/04_clipboard_allow.png)
 
 > [!NOTE]
-> 로컬 PC에서 원격 세션으로 텍스트 복사/붙여넣기가 되지 않으면 원격 세션 우측 하단의 클립보드 매니저를 이용하세요.
-> 1. 원격 화면 우측 하단의 **Clipboard** 아이콘을 클릭합니다.
-> 2. 로컬 컴퓨터의 텍스트를 텍스트 상자에 붙여넣습니다.
-> 3. 패널을 닫고 터미널에 붙여넣기를 수행합니다.
+> 로컬 PC에서 원격 세션으로 복사/붙여넣기가 되지 않으면 원격 화면 우측 하단의 **Clipboard** 아이콘을 클릭해 텍스트를 붙여넣은 뒤 터미널에 붙여넣으세요.
+
+5. 원격 화면 좌측 하단 **Application Launcher > System > Konsole**을 클릭하여 터미널을 실행합니다(`Warning: Could not find '', starting '/bin/bash' instead.` 경고는 무시해도 됩니다).
+![Konsole 터미널 실행](./images/05_konsole_terminal_access.png)
+
+</details>
 
 ---
 
-### 터미널 열기와 API 활성화
+### 터미널 열기와 Google Cloud 인증, API 활성화
 
-1. 원격 화면 좌측 하단 **Application Launcher > System > Konsole**을 클릭하여 터미널을 실행합니다.
-![Konsole 터미널 실행](./images/05_konsole_terminal_access.png)
+1. 작업 환경에서 터미널을 열고 사용할 Google Cloud 프로젝트를 설정합니다(이미 프로젝트가 설정되어 있으면 `gcloud config set project`는 생략해도 됩니다).
 
-> [!NOTE]
-> Konsole 터미널을 열 때 `Warning: Could not find '', starting '/bin/bash' instead. Please check your profile settings.` 경고가 표시되어도 무시해도 됩니다.
+```bash
+# 본인 프로젝트 ID로 변경하여 설정 (이미 설정되어 있다면 생략 가능)
+# gcloud config set project YOUR_PROJECT_ID
 
-2. 실습 계정으로 gcloud에 로그인합니다. 터미널의 gcloud는 처음에 VM 서비스 계정(`antigravity-sa@...`)으로 설정되어 있습니다. 이 계정은 프로젝트 소유자(Owner)가 아니어서 실습 2 5.4절(Step 2)의 시크릿 생성과 9.2절(Step 6)의 Gemini Enterprise 등록에서 권한 오류가 납니다. 계정만 바뀌고 gcloud의 프로젝트 설정은 그대로 유지됩니다.
+gcloud config get-value project
+```
+
+2. 본인 Google 계정으로 `gcloud`와 ADC(Application Default Credentials, 애플리케이션 기본 사용자 인증 정보)에 로그인합니다. RAG 도구, `agents-cli run`, 배포 명령이 ADC로 Google Cloud API를 호출합니다.
+   - 로컬 PC 브라우저가 열리는 환경에서는 `--no-launch-browser`를 빼고 실행해도 됩니다.
+   - 원격 VM, SSH, 또는 브라우저가 분리된 환경에서는 아래처럼 `--no-launch-browser`를 붙여 출력된 URL을 브라우저에서 열고 인증 코드를 복사해 터미널에 붙여넣습니다.
 
 ```bash
 gcloud auth login --no-launch-browser
 ```
 
-- `You are running on a Google Compute Engine virtual machine. ... Do you want to continue (Y/n)?`가 나오면 `Y`를 입력하고 **ENTER**를 누릅니다.
-- 터미널에 표시된 URL을 복사해 원격 화면의 Chrome 새 탭에서 엽니다. Welcome to Google Chrome 알림이 나타나면 **OK**, Chrome 초기 로그인 창이 나타나면 **Stay signed out** 또는 **Use Chrome without an account**를 클릭합니다.
-- Qwiklabs 자격증명 패널의 **Username**과 **Password**로 로그인하고 접근을 허용한 뒤, 표시된 인증 코드를 복사해 터미널에 붙여넣고 **ENTER**를 누릅니다.
-- `You are now logged in as [student-...@qwiklabs.net].`가 나오면 완료입니다.
-
-이어서 같은 방법으로 ADC(Application Default Credentials, 애플리케이션 기본 사용자 인증 정보)도 실습 계정으로 로그인합니다. RAG 도구, `agents-cli run`, 배포가 ADC로 Google Cloud API를 호출합니다. 이번에도 `(Y/n)` 질문에 `Y`를 입력합니다. 앞의 로그인이 끝나기를 기다리지 않고 Konsole 새 탭에서 동시에 진행해도 됩니다.
-
 ```bash
 gcloud auth application-default login --no-launch-browser
 ```
 
-`Credentials saved to file: [...]`와 `Quota project "<Project ID>" was added to ADC ...`가 나오면 완료입니다. 다음 명령으로 계정과 프로젝트를 확인합니다. account가 Qwiklabs **Username**, project가 **Project ID**이면 됩니다.
+> [!NOTE]
+> Compute Engine VM이나 Qwiklabs 원격 VM에서는 터미널의 `gcloud`가 처음에 VM 서비스 계정(예: `antigravity-sa@...`)으로 설정되어 있습니다. 이 서비스 계정은 프로젝트 소유자(Owner)가 아니어서 실습 2 5.4절(Step 2)의 시크릿 생성과 9.2절(Step 6)의 Gemini Enterprise 등록에서 권한 오류가 납니다. `(Y/n)` 질문에 `Y`를 입력하고 반드시 본인 계정(Qwiklabs에서는 제공된 `student-...@qwiklabs.net`)으로 두 명령을 모두 로그인하세요.
+
+`Credentials saved to file: [...]`와 `Quota project "<Project ID>" was added to ADC ...`가 나오면 완료입니다. 다음 명령으로 계정과 프로젝트를 확인합니다.
 
 ```bash
 gcloud config get-value account
@@ -166,7 +160,7 @@ gcloud services enable \
 gcloud auth application-default print-access-token > /dev/null && echo "ADC OK"
 ```
 
-오류가 나면 2단계의 `gcloud auth application-default login --no-launch-browser`를 다시 실행하고 실습 계정(Qwiklabs **Username**)으로 로그인합니다.
+오류가 나면 2단계의 `gcloud auth application-default login --no-launch-browser`를 다시 실행합니다.
 
 ---
 
@@ -177,37 +171,42 @@ gcloud auth application-default print-access-token > /dev/null && echo "ADC OK"
 | 방식 | 특징 |
 |:---|:---|
 | (가) Antigravity 2.0 앱 | 데스크톱 앱(Agent Platform)입니다. 대화, 작업 기록, 예약 작업을 창 하나에서 관리합니다. |
-| (나) agy CLI | Konsole 터미널에서 실행하는 코딩 에이전트입니다. 여러 파일을 읽고 고치며 명령을 실행합니다. |
+| (나) agy CLI | 터미널에서 실행하는 코딩 에이전트입니다. 여러 파일을 읽고 고치며 명령을 실행합니다. |
 
 #### (가) Antigravity 2.0 앱 로그인
 
 > [!IMPORTANT]
 > 로그인할 때는 항상 **Use Google Cloud project instead**를 선택합니다. 앱이 실행 중인데 창이 뜨지 않으면 터미널에서 `sudo pkill -9 antigravity`를 실행한 뒤 다시 엽니다.
 
-1. 원격 화면 좌측 하단 **Application Launcher > Development > Antigravity**를 클릭합니다.
+1. Antigravity 데스크톱 앱을 실행합니다(원격 브라우저 VM에서는 좌측 하단 **Application Launcher > Development > Antigravity** 클릭).
 ![Application Launcher에서 Antigravity 실행](./images/agy2_01_launcher.png)
 화면에는 VS Code에도 빨간 박스가 있지만, 클릭하는 항목은 Antigravity입니다.
 
-2. Welcome to Antigravity 화면에서 **Use Google Cloud project instead**를 클릭합니다.
+2. Welcome to Antigravity 화면에서 **Use Google Cloud project instead**를 클릭하고 브라우저에서 본인 Google 계정으로 로그인합니다.
 ![Use Google Cloud project instead 선택](./images/agy2_02_use_gcp_project.png)
 
-3. Welcome to Google Chrome 창이 나타나면 **OK**를 클릭합니다.
+<details>
+<summary>원격 브라우저 VM에서 Chrome 초기 실행 창이 나타나는 경우 (클릭하여 펼치기)</summary>
+
+1. Welcome to Google Chrome 창이 나타나면 **OK**를 클릭합니다.
 ![Chrome 시작 창](./images/agy2_03_chrome_welcome.png)
 
-4. Sign in to Chrome 화면에서 **Stay signed out**을 클릭합니다.
+2. Sign in to Chrome 화면에서 **Stay signed out**을 클릭합니다.
 ![Stay signed out 선택](./images/agy2_04_chrome_stay_signed_out.png)
 
-5. Qwiklabs 자격증명 패널의 **Username**과 **Password**로 로그인합니다. Sign in to Chrome? 창이 나타나면 **Use Chrome without an account**를 클릭하고, 이어지는 확인 화면에서 **Sign in**을 클릭합니다.
+3. 실습 계정으로 로그인합니다. Sign in to Chrome? 창이 나타나면 **Use Chrome without an account**를 클릭하고, 이어지는 확인 화면에서 **Sign in**을 클릭합니다.
 ![Use Chrome without an account 선택](./images/agy2_05_chrome_without_account.png)
 ![Google Antigravity 로그인 확인](./images/agy2_06_google_signin.png)
 
-6. Open Antigravity? 대화상자가 나타나면 **Cancel**을 클릭해 닫고 Chrome 창을 최소화합니다.
+4. Open Antigravity? 대화상자가 나타나면 **Cancel**을 클릭해 닫고 Chrome 창을 최소화합니다.
 ![Open Antigravity 대화상자 닫기](./images/agy2_07_open_antigravity_cancel.png)
 
-7. Antigravity 창에서 본인의 **Google Cloud Project ID**를 입력하고 **Next**를 클릭합니다.
+</details>
+
+3. Antigravity 창에서 본인의 **Google Cloud Project ID**를 입력하고 **Next**를 클릭합니다.
 ![Google Cloud Project ID 입력](./images/agy2_08_project_id.png)
 
-8. 설정 마법사는 다음과 같이 진행하고 나머지는 기본값으로 둔 채 페이지마다 **Next**를 클릭합니다.
+4. 설정 마법사는 다음과 같이 진행하고 나머지는 기본값으로 둔 채 페이지마다 **Next**를 클릭합니다.
 
 | 페이지 | 설정 |
 |---|---|
@@ -215,10 +214,10 @@ gcloud auth application-default print-access-token > /dev/null && echo "ADC OK"
 | Select Antigravity Theme | 원하는 테마 선택 (System / Light / Dark) |
 | Build with Google | **Google Antigravity SDK** 선택 |
 
-9. **Finish**를 클릭합니다. 다음과 같은 화면이 보이면 준비가 끝난 것입니다.
+5. **Finish**를 클릭합니다. 다음과 같은 화면이 보이면 준비가 끝난 것입니다.
 ![Antigravity Agent Platform 준비 완료](./images/agy2_09_ready.png)
 
-앱에서 모델을 고르는 메뉴가 보이면 기본 Flash 모델(Qwiklabs에서는 Gemini 3.6 Flash)을 그대로 둡니다(메뉴 이름은 앱 버전에 따라 다를 수 있음). 3.8 Flash 계열이 보이면 골라도 됩니다. 앱 창은 그대로 두고, Task 1 5단계에서 프로젝트 폴더를 엽니다.
+앱에서 모델을 고르는 메뉴가 보이면 기본 Flash 모델(예: Gemini 3.6 Flash 또는 3.8 Flash 계열)을 그대로 둡니다(메뉴 이름은 앱 버전에 따라 다를 수 있음). 앱 창은 그대로 두고, Task 1 5단계에서 프로젝트 폴더를 엽니다.
 
 #### (나) agy CLI 초기 설정
 
@@ -231,10 +230,9 @@ agy
 2. 로그인 방식 선택 창이 나타나면 **Use a Google Cloud project**를 선택합니다.
 ![Google Cloud Project 로그인 선택](./images/06_agy_signin_option.png)
 
-3. Chrome 브라우저에서 인증 절차를 완료합니다. 터미널에 표시된 인증 URL을 복사해 새 Chrome 탭에서 열어도 됩니다.
-   - Welcome to Google Chrome 알림이 나타나면 **OK**를 클릭합니다.
-   - Chrome 초기 로그인 창이 나타나면 **Stay signed out** 또는 **Use Chrome without an account**를 클릭합니다.
-   - Google 로그인 화면에서 Qwiklabs 자격증명 패널의 **Username**과 **Password**를 입력합니다.
+3. 브라우저에서 인증 절차를 완료합니다. 터미널에 표시된 인증 URL을 복사해 새 브라우저 탭에서 열어도 됩니다.
+   - 원격 브라우저 VM에서 Chrome 초기 창이 나타나면 **OK**, **Stay signed out**(또는 **Use Chrome without an account**)을 클릭합니다.
+   - Google 로그인 화면에서 본인 Google 계정(Qwiklabs 환경에서는 제공된 실습 계정)으로 로그인합니다.
    - 안내에 따라 접근 권한을 허용하고 생성된 인증 코드를 복사합니다.
    - 터미널로 돌아와 인증 코드를 붙여넣고 **ENTER**를 누릅니다. `Enter Google Cloud Project ID:` 입력란이 나오면 본인의 **Google Cloud Project ID**를 입력하고 **ENTER**를 누릅니다.
 ![인증 코드 입력 및 프로젝트 선택](./images/07_agy_auth_code.png)
@@ -312,20 +310,26 @@ Python 패키지를 설치하고 `agents-cli`로 프로젝트를 만든 뒤, SDD
 
 ### 1단계: 필수 라이브러리 및 런타임 툴 설치
 
-시작 준비에서 연 Konsole 터미널(이하 터미널 창)에서 시스템 도구와 agents-cli, ADK 라이브러리를 설치합니다. 설치에는 몇 분 걸릴 수 있습니다. 실습 환경에는 Python 가상 환경 `/opt/venv`가 미리 만들어져 있고 `PATH`에도 들어 있어, agents-cli는 이 가상 환경에 설치합니다. `/opt/venv`는 root 소유라 `sudo`를 붙입니다.
+터미널 창에서 시스템 도구와 `agents-cli`, ADK 라이브러리를 설치합니다. 설치에는 몇 분 걸릴 수 있습니다. 원격 브라우저 VM처럼 `/opt/venv`가 미리 구성된 환경에서는 `/opt/venv`에 설치하고, 일반 리눅스/Cloud Shell/로컬 환경에서는 사용자 경로(`~/.local/bin`)에 설치합니다.
 
-`PATH`와 Vertex AI 환경 변수는 `~/lab.env` 파일에 저장합니다. 터미널, agy CLI, Antigravity 앱이 모두 같은 값을 읽을 수 있게 하기 위해서입니다. `~/.bashrc`에는 이 파일을 읽는 한 줄만 추가하므로, 이후 새로 여는 Konsole 탭에는 값이 자동으로 적용됩니다.
+`PATH`와 Vertex AI 환경 변수는 `~/lab.env` 파일에 저장합니다. 터미널, `agy` CLI, Antigravity 앱이 모두 같은 값을 읽을 수 있게 하기 위해서입니다. `~/.bashrc`에는 이 파일을 읽는 한 줄만 추가하므로, 이후 새로 여는 터미널 탭에는 값이 자동으로 적용됩니다.
 
 ```bash
-# 1. pip, git, 압축 해제 유틸리티, JSON 처리 도구 설치
-#    (실습 환경에서 apt-get이 PackageKit 오류를 내지 않도록 packagekit을 먼저 제거)
-sudo apt-get purge -y -qq packagekit
-sudo apt-get update -qq && sudo apt-get install -y -qq python3-pip git unzip jq
-type pip3 git unzip jq
+# 1. 필수 시스템 도구 확인 (Debian/Ubuntu 환경에서 없는 경우 설치)
+if command -v apt-get >/dev/null 2>&1; then
+  sudo apt-get purge -y -qq packagekit 2>/dev/null || true
+  sudo apt-get update -qq && sudo apt-get install -y -qq python3-pip git unzip jq curl
+fi
+type git unzip jq curl
 
-# 2. 실습 환경의 Python 가상 환경(/opt/venv)에 agents-cli와 필수 라이브러리 설치
-sudo /opt/venv/bin/pip install --upgrade pip
-sudo /opt/venv/bin/pip install google-agents-cli==1.8.0 "google-adk>=2.9.2,<=2.11.0" mcp httpx pydantic pyyaml uv
+# 2. agents-cli(1.8.0)와 필수 라이브러리 설치 (/opt/venv가 있으면 해당 경로에, 없으면 사용자 경로에 설치)
+if [ -x /opt/venv/bin/pip ]; then
+  sudo /opt/venv/bin/pip install --upgrade pip
+  sudo /opt/venv/bin/pip install google-agents-cli==1.8.0 "google-adk>=2.9.2,<=2.11.0" mcp httpx pydantic pyyaml uv
+else
+  python3 -m pip install --user --break-system-packages google-agents-cli==1.8.0 "google-adk>=2.9.2,<=2.11.0" mcp httpx pydantic pyyaml uv \
+    || python3 -m pip install --user google-agents-cli==1.8.0 "google-adk>=2.9.2,<=2.11.0" mcp httpx pydantic pyyaml uv
+fi
 
 # 3. 사용자 바이너리 경로와 Vertex AI global 엔드포인트 환경 변수를 ~/lab.env에 저장
 #    (GOOGLE_CLOUD_PROJECT는 지금 시점의 프로젝트 ID 값으로 저장됩니다)
@@ -336,8 +340,8 @@ export GOOGLE_CLOUD_LOCATION=global
 export GOOGLE_CLOUD_PROJECT="$(gcloud config get-value project 2>/dev/null)"
 EOF
 
-# 4. 새 Konsole 탭에서도 ~/lab.env를 읽도록 ~/.bashrc에 한 번만 등록하고, 현재 셸에 적용
-grep -q lab.env ~/.bashrc || echo '[ -f ~/lab.env ] && . ~/lab.env' >> ~/.bashrc
+# 4. 새 터미널 탭에서도 ~/lab.env를 읽도록 ~/.bashrc에 한 번만 등록하고, 현재 셸에 적용
+grep -q lab.env ~/.bashrc 2>/dev/null || echo '[ -f ~/lab.env ] && . ~/lab.env' >> ~/.bashrc
 source ~/lab.env
 ```
 
@@ -509,14 +513,14 @@ uv가 Python 3.13을 직접 내려받아 `.venv`를 만듭니다. 패키지 목�
 이후 실습은 창 두 개로 진행합니다.
 
 - 에이전트 창: 프롬프트를 입력하는 곳입니다. 문서의 `prompt` 코드 블록은 여기에 입력합니다.
-- 터미널 창: 명령을 실행하는 Konsole 탭입니다. 문서의 `bash` 코드 블록은 여기서 실행합니다.
+- 터미널 창: 명령을 실행하는 터미널 탭입니다. 문서의 `bash` 코드 블록은 여기서 실행합니다.
 
 에이전트는 열어 둔 프로젝트 폴더를 워크스페이스로 인식합니다. `~/enterprise-ops-agent` 폴더를 열어야 `docs/SDD.md`와 `app/`을 읽을 수 있습니다.
 
 | 사용 방식 | 프로젝트 폴더 열기 | 에이전트 창 | 터미널 창 |
 |:---|:---|:---|:---|
-| (가) Antigravity 2.0 앱 | 아래 "Antigravity 2.0 앱에서 프로젝트 폴더 연결" 순서를 따릅니다. | 앱의 대화 입력창 | 지금까지 쓴 Konsole 탭 |
-| (나) agy CLI | Konsole 탭 1에서 `cd ~/enterprise-ops-agent && agy`를 실행합니다. | 탭 1의 agy | Konsole 새 탭(**Ctrl+Shift+T**)인 탭 2 |
+| (가) Antigravity 2.0 앱 | 아래 "Antigravity 2.0 앱에서 프로젝트 폴더 연결" 순서를 따릅니다. | 앱의 대화 입력창 | 지금까지 쓴 터미널 탭 |
+| (나) agy CLI | 터미널 탭 1에서 `cd ~/enterprise-ops-agent && agy`를 실행합니다. | 탭 1의 agy | 터미널 새 탭(**Ctrl+Shift+T**)인 탭 2 |
 
 #### Antigravity 2.0 앱에서 프로젝트 폴더 연결
 
@@ -530,7 +534,7 @@ uv가 Python 3.13을 직접 내려받아 `.venv`를 만듭니다. 패키지 목�
 
    ![Create Project 대화상자](./images/agy2_project_02_add_folder.png)
 
-3. **Open workspace** 창에서 `enterprise-ops-agent` 폴더를 선택하고 **Open**을 클릭합니다. 실습 환경의 홈 폴더는 `/config`입니다.
+3. **Open workspace** 창에서 홈 디렉터리 아래의 `enterprise-ops-agent` 폴더를 선택하고 **Open**을 클릭합니다(원격 브라우저 VM의 홈 폴더는 `/config`입니다).
 
    ![Open workspace에서 폴더 선택](./images/agy2_project_03_open_workspace.png)
 
@@ -545,7 +549,7 @@ uv가 Python 3.13을 직접 내려받아 `.venv`를 만듭니다. 패키지 목�
 agy CLI에서 폴더 신뢰 확인이 나오면 **Yes, I trust this folder**를 선택합니다.
 
 > [!NOTE]
-> Antigravity 앱은 Konsole에서 `export`한 값을 이어받지 않습니다. 그래서 에이전트에게 명령 실행을 맡기는 프롬프트에는 `source ~/lab.env`를 먼저 실행하라는 줄이 들어 있습니다. 터미널 창은 1단계에서 등록한 `~/.bashrc` 설정으로 값을 자동으로 읽습니다.
+> Antigravity 앱은 터미널에서 `export`한 값을 이어받지 않습니다. 그래서 에이전트에게 명령 실행을 맡기는 프롬프트에는 `source ~/lab.env`를 먼저 실행하라는 줄이 들어 있습니다. 터미널 창은 1단계에서 등록한 `~/.bashrc` 설정으로 값을 자동으로 읽습니다.
 
 #### 프로젝트 컨텍스트 읽히기
 
@@ -914,7 +918,7 @@ FastMCP는 MCP(Model Context Protocol) 서버를 만드는 Python 프레임워�
 
 ### 1단계: Mock SaaS 웹 화면 접속 및 개인 토큰 발급
 
-1. 원격 세션 안의 Chrome에서 아래 Mock SaaS 주소로 접속합니다. 시작 준비의 로그인 과정에서 열린 Chrome 창을 써도 됩니다. 원격 세션 안에서 열어야 토큰을 같은 화면의 터미널 창에 바로 붙여넣을 수 있습니다.  
+1. 브라우저에서 아래 Mock SaaS 주소로 접속합니다(원격 브라우저 VM을 쓰는 경우 원격 세션 안의 Chrome에서 열면 토큰을 바로 터미널 창에 붙여넣기 편합니다).  
    [https://korean-mock-saas-dri5akvbzq-du.a.run.app/](https://korean-mock-saas-dri5akvbzq-du.a.run.app/)
 2. 화면 오른쪽 상단의 **MCP 토큰 발급** 버튼을 클릭합니다.
 3. 팝업 창의 토큰 용도/식별 이름 칸에 `lab`처럼 이름을 입력하고 **발급하기**를 클릭한 뒤, 표시된 고유 토큰(예: `mcp_eyJp...`)을 복사합니다.
@@ -931,7 +935,7 @@ echo "export MCP_TOKEN=mcp_여러분의토큰값" >> ~/lab.env && source ~/lab.e
 ```
 
 > [!NOTE]
-> - 새로 여는 Konsole 탭은 `~/.bashrc`를 통해 `~/lab.env`를 읽으므로 토큰을 다시 입력하지 않아도 됩니다. 이미 열려 있던 탭에서는 `source ~/lab.env`를 실행합니다.
+> - 새로 여는 터미널 탭은 `~/.bashrc`를 통해 `~/lab.env`를 읽으므로 토큰을 다시 입력하지 않아도 됩니다. 이미 열려 있던 탭에서는 `source ~/lab.env`를 실행합니다.
 > - 에이전트 창은 셸 변수를 이어받지 않을 수 있습니다. 그래서 명령 실행을 맡기는 프롬프트에 `source ~/lab.env` 줄을 넣었습니다.
 > - 토큰이 곧 개인 데이터 공간(테넌트)이므로 자동 발급하지 않습니다. 토큰이 없으면 도구가 `MCP_TOKEN` 관련 오류로 즉시 중단됩니다(문구는 생성된 코드에 따라 다를 수 있습니다).
 
@@ -1265,7 +1269,7 @@ agents-cli run "현재 제가 사용 중인 업무용 랩톱 배터리가 심하
 
 ### 7단계: Mock SaaS 화면에서 결과 확인
 
-1. Task 4 1단계에서 토큰을 발급한 원격 세션 안 Chrome의 Korean Enterprise Mock SaaS 플랫폼 탭으로 이동합니다.  
+1. Task 4 1단계에서 토큰을 발급한 브라우저의 Korean Enterprise Mock SaaS 플랫폼 탭으로 이동합니다.  
    `https://korean-mock-saas-dri5akvbzq-du.a.run.app/`
 2. **WorkWeek** 탭을 클릭합니다.
    - 왼쪽 **휴가 관리** 메뉴를 엽니다. **신청 내역**에 에이전트가 신청한 기간(4.0일)이 추가되고, **연차 잔여 현황**의 부여/사용 일수가 `3.0 / 15.0 일`에서 `7.0 / 15.0 일`로 바뀌었는지 확인합니다. 신청 내역의 `연차 3.0`일 행은 처음부터 들어 있는 데이터입니다.
@@ -1283,7 +1287,7 @@ agents-cli run "현재 제가 사용 중인 업무용 랩톱 배터리가 심하
 
 `agents-cli run`은 질의 하나를 실행하고 끝나면 세션을 버립니다. `agents-cli playground`는 ADK 개발 UI를 띄워, 같은 세션에서 대화를 이어 가며 어떤 에이전트가 어떤 도구를 어떤 순서로 호출했는지 화면으로 보여 줍니다. 여기서는 시나리오 2에서 "확인 절차 없이 바로 진행해 주세요." 문장을 빼고 보내서, 에이전트가 되묻는 질문에 같은 대화 안에서 답해 봅니다.
 
-1. 터미널 창에서 playground를 실행합니다. 이 명령은 **Ctrl+C**로 끌 때까지 터미널을 차지합니다. 그동안 다른 명령이 필요하면 Konsole 새 탭을 엽니다. `MCP_TOKEN` 안내 메시지가 출력되면 뒤 명령은 실행되지 않습니다. Task 4 1단계의 토큰 저장부터 하고 다시 실행합니다.
+1. 터미널 창에서 playground를 실행합니다. 이 명령은 **Ctrl+C**로 끌 때까지 터미널을 차지합니다. 그동안 다른 명령이 필요하면 새 터미널 탭을 엽니다. `MCP_TOKEN` 안내 메시지가 출력되면 뒤 명령은 실행되지 않습니다. Task 4 1단계의 토큰 저장부터 하고 다시 실행합니다.
 
 ```bash
 source ~/lab.env
@@ -1294,7 +1298,7 @@ agents-cli playground --port 8085
 
 처음 실행하면 터미널에 `Enable telemetry? [Y/n]:` 질문이 나옵니다. 답하기 전까지 서버가 시작되지 않으므로 **ENTER**를 눌러 넘어갑니다. `Will be available at: http://127.0.0.1:8085/dev-ui/?app=app`과 `Uvicorn running on http://127.0.0.1:8085`가 출력되면 준비된 것입니다.
 
-2. 원격 세션 안 Chrome에서 `http://127.0.0.1:8085/dev-ui/?app=app`을 엽니다. **Help Improve ADK!** 대화상자가 나타나면 **No Thanks**를 클릭합니다. 다음과 같은 ADK 개발 UI 화면이 나타납니다.
+2. 브라우저에서 `http://127.0.0.1:8085/dev-ui/?app=app`을 엽니다(Cloud Shell에서는 웹 미리보기 포트를 `8085`로 지정하고, 원격 SSH VM에서는 로컬 포트 포워딩 또는 원격 세션 안의 브라우저를 사용합니다). **Help Improve ADK!** 대화상자가 나타나면 **No Thanks**를 클릭합니다. 다음과 같은 ADK 개발 UI 화면이 나타납니다.
 
    ![ADK 개발 UI 첫 화면](./images/playground_initial.png)
 
@@ -1505,7 +1509,7 @@ for i in $(seq 10); do curl -sf http://localhost:8080/healthz && break; sleep 2;
 healthz 응답(`{"status":"ok",...}`)이 출력되면 서버가 실행된 것입니다. 아무것도 나오지 않으면 `tail /tmp/a2a.log`로 오류를 확인하세요. 백그라운드로 띄웠으므로 같은 터미널 창에서 다음 curl을 실행할 수 있습니다. 이 블록을 다시 실행하면 `fuser`가 이전 서버를 종료하면서 PID 번호와 `Exit 137` 줄이 출력되는데, 정상입니다.
 
 2. 로컬 테스트 콘솔 접속:
-원격 세션 안의 브라우저에서 `http://localhost:8080`에 접속합니다.
+브라우저에서 `http://localhost:8080`에 접속합니다.
 
 ![로컬 에이전트 웹 콘솔](./images/local_agent_web_chat.png)
 

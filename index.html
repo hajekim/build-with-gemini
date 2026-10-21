@@ -265,6 +265,9 @@
     .alert-tip .alert-label { color: var(--green); }
     .alert-warning .alert-label { color: var(--yellow); }
     .alert-caution .alert-label { color: var(--red); }
+    .md details { margin: 18px 0 24px; padding: 12px 18px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); }
+    .md summary { cursor: pointer; font: 600 16px/1.5 var(--sans); color: var(--text-hi); user-select: none; }
+    .md details[open] > summary { margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--line-soft); }
 
     /* code windows */
     .code { margin: 16px 0 26px; border-radius: var(--radius); overflow: hidden; background: var(--code-bg); border: 1px solid var(--line); box-shadow: var(--shadow); }
