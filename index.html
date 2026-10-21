@@ -385,7 +385,7 @@
   </style>
 </head>
 <body>
-  <!-- gate: same passphrases as before; empty ENTER also passes -->
+  <!-- gate -->
   <div id="gate">
     <div class="term" role="dialog" aria-labelledby="gate-title">
       <div class="win-bar"><span class="dots"><i></i><i></i><i></i></span><span class="title">developer@build-with-antigravity: ~</span></div>
@@ -403,7 +403,7 @@
           <label for="gate-password"><b>~</b> $ passphrase:</label>
           <input id="gate-password" type="password" autocomplete="off" autofocus aria-label="입장 비밀번호">
         </form>
-        <div class="gate-hint">공지된 비밀번호를 입력하거나 그냥 <kbd>Enter</kbd>를 누르세요.</div>
+        <div class="gate-hint">비밀번호를 입력하고 <kbd>Enter</kbd>를 누르세요.</div>
       </div>
     </div>
   </div>
@@ -469,7 +469,7 @@
       sdd: { src: "docs/SDD.md", name: "sdd" },
       saas: { src: "docs/MOCK_SAAS.md", name: "mock-saas" },
     };
-    const PASSPHRASES = ["", "gemini", "gemini2026", "cjoy", "1234"];
+    const PASSPHRASES = ["agy"];
     const CODE_KIND = {
       bash: { lang: "bash", hint: "터미널 창에서 실행" },
       prompt: { lang: "agy", hint: "에이전트 창(앱 또는 CLI)에 붙여넣기" },
@@ -805,7 +805,7 @@
         enterApp();
       } else {
         $("#gate-password").value = "";
-        $(".gate-hint").innerHTML = `<span style="color:var(--red)">✗ permission denied.</span> 공지된 비밀번호를 확인하거나 <kbd>Enter</kbd>를 누르세요.`;
+        $(".gate-hint").innerHTML = `<span style="color:var(--red)">✗ permission denied.</span> 비밀번호를 확인하고 다시 입력하세요.`;
       }
     });
     $("#lock-btn").addEventListener("click", () => {
